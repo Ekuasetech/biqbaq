@@ -6,8 +6,8 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 
 | ID | Question | Working assumption | Blocks |
 | --- | --- | --- | --- |
-| Q-01 | **No application route exists for Co-admin** (§4.1 lists Seller, Seller Staff, Admin, Marketer), yet §3.4 has Admins delegating to Co-admins. How does someone become one? Must Super Admin approve? | Only Super Admin assigns the role; an Admin grants permissions they hold themselves | Phase 2 |
-| Q-02 | **Who can create the first and further Super Admins?** The PRD only says ordinary admins cannot. | First one comes from a one-off server-side script; later ones are added only by a Super Admin; the last active one cannot be removed | Phase 2 |
+| Q-01 | **How does someone become a Co-admin?** | **Decided by the owner (2026-11-06):** only Super Admin gives the role, with no public application. An Admin may grant a Co-admin only permissions the Admin holds | Decided |
+| Q-02 | **Who creates Super Admins?** | **Decided by the owner (2026-11-06):** the first comes from a one-off secure server-side script, later ones only from a Super Admin, and the last active one cannot be removed | Decided |
 | Q-03 | **Can an unverified seller edit a published product into a completely different one?** Edits do not count against the allowance (§6.1), so this quietly defeats the two-product limit. | Not blocked; edits to published products by unverified sellers are logged so abuse can be spotted | Phase 3 |
 | Q-04 | **Is there a Dealer role?** §8 describes car dealers, but §3 and §4 define no such role. Who may post vehicle listings? | Approved sellers, with no new role | Phase 9 |
 | Q-05 | **Do vehicle listings count toward the unverified allowance?** §6.1 only says "products". | They do not count, and need a verified seller | Phase 9 |
@@ -38,7 +38,7 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 | BD-06 | Job display approach | Isolated integration | Phase 10 |
 | BD-07 | Express Entry only, or broader | Isolated integration | Phase 10 |
 | BD-08 | Staff permissions: granular, presets or both | Stored as granular permissions; presets could be added as named bundles | Phase 3 |
-| BD-09 | Co-admin permissions and delegation | Permission catalogue plus a no-escalation rule; the exact list is needed. See Q-01 | Phase 2 |
+| BD-09 | Co-admin permissions and delegation | **Decided by the owner (2026-11-06):** a Co-admin has only the permissions given to them, from the permission catalogue, and no one can grant a permission they do not hold (no escalation) | Decided |
 | BD-10 | Product approval requirement | **Needs a `pending_approval` status not listed in §7.1**, added only if this is confirmed | Phase 3 |
 | BD-11 | Referral window and precedence | Most recent code at signup, no window, as a placeholder | Phase 8 |
 | BD-12 | Payment providers and countries | Provider interface; evaluate against provider terms | Phase 7 |
@@ -46,7 +46,7 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 | BD-14 | Image formats, dimensions, counts | Stored in `platform_settings`; only the 1 MB limit has a default | Phase 3 |
 | BD-15 | Blog resubmission workflow | Revisions held separately from the live post | Phase 6 |
 | BD-16 | Manual verification evidence | Evidence references are free-form for now | Phase 3 |
-| BD-17 | Required application fields per role | Stored as validated JSON per role, so fields can change without a migration | Phase 2 |
+| BD-17 | Required application fields per role | **Decided by the owner (2026-11-06):** the fields in PRD §4.3, stored as validated JSON per role so they can change without a migration | Decided |
 | BD-18 | Reapply after rejection | Allowed only via a new application; at most one pending per role per user | Phase 2 |
 
 ## Needed from the project owner, outside the design

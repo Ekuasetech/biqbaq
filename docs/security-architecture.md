@@ -1,6 +1,6 @@
 # Security Architecture
 
-Status: **proposed, awaiting review**. Covers authentication, authorization and the RLS design (PRD §5, §23, §24.1).
+Status: **approved by the owner (2026-11-06)**. Covers authentication, authorization and the RLS design (PRD §5, §23, §24.1).
 
 ## 1. Authentication
 

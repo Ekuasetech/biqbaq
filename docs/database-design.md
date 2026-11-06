@@ -1,6 +1,6 @@
 # Database Design
 
-Status: **proposed, awaiting review. No migrations exist yet.** Security policies are in [security-architecture.md](security-architecture.md).
+Status: **approved by the owner (2026-11-06)**. No migrations exist yet. Security policies are in [security-architecture.md](security-architecture.md).
 
 Launch scope: Canada only, in CAD (ADR-0005). `sellers.country` and `products.currency` stay in the schema so Nigeria can be added later.
 
