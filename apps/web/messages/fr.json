@@ -6,7 +6,7 @@
   "common": {
     "skipToContent": "Aller au contenu",
     "views": "{count, plural, one {# vue} other {# vues}}",
-    "previewNotice": "Aperçu : les annonces, vendeurs et avis affichés ici sont des données d'exemple.",
+    "previewNotice": "Aperçu : ce site est encore en construction et contient des données d’exemple.",
     "home": "Accueil"
   },
   "nav": {
@@ -80,7 +80,8 @@
     "faq4Q": "Où sont situés les vendeurs?",
     "faq4A": "Biqbaq s'adresse pour l'instant aux Nigérians au Canada, et tous les prix sont en dollars canadiens. Chaque annonce indique où se trouve son vendeur.",
     "faq5Q": "Comment devenir vendeur?",
-    "faq5A": "Inscrivez-vous, puis demandez le rôle de vendeur depuis votre compte. Chaque demande est examinée avant d'être approuvée."
+    "faq5A": "Inscrivez-vous, puis demandez le rôle de vendeur depuis votre compte. Chaque demande est examinée avant d'être approuvée.",
+    "noProductsYet": "Aucun produit pour le moment. Revenez bientôt."
   },
   "categories": {
     "fashion": "Mode",
@@ -391,7 +392,8 @@
       "loadFailed": "Impossible de charger votre compte. Veuillez actualiser la page.",
       "generic": "Une erreur s'est produite. Veuillez réessayer."
     },
-    "adminLink": "Examiner les demandes de rôle"
+    "adminLink": "Examiner les demandes de rôle",
+    "shopLink": "Gérer ma boutique"
   },
   "admin": {
     "section": "Administration",
@@ -448,5 +450,74 @@
       "reasonRequired": "Entrez un motif de refus.",
       "generic": "Une erreur s'est produite. Veuillez réessayer."
     }
+  },
+  "shop": {
+    "title": "Ma boutique",
+    "viewPublic": "Voir la page publique",
+    "signedOutBody": "Connectez-vous pour gérer votre boutique.",
+    "noShopTitle": "Vous n’avez pas encore de boutique",
+    "noShopBody": "Une boutique est créée lorsque votre demande pour devenir vendeur est approuvée.",
+    "backToAccount": "Aller à votre compte",
+    "shopSuspended": "Votre boutique est suspendue : ses produits ne sont pas publics et vous ne pouvez rien modifier.",
+    "publishingSuspended": "La publication est suspendue pour votre boutique. Vos produits en ligne le restent, mais vous ne pouvez pas en publier d’autres.",
+    "noLimit": "Votre boutique est vérifiée : vous pouvez publier autant de produits que vous le souhaitez.",
+    "places": "{left, plural, =0 {Aucune place de publication restante} one {# place de publication restante} other {# places de publication restantes}} sur {allowance}",
+    "placesHelp": "La première publication d’un produit utilise une place. Supprimer ou retirer un produit ne redonne pas la place. Republier un produit est gratuit, et la modification l’est toujours.",
+    "productsTitle": "Vos produits",
+    "empty": "Vous n’avez encore ajouté aucun produit.",
+    "addProduct": "Ajouter un produit",
+    "editTitle": "Modifier le produit",
+    "newTitle": "Nouveau produit",
+    "status": {
+      "draft": "Brouillon",
+      "published": "Publié",
+      "unpublished": "Non public",
+      "archived": "Archivé",
+      "suspended": "Suspendu par Biqbaq"
+    },
+    "suspendedHelp": "Biqbaq a suspendu ce produit. Il ne peut être ni publié, ni modifié, ni supprimé.",
+    "fields": {
+      "name": "Nom du produit",
+      "description": "Description",
+      "category": "Catégorie",
+      "noCategory": "Choisissez une catégorie",
+      "price": "Prix (CAD)",
+      "priceHint": "Par exemple 12.50",
+      "availability": "Disponibilité",
+      "condition": "État",
+      "noCondition": "Sans objet"
+    },
+    "publishNeeds": "Vous pouvez enregistrer un brouillon à tout moment. Pour publier, il faut aussi une description et une catégorie.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "publish": "Publier",
+    "unpublish": "Retirer",
+    "delete": "Supprimer",
+    "confirmDelete": "Oui, le supprimer",
+    "keep": "Le garder",
+    "deleteWarning": "Supprimer « {name} » ? Cette action est définitive, et la place de publication utilisée n’est pas redonnée.",
+    "view": "Voir",
+    "errors": {
+      "required": "Ce champ est obligatoire.",
+      "tooLong": "Ce texte est trop long.",
+      "invalidPrice": "Entrez un prix comme 12.50.",
+      "allowanceUsed": "Vous avez utilisé toutes vos places de publication. Vos produits existants restent en ligne, et vous pouvez toujours les modifier ou les republier.",
+      "publishingOff": "La publication est désactivée pour le moment. Veuillez réessayer plus tard.",
+      "shopSuspended": "La publication est suspendue pour votre boutique.",
+      "incomplete": "Ajoutez une description et une catégorie avant de publier.",
+      "notPublishable": "Ce produit ne peut pas être modifié ainsi. Actualisez la page pour voir son statut.",
+      "notAllowed": "Vous n’êtes pas autorisé à faire cela pour le moment.",
+      "loadFailed": "Impossible de charger votre boutique. Veuillez actualiser la page.",
+      "generic": "Une erreur s’est produite. Veuillez réessayer."
+    },
+    "signIn": "Se connecter"
+  },
+  "errorPage": {
+    "title": "Une erreur s’est produite",
+    "body": "Impossible de charger cette page. Veuillez réessayer dans un instant.",
+    "retry": "Réessayer",
+    "home": "Retour à l’accueil"
   }
 }

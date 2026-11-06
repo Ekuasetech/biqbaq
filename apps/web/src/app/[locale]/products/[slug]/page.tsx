@@ -26,7 +26,9 @@ export const instant = false;
 
 export async function generateStaticParams() {
   const slugs = await listProductSlugs();
-  return routing.locales.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
+  // The framework refuses to build a route with no pages, as on a new, empty catalogue.
+  const paths = slugs.length > 0 ? slugs : ["__none__"];
+  return routing.locales.flatMap((locale) => paths.map((slug) => ({ locale, slug })));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

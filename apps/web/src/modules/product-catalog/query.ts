@@ -3,8 +3,12 @@ import {
   CATEGORY_SLUGS,
   MARKETS,
   SORTS,
+  type Availability,
+  type CategorySlug,
+  type Currency,
+  type Market,
   type Product,
-  type ProductPage,
+  type ProductImage,
   type ProductQuery,
 } from "./types";
 
@@ -33,45 +37,64 @@ export function parseProductQuery(
   return { ...searchParamsSchema.parse(single), pageSize: DEFAULT_PAGE_SIZE };
 }
 
-function compare(a: Product, b: Product, sort: ProductQuery["sort"]): number {
-  switch (sort) {
-    case "name":
-      return a.name.localeCompare(b.name);
-    case "price_asc":
-    case "price_desc": {
-      // Amounts in different currencies are not comparable, so group by currency.
-      const byCurrency = a.price.currency.localeCompare(b.price.currency);
-      if (byCurrency !== 0) return byCurrency;
-      const diff = a.price.amountMinor - b.price.amountMinor;
-      return sort === "price_asc" ? diff : -diff;
-    }
-    case "newest":
-      return b.createdAt.localeCompare(a.createdAt);
-  }
+/**
+ * Builds a filter from what a visitor typed. Their % and _ must match literally, and
+ * quoting stops a comma or bracket being read as part of the filter's own syntax.
+ */
+export function containsFilter(columns: string[], text: string): string {
+  const pattern = text.replace(/[\\%_]/g, "\\$&");
+  const quoted = `%${pattern}%`.replace(/[\\"]/g, "\\$&");
+  return columns.map((column) => `${column}.ilike."${quoted}"`).join(",");
 }
 
-export function queryProducts(products: Product[], query: ProductQuery): ProductPage {
-  const needle = query.q?.toLowerCase();
-  const matches = products
-    .filter((p) => !query.category || p.category === query.category)
-    .filter((p) => !query.market || p.seller.country === query.market)
-    .filter(
-      (p) =>
-        !needle ||
-        p.name.toLowerCase().includes(needle) ||
-        p.description.toLowerCase().includes(needle) ||
-        p.seller.name.toLowerCase().includes(needle) ||
-        p.seller.city.toLowerCase().includes(needle),
-    )
-    .sort((a, b) => compare(a, b, query.sort));
+export const PRODUCT_COLUMNS =
+  "id, slug, name, description, price_minor, currency, availability, condition, images, view_count, first_published_at, category_slug, seller_slug, seller_name, seller_city, seller_country, seller_description, seller_verified";
 
-  const total = matches.length;
-  const totalPages = Math.max(1, Math.ceil(total / query.pageSize));
-  const page = Math.min(query.page, totalPages);
-  const start = (page - 1) * query.pageSize;
+export const SELLER_COLUMNS = "slug, name, city, country, verified, description";
 
+export interface ProductRow {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  price_minor: number;
+  currency: string;
+  availability: string;
+  condition: string | null;
+  images: unknown;
+  view_count: number;
+  first_published_at: string | null;
+  category_slug: string | null;
+  seller_slug: string;
+  seller_name: string;
+  seller_city: string;
+  seller_country: string;
+  seller_description: string;
+  seller_verified: boolean;
+}
+
+export function toProduct(row: ProductRow): Product {
   return {
-    data: matches.slice(start, start + query.pageSize),
-    meta: { page, pageSize: query.pageSize, total, totalPages },
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    description: row.description,
+    price: { amountMinor: row.price_minor, currency: row.currency as Currency },
+    images: row.images as ProductImage[],
+    availability: row.availability as Availability,
+    condition: row.condition as Product["condition"],
+    category: row.category_slug as CategorySlug,
+    seller: {
+      name: row.seller_name,
+      slug: row.seller_slug,
+      city: row.seller_city,
+      country: row.seller_country as Market,
+      verified: row.seller_verified,
+      description: row.seller_description,
+    },
+    // Reviews are not built yet, so no product has any.
+    reviews: [],
+    views: row.view_count,
+    createdAt: row.first_published_at ?? "",
   };
 }

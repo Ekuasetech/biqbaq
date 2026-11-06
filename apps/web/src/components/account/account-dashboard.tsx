@@ -24,9 +24,9 @@ import {
   type UserRole,
 } from "@/modules/role-management";
 
-const cardClass = "rounded-3xl bg-card p-5 shadow-sm sm:p-7";
-const headingClass = "font-heading text-xl font-extrabold tracking-tight";
-const primaryButton =
+export const cardClass = "rounded-3xl bg-card p-5 shadow-sm sm:p-7";
+export const headingClass = "font-heading text-xl font-extrabold tracking-tight";
+export const primaryButton =
   "inline-flex h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground transition-colors outline-none hover:bg-brand-red hover:text-brand-red-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70";
 
 interface AccountData {
@@ -36,7 +36,7 @@ interface AccountData {
   applications: RoleApplication[];
 }
 
-function StatusPill({ tone, children }: { tone: "good" | "waiting" | "bad" | "neutral"; children: ReactNode }) {
+export function StatusPill({ tone, children }: { tone: "good" | "waiting" | "bad" | "neutral"; children: ReactNode }) {
   return (
     <span
       className={cn(
@@ -52,7 +52,7 @@ function StatusPill({ tone, children }: { tone: "good" | "waiting" | "bad" | "ne
   );
 }
 
-function Notice({ kind, children }: { kind: "error" | "info"; children: ReactNode }) {
+export function Notice({ kind, children }: { kind: "error" | "info"; children: ReactNode }) {
   const Icon = kind === "error" ? CircleAlert : Info;
   return (
     <p role={kind === "error" ? "alert" : "status"} className={cn("flex gap-2 text-sm", kind === "error" && "text-destructive")}>
@@ -415,6 +415,11 @@ export function AccountDashboard() {
       <div className="grid gap-4">
         <ProfileCard user={user} data={data} onSaved={reload} />
         <RolesCard roles={data.roles} />
+        {data.roles.some((role) => role.role_key === "seller" && role.status === "active") && (
+          <Link href="/account/shop" className={cn(primaryButton, "w-fit")}>
+            {t("shopLink")}
+          </Link>
+        )}
         {data.roles.some((role) => role.role_key === "super_admin" && role.status === "active") && (
           <Link href="/admin/role-applications" className={cn(primaryButton, "w-fit")}>
             {t("adminLink")}

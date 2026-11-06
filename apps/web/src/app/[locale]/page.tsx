@@ -165,7 +165,11 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             </li>
           ))}
         </ul>
-        <ProductGrid products={grid} className="lg:grid-cols-6" compact />
+        {grid.length > 0 ? (
+          <ProductGrid products={grid} className="lg:grid-cols-6" compact />
+        ) : (
+          <p className="text-muted-foreground">{t("home.noProductsYet")}</p>
+        )}
       </section>
 
       {/* Cargo cars going to Nigeria */}

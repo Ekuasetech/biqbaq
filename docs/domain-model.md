@@ -16,7 +16,6 @@ User (one account)
 
 Seller
  |- has verification status, with VerificationRequests and history
- |- has a verified contact email (separate from login email)
  |- has Products, VehicleListings, StaffMemberships, PaymentAccount
  '- has a ReferralCode
 
@@ -34,7 +33,6 @@ Order -> Product(s), Seller, Buyer -> PaymentTransactions
 | **Seller role vs seller verification** | Approval lets you act as a seller; verification is identity (§4.3) |
 | **Platform role vs staff membership** | Seller Staff needs both (§3.6). The role alone reaches no seller's data |
 | **Role vs seller suspension** | A suspended role removes permissions; a suspended seller stops selling while the user keeps other roles |
-| **Login email vs seller contact email** | Verified separately (§9.3) |
 | **Product owner vs actor** | On-behalf actions keep both (§3.4) |
 | **Marketer vs seller referrals** | Reported separately (§14.5), and both use one attribution rule |
 
@@ -84,7 +82,7 @@ published | unpublished -> archived
 any except draft -> suspended (moderators only)
 suspended -> unpublished (moderators only)
 ```
-A `pending_approval` status gets added only if BD-10 requires it.
+No admin approval is needed before publishing (BD-10).
 
 **Blog post** (§11.3)
 ```
@@ -102,10 +100,10 @@ Admin posts skip review. A seller's significant edit to a published post creates
 
 `publish_product` allows publication only if **all** of these are true:
 
-1. The caller is the seller's owner, staff with `products.publish`, or an admin with `products.publish_on_behalf`.
+1. The caller is the seller's owner, or an admin with `products.publish_on_behalf`. Staff with `products.publish` are added when staff memberships are built.
 2. Global seller publishing is on, and the seller's own publishing is not suspended.
-3. The seller has a verified contact email (Q-06).
-4. Publishing for the seller's class (verified or unverified) is on.
+3. Publishing for the seller's class (verified or unverified) is on.
+4. The product is complete: it has a name, description and category. A price of $0 is allowed (Q-23).
 5. If the seller is verified: allowed.
 6. If unverified: the product already has a ledger entry, **or** the seller's ledger count is below the configured allowance, **or** a Super Admin override applies.
 

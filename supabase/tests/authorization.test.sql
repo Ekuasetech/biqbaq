@@ -183,7 +183,7 @@ select lives_ok(
 );
 
 reset role;
-create temp table role_rows as select user_id, role_key, id from user_roles;
+create temp table role_rows as select user_id, role_key, id from user_roles where user_id::text not like '%-0000000000d_'; -- not the local sample shops
 grant select on role_rows to authenticated;
 select pg_temp.act_as('00000000-0000-4000-8000-0000000000a4');
 set local role authenticated;
@@ -360,8 +360,9 @@ select throws_ok($$ select * from profiles $$, '42501', null, 'visitors cannot r
 select throws_ok($$ select * from roles $$, '42501', null, 'visitors cannot read roles');
 select throws_ok($$ select submit_role_application('seller', '{}') $$, '42501', null, 'visitors must sign in to apply');
 select throws_ok($$ select approve_role_application(gen_random_uuid()) $$, '42501', null, 'visitors cannot call approval');
-select ok(not private.has_permission('users.manage'), 'visitors have no permissions');
+select throws_ok($$ select private.has_permission('users.manage') $$, '42501', null, 'visitors cannot reach the permission helpers');
 reset role;
+select ok(not private.has_permission('users.manage'), 'with no signed-in user, the helper answers no');
 
 select * from finish();
 rollback;

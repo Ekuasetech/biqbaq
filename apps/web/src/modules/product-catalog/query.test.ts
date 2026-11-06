@@ -1,77 +1,68 @@
 import { describe, expect, it } from "vitest";
-import { parseProductQuery, queryProducts } from "./query";
-import { SAMPLE_PRODUCTS } from "./sample-data";
-
-const base = { sort: "newest", page: 1, pageSize: 100 } as const;
+import { containsFilter, parseProductQuery, toProduct, type ProductRow } from "./query";
 
 describe("parseProductQuery", () => {
-  it("falls back to defaults for invalid values", () => {
-    const q = parseProductQuery({ category: "nope", market: "US", sort: "x", page: "-3", q: "  " });
-    expect(q).toMatchObject({ sort: "newest", page: 1 });
-    expect(q.category).toBeUndefined();
-    expect(q.market).toBeUndefined();
-    expect(q.q).toBeUndefined();
+  it("keeps valid values", () => {
+    expect(parseProductQuery({ q: " suya ", category: "food", market: "CA", sort: "name", page: "2" })).toMatchObject({
+      q: "suya",
+      category: "food",
+      market: "CA",
+      sort: "name",
+      page: 2,
+    });
   });
 
-  it("keeps valid values and trims the search term", () => {
-    const q = parseProductQuery({ category: "food", market: "CA", sort: "name", page: "2", q: " suya " });
-    expect(q).toMatchObject({ category: "food", market: "CA", sort: "name", page: 2, q: "suya" });
-  });
-
-  it("uses the first value of a repeated param", () => {
-    expect(parseProductQuery({ category: ["food", "home"] }).category).toBe("food");
-  });
-});
-
-describe("sample catalogue", () => {
-  it("is priced in Canadian dollars, from sellers in Canada", () => {
-    expect(SAMPLE_PRODUCTS.every((p) => p.price.currency === "CAD" && p.seller.country === "CA")).toBe(true);
-    expect(SAMPLE_PRODUCTS.every((p) => p.seller.city.length > 0)).toBe(true);
+  it("falls back on anything invalid", () => {
+    const query = parseProductQuery({ category: "electronics", market: "US", sort: "drop table", page: "-1", q: "" });
+    expect(query).toMatchObject({ sort: "newest", page: 1 });
+    expect(query.category).toBeUndefined();
+    expect(query.market).toBeUndefined();
+    expect(query.q).toBeUndefined();
   });
 });
 
-describe("queryProducts", () => {
-  it("filters by category, market and search term", () => {
-    expect(queryProducts(SAMPLE_PRODUCTS, { ...base, category: "food" }).data.every((p) => p.category === "food")).toBe(true);
-    expect(queryProducts(SAMPLE_PRODUCTS, { ...base, market: "CA" }).data).toHaveLength(12);
-    expect(queryProducts(SAMPLE_PRODUCTS, { ...base, market: "NG" }).data).toHaveLength(0);
-    expect(queryProducts(SAMPLE_PRODUCTS, { ...base, q: "SUYA" }).data.map((p) => p.slug)).toEqual(["suya-spice-blend"]);
+describe("containsFilter", () => {
+  it("searches every column", () => {
+    expect(containsFilter(["name", "city"], "suya")).toBe('name.ilike."%suya%",city.ilike."%suya%"');
   });
 
-  it("finds products by seller name and by seller city", () => {
-    const byName = queryProducts(SAMPLE_PRODUCTS, { ...base, q: "kano naturals" }).data;
-    expect(byName.length).toBeGreaterThan(0);
-    expect(byName.every((p) => p.seller.slug === "kano-naturals")).toBe(true);
-    const byCity = queryProducts(SAMPLE_PRODUCTS, { ...base, q: "calgary" }).data;
-    expect(byCity.length).toBeGreaterThan(0);
-    expect(byCity.every((p) => p.seller.city === "Calgary")).toBe(true);
+  it("treats wildcards as ordinary characters", () => {
+    expect(containsFilter(["name"], "50%_off")).toBe('name.ilike."%50\\\\%\\\\_off%"');
   });
 
-  it("paginates, and clamps a page past the end", () => {
-    const first = queryProducts(SAMPLE_PRODUCTS, { sort: "newest", page: 1, pageSize: 5 });
-    expect(first.data).toHaveLength(5);
-    expect(first.meta).toMatchObject({ total: 12, totalPages: 3 });
-    const beyond = queryProducts(SAMPLE_PRODUCTS, { sort: "newest", page: 99, pageSize: 5 });
-    expect(beyond.meta.page).toBe(3);
-    expect(beyond.data).toHaveLength(2);
+  it("stops typed text escaping into the filter's own syntax", () => {
+    expect(containsFilter(["name"], 'a",status.eq.draft')).toBe('name.ilike."%a\\",status.eq.draft%"');
+    expect(containsFilter(["name"], "a,b)")).toBe('name.ilike."%a,b)%"');
   });
+});
 
-  it("never compares prices across currencies", () => {
-    // The launch is CAD only (ADR-0005), but the sort must stay safe for later.
-    const mixed = SAMPLE_PRODUCTS.map((p, i) =>
-      i % 2 ? { ...p, price: { ...p.price, currency: "NGN" as const } } : p,
-    );
-    const { data } = queryProducts(mixed, { ...base, sort: "price_asc" });
-    const cad = data.filter((p) => p.price.currency === "CAD").map((p) => p.price.amountMinor);
-    const ngn = data.filter((p) => p.price.currency === "NGN").map((p) => p.price.amountMinor);
-    expect(cad).toEqual([...cad].sort((a, b) => a - b));
-    expect(ngn).toEqual([...ngn].sort((a, b) => a - b));
-    expect(data.findIndex((p) => p.price.currency === "NGN")).toBe(cad.length);
-  });
+describe("toProduct", () => {
+  const row: ProductRow = {
+    id: "id",
+    slug: "suya",
+    name: "Suya",
+    description: "Smoky",
+    price_minor: 1200,
+    currency: "CAD",
+    availability: "limited",
+    condition: null,
+    images: [{ url: "https://example.com/a.jpg", alt: "A" }],
+    view_count: 7,
+    first_published_at: "2026-10-01T00:00:00Z",
+    category_slug: "food",
+    seller_slug: "shop",
+    seller_name: "Shop",
+    seller_city: "Toronto",
+    seller_country: "CA",
+    seller_description: "Words",
+    seller_verified: false,
+  };
 
-  it("does not mutate its input", () => {
-    const before = SAMPLE_PRODUCTS.map((p) => p.id);
-    queryProducts(SAMPLE_PRODUCTS, { ...base, sort: "name" });
-    expect(SAMPLE_PRODUCTS.map((p) => p.id)).toEqual(before);
+  it("maps a public row to what the pages show", () => {
+    const product = toProduct(row);
+    expect(product.price).toEqual({ amountMinor: 1200, currency: "CAD" });
+    expect(product.seller).toEqual({ name: "Shop", slug: "shop", city: "Toronto", country: "CA", verified: false, description: "Words" });
+    expect(product.views).toBe(7);
+    expect(product.images).toHaveLength(1);
   });
 });

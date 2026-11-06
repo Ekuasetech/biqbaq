@@ -65,8 +65,6 @@ Authenticated. Authorization is enforced on the server. Everything else goes via
 | `POST /media/sign` | Authorize a Cloudinary upload for an entity the caller controls | 3 |
 | `POST /media/complete` | Verify the upload and save metadata | 3 |
 | `DELETE /media/{id}` | Remove from Cloudinary and the database | 3 |
-| `POST /sellers/me/contact-email` | Set the email and send verification | 4 |
-| `POST /contact-email/verify` | Validate the token | 4 |
 | `POST /products/{id}/contact` | **Public.** Anonymous enquiry, sent via Resend with Reply-To | 4 |
 | `POST /sellers/me/invitations` | Invite staff | 3 |
 | `POST /payments/onboarding` | Start provider onboarding | 7 |
@@ -81,4 +79,4 @@ Authenticated. Authorization is enforced on the server. Everything else goes via
 { "name": "Ada", "email": "ada@example.com", "subject": "Availability", "message": "Is this in stock?", "website": "" }
 ```
 
-`website` is the hidden honeypot field. Responses: `202` when accepted for sending, `400`, `404` (product not public), `409` (seller's contact email not verified), `429`. Failures are reported to the visitor (§9.2), and never reveal the seller's address.
+`website` is the hidden honeypot field. Responses: `202` when accepted for sending, `400`, `404` (product not public), `429`. Failures are reported to the visitor (§9.2), and never reveal the seller's address.

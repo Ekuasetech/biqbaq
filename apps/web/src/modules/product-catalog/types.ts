@@ -1,3 +1,6 @@
+/** Marks cached catalogue reads, so a seller's change can refresh them straight away. */
+export const CATALOG_CACHE_TAG = "catalog";
+
 export const AVAILABILITIES = ["in_stock", "limited", "out_of_stock"] as const;
 export type Availability = (typeof AVAILABILITIES)[number];
 
@@ -28,7 +31,7 @@ export interface ProductImage {
   alt: string;
 }
 
-/** Public seller fields only: mirrors the planned `public_sellers` view. */
+/** Public seller fields only: from the `public_sellers` view. */
 export interface PublicSeller {
   name: string;
   slug: string;
@@ -47,7 +50,7 @@ export interface Review {
   createdAt: string;
 }
 
-/** Public product fields only: mirrors the planned `public_products` view. */
+/** Public product fields only: from the `public_products` view. */
 export interface Product {
   id: string;
   slug: string;

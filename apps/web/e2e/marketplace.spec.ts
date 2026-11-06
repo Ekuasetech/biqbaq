@@ -31,6 +31,18 @@ test.describe("public marketplace", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Suya Spice Blend");
   });
 
+  test("search treats unusual characters as ordinary text", async ({ page }) => {
+    for (const text of ['a",status.eq.draft', "100%", "a,b)", "under_score", "back\\slash"]) {
+      await page.goto(`/products?q=${encodeURIComponent(text)}`);
+      await expect(page.getByRole("main")).toContainText("No products");
+    }
+  });
+
+  test("a page number past the end shows the last page", async ({ page }) => {
+    await page.goto("/products?page=999");
+    await expect(page.getByRole("article").first()).toBeVisible();
+  });
+
   test("hero offers browsing and account creation", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("link", { name: "Browse all products" }).first()).toBeVisible();
@@ -87,7 +99,7 @@ test.describe("public marketplace", () => {
   test("view counts appear on products and cargo cars", async ({ page }) => {
     await page.goto("/");
     const products = page.getByRole("region", { name: "New on Biqbaq" });
-    await expect(products.getByRole("article").first()).toContainText("1,240 views");
+    await expect(products.getByRole("article").filter({ hasText: "Ankara Tote Bag" })).toContainText("1,240 views");
     const cargo = page.getByRole("region", { name: "Cargo cars going to Nigeria" });
     await expect(cargo.getByRole("article").first()).toContainText("1,876 views");
     await page.goto("/products");
@@ -527,7 +539,7 @@ test.describe("public marketplace", () => {
     test("a card's seller name opens the profile, not the product", async ({ page }) => {
       await page.goto("/products");
       await page.waitForLoadState("networkidle");
-      await page.getByRole("article").first().getByRole("link", { name: /\(sample\)/ }).click();
+      await page.getByRole("link", { name: /\(sample\)/ }).first().click();
       await expect(page).toHaveURL(/\/sellers\/[a-z-]+$/);
     });
 
@@ -866,6 +878,140 @@ test.describe("public marketplace", () => {
           return { page, email, context };
         }
 
+        test.describe("seller shops and publishing", () => {
+          const unique = () => `${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+
+          /** Approves a new applicant as a Seller, and opens their shop. */
+          async function approvedSeller(page: import("@playwright/test").Page, browser: import("@playwright/test").Browser, request: import("@playwright/test").APIRequestContext) {
+            const owner = await confirmedAccount(page, request);
+            makeSuperAdmin(owner);
+            const seller = await newApplicant(browser, request);
+            await apply(seller.page).getByRole("button", { name: "Apply as Seller", exact: false }).first().click();
+            await fillSeller(seller.page);
+            await seller.page.getByRole("button", { name: "Submit application" }).click();
+            await expect(applications(seller.page)).toContainText("Waiting for review");
+            await page.goto(screen);
+            await page.getByLabel("Search", { exact: true }).fill(seller.email);
+            await page.getByRole("button", { name: "Search", exact: true }).click();
+            await cardFor(page, seller.email).getByRole("button", { name: "View details" }).click({ timeout: 15000 });
+            await cardFor(page, seller.email).getByRole("button", { name: "Approve" }).click();
+            await expect(page.getByText("The application was approved")).toBeVisible();
+            await seller.page.goto("/account");
+            await seller.page.getByRole("link", { name: "Manage my shop" }).click({ timeout: 15000 });
+            await expect(seller.page).toHaveURL(/\/account\/shop$/);
+            await expect(seller.page.getByRole("heading", { name: "Ada's Shop" })).toBeVisible({ timeout: 15000 });
+            return seller;
+          }
+
+          async function addProduct(page: import("@playwright/test").Page, name: string, complete = true) {
+            await page.getByRole("button", { name: "Add a product" }).click();
+            const form = page.getByRole("form", { name: "New product" });
+            await form.getByLabel("Product name").fill(name);
+            await form.getByLabel("Price (CAD)").fill("12.50");
+            if (complete) {
+              await form.getByLabel("Description").fill("Made for this test");
+              await form.getByLabel("Category").selectOption({ label: "Food & groceries" });
+            }
+            await form.getByRole("button", { name: "Save" }).click();
+            await expect(page.getByRole("article", { name })).toContainText("Draft");
+          }
+          const item = (page: import("@playwright/test").Page, name: string) => page.getByRole("article", { name });
+
+          test("a seller's first two products go live, and the limit holds through deleting", async ({ page, browser, request }) => {
+            test.setTimeout(120000);
+            const { page: shop, email } = await approvedSeller(page, browser, request);
+            const id = unique();
+            const [first, second, third] = [`First ${id}`, `Second ${id}`, `Third ${id}`];
+            await expect(shop.getByRole("region", { name: "Ada's Shop" })).toContainText("2 publishing places left of 2");
+
+            // A draft is private.
+            await addProduct(shop, first);
+            const visitor = await (await browser.newContext()).newPage();
+            await visitor.goto(`/products?q=${encodeURIComponent(first)}`);
+            await expect(visitor.getByRole("main")).toContainText("No products");
+
+            // Publishing puts it on the public site straight away, with the seller's city.
+            await item(shop, first).getByRole("button", { name: "Publish" }).click();
+            await expect(item(shop, first)).toContainText("Published");
+            await expect(shop.getByRole("region", { name: "Ada's Shop" })).toContainText("1 publishing place left of 2");
+            await item(shop, first).getByRole("link", { name: "View" }).click();
+            await expect(shop.getByRole("heading", { level: 1 })).toHaveText(first);
+            await expect(shop.getByRole("main")).toContainText("Toronto");
+            await expect(shop.getByRole("main")).toContainText("Unverified");
+            await expect(shop.getByRole("main")).toContainText("$12.50");
+            await shop.goto("/account/shop");
+
+            await addProduct(shop, second);
+            await item(shop, second).getByRole("button", { name: "Publish" }).click();
+            await expect(item(shop, second)).toContainText("Published");
+            await expect(shop.getByRole("region", { name: "Ada's Shop" })).toContainText("No publishing places left of 2");
+
+            // The third is refused, with an explanation.
+            await addProduct(shop, third);
+            await item(shop, third).getByRole("button", { name: "Publish" }).click();
+            await expect(item(shop, third)).toContainText("You've used all your publishing places");
+            await expect(item(shop, third)).toContainText("Draft");
+
+            // Deleting does not give a place back.
+            await item(shop, first).getByRole("button", { name: "Delete" }).click();
+            await item(shop, first).getByRole("button", { name: "Yes, delete it" }).click();
+            await expect(item(shop, first)).toHaveCount(0);
+            await item(shop, third).getByRole("button", { name: "Publish" }).click();
+            await expect(item(shop, third)).toContainText("You've used all your publishing places");
+            await visitor.goto(`/products?q=${encodeURIComponent(first)}`);
+            await expect(visitor.getByRole("main")).toContainText("No products");
+
+            // Unpublishing and republishing costs nothing.
+            await item(shop, second).getByRole("button", { name: "Unpublish" }).click();
+            await expect(item(shop, second)).toContainText("Not public");
+            await item(shop, second).getByRole("button", { name: "Publish" }).click();
+            await expect(item(shop, second)).toContainText("Published");
+
+            // Editing a published product shows publicly, and is logged.
+            const renamed = `Renamed ${id}`;
+            await item(shop, second).getByRole("button", { name: "Edit" }).click();
+            await item(shop, second).getByLabel("Product name").fill(renamed);
+            await item(shop, second).getByRole("button", { name: "Save" }).click();
+            await expect(item(shop, renamed)).toContainText("Published");
+            await visitor.goto(`/products?q=${encodeURIComponent(renamed)}`);
+            await expect(visitor.getByRole("link", { name: renamed }).first()).toBeVisible();
+            expect(sql(`select count(*) from public.audit_logs a join auth.users u on u.id = a.actor_id where a.action = 'product.edit' and u.email = '${email}' and a.metadata ->> 'old_name' = '${second}'`)).toBe("1");
+
+            // Leaves the shared catalogue as it was for later runs.
+            sql(`update public.products set status = 'archived', deleted_at = now() where name like '% ${id}'`);
+          });
+
+          test("an incomplete draft saves, but cannot be published, and bad prices are refused", async ({ page, browser, request }) => {
+            test.setTimeout(90000);
+            const { page: shop } = await approvedSeller(page, browser, request);
+            await shop.getByRole("button", { name: "Add a product" }).click();
+            const form = shop.getByRole("form", { name: "New product" });
+            await form.getByRole("button", { name: "Save" }).click();
+            await expect(form).toContainText("This is required.");
+            await form.getByLabel("Product name").fill("Half done");
+            await form.getByLabel("Price (CAD)").fill("twelve");
+            await form.getByRole("button", { name: "Save" }).click();
+            await expect(form).toContainText("Enter a price such as 12.50.");
+            await form.getByRole("button", { name: "Cancel" }).click();
+
+            await addProduct(shop, "Half done", false);
+            await item(shop, "Half done").getByRole("button", { name: "Publish" }).click();
+            await expect(item(shop, "Half done")).toContainText("Add a description and a category before publishing.");
+            await expect(shop.getByRole("region", { name: "Ada's Shop" })).toContainText("2 publishing places left of 2");
+          });
+
+          test("a shop stays private: signed-out visitors and buyers get nothing", async ({ page, request }) => {
+            await page.goto("/account/shop");
+            await expect(page.getByText("Sign in to manage your shop.")).toBeVisible();
+            await confirmedAccount(page, request);
+            await page.goto("/account/shop");
+            await expect(page.getByRole("heading", { name: "You don't have a shop yet" })).toBeVisible({ timeout: 15000 });
+            await page.goto("/account");
+            await expect(page.getByRole("region", { name: "Your roles" })).toBeVisible({ timeout: 15000 });
+            await expect(page.getByRole("link", { name: "Manage my shop" })).toHaveCount(0);
+          });
+        });
+
         test("signed-out visitors and ordinary users get no access, or data", async ({ page, request }) => {
           await page.goto(screen);
           await expect(page.getByRole("heading", { name: "You don't have access" })).toBeVisible();
@@ -1147,7 +1293,7 @@ test.describe("public marketplace", () => {
     await page.goto("/products?q=zzzz");
     await expect(page.getByRole("heading", { name: "No products found" })).toBeVisible();
     await page.getByRole("link", { name: "Clear filters" }).click();
-    await expect(page.getByText("12 products")).toBeVisible();
+    await expect(page.getByText(/\d+ products/)).toBeVisible();
   });
 
   test("filters and pagination work and bad params are ignored", async ({ page }) => {
@@ -1156,11 +1302,12 @@ test.describe("public marketplace", () => {
     await page.getByRole("button", { name: "Apply" }).click();
     await expect(page).toHaveURL(/sort=price_asc/);
     await expect(page.getByRole("article").first()).toContainText("$9.00");
+    // Only the local sample shops match this, as tests running alongside publish their own products.
+    await page.goto("/products?q=(sample)");
     await expect(page.getByText("12 products")).toBeVisible();
-    await page.goto("/products");
     await page.getByRole("link", { name: "Next" }).click();
     await expect(page.getByText("Page 2 of 2")).toBeVisible();
-    await page.goto("/products?category=bad&page=abc&sort=bad");
+    await page.goto("/products?q=(sample)&category=bad&page=abc&sort=bad");
     await expect(page.getByText("12 products")).toBeVisible();
   });
 

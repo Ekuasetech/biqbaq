@@ -53,14 +53,22 @@ Needs: Q-03, Q-06, Q-08, Q-09, Q-12, BD-08, BD-10, BD-14, BD-16.
 7. Reviews and favourites.
 8. On-behalf actions for admins and co-admins.
 
-Roadmap note: `publish_product` depends on contact email status (Q-06), which is built in Phase 4. Contact email verification moves to the start of step 4 in this phase if Q-06 is confirmed as the assumption states, and needs `EmailService` then.
+Progress at 2026-11-06, on the local copy only:
+
+- **Built:** a shop created on approval; the seller's "My shop" screen with drafts, editing, publishing, unpublishing and deleting; `publish_product`, with the limit, the permanent ledger and edit logging; moderation and on-behalf database functions, with no screens yet; public product, seller and search pages reading the database.
+- **Not built:** images (needs Cloudinary), shop profile editing, staff, verification screens, reviews, favourites, moderation screens, and view counting (Q-16). Vehicles, blog and ads still use sample data, until their own phases.
+- `supabase/seed.sql` holds invented shops for local use. `supabase db push` does not load it, so it never reaches the real project.
+- Public pages can show old data for about a minute after a change made outside the seller's own screen, such as a moderator suspending a product. This needs revisiting when the moderation screens are built.
+- `scripts/test-publish-race.sh` proves the limit holds when two publishes overlap. Run it after changing `publish_product`.
+
+The owner decided that publishing does not need a verified contact email (Q-06), so this phase no longer depends on Phase 4.
 
 ## Phase 4: Communication
 
 Needs: BD-04, BD-05, Q-10, Q-13.
 
 1. `background_jobs`, the worker, `EmailService` with Resend, and Auth email hook.
-2. Seller contact email verification (if not already done in Phase 3).
+2. Send enquiries to the seller's login email, which is already verified (Q-06).
 3. Anonymous contact form.
 4. Messaging, inbox and Realtime.
 5. In-app notifications and preferences.

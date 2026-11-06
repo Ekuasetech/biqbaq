@@ -1,4 +1,4 @@
-import { listProducts, listSellers, type Money, type Product, type PublicSeller } from "@/modules/product-catalog";
+import { listProducts, searchSellers, type Money, type Product, type PublicSeller } from "@/modules/product-catalog";
 import { listCargoVehicles, type CargoVehicle } from "@/modules/vehicle-marketplace";
 
 export const SUGGESTION_MIN_LENGTH = 2;
@@ -61,9 +61,7 @@ export async function suggest(rawQuery: string): Promise<SearchSuggestion[]> {
     [carTitle(car), car.origin, car.destination].some((text) => text.toLowerCase().includes(needle)),
   );
 
-  const sellers = (await listSellers()).filter((seller) =>
-    [seller.name, seller.city].some((text) => text.toLowerCase().includes(needle)),
-  );
+  const sellers = await searchSellers(q, MAX_SELLERS * 5);
 
   return [
     ...sellers.map(sellerSuggestion).sort(byRank(needle)).slice(0, MAX_SELLERS),

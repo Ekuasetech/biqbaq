@@ -24,9 +24,8 @@ Effective permission = an **active** `user_roles` row, plus a matching `role_per
 
 | Table | Key columns | Notes |
 | --- | --- | --- |
-| `sellers` | `owner_user_id` (unique, Q-08), `slug` (unique), `name`, `city`, `country`, `category`, `description`, `logo`, `status`, `publishing_suspended`, `verification_status`, `allowance_override` | Created when a seller application is approved |
-| `seller_private` | `seller_id`, `contact_email`, `contact_email_verified_at` | Split out so a public read can never include it |
-| `seller_contact_email_tokens` | `seller_id`, `email`, `token_hash`, `expires_at`, `used_at` | Only the hash is stored |
+| `sellers` | `owner_user_id` (unique, Q-08), `slug` (unique), `name`, `city`, `country`, `category`, `description`, `status`, `publishing_suspended`, `verification_status`, `allowance_override` | Created when a seller application is approved |
+| `seller_private` | `seller_id`, `contact_information` | Split out so a public read can never include it. Enquiries go to the seller's login email (Q-06), so there is no separate contact email |
 | `seller_invitations` | `seller_id`, `invitee_email` or `invitee_user_id`, `token_hash`, `status`, `expires_at`, `permissions` | |
 | `seller_staff_memberships` | `seller_id`, `user_id`, `status`, `invited_by` | Unique (`seller_id`, `user_id`) |
 | `seller_staff_permissions` | `membership_id`, `permission_key` | Granular (BD-08) |

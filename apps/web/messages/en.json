@@ -6,7 +6,7 @@
   "common": {
     "skipToContent": "Skip to content",
     "views": "{count, plural, one {# view} other {# views}}",
-    "previewNotice": "Preview: all listings, sellers and reviews shown here are sample data.",
+    "previewNotice": "Preview: this site is still being built, and includes sample data.",
     "home": "Home"
   },
   "nav": {
@@ -80,7 +80,8 @@
     "faq4Q": "Where are the sellers based?",
     "faq4A": "Biqbaq currently serves Nigerians in Canada, with all prices in Canadian dollars. Each listing shows where its seller is based.",
     "faq5Q": "How do I become a seller?",
-    "faq5A": "Register, then apply for a seller role from your account. Each application is reviewed before it is approved."
+    "faq5A": "Register, then apply for a seller role from your account. Each application is reviewed before it is approved.",
+    "noProductsYet": "No products yet. Check back soon."
   },
   "categories": {
     "fashion": "Fashion",
@@ -391,7 +392,8 @@
       "loadFailed": "We couldn't load your account. Please refresh the page.",
       "generic": "Something went wrong. Please try again."
     },
-    "adminLink": "Review role applications"
+    "adminLink": "Review role applications",
+    "shopLink": "Manage my shop"
   },
   "admin": {
     "section": "Administration",
@@ -448,5 +450,74 @@
       "reasonRequired": "Enter a reason for rejecting.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "shop": {
+    "title": "My shop",
+    "viewPublic": "View public page",
+    "signedOutBody": "Sign in to manage your shop.",
+    "noShopTitle": "You don't have a shop yet",
+    "noShopBody": "A shop is created when your application to become a Seller is approved.",
+    "backToAccount": "Go to your account",
+    "shopSuspended": "Your shop is suspended, so its products aren't public and you can't make changes.",
+    "publishingSuspended": "Publishing is suspended for your shop. Your live products stay up, but you can't publish more.",
+    "noLimit": "Your shop is verified, so you can publish as many products as you like.",
+    "places": "{left, plural, =0 {No publishing places left} one {# publishing place left} other {# publishing places left}} of {allowance}",
+    "placesHelp": "The first time you publish a product, it uses a place. Deleting or unpublishing a product doesn't give the place back. Republishing a product costs nothing, and editing is always free.",
+    "productsTitle": "Your products",
+    "empty": "You haven't added any products yet.",
+    "addProduct": "Add a product",
+    "editTitle": "Edit product",
+    "newTitle": "New product",
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "unpublished": "Not public",
+      "archived": "Archived",
+      "suspended": "Suspended by Biqbaq"
+    },
+    "suspendedHelp": "Biqbaq has suspended this product. It can't be published, edited or deleted.",
+    "fields": {
+      "name": "Product name",
+      "description": "Description",
+      "category": "Category",
+      "noCategory": "Choose a category",
+      "price": "Price (CAD)",
+      "priceHint": "For example 12.50",
+      "availability": "Availability",
+      "condition": "Condition",
+      "noCondition": "Doesn't apply"
+    },
+    "publishNeeds": "You can save a draft at any time. To publish, it also needs a description and a category.",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "delete": "Delete",
+    "confirmDelete": "Yes, delete it",
+    "keep": "Keep it",
+    "deleteWarning": "Delete “{name}”? This can't be undone, and any publishing place it used isn't given back.",
+    "view": "View",
+    "errors": {
+      "required": "This is required.",
+      "tooLong": "This is too long.",
+      "invalidPrice": "Enter a price such as 12.50.",
+      "allowanceUsed": "You've used all your publishing places. Your existing products stay up, and you can still edit or republish them.",
+      "publishingOff": "Publishing is switched off right now. Please try again later.",
+      "shopSuspended": "Publishing is suspended for your shop.",
+      "incomplete": "Add a description and a category before publishing.",
+      "notPublishable": "This product can't be changed that way. Refresh the page to see its status.",
+      "notAllowed": "You aren't allowed to do this right now.",
+      "loadFailed": "We couldn't load your shop. Please refresh the page.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "signIn": "Sign in"
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "body": "We couldn't load this page. Please try again in a moment.",
+    "retry": "Try again",
+    "home": "Back to home"
   }
 }

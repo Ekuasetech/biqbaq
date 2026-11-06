@@ -1,5 +1,29 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { Product, PublicSeller } from "@/modules/product-catalog";
 import { suggest } from "./index";
+
+// Tests the ranking and limits here. Browser tests cover searching the real database.
+const seller = (name: string, slug: string, city: string): PublicSeller => ({ name, slug, city, country: "CA", verified: false, description: "" });
+const kano = seller("Kano Naturals", "kano-naturals", "Ottawa");
+const lagos = seller("Lagos Pantry", "lagos-pantry", "Calgary");
+const adire = seller("Adire Studio", "adire-studio", "Toronto");
+const product = (name: string, slug: string, owner: PublicSeller) =>
+  ({ id: slug, slug, name, description: "", seller: owner, images: [], price: { amountMinor: 100, currency: "CAD" } }) as unknown as Product;
+const catalogue = [
+  product("Suya Spice Blend", "suya-spice-blend", lagos),
+  product("Whipped Shea Butter", "whipped-shea-butter", kano),
+  product("Raffia Wall Basket", "raffia-wall-basket", adire),
+  product("Adire Silk Scarf", "adire-silk-scarf", adire),
+  ...["One", "Two", "Three", "Four", "Five", "Six"].map((n) => product(`Toronto Print ${n}`, `print-${n}`, adire)),
+];
+const contains = (texts: string[], needle: string) => texts.some((text) => text.toLowerCase().includes(needle.toLowerCase()));
+
+vi.mock("@/modules/product-catalog", () => ({
+  listProducts: async ({ q }: { q: string }) => ({
+    data: catalogue.filter((p) => contains([p.name, p.seller.name, p.seller.city], q)),
+  }),
+  searchSellers: async (q: string) => [kano, lagos, adire].filter((s) => contains([s.name, s.city], q)),
+}));
 
 describe("suggest", () => {
   it("returns nothing for very short terms", async () => {

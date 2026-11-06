@@ -48,7 +48,7 @@ Modules live in `apps/web/src/modules/`. PRD §22.4 suggests 30 and warns agains
 | `reviews`, `favourites` | their tables | 3 |
 | `notifications` | notifications, preferences, `EmailService`, SMS interface | 4 |
 | `background-jobs` | background_jobs, `JobQueue`, worker | 4 |
-| `seller-contact` | contact email tokens, enquiries | 4 |
+| `seller-contact` | enquiries | 4 |
 | `messaging` | conversations, messages | 4 |
 | `public-store-api` | public seller endpoints and contract | 5 |
 | `search` | no tables; reads other modules' public data for suggestions | 3 |

@@ -23,7 +23,7 @@ Located in a `private` schema that the API does not expose, `SECURITY DEFINER`, 
 | `can_access_conversation(conv)` | Buyer, or a seller member with `messages.view` |
 | `can_reply_to_conversation(conv)` | Buyer, or a seller member with `messages.respond` |
 
-These helpers need `EXECUTE` granted to the `anon` and `authenticated` roles, because policies run as the caller. That does not expose them to the API, because the `private` schema is not exposed.
+These helpers need `EXECUTE` granted to `authenticated`, because policies run as the caller. That does not expose them to the API, because the `private` schema is not exposed. Signed-out visitors read only through public views, so `anon` has no access to `private`, and can run no function in `public`. New functions in `public` start closed, and must be granted explicitly. A database test fails if any function is left open.
 
 The `seller_staff` role check is what enforces §3.6: suspending the platform role or the membership each cuts access on its own. Same for owners: a suspended `seller` role removes access to seller management but leaves the records intact.
 
@@ -73,8 +73,8 @@ Default deny. Every table has RLS on, and no policy means no access.
 | Area | Control |
 | --- | --- |
 | Verification documents | Private bucket; Storage policies; short-lived signed URLs issued by an audited RPC to Super Admin only |
-| Seller contact email | Stored only in `seller_private`; absent from views, API and frontend |
-| Tokens (contact email, invites) | Random, hashed at rest, expiring, single-use |
+| Seller login email, used for enquiries (Q-06) | Stored only in `auth.users`; absent from public views, API and frontend |
+| Tokens (invites) | Random, hashed at rest, expiring, single-use |
 | Payment webhooks | Signature checked before parsing; dedupe by event ID; amounts confirmed with the provider |
 | Uploads | Ownership check before signing; size, format and dimensions verified after upload |
 | Anonymous contact | Validation, length limits, IP and per-seller rate limits, honeypot (Q-13), header injection blocked by the Resend API's structured fields |

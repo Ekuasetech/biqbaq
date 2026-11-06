@@ -2,7 +2,7 @@
 
 A marketplace for Nigerians in Canada (Canada only for now, see ADR-0005): products, vehicle shipping and shared cargo opportunities, and seller tools, on web (Next.js) and mobile (React Native / Expo) with one Supabase backend.
 
-**Status:** early development. The public web pages run on sample data, with no backend connected yet. The design docs are awaiting review.
+**Status:** early development, running against a local Supabase copy only. Accounts, roles, seller shops and products use the database. Vehicles, blog and ads still use sample data.
 
 ## Run the web app
 
