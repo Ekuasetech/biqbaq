@@ -6,7 +6,9 @@ Questions referred to are in [open-questions.md](decisions/open-questions.md).
 
 ## Build order note
 
-At the project owner's direction (2026-11-05), public web pages are being built first, on sample data behind `modules/product-catalog`. These pages are **not done** under §28.4 until the backend replaces the sample data. `sample-data.ts` and the preview banner are removed at that point. The contact form validates only, and sends nothing, until Phase 4.
+At the project owner's direction (2026-11-05), public web pages are being built first, on sample data behind `modules/product-catalog`. These pages are **not done** under §28.4 until the backend replaces the sample data. Each module's `sample-data.ts` and the preview banner are removed at that point. The contact and account forms validate only, and send nothing, until they are connected.
+
+The public pages are now built: home, products, cargo cars, blog, seller profiles, ads, account forms and draft legal pages. Dashboards wait for the backend, because they depend on real sign-in and permissions.
 
 Known limitation: an unknown product URL shows the not-found page and a `noindex` tag, but responds with HTTP 200, because the response has already started streaming. Unknown non-product URLs do respond 404. Decide when the backend is connected whether to add a check in Proxy for a true 404, at the cost of a database lookup on those requests.
 

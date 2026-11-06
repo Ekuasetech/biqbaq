@@ -51,6 +51,7 @@ Modules live in `apps/web/src/modules/`. PRD §22.4 suggests 30 and warns agains
 | `seller-contact` | contact email tokens, enquiries | 4 |
 | `messaging` | conversations, messages | 4 |
 | `public-store-api` | public seller endpoints and contract | 5 |
+| `search` | no tables; reads other modules' public data for suggestions | 3 |
 | `blog` | posts, revisions, moderation | 6 |
 | `advertising` | advertisements | 6 |
 | `payment-management` | provider accounts, webhooks, commission rules | 7 |

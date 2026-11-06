@@ -13,6 +13,8 @@ npm test -w web         # unit tests
 npm run test:e2e -w web # browser tests (run `npm run build -w web` first)
 ```
 
+Copy `apps/web/.env.example` to `apps/web/.env.local` when connecting Supabase. Never commit real keys.
+
 ## Where to start
 
 - [Product requirements](docs/product-requirements.md): the requirements baseline.

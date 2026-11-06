@@ -1,5 +1,5 @@
 import { SAMPLE_ADS } from "./sample-data";
-import { selectAds, type Advertisement, type AdPlacement } from "./select";
+import { isLive, selectAds, type Advertisement, type AdPlacement } from "./select";
 
 export { destinationKind } from "./select";
 export type { Advertisement, AdPlacement } from "./select";
@@ -17,9 +17,9 @@ export async function listLiveAds(
     .slice(0, limit);
 }
 
-/** Only an ad live on some placement can be opened, so finished ads stay hidden. */
+/** Only a live ad can be opened, on any placement, so finished ads stay hidden. */
 export async function getLiveAdBySlug(slug: string, now: Date): Promise<Advertisement | null> {
-  return selectAds(SAMPLE_ADS, "global", now).find((ad) => ad.slug === slug) ?? null;
+  return SAMPLE_ADS.find((ad) => ad.slug === slug && isLive(ad, now)) ?? null;
 }
 
 export async function listAdSlugs(): Promise<string[]> {

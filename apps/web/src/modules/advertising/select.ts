@@ -28,15 +28,16 @@ export function destinationKind(url: string): "internal" | "external" | "invalid
   return url.startsWith("https://") ? "external" : "invalid";
 }
 
+/** Whether an ad is active and within its schedule, whatever its placement. */
+export function isLive(ad: Advertisement, now: Date): boolean {
+  return ad.active && new Date(ad.startsAt) <= now && now < new Date(ad.endsAt);
+}
+
 /** Active ads within their schedule for a placement, highest priority first. */
 export function selectAds(ads: Advertisement[], placement: AdPlacement, now: Date): Advertisement[] {
   return ads
     .filter(
-      (ad) =>
-        ad.active &&
-        ad.placements.includes(placement) &&
-        new Date(ad.startsAt) <= now &&
-        now < new Date(ad.endsAt),
+      (ad) => ad.placements.includes(placement) && isLive(ad, now),
     )
     .sort((a, b) => b.priority - a.priority);
 }

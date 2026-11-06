@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SAMPLE_ADS } from "./sample-data";
-import { destinationKind, selectAds, type Advertisement } from "./select";
+import { destinationKind, isLive, selectAds, type Advertisement } from "./select";
 
 const now = new Date("2026-11-05T12:00:00.000Z");
 const base: Advertisement = {
@@ -25,6 +25,14 @@ describe("destinationKind", () => {
     for (const unsafe of ["javascript:alert(1)", "http://example.com", "//evil.example", "/\\evil.example", ""]) {
       expect(destinationKind(unsafe)).toBe("invalid");
     }
+  });
+});
+
+describe("isLive", () => {
+  it("does not depend on the placement, so a home page ad's own page still opens", () => {
+    expect(isLive({ ...base, placements: ["homepage"] }, now)).toBe(true);
+    expect(isLive({ ...base, active: false }, now)).toBe(false);
+    expect(isLive({ ...base, endsAt: now.toISOString() }, now)).toBe(false);
   });
 });
 

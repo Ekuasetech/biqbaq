@@ -2,6 +2,8 @@
 
 Status: **proposed, awaiting review. No migrations exist yet.** Security policies are in [security-architecture.md](security-architecture.md).
 
+Launch scope: Canada only, in CAD (ADR-0005). `sellers.country` and `products.currency` stay in the schema so Nigeria can be added later.
+
 Conventions: `uuid` primary keys, `timestamptz` `created_at` / `updated_at`, `snake_case`, money in integer minor units with an ISO currency code. State columns use `text` with `CHECK`, as these are cheaper to change than enums. RLS is on for every table.
 
 ## Identity and roles
@@ -42,20 +44,22 @@ Effective permission = an **active** `user_roles` row, plus a matching `role_per
 | Table | Key columns | Notes |
 | --- | --- | --- |
 | `categories` | `parent_id`, `slug`, `name_en`, `name_fr` | Subcategories via `parent_id`. Translated, as it is platform content |
-| `products` | `seller_id`, `category_id`, `slug` (unique), `name`, `description`, `price_minor`, `currency`, `availability`, `condition`, `attributes` jsonb, `status`, `first_published_at`, `created_by`, `updated_by`, `deleted_at` | The slug is fixed at first publication to keep URLs stable |
+| `products` | `seller_id`, `category_id`, `slug` (unique), `name`, `description`, `price_minor`, `currency`, `availability`, `condition`, `attributes` jsonb, `status`, `first_published_at`, `view_count`, `created_by`, `updated_by`, `deleted_at` | The slug is fixed at first publication to keep URLs stable |
 | `product_publication_ledger` | `product_id` (unique), `seller_id`, `published_by`, `seller_verified_at_time`, `created_at` | No FK cascade; rows never removed. Indexed on `seller_id` |
 | `media_assets` | `entity_type`, `entity_id`, `cloudinary_public_id`, `secure_url`, `alt_text`, `display_order`, `is_primary`, `uploaded_by` | One table for all images (§17) |
 | `reviews` | `product_id`, `author_id`, `rating`, `body`, `is_verified_purchase`, `status` | Unique (`product_id`, `author_id`) (Q-09) |
 | `favourites` | `user_id`, `product_id` | Composite primary key |
 
-View `public_products`: only `published`, undeleted products of non-suspended sellers, approved fields only, including the seller's name, slug and verified flag. `public_sellers` works the same way.
+View `public_products`: only `published`, undeleted products of non-suspended sellers, approved fields only, including the seller's name, slug, city and verified flag. `public_sellers` works the same way. Both list their columns explicitly and never use `select *`, so a new private column cannot leak. See security-architecture.md §4 for how they bypass RLS safely.
+
+Slugs must be unique, and real titles repeat (two 2021 Toyota Siennas), so a generated slug gets a short suffix when needed. This applies to products, vehicle listings, blog posts and ads.
 
 ## Vehicles and cargo (Phase 9)
 
 | Table | Key columns |
 | --- | --- |
-| `vehicle_listings` | `seller_id`, `make`, `model`, `year`, `origin`, `destination`, `estimated_departure`, `status`, `contact_details` |
-| `cargo_opportunities` | `vehicle_listing_id`, `available_capacity`, `restrictions`, `status` |
+| `vehicle_listings` | `seller_id`, `slug` (unique), `make`, `model`, `year`, `origin_city`, `destination_city`, `estimated_departure`, `status`, `view_count`, `created_by` |
+| `cargo_opportunities` | `vehicle_listing_id`, `available_capacity` (unit pending), `restrictions` text[], `status` |
 
 ## Communication
 
@@ -70,11 +74,11 @@ View `public_products`: only `published`, undeleted products of non-suspended se
 
 | Table | Key columns |
 | --- | --- |
-| `blog_posts` | `author_id`, `seller_id` (null for platform posts), `title`, `slug`, `excerpt`, `body`, `cover_image`, `seo_title`, `seo_description`, `status`, `scheduled_for`, `published_at` |
+| `blog_posts` | `author_id`, `seller_id` (null for platform posts), `title`, `slug`, `excerpt`, `body`, `cover_image`, `seo_title`, `seo_description`, `status`, `scheduled_for`, `published_at`, `reader_count` |
 | `blog_post_revisions` | `post_id`, pending field values, `status` |
 | `blog_moderation_history` | `post_id`, `from_status`, `to_status`, `actor_id`, `reason` |
 | `blog_categories`, `blog_tags`, plus join tables | |
-| `advertisements` | `title`, `image`, `destination_url`, `placements` text[], `all_pages`, `priority`, `status`, `starts_at`, `ends_at`, `frequency_cap` |
+| `advertisements` | `slug` (unique), `title`, `description`, `advertiser_name`, `image`, `destination_url`, `placements` text[], `priority`, `active`, `starts_at`, `ends_at`, `frequency_cap`, `created_by`. `CHECK` limits `destination_url` to internal paths and `https`. `advertiser_name` is plain text: advertisers have no accounts, and only Super Admin posts ads |
 
 ## Payments (Phase 7)
 
@@ -103,6 +107,7 @@ View `public_products`: only `published`, undeleted products of non-suspended se
 | `notifications` | `user_id`, `type`, `payload`, `read_at`, delivery status | |
 | `notification_preferences` | `user_id`, `channel`, `type`, `enabled` | |
 | `background_jobs` | `type`, `payload`, `status`, `attempts`, `run_at`, `last_error`, `idempotency_key` (unique) | ADR-0002 |
+| `view_events` | `entity_type`, `entity_id`, `visitor_hash`, `day` | Unique per listing, visitor and day (Q-16). A job rolls them up into `view_count` and `reader_count`, then prunes them, so public pages never write to listings |
 | `rate_limit_counters` | `bucket`, `window_start`, `count` | Pruned by a job |
 | `integration_snapshots` | `source`, `key`, `data`, `source_url`, `fetched_at` | Express Entry, FX, weather, jobs |
 
