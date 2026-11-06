@@ -266,6 +266,19 @@ test.describe("public marketplace", () => {
     await expect(page.getByRole("button", { name: "S'inscrire avec Google" })).toBeVisible();
   });
 
+  for (const path of ["/register", "/sign-in", "/forgot-password", "/fr/register"]) {
+    test(`${path} shows only the form, with no images, blog or ads`, async ({ page }) => {
+      await page.goto(path);
+      const main = page.getByRole("main");
+      await expect(main.locator("form")).toBeVisible();
+      // Wait past the point where streamed ads would have arrived.
+      await page.waitForLoadState("networkidle");
+      await expect(main.locator("img")).toHaveCount(0);
+      await expect(main.locator("#blog-title, #ads-title")).toHaveCount(0);
+      await expect(main.getByRole("article")).toHaveCount(0);
+    });
+  }
+
   test("the password can be shown and hidden", async ({ page }) => {
     await page.goto("/sign-in");
     const password = page.getByLabel("Password", { exact: true });
@@ -313,7 +326,7 @@ test.describe("public marketplace", () => {
     (page as unknown as { problems: string[] }).problems = [];
   });
 
-  for (const path of ["/", "/products", "/products/ankara-tote-bag", "/cargo-cars", "/cargo-cars/2021-toyota-sienna", "/blog", "/register", "/sign-in", "/forgot-password", "/fr/products"]) {
+  for (const path of ["/", "/products", "/products/ankara-tote-bag", "/cargo-cars", "/cargo-cars/2021-toyota-sienna", "/blog", "/fr/products"]) {
     test(`blog and ads appear exactly once on ${path}`, async ({ page }) => {
       await page.goto(path);
       const french = path.startsWith("/fr");

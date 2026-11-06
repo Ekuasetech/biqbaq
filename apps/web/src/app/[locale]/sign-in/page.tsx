@@ -12,16 +12,10 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/sign-in"
 export default async function SignInPage({ params }: PageProps<"/[locale]/sign-in">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations({ locale });
+  const t = await getTranslations({ locale, namespace: "auth" });
 
   return (
-    <AuthPage
-      locale={locale}
-      title={t("auth.signInTitle")}
-      subtitle={t("auth.signInSubtitle")}
-      image="/hero/toronto-professional.jpg"
-      imageAlt={t("home.slideTorontoAlt")}
-    >
+    <AuthPage title={t("signInTitle")} subtitle={t("signInSubtitle")}>
       <SignInForm />
     </AuthPage>
   );

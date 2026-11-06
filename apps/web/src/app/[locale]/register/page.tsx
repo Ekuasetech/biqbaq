@@ -12,17 +12,10 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/register
 export default async function RegisterPage({ params }: PageProps<"/[locale]/register">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations({ locale });
+  const t = await getTranslations({ locale, namespace: "auth" });
 
   return (
-    <AuthPage
-      locale={locale}
-      title={t("auth.registerTitle")}
-      subtitle={t("auth.registerSubtitle")}
-      image="/hero/nigeria-seller.jpg"
-      imageAlt={t("home.slideSellerAlt")}
-      imagePosition="object-[65%_center]"
-    >
+    <AuthPage title={t("registerTitle")} subtitle={t("registerSubtitle")}>
       <RegisterForm />
     </AuthPage>
   );
