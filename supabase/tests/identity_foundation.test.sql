@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(43);
+select plan(42);
 
 -- Structure -----------------------------------------------------------------
 
@@ -156,12 +156,11 @@ select throws_ok($$ delete from audit_logs $$, '55000', null, 'audit entries can
 select throws_ok($$ truncate audit_logs $$, '55000', null, 'the audit log cannot be emptied');
 select throws_ok($$ delete from platform_settings_history $$, '55000', null, 'settings history cannot be deleted');
 
--- Client access: everything is denied until the security rules are added ---
+-- Client access: direct writes are denied ---------------------------------
 
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-000000000001", "role": "authenticated"}', true);
 
-select throws_ok($$ select * from profiles $$, '42501', null, 'a signed-in user cannot read profiles yet');
 select throws_ok(
   $$ insert into user_roles (user_id, role_key) values ('00000000-0000-4000-8000-000000000001', 'super_admin') $$,
   '42501', null, 'a signed-in user cannot give themselves a role'
