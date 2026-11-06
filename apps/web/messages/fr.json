@@ -17,6 +17,10 @@
     "searchPlaceholder": "Rechercher des produits",
     "searchLabel": "Rechercher des produits",
     "search": "Rechercher",
+    "searching": "Recherche en cours…",
+    "suggestionsLabel": "Suggestions de recherche",
+    "seeAllResults": "Voir tous les résultats pour « {query} »",
+    "noMatches": "Aucun résultat pour « {query} »",
     "toggleTheme": "Basculer entre le mode clair et le mode sombre",
     "switchLanguage": "Switch to English",
     "otherLanguage": "EN"
@@ -170,6 +174,11 @@
       "messageTooLong": "Le message est trop long."
     }
   },
+  "legal": {
+    "conditionsLink": "Conditions d'utilisation",
+    "privacyLink": "Avis de confidentialité",
+    "draftNotice": "Ébauche à faire réviser par un conseiller juridique : pas encore en vigueur. Le texte surligné indique les détails à compléter."
+  },
   "ads": {
     "sectionTitle": "Commandité",
     "label": "Publicité",
@@ -245,6 +254,7 @@
     "googleSignIn": "Se connecter avec Google",
     "googleResult": "La connexion avec Google n'est pas activée dans cet aperçu : rien ne s'est produit.",
     "or": "ou",
+    "agreement": "En continuant, vous acceptez les <conditions>Conditions d'utilisation</conditions> et l’<privacy>Avis de confidentialité</privacy> de Biqbaq.",
     "registerSubmit": "Créer le compte",
     "signInSubmit": "Se connecter",
     "forgotSubmit": "Envoyer le lien",

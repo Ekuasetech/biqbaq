@@ -17,6 +17,10 @@
     "searchPlaceholder": "Search products",
     "searchLabel": "Search products",
     "search": "Search",
+    "searching": "Searching…",
+    "suggestionsLabel": "Search suggestions",
+    "seeAllResults": "See all results for “{query}”",
+    "noMatches": "No matches for “{query}”",
     "toggleTheme": "Switch between light and dark mode",
     "switchLanguage": "Passer au français",
     "otherLanguage": "FR"
@@ -170,6 +174,11 @@
       "messageTooLong": "The message is too long."
     }
   },
+  "legal": {
+    "conditionsLink": "Conditions of Use",
+    "privacyLink": "Privacy Notice",
+    "draftNotice": "Draft for legal review: not yet in effect. Highlighted text marks details still to be completed."
+  },
   "ads": {
     "sectionTitle": "Sponsored",
     "label": "Ad",
@@ -245,6 +254,7 @@
     "googleSignIn": "Sign in with Google",
     "googleResult": "Google sign-in isn't connected in this preview, so nothing happened.",
     "or": "or",
+    "agreement": "By continuing, you agree to Biqbaq's <conditions>Conditions of Use</conditions> and <privacy>Privacy Notice</privacy>.",
     "registerSubmit": "Create account",
     "signInSubmit": "Sign in",
     "forgotSubmit": "Send reset link",

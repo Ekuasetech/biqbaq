@@ -279,6 +279,128 @@ test.describe("public marketplace", () => {
     });
   }
 
+  test("sign-up and sign-in show the agreement notice, linked to the documents", async ({ page }) => {
+    const notice = "By continuing, you agree to Biqbaq's Conditions of Use and Privacy Notice.";
+    for (const path of ["/register", "/sign-in"]) {
+      await page.goto(path);
+      await expect(page.getByText(notice)).toBeVisible();
+      const main = page.getByRole("main");
+      await expect(main.getByRole("link", { name: "Conditions of Use" })).toHaveAttribute("href", "/conditions-of-use");
+      await expect(main.getByRole("link", { name: "Privacy Notice" })).toHaveAttribute("href", "/privacy-notice");
+    }
+    await page.goto("/forgot-password");
+    await expect(page.getByText(notice)).toHaveCount(0);
+  });
+
+  for (const [path, title, link] of [
+    ["/conditions-of-use", "Conditions of Use", "Conditions of Use"],
+    ["/privacy-notice", "Privacy Notice", "Privacy Notice"],
+  ] as const) {
+    test(`${path} is reachable from the footer, marked as a draft and hidden from search`, async ({ page }) => {
+      await page.goto("/products");
+      await page.getByRole("contentinfo").getByRole("link", { name: link }).click();
+      await expect(page).toHaveURL(new RegExp(`${path}$`));
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
+      const main = page.getByRole("main");
+      await expect(main).toContainText("Draft for legal review");
+      await expect(main.locator("mark").first()).toBeVisible();
+      await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
+    });
+  }
+
+  test("the legal pages are available in French", async ({ page }) => {
+    await page.goto("/fr/conditions-of-use");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Conditions d'utilisation");
+    await page.goto("/fr/privacy-notice");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Avis de confidentialité");
+    await page.goto("/fr/sign-in");
+    await expect(page.getByRole("main").getByRole("link", { name: "Avis de confidentialité" })).toHaveAttribute("href", "/fr/privacy-notice");
+  });
+
+  test.describe("search suggestions", () => {
+    const box = (page: import("@playwright/test").Page) => page.getByRole("combobox", { name: "Search products" });
+    const list = (page: import("@playwright/test").Page) => page.getByRole("listbox", { name: "Search suggestions" });
+
+    test("typing shows matching items, and clicking one opens it", async ({ page }) => {
+      await page.goto("/");
+      await box(page).pressSequentially("suy");
+      await expect(list(page).getByRole("option", { name: /Suya Spice Blend/ })).toBeVisible();
+      await expect(list(page)).toContainText("$12.00");
+      await expect(box(page)).toHaveAttribute("aria-expanded", "true");
+      await list(page).getByRole("option", { name: /Suya Spice Blend/ }).click();
+      await expect(page).toHaveURL(/\/products\/suya-spice-blend$/);
+    });
+
+    test("cars appear too, and open their own page", async ({ page }) => {
+      await page.goto("/products");
+      await box(page).fill("sienna");
+      await list(page).getByRole("option", { name: /2021 Toyota Sienna/ }).click();
+      await expect(page).toHaveURL(/\/cargo-cars\/2021-toyota-sienna$/);
+    });
+
+    test("works with the keyboard, and Escape closes the list", async ({ page }) => {
+      await page.goto("/");
+      await box(page).fill("suya");
+      await expect(list(page).getByRole("option", { name: /Suya/ })).toBeVisible();
+      await box(page).press("ArrowDown");
+      await expect(list(page).getByRole("option", { name: /Suya/ })).toHaveAttribute("aria-selected", "true");
+      await box(page).press("Escape");
+      await expect(list(page)).toBeHidden();
+      await box(page).fill("suyaa");
+      await box(page).fill("suya");
+      await expect(list(page).getByRole("option", { name: /Suya/ })).toBeVisible();
+      await box(page).press("ArrowDown");
+      await box(page).press("Enter");
+      await expect(page).toHaveURL(/\/products\/suya-spice-blend$/);
+    });
+
+    test("Enter without choosing an item still searches", async ({ page }) => {
+      await page.goto("/");
+      await box(page).fill("tote");
+      await box(page).press("Enter");
+      await expect(page).toHaveURL(/\/products\?q=tote/);
+      await expect(page.getByText("1 product")).toBeVisible();
+    });
+
+    test("no matches says so, and short terms show nothing", async ({ page }) => {
+      await page.goto("/");
+      await box(page).fill("a");
+      await expect(list(page)).toBeHidden();
+      await box(page).fill("zzzz");
+      await expect(page.getByText("No matches for “zzzz”")).toBeVisible();
+      await list(page).getByRole("option", { name: /See all results/ }).click();
+      await expect(page).toHaveURL(/\/products\?q=zzzz/);
+    });
+
+    test("search still works if suggestions fail to load", async ({ page }) => {
+      await page.route("**/api/v1/search/suggestions**", (route) => route.abort());
+      await page.goto("/");
+      await box(page).fill("tote");
+      await expect(list(page).getByRole("option", { name: /See all results/ })).toBeVisible();
+      await expect(page.getByText(/No matches/)).toHaveCount(0);
+      (page as unknown as { problems: string[] }).problems = [];
+      await box(page).press("Enter");
+      await expect(page).toHaveURL(/\/products\?q=tote/);
+    });
+
+    test("the endpoint returns public fields only", async ({ request }) => {
+      const response = await request.get("/api/v1/search/suggestions?q=tote");
+      expect(response.ok()).toBe(true);
+      const { data } = await response.json();
+      expect(Object.keys(data[0]).sort()).toEqual(["detail", "href", "id", "imageUrl", "price", "title", "type"]);
+      expect(await (await request.get("/api/v1/search/suggestions")).json()).toEqual({ data: [] });
+    });
+
+    test("is translated on French pages", async ({ page }) => {
+      await page.goto("/fr");
+      await page.getByRole("combobox", { name: "Rechercher des produits" }).fill("tote");
+      const option = page.getByRole("listbox", { name: "Suggestions de recherche" }).getByRole("option", { name: /Ankara Tote/ });
+      await expect(option).toContainText("45,00");
+      await option.click();
+      await expect(page).toHaveURL(/\/fr\/products\/ankara-tote-bag$/);
+    });
+  });
+
   test("the password can be shown and hidden", async ({ page }) => {
     await page.goto("/sign-in");
     const password = page.getByLabel("Password", { exact: true });
@@ -326,7 +448,7 @@ test.describe("public marketplace", () => {
     (page as unknown as { problems: string[] }).problems = [];
   });
 
-  for (const path of ["/", "/products", "/products/ankara-tote-bag", "/cargo-cars", "/cargo-cars/2021-toyota-sienna", "/blog", "/fr/products"]) {
+  for (const path of ["/", "/products", "/products/ankara-tote-bag", "/cargo-cars", "/cargo-cars/2021-toyota-sienna", "/blog", "/conditions-of-use", "/privacy-notice", "/fr/products"]) {
     test(`blog and ads appear exactly once on ${path}`, async ({ page }) => {
       await page.goto(path);
       const french = path.startsWith("/fr");

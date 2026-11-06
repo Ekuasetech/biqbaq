@@ -44,10 +44,20 @@ export function SiteFooter() {
                   {t("blog.pageTitle")}
                 </Link>
               </li>
+              <li>
+                <Link href="/conditions-of-use" className={linkClass}>
+                  {t("legal.conditionsLink")}
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy-notice" className={linkClass}>
+                  {t("legal.privacyLink")}
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>
-        <p {...reveal("rise", 150)} aria-hidden className="mt-10 pb-[0.2em] text-center font-heading text-[25vw] leading-[0.95] font-extrabold tracking-tighter xl:text-[21rem]">
+        <p {...reveal("rise", 150)} aria-hidden className="pointer-events-none mt-14 pb-[0.2em] text-center font-heading text-[25vw] leading-[0.95] font-extrabold tracking-tighter select-none xl:text-[21rem]">
           biqbaq
         </p>
       </div>

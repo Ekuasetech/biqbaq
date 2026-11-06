@@ -59,6 +59,7 @@ Authenticated. Authorization is enforced on the server. Everything else goes via
 
 | Method and path | Purpose | Phase |
 | --- | --- | --- |
+| `GET /search/suggestions?q=` | **Public.** Live search box suggestions: public product and cargo car fields only, in `{ data: [...] }`. Rate limiting to be added with the backend | 3 |
 | `GET /me` | Profile, active roles, permissions, seller memberships (display only) | 2 |
 | `POST /admin/users/marketers` | Manually create a marketer | 8 |
 | `POST /media/sign` | Authorize a Cloudinary upload for an entity the caller controls | 3 |

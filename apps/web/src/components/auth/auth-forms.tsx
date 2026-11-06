@@ -158,6 +158,28 @@ function FormFooter({ label, validated, result }: { label: string; validated: bo
   );
 }
 
+/** Opens in a new tab, so that reading the documents does not clear the form. */
+function AgreementNotice() {
+  const t = useTranslations("auth");
+  const linkClass = "font-medium text-foreground underline underline-offset-2";
+  return (
+    <p className="text-center text-xs text-muted-foreground">
+      {t.rich("agreement", {
+        conditions: (chunks) => (
+          <Link href="/conditions-of-use" target="_blank" className={linkClass}>
+            {chunks}
+          </Link>
+        ),
+        privacy: (chunks) => (
+          <Link href="/privacy-notice" target="_blank" className={linkClass}>
+            {chunks}
+          </Link>
+        ),
+      })}
+    </p>
+  );
+}
+
 // Colours and layout follow Google's sign-in branding guidelines, which keep the
 // button light in both themes. Connects through Supabase Auth in Phase 2.
 function GoogleButton({ label }: { label: string }) {
@@ -206,6 +228,7 @@ export function RegisterForm() {
       <PasswordField name="password" label={t("password")} autoComplete="new-password" hint={t("passwordHint")} error={errors.password} />
       <PasswordField name="confirmPassword" label={t("confirmPassword")} autoComplete="new-password" error={errors.confirmPassword} />
       <FormFooter label={t("registerSubmit")} validated={validated} result={t("registerResult")} />
+      <AgreementNotice />
       <p className="text-center text-sm text-muted-foreground">
         {t("haveAccount")}{" "}
         <Link href="/sign-in" className="font-semibold text-foreground underline underline-offset-4">
@@ -228,6 +251,7 @@ export function SignInForm() {
         {t("forgotLink")}
       </Link>
       <FormFooter label={t("signInSubmit")} validated={validated} result={t("signInResult")} />
+      <AgreementNotice />
       <p className="text-center text-sm text-muted-foreground">
         {t("noAccount")}{" "}
         <Link href="/register" className="font-semibold text-foreground underline underline-offset-4">
