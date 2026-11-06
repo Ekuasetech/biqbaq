@@ -4,7 +4,9 @@ export type AdPlacement = (typeof AD_PLACEMENTS)[number];
 /** An advertisement created by Super Admin (PRD §12). */
 export interface Advertisement {
   id: string;
+  slug: string;
   title: string;
+  description: string;
   advertiser: string;
   imageUrl: string;
   /** An internal path, or an https URL. */
@@ -15,6 +17,15 @@ export interface Advertisement {
   /** Higher numbers show first. */
   priority: number;
   placements: AdPlacement[];
+}
+
+/**
+ * How an ad's destination may be linked. Only internal paths and https URLs are
+ * allowed, and "//host" is rejected because browsers treat it as another site.
+ */
+export function destinationKind(url: string): "internal" | "external" | "invalid" {
+  if (url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\")) return "internal";
+  return url.startsWith("https://") ? "external" : "invalid";
 }
 
 /** Active ads within their schedule for a placement, highest priority first. */

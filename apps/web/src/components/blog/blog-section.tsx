@@ -5,9 +5,9 @@ import { Link } from "@/i18n/navigation";
 import { listPopularBlogPosts } from "@/modules/blog";
 import { BlogFeaturedCard, BlogListItem } from "./blog-post-card";
 
-export async function BlogSection({ locale }: { locale: string }) {
+export async function BlogSection({ locale, excludeSlug }: { locale: string; excludeSlug?: string }) {
   const t = await getTranslations({ locale });
-  const [leadPost, ...otherPosts] = await listPopularBlogPosts(5);
+  const [leadPost, ...otherPosts] = await listPopularBlogPosts(5, excludeSlug);
   if (!leadPost) return null;
 
   return (

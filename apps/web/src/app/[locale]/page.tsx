@@ -255,7 +255,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
                 <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{spotlight.description}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                   <span className="font-medium">
-                    {spotlight.seller.name} · {spotlight.seller.city}
+                    <Link href={`/sellers/${spotlight.seller.slug}`} className="underline-offset-4 hover:underline">
+                      {spotlight.seller.name}
+                    </Link>{" "}
+                    · {spotlight.seller.city}
                   </span>
                   <SellerBadge verified={spotlight.seller.verified} />
                   <span className="text-muted-foreground">{t(`availability.${spotlight.availability}`)}</span>

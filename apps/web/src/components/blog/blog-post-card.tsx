@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { BlogPost } from "@/modules/blog";
 
-function WriterAvatar({ name, className }: { name: string; className?: string }) {
+export function WriterAvatar({ name, className }: { name: string; className?: string }) {
   return (
     <span
       aria-hidden
@@ -19,7 +19,7 @@ function WriterAvatar({ name, className }: { name: string; className?: string })
   );
 }
 
-function PostStats({ post }: { post: BlogPost }) {
+export function PostStats({ post }: { post: BlogPost }) {
   const t = useTranslations("blog");
 
   return (
@@ -58,7 +58,7 @@ export function BlogFeaturedCard({ post }: { post: BlogPost }) {
       <p className="text-xs font-bold tracking-widest uppercase">{t(`topics.${post.topic}`)}</p>
       <h3 className="mt-2 font-heading text-2xl leading-tight font-extrabold text-balance sm:text-3xl">
         {/* The link covers the whole card through the ::after overlay. */}
-        <Link href="/blog" className="outline-none after:absolute after:inset-0">
+        <Link href={`/blog/${post.slug}`} className="outline-none after:absolute after:inset-0">
           {post.title}
         </Link>
       </h3>
@@ -93,7 +93,7 @@ export function BlogListItem({ post }: { post: BlogPost }) {
       <div className="min-w-0 flex-1">
         <p className="text-xs font-bold tracking-wide text-brand-red uppercase dark:text-red-400">{t(`topics.${post.topic}`)}</p>
         <h3 className="mt-0.5 line-clamp-2 text-sm leading-snug font-semibold">
-          <Link href="/blog" className="outline-none after:absolute after:inset-0">
+          <Link href={`/blog/${post.slug}`} className="outline-none after:absolute after:inset-0">
             {post.title}
           </Link>
         </h3>

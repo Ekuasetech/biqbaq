@@ -27,3 +27,13 @@ export const signInSchema = z.object({
 });
 
 export const forgotPasswordSchema = z.object({ email });
+
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(PASSWORD_MIN, "passwordTooShort").max(PASSWORD_MAX, "passwordTooLong"),
+    confirmPassword: z.string(),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: "passwordsDoNotMatch",
+    path: ["confirmPassword"],
+  });

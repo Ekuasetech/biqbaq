@@ -61,7 +61,12 @@ export function ProductCard({
             {formatPrice(product.price, locale)}
           </p>
           <div className="mt-1 text-xs text-muted-foreground">
-            <p className="truncate">{product.seller.name}</p>
+            <p className="truncate">
+              {/* Sits above the card's overlay, so it opens the seller rather than the product. */}
+              <Link href={`/sellers/${product.seller.slug}`} className="relative z-10 hover:text-foreground hover:underline">
+                {product.seller.name}
+              </Link>
+            </p>
             <p className="truncate">
               {t("seller.location", { city: product.seller.city, country: t(`markets.${product.seller.country}`) })}
             </p>

@@ -1,14 +1,15 @@
-import { listProducts, type Money, type Product } from "@/modules/product-catalog";
+import { listProducts, listSellers, type Money, type Product, type PublicSeller } from "@/modules/product-catalog";
 import { listCargoVehicles, type CargoVehicle } from "@/modules/vehicle-marketplace";
 
 export const SUGGESTION_MIN_LENGTH = 2;
 const MAX_PRODUCTS = 5;
 const MAX_CARS = 3;
+const MAX_SELLERS = 2;
 
 /** Public fields only: this is returned by an unauthenticated endpoint. */
 export type SearchSuggestion =
   | { type: "product"; id: string; title: string; detail: string; imageUrl: string | null; href: string; price: Money }
-  | { type: "car"; id: string; title: string; detail: string; imageUrl: string | null; href: string };
+  | { type: "car" | "seller"; id: string; title: string; detail: string; imageUrl: string | null; href: string };
 
 /** Lower is better: title starts with the term, then contains it, then anything else. */
 function rank(title: string, needle: string): number {
@@ -41,6 +42,15 @@ const carSuggestion = (car: CargoVehicle): SearchSuggestion => ({
   href: `/cargo-cars/${car.slug}`,
 });
 
+const sellerSuggestion = (seller: PublicSeller): SearchSuggestion => ({
+  type: "seller",
+  id: seller.slug,
+  title: seller.name,
+  detail: seller.city,
+  imageUrl: null,
+  href: `/sellers/${seller.slug}`,
+});
+
 export async function suggest(rawQuery: string): Promise<SearchSuggestion[]> {
   const q = rawQuery.trim();
   if (q.length < SUGGESTION_MIN_LENGTH) return [];
@@ -51,7 +61,12 @@ export async function suggest(rawQuery: string): Promise<SearchSuggestion[]> {
     [carTitle(car), car.origin, car.destination].some((text) => text.toLowerCase().includes(needle)),
   );
 
+  const sellers = (await listSellers()).filter((seller) =>
+    [seller.name, seller.city].some((text) => text.toLowerCase().includes(needle)),
+  );
+
   return [
+    ...sellers.map(sellerSuggestion).sort(byRank(needle)).slice(0, MAX_SELLERS),
     ...products.map(productSuggestion).sort(byRank(needle)).slice(0, MAX_PRODUCTS),
     ...cars.map(carSuggestion).sort(byRank(needle)).slice(0, MAX_CARS),
   ];

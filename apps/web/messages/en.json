@@ -23,7 +23,8 @@
     "noMatches": "No matches for “{query}”",
     "toggleTheme": "Switch between light and dark mode",
     "switchLanguage": "Passer au français",
-    "otherLanguage": "FR"
+    "otherLanguage": "FR",
+    "sellers": "Sellers"
   },
   "footer": {
     "tagline": "Connecting Nigerians across Canada.",
@@ -126,7 +127,12 @@
     "soldBy": "Sold by",
     "basedIn": "Based in {city}, {country}",
     "location": "{city}, {country}",
-    "about": "About the seller"
+    "about": "About the seller",
+    "productsTitle": "Products from this seller",
+    "productCount": "{count, plural, one {# product} other {# products}}",
+    "notFoundTitle": "Seller not found",
+    "notFoundBody": "This seller may have been removed or is no longer available.",
+    "browseProducts": "Browse products"
   },
   "productDetail": {
     "breadcrumbLabel": "Breadcrumb",
@@ -182,13 +188,17 @@
   "ads": {
     "sectionTitle": "Sponsored",
     "label": "Ad",
-    "learnMore": "Learn more"
+    "learnMore": "Learn more",
+    "visit": "Visit advertiser",
+    "disclosure": "This is an advertisement. Biqbaq does not endorse advertisers or their products.",
+    "notFoundTitle": "This ad is not available",
+    "notFoundBody": "It may have ended or been removed.",
+    "browseProducts": "Browse products"
   },
   "blog": {
     "sectionTitle": "From the Biqbaq blog",
     "pageTitle": "Biqbaq blog",
-    "pageBody": "Articles and guides are coming soon. The topics on the home page are samples for this preview.",
-    "browse": "Browse products",
+    "pageBody": "Guides and stories for Nigerians in Canada. The articles shown here are samples for this preview.",
     "mostRead": "Most read",
     "readers": "{count, plural, one {# reader} other {# readers}}",
     "readMinutes": "{count} min read",
@@ -197,7 +207,12 @@
       "cargo": "Cargo",
       "food": "Food",
       "fashion": "Fashion"
-    }
+    },
+    "allArticles": "All articles",
+    "breadcrumbLabel": "Breadcrumb",
+    "notFoundTitle": "Article not found",
+    "notFoundBody": "This article may have been removed or is no longer available.",
+    "backToBlog": "Back to the blog"
   },
   "cargoCars": {
     "title": "Cargo Cars",
@@ -275,7 +290,13 @@
       "passwordTooShort": "Use at least 8 characters.",
       "passwordTooLong": "Use 72 characters or fewer.",
       "passwordsDoNotMatch": "The passwords don't match."
-    }
+    },
+    "resetTitle": "Choose a new password",
+    "resetSubtitle": "Enter a new password for your Biqbaq account.",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "resetSubmit": "Save new password",
+    "resetResult": "Your new password is valid, but it wasn't saved: accounts aren't connected in this preview."
   },
   "notFound": {
     "title": "Page not found",

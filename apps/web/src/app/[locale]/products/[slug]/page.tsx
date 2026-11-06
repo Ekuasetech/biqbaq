@@ -98,7 +98,11 @@ export default async function ProductPage({ params }: Props) {
 
           <div className="rounded-2xl bg-card p-4 shadow-sm">
             <p className="text-xs text-muted-foreground">{t("seller.soldBy")}</p>
-            <p className="font-semibold">{product.seller.name}</p>
+            <p className="font-semibold">
+              <Link href={`/sellers/${product.seller.slug}`} className="underline-offset-4 hover:underline">
+                {product.seller.name}
+              </Link>
+            </p>
             <SellerBadge verified={product.seller.verified} className="mt-1" />
             <p className="mt-2 text-sm text-muted-foreground">
               {t("seller.basedIn", { city: product.seller.city, country: t(`markets.${product.seller.country}`) })}

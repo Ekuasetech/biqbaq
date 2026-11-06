@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { SAMPLE_ADS } from "./sample-data";
-import { selectAds, type Advertisement } from "./select";
+import { destinationKind, selectAds, type Advertisement } from "./select";
 
 const now = new Date("2026-11-05T12:00:00.000Z");
 const base: Advertisement = {
   id: "a",
+  slug: "ad",
   title: "Ad",
+  description: "An ad.",
   advertiser: "Advertiser",
   imageUrl: "/x.jpg",
   destinationUrl: "/products",
@@ -15,6 +17,16 @@ const base: Advertisement = {
   priority: 1,
   placements: ["homepage"],
 };
+
+describe("destinationKind", () => {
+  it("allows internal paths and https only", () => {
+    expect(destinationKind("/products?category=food")).toBe("internal");
+    expect(destinationKind("https://example.com")).toBe("external");
+    for (const unsafe of ["javascript:alert(1)", "http://example.com", "//evil.example", "/\\evil.example", ""]) {
+      expect(destinationKind(unsafe)).toBe("invalid");
+    }
+  });
+});
 
 describe("selectAds", () => {
   it("shows an active ad within its schedule", () => {

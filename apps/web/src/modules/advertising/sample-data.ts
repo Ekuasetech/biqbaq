@@ -7,6 +7,7 @@ import type { Advertisement } from "./select";
 function ad(
   index: number,
   title: string,
+  description: string,
   advertiser: string,
   destinationUrl: string,
   priority: number,
@@ -14,7 +15,9 @@ function ad(
 ): Advertisement {
   return {
     id: `30000000-0000-4000-8000-${String(index).padStart(12, "0")}`,
+    slug: title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
     title,
+    description,
     advertiser: `${advertiser} (sample)`,
     // Random placeholder photo: the seed fixes the image, not its subject.
     imageUrl: `https://picsum.photos/seed/biqbaq-ad-${index}/900/600`,
@@ -28,10 +31,10 @@ function ad(
 }
 
 export const SAMPLE_ADS: Advertisement[] = [
-  ad(1, "Send your goods home this season", "Maple Freight", "/cargo-cars", 30),
-  ad(2, "Stock up on your favourite Nigerian staples", "Naija Foods Canada", "/products?category=food", 20),
-  ad(3, "Fresh prints for every occasion", "Ankara House", "/products?category=fashion", 10),
-  ad(4, "Inactive ad: never shown", "Hidden Advertiser", "/products", 99, { active: false }),
-  ad(5, "Finished ad: never shown", "Past Advertiser", "/products", 98, { endsAt: "2026-01-02T00:00:00.000Z" }),
-  ad(6, "Future ad: not shown yet", "Future Advertiser", "/products", 97, { startsAt: "2030-01-01T00:00:00.000Z", endsAt: "2031-01-01T00:00:00.000Z" }),
+  ad(1, "Send your goods home this season", "Sample ad: compare cars going from Canada to Nigeria, and find space for your goods.", "Maple Freight", "/cargo-cars", 30),
+  ad(2, "Stock up on your favourite Nigerian staples", "Sample ad: rice, spices and pantry essentials from sellers across Canada.", "Naija Foods Canada", "/products?category=food", 20),
+  ad(3, "Fresh prints for every occasion", "Sample ad: bold Ankara styles for work, weekends and special events.", "Ankara House", "/products?category=fashion", 10),
+  ad(4, "Inactive ad: never shown", "Never shown.", "Hidden Advertiser", "/products", 99, { active: false }),
+  ad(5, "Finished ad: never shown", "Never shown.", "Past Advertiser", "/products", 98, { endsAt: "2026-01-02T00:00:00.000Z" }),
+  ad(6, "Future ad: not shown yet", "Not shown yet.", "Future Advertiser", "/products", 97, { startsAt: "2030-01-01T00:00:00.000Z", endsAt: "2031-01-01T00:00:00.000Z" }),
 ];

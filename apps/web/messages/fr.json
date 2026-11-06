@@ -23,7 +23,8 @@
     "noMatches": "Aucun résultat pour « {query} »",
     "toggleTheme": "Basculer entre le mode clair et le mode sombre",
     "switchLanguage": "Switch to English",
-    "otherLanguage": "EN"
+    "otherLanguage": "EN",
+    "sellers": "Vendeurs"
   },
   "footer": {
     "tagline": "Relier les Nigérians partout au Canada.",
@@ -126,7 +127,12 @@
     "soldBy": "Vendu par",
     "basedIn": "Situé à {city}, {country}",
     "location": "{city}, {country}",
-    "about": "À propos du vendeur"
+    "about": "À propos du vendeur",
+    "productsTitle": "Produits de ce vendeur",
+    "productCount": "{count, plural, one {# produit} other {# produits}}",
+    "notFoundTitle": "Vendeur introuvable",
+    "notFoundBody": "Ce vendeur a peut-être été retiré ou n'est plus disponible.",
+    "browseProducts": "Voir les produits"
   },
   "productDetail": {
     "breadcrumbLabel": "Fil d'Ariane",
@@ -182,13 +188,17 @@
   "ads": {
     "sectionTitle": "Commandité",
     "label": "Publicité",
-    "learnMore": "En savoir plus"
+    "learnMore": "En savoir plus",
+    "visit": "Visiter l'annonceur",
+    "disclosure": "Ceci est une publicité. Biqbaq ne cautionne ni les annonceurs ni leurs produits.",
+    "notFoundTitle": "Cette publicité n'est pas disponible",
+    "notFoundBody": "Elle est peut-être terminée ou a été retirée.",
+    "browseProducts": "Voir les produits"
   },
   "blog": {
     "sectionTitle": "Sur le blogue de Biqbaq",
     "pageTitle": "Blogue de Biqbaq",
-    "pageBody": "Les articles et les guides arrivent bientôt. Les sujets de la page d'accueil sont des exemples pour cet aperçu.",
-    "browse": "Voir les produits",
+    "pageBody": "Des guides et des récits pour les Nigérians au Canada. Les articles affichés ici sont des exemples pour cet aperçu.",
     "mostRead": "Le plus lu",
     "readers": "{count, plural, one {# lecteur} other {# lecteurs}}",
     "readMinutes": "{count} min de lecture",
@@ -197,7 +207,12 @@
       "cargo": "Cargo",
       "food": "Alimentation",
       "fashion": "Mode"
-    }
+    },
+    "allArticles": "Tous les articles",
+    "breadcrumbLabel": "Fil d'Ariane",
+    "notFoundTitle": "Article introuvable",
+    "notFoundBody": "Cet article a peut-être été retiré ou n'est plus disponible.",
+    "backToBlog": "Retour au blogue"
   },
   "cargoCars": {
     "title": "Voitures cargo",
@@ -275,7 +290,13 @@
       "passwordTooShort": "Utilisez au moins 8 caractères.",
       "passwordTooLong": "Utilisez 72 caractères ou moins.",
       "passwordsDoNotMatch": "Les mots de passe ne correspondent pas."
-    }
+    },
+    "resetTitle": "Choisir un nouveau mot de passe",
+    "resetSubtitle": "Entrez un nouveau mot de passe pour votre compte Biqbaq.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "resetSubmit": "Enregistrer le mot de passe",
+    "resetResult": "Votre nouveau mot de passe est valide, mais il n'a pas été enregistré : les comptes ne sont pas activés dans cet aperçu."
   },
   "notFound": {
     "title": "Page introuvable",

@@ -2,25 +2,11 @@ import { ArrowUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { connection } from "next/server";
-import type { ReactNode } from "react";
 import { reveal, RevealWords } from "@/components/layout/reveal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { listLiveAds, type Advertisement, type AdPlacement } from "@/modules/advertising";
-
-function AdLink({ ad, children }: { ad: Advertisement; children: ReactNode }) {
-  const className = "outline-none after:absolute after:inset-0";
-  return ad.destinationUrl.startsWith("/") ? (
-    <Link href={ad.destinationUrl} className={className}>
-      {children}
-    </Link>
-  ) : (
-    <a href={ad.destinationUrl} target="_blank" rel="sponsored noopener noreferrer" className={className}>
-      {children}
-    </a>
-  );
-}
+import { listLiveAds, type AdPlacement } from "@/modules/advertising";
 
 export function AdsSkeleton() {
   return (
@@ -33,10 +19,18 @@ export function AdsSkeleton() {
 }
 
 /** Live ads for a placement. Reads the time per request, so schedules apply as they pass. */
-export async function AdsSection({ locale, placement }: { locale: string; placement: AdPlacement }) {
+export async function AdsSection({
+  locale,
+  placement,
+  excludeSlug,
+}: {
+  locale: string;
+  placement: AdPlacement;
+  excludeSlug?: string;
+}) {
   await connection();
   const t = await getTranslations({ locale, namespace: "ads" });
-  const ads = await listLiveAds(placement, new Date(), 3);
+  const ads = await listLiveAds(placement, new Date(), 3, excludeSlug);
   if (ads.length === 0) return null;
 
   return (
@@ -61,7 +55,9 @@ export async function AdsSection({ locale, placement }: { locale: string; placem
               </span>
               <p className="text-xs font-semibold text-white/85">{ad.advertiser}</p>
               <h3 className="mt-1 font-heading text-xl leading-tight font-extrabold text-balance">
-                <AdLink ad={ad}>{ad.title}</AdLink>
+                <Link href={`/ads/${ad.slug}`} className="outline-none after:absolute after:inset-0">
+                  {ad.title}
+                </Link>
               </h3>
               <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold group-hover:underline">
                 {t("learnMore")}

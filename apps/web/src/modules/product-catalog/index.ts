@@ -1,6 +1,6 @@
 import { queryProducts } from "./query";
 import { SAMPLE_PRODUCTS } from "./sample-data";
-import type { Product, ProductPage, ProductQuery } from "./types";
+import type { Product, ProductPage, ProductQuery, PublicSeller } from "./types";
 
 export { DEFAULT_PAGE_SIZE, parseProductQuery } from "./query";
 export * from "./types";
@@ -26,6 +26,20 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 
 export async function listProductSlugs(): Promise<string[]> {
   return SAMPLE_PRODUCTS.map((p) => p.slug);
+}
+
+/** Each seller with at least one sample product. */
+export async function listSellers(): Promise<PublicSeller[]> {
+  const sellers = new Map(SAMPLE_PRODUCTS.map((p) => [p.seller.slug, p.seller]));
+  return [...sellers.values()];
+}
+
+export async function getSellerBySlug(slug: string): Promise<PublicSeller | null> {
+  return (await listSellers()).find((seller) => seller.slug === slug) ?? null;
+}
+
+export async function listProductsBySeller(slug: string): Promise<Product[]> {
+  return SAMPLE_PRODUCTS.filter((p) => p.seller.slug === slug);
 }
 
 export async function listRelatedProducts(product: Product, limit: number): Promise<Product[]> {

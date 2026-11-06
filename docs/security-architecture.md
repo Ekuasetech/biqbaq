@@ -51,6 +51,7 @@ Default deny. Every table has RLS on, and no policy means no access.
 | `referral_attributions` | The referrer sees own, limited fields; Super Admin | None |
 | `audit_logs` | Super Admin; holders of a permission if delegated | None; append-only |
 | `platform_settings` | Public keys via a view; admins with permission | RPC only, with history |
+| `advertisements` | Public sees live ads only, via a view; Super Admin sees all | **Super Admin only**, via RPC and audited. Checked with `has_active_role('super_admin')`, not a grantable permission, so it cannot be delegated to Admins or anyone else |
 | `background_jobs`, `rate_limit_counters`, `payment_webhook_events` | None for clients | Server only |
 
 **Column-level care:** RLS works by row, so a policy cannot stop an owner changing `verification_status` on their own seller row. These are handled by revoking `UPDATE` on those columns for client roles, with RPCs doing the change. Tests must cover it, since this is a common Supabase mistake.

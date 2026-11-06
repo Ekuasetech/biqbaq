@@ -7,7 +7,7 @@ import type { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "@/i18n/navigation";
-import { forgotPasswordSchema, registerSchema, signInSchema } from "@/modules/identity/schema";
+import { forgotPasswordSchema, registerSchema, resetPasswordSchema, signInSchema } from "@/modules/identity/schema";
 
 type Errors = Record<string, string | undefined>;
 
@@ -256,6 +256,24 @@ export function SignInForm() {
         {t("noAccount")}{" "}
         <Link href="/register" className="font-semibold text-foreground underline underline-offset-4">
           {t("registerLink")}
+        </Link>
+      </p>
+    </form>
+  );
+}
+
+/** Where the emailed reset link will land. Phase 2 adds checking the link's token. */
+export function ResetPasswordForm() {
+  const t = useTranslations("auth");
+  const { errors, validated, onSubmit } = useAuthForm(resetPasswordSchema);
+  return (
+    <form onSubmit={onSubmit} noValidate className="grid gap-4">
+      <PasswordField name="password" label={t("newPassword")} autoComplete="new-password" hint={t("passwordHint")} error={errors.password} />
+      <PasswordField name="confirmPassword" label={t("confirmNewPassword")} autoComplete="new-password" error={errors.confirmPassword} />
+      <FormFooter label={t("resetSubmit")} validated={validated} result={t("resetResult")} />
+      <p className="text-center text-sm text-muted-foreground">
+        <Link href="/sign-in" className="font-semibold text-foreground underline underline-offset-4">
+          {t("backToSignIn")}
         </Link>
       </p>
     </form>

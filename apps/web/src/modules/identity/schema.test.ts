@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { forgotPasswordSchema, PASSWORD_MAX, PASSWORD_MIN, registerSchema, signInSchema } from "./schema";
+import { forgotPasswordSchema, PASSWORD_MAX, PASSWORD_MIN, registerSchema, resetPasswordSchema, signInSchema } from "./schema";
 
 const valid = { name: "Ada", email: "ada@example.com", password: "long-enough", confirmPassword: "long-enough" };
 const firstError = (input: object) => registerSchema.safeParse(input).error?.issues[0]?.message;
@@ -31,6 +31,16 @@ describe("registerSchema", () => {
     const issue = registerSchema.safeParse({ ...valid, confirmPassword: "different" }).error?.issues[0];
     expect(issue?.message).toBe("passwordsDoNotMatch");
     expect(issue?.path).toEqual(["confirmPassword"]);
+  });
+});
+
+describe("resetPasswordSchema", () => {
+  it("requires a long enough password that matches its confirmation", () => {
+    const check = (password: string, confirmPassword: string) =>
+      resetPasswordSchema.safeParse({ password, confirmPassword }).error?.issues[0]?.message;
+    expect(check("long-enough", "long-enough")).toBeUndefined();
+    expect(check("short", "short")).toBe("passwordTooShort");
+    expect(check("long-enough", "different")).toBe("passwordsDoNotMatch");
   });
 });
 

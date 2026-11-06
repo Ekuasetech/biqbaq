@@ -25,6 +25,11 @@ describe("suggest", () => {
     expect(abuja.filter((r) => r.type === "car")).toHaveLength(3);
   });
 
+  it("finds sellers by name and city, linking to their profiles", async () => {
+    expect((await suggest("kano"))[0]).toMatchObject({ type: "seller", href: "/sellers/kano-naturals" });
+    expect((await suggest("ottawa")).filter((r) => r.type === "seller").map((r) => r.href)).toEqual(["/sellers/kano-naturals"]);
+  });
+
   it("puts titles starting with the term first", async () => {
     const results = await suggest("ad");
     const products = results.filter((r) => r.type === "product");

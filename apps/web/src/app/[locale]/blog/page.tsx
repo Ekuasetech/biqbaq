@@ -1,38 +1,50 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { BlogFeaturedCard, BlogListItem } from "@/components/blog/blog-post-card";
 import { PageTransition } from "@/components/layout/page-transition";
-import { SiteExtras } from "@/components/layout/site-extras";
-import { Link } from "@/i18n/navigation";
+import { reveal } from "@/components/layout/reveal";
+import { SiteAds } from "@/components/layout/site-extras";
+import { listPopularBlogPosts } from "@/modules/blog";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/blog">): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "blog" });
-  return { title: t("pageTitle") };
+  return { title: t("pageTitle"), description: t("pageBody") };
 }
 
-// Placeholder until the blog is built (Phase 6).
+// Lists sample articles until the blog is built (Phase 6). The ads are shown on
+// their own, as the blog section would only repeat this list.
 export default async function BlogPage({ params }: PageProps<"/[locale]/blog">) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "blog" });
+  const [leadPost, ...otherPosts] = await listPopularBlogPosts();
 
   return (
     <PageTransition>
-    <>
-      <div className="mx-auto max-w-xl px-4 pt-20 text-center">
-      <h1 className="font-heading text-3xl font-extrabold tracking-tight">{t("pageTitle")}</h1>
-      <p className="mt-2 text-muted-foreground">{t("pageBody")}</p>
-      <Link
-        href="/products"
-        className="mt-6 inline-flex h-11 items-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground transition-colors hover:bg-brand-red hover:text-brand-red-foreground"
-      >
-        {t("browse")}
-      </Link>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        <h1 {...reveal("rise")} className="font-heading text-3xl font-extrabold tracking-tight">
+          {t("pageTitle")}
+        </h1>
+        <p {...reveal("rise", 100)} className="mt-2 mb-6 max-w-2xl text-muted-foreground">
+          {t("pageBody")}
+        </p>
+        {leadPost && (
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div {...reveal("rise", 150)}>
+              <BlogFeaturedCard post={leadPost} />
+            </div>
+            <ul aria-label={t("allArticles")} className="grid gap-3">
+              {otherPosts.map((post, index) => (
+                <li key={post.id} {...reveal("rise", 200 + index * 90)}>
+                  <BlogListItem post={post} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <SiteAds locale={locale} />
       </div>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SiteExtras locale={locale} />
-      </div>
-    </>
     </PageTransition>
   );
 }

@@ -108,8 +108,8 @@ test.describe("public marketplace", () => {
     await expect(lead).toContainText("3,420 readers");
     await expect(section.locator("article img")).toHaveCount(5);
     await section.getByRole("link", { name: /sending cargo home/ }).click();
-    await expect(page).toHaveURL(/\/blog$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Biqbaq blog");
+    await expect(page).toHaveURL(/\/blog\/what-to-know-before-sending-cargo-home-to-nigeria$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("What to know before sending cargo home to Nigeria");
   });
 
   test("all prices are in Canadian dollars, with no Nigeria market options", async ({ page }) => {
@@ -137,7 +137,7 @@ test.describe("public marketplace", () => {
     await expect(section.getByText("Ad", { exact: true })).toHaveCount(3);
     await expect(section).not.toContainText(/never shown|not shown/);
     await section.getByRole("link", { name: /favourite Nigerian staples/ }).click();
-    await expect(page).toHaveURL(/category=food/);
+    await expect(page).toHaveURL(/\/ads\/stock-up-on-your-favourite-nigerian-staples$/);
   });
 
   test("get-started tiles sit below the ads and lead to the right pages", async ({ page }) => {
@@ -266,7 +266,7 @@ test.describe("public marketplace", () => {
     await expect(page.getByRole("button", { name: "S'inscrire avec Google" })).toBeVisible();
   });
 
-  for (const path of ["/register", "/sign-in", "/forgot-password", "/fr/register"]) {
+  for (const path of ["/register", "/sign-in", "/forgot-password", "/reset-password", "/fr/register"]) {
     test(`${path} shows only the form, with no images, blog or ads`, async ({ page }) => {
       await page.goto(path);
       const main = page.getByRole("main");
@@ -483,6 +483,148 @@ test.describe("public marketplace", () => {
     });
   });
 
+  test.describe("blog pages", () => {
+    test("the list shows every article, and each one opens", async ({ page }) => {
+      await page.goto("/blog");
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Biqbaq blog");
+      await expect(page.getByRole("list", { name: "All articles" }).getByRole("article")).toHaveCount(4);
+      await expect(page.getByRole("region", { name: "Sponsored" }).getByRole("article")).toHaveCount(3);
+      // The large lead article opens its own page too.
+      await page.getByRole("link", { name: "How to start selling your products online from Canada" }).click();
+      await expect(page).toHaveURL(/\/blog\/how-to-start-selling-your-products-online-from-canada$/);
+      await page.goto("/blog");
+      await page.getByRole("link", { name: "Styling Ankara for a Canadian winter" }).click();
+      await expect(page).toHaveURL(/\/blog\/styling-ankara-for-a-canadian-winter$/);
+      const main = page.getByRole("main");
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Styling Ankara for a Canadian winter");
+      await expect(main).toContainText("Ngozi E. (sample)");
+      await expect(main).toContainText("1,185 readers");
+      await expect(main).toContainText("4 min read");
+      await expect(main).toContainText("October 2, 2026");
+      await expect(main).toContainText("This is sample text");
+      await expect(page.getByRole("link", { name: "Share on WhatsApp" })).toBeVisible();
+    });
+
+    test("an article does not list itself below, and shows the ads", async ({ page }) => {
+      await page.goto("/blog/styling-ankara-for-a-canadian-winter");
+      const section = page.getByRole("region", { name: "From the Biqbaq blog" });
+      await expect(section.getByRole("article")).toHaveCount(4);
+      await expect(section).not.toContainText("Styling Ankara");
+      await expect(page.getByRole("region", { name: "Sponsored" }).getByRole("article")).toHaveCount(3);
+    });
+
+    test("an unknown article shows a not-found page", async ({ page }) => {
+      await page.goto("/blog/does-not-exist");
+      await expect(page.getByRole("heading", { name: "Article not found" })).toBeVisible();
+      await expect(page.locator('meta[name="robots"][content="noindex"]').first()).toBeAttached();
+      (page as unknown as { problems: string[] }).problems = [];
+    });
+
+    test("works in French", async ({ page }) => {
+      await page.goto("/fr/blog");
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Blogue de Biqbaq");
+    });
+  });
+
+  test.describe("seller profiles", () => {
+    test("a card's seller name opens the profile, not the product", async ({ page }) => {
+      await page.goto("/products");
+      await page.waitForLoadState("networkidle");
+      await page.getByRole("article").first().getByRole("link", { name: /\(sample\)/ }).click();
+      await expect(page).toHaveURL(/\/sellers\/[a-z-]+$/);
+    });
+
+    test("the profile shows the seller and all their products", async ({ page }) => {
+      await page.goto("/products/ankara-tote-bag");
+      await page.getByRole("main").getByRole("link", { name: "Adire Studio (sample)" }).first().click();
+      await expect(page).toHaveURL(/\/sellers\/adire-studio$/);
+      const main = page.getByRole("main");
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Adire Studio (sample)");
+      await expect(main).toContainText("Toronto, Canada");
+      await expect(main).toContainText("Verified Seller");
+      await expect(main).toContainText("3 products");
+      const products = page.getByRole("region", { name: "Products from this seller" }).getByRole("article");
+      await expect(products).toHaveCount(3);
+      await products.first().getByRole("heading").getByRole("link").click();
+      await expect(page).toHaveURL(/\/products\//);
+    });
+
+    test("unverified sellers are labelled on their profile", async ({ page }) => {
+      await page.goto("/sellers/lagos-pantry");
+      await expect(page.locator("section").first()).toContainText("Unverified Seller");
+    });
+
+    test("sellers appear in the search dropdown", async ({ page }) => {
+      await page.goto("/");
+      await page.getByRole("combobox", { name: "Search products" }).fill("kano");
+      await page.getByRole("listbox", { name: "Search suggestions" }).getByRole("option", { name: /Kano Naturals \(sample\) Ottawa/ }).click();
+      await expect(page).toHaveURL(/\/sellers\/kano-naturals$/);
+    });
+
+    test("an unknown seller shows a not-found page", async ({ page }) => {
+      await page.goto("/sellers/does-not-exist");
+      await expect(page.getByRole("heading", { name: "Seller not found" })).toBeVisible();
+      (page as unknown as { problems: string[] }).problems = [];
+    });
+  });
+
+  test("choosing a new password validates, and is honest that nothing is saved", async ({ page }) => {
+    await page.goto("/reset-password");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Choose a new password");
+    await page.getByRole("button", { name: "Save new password" }).click();
+    await expect(page.getByText("Use at least 8 characters.")).toBeVisible();
+    await page.getByLabel("New password", { exact: true }).fill("long-enough");
+    await page.getByLabel("Confirm new password", { exact: true }).fill("different");
+    await page.getByRole("button", { name: "Save new password" }).click();
+    await expect(page.getByText("The passwords don't match.")).toBeVisible();
+    await page.getByLabel("Confirm new password", { exact: true }).fill("long-enough");
+    await page.getByRole("button", { name: "Save new password" }).click();
+    await expect(page.getByText("it wasn't saved")).toBeVisible();
+    await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
+  });
+
+  test.describe("ad pages", () => {
+    const slug = "stock-up-on-your-favourite-nigerian-staples";
+
+    test("an ad opens its own labelled page, and leads to the advertiser", async ({ page }) => {
+      await page.goto("/products");
+      await page.getByRole("region", { name: "Sponsored" }).getByRole("link", { name: /favourite Nigerian staples/ }).click();
+      await expect(page).toHaveURL(new RegExp(`/ads/${slug}$`));
+      const main = page.getByRole("main");
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Stock up on your favourite Nigerian staples");
+      await expect(main).toContainText("Naija Foods Canada (sample)");
+      await expect(main).toContainText("Sample ad: rice, spices");
+      await expect(main).toContainText("This is an advertisement.");
+      await expect(main.getByText("Ad", { exact: true }).first()).toBeVisible();
+      await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
+      await main.getByRole("link", { name: "Visit advertiser" }).click();
+      await expect(page).toHaveURL(/category=food/);
+    });
+
+    test("the ad does not repeat itself below, and the blog and other ads show", async ({ page }) => {
+      await page.goto(`/ads/${slug}`);
+      const others = page.getByRole("region", { name: "Sponsored" });
+      await expect(others.getByRole("article")).toHaveCount(2);
+      await expect(others).not.toContainText("Nigerian staples");
+      await expect(page.getByRole("region", { name: "From the Biqbaq blog" }).getByRole("article")).toHaveCount(5);
+    });
+
+    for (const hidden of ["inactive-ad-never-shown", "finished-ad-never-shown", "future-ad-not-shown-yet", "does-not-exist"]) {
+      test(`${hidden} cannot be opened`, async ({ page }) => {
+        await page.goto(`/ads/${hidden}`);
+        await expect(page.getByRole("heading", { name: "This ad is not available" })).toBeVisible();
+        await expect(page.getByRole("main")).not.toContainText("Never shown");
+        await expect(page).not.toHaveTitle(/never shown|not shown/i);
+        (page as unknown as { problems: string[] }).problems = [];
+      });
+    }
+
+    test("works in French", async ({ page }) => {
+      await page.goto(`/fr/ads/${slug}`);
+      await expect(page.getByRole("main").getByRole("link", { name: "Visiter l'annonceur" })).toBeVisible();
+    });
+  });
+
   test("the password can be shown and hidden", async ({ page }) => {
     await page.goto("/sign-in");
     const password = page.getByLabel("Password", { exact: true });
@@ -530,7 +672,7 @@ test.describe("public marketplace", () => {
     (page as unknown as { problems: string[] }).problems = [];
   });
 
-  for (const path of ["/", "/products", "/products/ankara-tote-bag", "/cargo-cars", "/cargo-cars/2021-toyota-sienna", "/blog", "/conditions-of-use", "/privacy-notice", "/fr/products"]) {
+  for (const path of ["/", "/products", "/products/ankara-tote-bag", "/cargo-cars", "/cargo-cars/2021-toyota-sienna", "/sellers/adire-studio", "/conditions-of-use", "/privacy-notice", "/fr/products"]) {
     test(`blog and ads appear exactly once on ${path}`, async ({ page }) => {
       await page.goto(path);
       const french = path.startsWith("/fr");

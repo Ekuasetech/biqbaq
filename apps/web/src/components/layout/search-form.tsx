@@ -1,6 +1,6 @@
 "use client";
 
-import { Car, LoaderCircle, Search } from "lucide-react";
+import { LoaderCircle, Search, Store } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useState, type KeyboardEvent } from "react";
@@ -60,10 +60,11 @@ export function SearchForm({ className, id }: { className?: string; id: string }
   }, [query, eligible]);
 
   const items = current?.items ?? [];
+  const sellers = items.filter((item) => item.type === "seller");
   const products = items.filter((item) => item.type === "product");
   const cars = items.filter((item) => item.type === "car");
   // Keyboard order follows display order, with "see all results" last.
-  const ordered = [...products, ...cars];
+  const ordered = [...sellers, ...products, ...cars];
   const optionCount = current ? ordered.length + 1 : 0;
   const showList = open && eligible;
   const listId = `${id}-list`;
@@ -123,7 +124,7 @@ export function SearchForm({ className, id }: { className?: string; id: string }
           {item.imageUrl ? (
             <Image src={item.imageUrl} alt="" fill sizes="44px" className="object-cover" />
           ) : (
-            <Car className="size-4" aria-hidden />
+            <Store className="size-4" aria-hidden />
           )}
         </span>
         <span className="min-w-0 flex-1">
@@ -189,6 +190,14 @@ export function SearchForm({ className, id }: { className?: string; id: string }
       >
         {loading && <p className="px-2 py-3 text-sm text-muted-foreground">{t("searching")}</p>}
         <ul id={listId} role="listbox" aria-label={t("suggestionsLabel")}>
+          {sellers.length > 0 && (
+            <li role="group" aria-label={t("sellers")}>
+              <p aria-hidden className={groupLabel}>
+                {t("sellers")}
+              </p>
+              <ul role="none">{sellers.map((item) => renderItem(item, ordered.indexOf(item)))}</ul>
+            </li>
+          )}
           {products.length > 0 && (
             <li role="group" aria-label={t("products")}>
               <p aria-hidden className={groupLabel}>
