@@ -2,6 +2,7 @@ import { LayoutGrid } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import { AccountMenu } from "./account-menu";
 import { LocaleSwitcher } from "./locale-switcher";
 import { SearchForm } from "./search-form";
 import { ThemeToggle } from "./theme-toggle";
@@ -40,12 +41,7 @@ export function SiteHeader() {
           </Link>
         </nav>
         <div className="ml-auto flex items-center gap-1 sm:order-last sm:ml-0">
-          <Link
-            href="/sign-in"
-            className="flex h-9 items-center rounded-lg px-2.5 text-sm font-semibold transition-colors hover:text-brand-red"
-          >
-            {t("signIn")}
-          </Link>
+          <AccountMenu />
           <LocaleSwitcher />
           <ThemeToggle />
         </div>

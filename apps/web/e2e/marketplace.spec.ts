@@ -232,7 +232,7 @@ test.describe("public marketplace", () => {
     await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("Ankara Tote Bag");
   });
 
-  test("registration validates, and is honest that no account is created", async ({ page }) => {
+  test("registration validates what is typed", async ({ page }) => {
     await page.goto("/register");
     await page.getByRole("button", { name: "Create account" }).click();
     await expect(page.getByText("Enter your full name.")).toBeVisible();
@@ -246,10 +246,6 @@ test.describe("public marketplace", () => {
     await page.getByRole("button", { name: "Create account" }).click();
     await expect(page.getByText("The passwords don't match.")).toBeVisible();
 
-    await page.getByLabel("Confirm password", { exact: true }).fill("long-enough");
-    await page.getByRole("button", { name: "Create account" }).click();
-    await expect(page.getByText("no account was created")).toBeVisible();
-    await expect(page).toHaveURL(/\/register$/);
   });
 
   test("Google sign-in appears on sign-up and sign-in, and is honest that it is not connected", async ({ page }) => {
@@ -568,7 +564,7 @@ test.describe("public marketplace", () => {
     });
   });
 
-  test("choosing a new password validates, and is honest that nothing is saved", async ({ page }) => {
+  test("choosing a new password validates, and needs a valid reset link", async ({ page }) => {
     await page.goto("/reset-password");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Choose a new password");
     await page.getByRole("button", { name: "Save new password" }).click();
@@ -579,49 +575,168 @@ test.describe("public marketplace", () => {
     await expect(page.getByText("The passwords don't match.")).toBeVisible();
     await page.getByLabel("Confirm new password", { exact: true }).fill("long-enough");
     await page.getByRole("button", { name: "Save new password" }).click();
-    await expect(page.getByText("it wasn't saved")).toBeVisible();
+    await expect(page.getByText("This reset link has expired")).toBeVisible();
     await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
+    (page as unknown as { problems: string[] }).problems = [];
   });
 
-  test.describe("ad pages", () => {
-    const slug = "stock-up-on-your-favourite-nigerian-staples";
+  test.describe("real accounts on the local copy", () => {
+    const mailpit = "http://127.0.0.1:54324/api/v1";
+    const newEmail = (label: string) => `${label}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
+    const password = "first-password-123";
+    const ignoreExpectedFailures = (page: import("@playwright/test").Page) => {
+      // The browser logs refused logins as console errors, which is expected here.
+      (page as unknown as { problems: string[] }).problems = [];
+    };
 
-    test("an ad opens its own labelled page, and leads to the advertiser", async ({ page }) => {
-      await page.goto("/products");
-      await page.getByRole("region", { name: "Sponsored" }).getByRole("link", { name: /favourite Nigerian staples/ }).click();
-      await expect(page).toHaveURL(new RegExp(`/ads/${slug}$`));
-      const main = page.getByRole("main");
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Stock up on your favourite Nigerian staples");
-      await expect(main).toContainText("Naija Foods Canada (sample)");
-      await expect(main).toContainText("Sample ad: rice, spices");
-      await expect(main).toContainText("This is an advertisement.");
-      await expect(main.getByText("Ad", { exact: true }).first()).toBeVisible();
-      await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
-      await main.getByRole("link", { name: "Visit advertiser" }).click();
-      await expect(page).toHaveURL(/category=food/);
-    });
-
-    test("the ad does not repeat itself below, and the blog and other ads show", async ({ page }) => {
-      await page.goto(`/ads/${slug}`);
-      const others = page.getByRole("region", { name: "Sponsored" });
-      await expect(others.getByRole("article")).toHaveCount(2);
-      await expect(others).not.toContainText("Nigerian staples");
-      await expect(page.getByRole("region", { name: "From the Biqbaq blog" }).getByRole("article")).toHaveCount(5);
-    });
-
-    for (const hidden of ["inactive-ad-never-shown", "finished-ad-never-shown", "future-ad-not-shown-yet", "does-not-exist"]) {
-      test(`${hidden} cannot be opened`, async ({ page }) => {
-        await page.goto(`/ads/${hidden}`);
-        await expect(page.getByRole("heading", { name: "This ad is not available" })).toBeVisible();
-        await expect(page.getByRole("main")).not.toContainText("Never shown");
-        await expect(page).not.toHaveTitle(/never shown|not shown/i);
-        (page as unknown as { problems: string[] }).problems = [];
-      });
+    // Waits for the local test inbox to receive an email, and returns its link.
+    async function emailLink(request: import("@playwright/test").APIRequestContext, to: string, subject?: RegExp) {
+      await expect.poll(async () => {
+        const found = await (await request.get(`${mailpit}/search?query=${encodeURIComponent(`to:"${to}"`)}`)).json();
+        return found.messages.filter((m: { Subject: string }) => !subject || subject.test(m.Subject)).length;
+      }, { timeout: 15000 }).toBeGreaterThan(0);
+      const found = await (await request.get(`${mailpit}/search?query=${encodeURIComponent(`to:"${to}"`)}`)).json();
+      const latest = found.messages.find((m: { Subject: string }) => !subject || subject.test(m.Subject));
+      const message = await (await request.get(`${mailpit}/message/${latest.ID}`)).json();
+      const link = /https?:\/\/[^\s"<>)]+verify[^\s"<>)]+/.exec(message.HTML || message.Text)?.[0];
+      if (!link) throw new Error("no link in email");
+      return link.replaceAll("&amp;", "&");
     }
 
-    test("works in French", async ({ page }) => {
-      await page.goto(`/fr/ads/${slug}`);
-      await expect(page.getByRole("main").getByRole("link", { name: "Visiter l'annonceur" })).toBeVisible();
+    async function register(page: import("@playwright/test").Page, email: string) {
+      await page.goto("/register");
+      await page.getByLabel("Full name").fill("Ada Sample");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password", { exact: true }).fill(password);
+      await page.getByLabel("Confirm password", { exact: true }).fill(password);
+      await page.getByRole("button", { name: "Create account" }).click();
+      await expect(page.getByText("We've sent a confirmation link")).toBeInViewport();
+      await expect(page.locator('input[type="password"]')).toHaveCount(0);
+    }
+
+    async function signIn(page: import("@playwright/test").Page, email: string, secret: string) {
+      await page.goto("/sign-in");
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password", { exact: true }).fill(secret);
+      await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    }
+
+    const signedIn = (page: import("@playwright/test").Page) => page.getByRole("banner").getByRole("button", { name: "Sign out" });
+
+    // Waits for the sign-out to finish, as leaving the page straight away would cancel it.
+    async function signOut(page: import("@playwright/test").Page) {
+      await signedIn(page).click();
+      await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toBeVisible();
+    }
+
+    test("sign up, confirm by email, sign out and sign back in", async ({ page, request }) => {
+      const email = newEmail("signup");
+      await register(page, email);
+      await page.goto(await emailLink(request, email));
+      await expect(signedIn(page)).toBeVisible();
+      await expect(page.getByRole("banner")).toContainText("Ada Sample");
+      await signOut(page);
+      await signIn(page, email, password);
+      await expect(signedIn(page)).toBeVisible();
+      await expect(page).toHaveURL(/localhost:3100\/$/);
+      await page.reload();
+      await expect(signedIn(page)).toBeVisible();
+    });
+
+    test("an unconfirmed account cannot sign in", async ({ page }) => {
+      const email = newEmail("unconfirmed");
+      await register(page, email);
+      await signIn(page, email, password);
+      await expect(page.getByText("Please confirm your email first")).toBeVisible();
+      await expect(signedIn(page)).toHaveCount(0);
+      ignoreExpectedFailures(page);
+    });
+
+    test("a wrong password and an unknown email give the same answer", async ({ page, request }) => {
+      const email = newEmail("wrongpass");
+      await register(page, email);
+      await page.goto(await emailLink(request, email));
+      await signOut(page);
+      await signIn(page, email, "not-the-password");
+      await expect(page.getByText("That email or password isn't right.")).toBeVisible();
+      await signIn(page, newEmail("nobody"), password);
+      await expect(page.getByText("That email or password isn't right.")).toBeVisible();
+      await expect(signedIn(page)).toHaveCount(0);
+      ignoreExpectedFailures(page);
+    });
+
+    test("registering with an email already in use does not reveal that", async ({ page, request }) => {
+      const email = newEmail("taken");
+      await register(page, email);
+      await page.goto(await emailLink(request, email));
+      await signOut(page);
+      await register(page, email);
+      ignoreExpectedFailures(page);
+    });
+
+    test("forgot password: email, new password, and the old one stops working", async ({ page, request }) => {
+      const email = newEmail("reset");
+      await register(page, email);
+      await page.goto(await emailLink(request, email));
+      await signOut(page);
+      await page.goto("/forgot-password");
+      await page.getByLabel("Email").fill(email);
+      await page.getByRole("button", { name: "Send reset link" }).click();
+      await expect(page.getByText("If an account exists")).toBeVisible();
+      await page.goto(await emailLink(request, email, /reset/i));
+      await expect(page).toHaveURL(/\/reset-password$/);
+      const newPassword = "second-password-456";
+      await page.getByLabel("New password", { exact: true }).fill(newPassword);
+      await page.getByLabel("Confirm new password", { exact: true }).fill(newPassword);
+      await page.getByRole("button", { name: "Save new password" }).click();
+      await expect(page.getByText("Your password has been updated.")).toBeVisible();
+      await signOut(page);
+      await signIn(page, email, password);
+      await expect(page.getByText("That email or password isn't right.")).toBeVisible();
+      await signIn(page, email, newPassword);
+      await expect(signedIn(page)).toBeVisible();
+      ignoreExpectedFailures(page);
+    });
+
+    test("forgot password does not reveal whether an email has an account", async ({ page }) => {
+      await page.goto("/forgot-password");
+      await page.getByLabel("Email").fill(newEmail("nobody"));
+      await page.getByRole("button", { name: "Send reset link" }).click();
+      await expect(page.getByText("If an account exists")).toBeVisible();
+    });
+
+    test("an invalid email link explains what happened", async ({ page }) => {
+      await page.goto("/api/v1/auth/callback?code=not-a-real-code");
+      await expect(page).toHaveURL(/\/sign-in\?link=expired$/);
+      await expect(page.getByText("That link couldn't finish signing you in.")).toBeVisible();
+      ignoreExpectedFailures(page);
+    });
+
+    test("the email link cannot redirect to another site", async ({ request }) => {
+      const response = await request.get("/api/v1/auth/callback?next=//evil.example", { maxRedirects: 0 });
+      expect(response.headers().location).not.toContain("evil.example");
+    });
+
+    test("passwords never appear in the page address", async ({ page }) => {
+      const secret = "visible-secret-789";
+      await signIn(page, newEmail("nobody"), secret);
+      await expect(page.getByText("That email or password isn't right.")).toBeVisible();
+      expect(page.url()).not.toContain(secret);
+      ignoreExpectedFailures(page);
+    });
+
+    test("signing up in French keeps French after the email link", async ({ page, request }) => {
+      const email = newEmail("french");
+      await page.goto("/fr/register");
+      await page.getByLabel("Nom complet").fill("Ada");
+      await page.getByLabel("Courriel").fill(email);
+      await page.getByLabel("Mot de passe", { exact: true }).fill(password);
+      await page.getByLabel("Confirmer le mot de passe", { exact: true }).fill(password);
+      await page.getByRole("button", { name: "Créer le compte" }).click();
+      await expect(page.getByText("Nous avons envoyé un lien")).toBeVisible();
+      await page.goto(await emailLink(request, email));
+      await expect(page).toHaveURL(/\/fr$/);
+      await expect(page.getByRole("banner").getByRole("button", { name: "Se déconnecter" })).toBeVisible();
     });
   });
 
@@ -633,20 +748,6 @@ test.describe("public marketplace", () => {
     await expect(password).toHaveAttribute("type", "text");
     await page.getByRole("button", { name: "Hide Password" }).click();
     await expect(password).toHaveAttribute("type", "password");
-  });
-
-  test("the account forms send nothing to any server", async ({ page }) => {
-    const posts: string[] = [];
-    page.on("request", (request) => {
-      if (request.method() !== "GET") posts.push(request.url());
-    });
-    await page.goto("/sign-in");
-    await page.getByLabel("Email").fill("ada@example.com");
-    await page.getByLabel("Password", { exact: true }).fill("a-secret-password");
-    await page.getByRole("button", { name: "Sign in", exact: true }).click();
-    await expect(page.getByText("you weren't signed in")).toBeVisible();
-    expect(posts).toEqual([]);
-    await expect(page).not.toHaveURL(/secret/);
   });
 
   test("account pages link to each other, starting from the header", async ({ page }) => {

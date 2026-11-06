@@ -13,7 +13,17 @@ npm test -w web         # unit tests
 npm run test:e2e -w web # browser tests (run `npm run build -w web` first)
 ```
 
-Copy `apps/web/.env.example` to `apps/web/.env.local` when connecting Supabase. Never commit real keys.
+Accounts need the local Supabase copy, which needs Docker running:
+
+```sh
+npx supabase start               # local database, sign-in service and test inbox
+./scripts/use-local-supabase.sh  # points the web app at the local copy
+npx supabase test db             # database and security tests
+```
+
+Emails sent locally land in the test inbox at http://127.0.0.1:54324, not real inboxes.
+
+Real project settings belong in `apps/web/.env.local`, copied from `.env.example`. On this computer the generated local files override it, so development and tests cannot touch the real project. Never commit real keys.
 
 ## Where to start
 

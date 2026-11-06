@@ -1,40 +1,82 @@
 "use client";
 
-import { Eye, EyeOff, Info } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { Eye, EyeOff, Info, TriangleAlert } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import type { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "@/i18n/navigation";
+import { getPathname, Link, useRouter } from "@/i18n/navigation";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { forgotPasswordSchema, registerSchema, resetPasswordSchema, signInSchema } from "@/modules/identity/schema";
 
 type Errors = Record<string, string | undefined>;
 
-// Accounts arrive with Supabase Auth in Phase 2. Until then these forms only
-// validate in the browser: nothing is sent or stored, and they say so.
-function useAuthForm(schema: z.ZodType) {
-  const [errors, setErrors] = useState<Errors>({});
-  const [validated, setValidated] = useState(false);
+/** A key into auth.errors, or nothing if the action worked. */
+type ActionResult = string | undefined;
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+// Shown in place of Supabase's own wording, which can reveal too much and is not
+// translated. Anything unexpected becomes a general message.
+function errorKey(error: { code?: string; name?: string }): string {
+  switch (error.code) {
+    case "invalid_credentials":
+      return "invalidCredentials";
+    case "email_not_confirmed":
+      return "emailNotConfirmed";
+    case "over_request_rate_limit":
+    case "over_email_send_rate_limit":
+      return "rateLimited";
+    case "weak_password":
+      return "weakPassword";
+    case "same_password":
+      return "samePassword";
+    case "session_not_found":
+      return "resetLinkExpired";
+  }
+  return error.name === "AuthSessionMissingError" ? "resetLinkExpired" : "generic";
+}
+
+// Passwords go straight from the browser to Supabase Auth, never through our server.
+function useAuthForm<T>(schema: z.ZodType<T>, action: (values: T) => Promise<ActionResult>) {
+  const [errors, setErrors] = useState<Errors>({});
+  const [status, setStatus] = useState<"idle" | "working" | "done">("idle");
+  const [formError, setFormError] = useState<string | null>(null);
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const result = schema.safeParse(Object.fromEntries(new FormData(event.currentTarget)));
-    if (result.success) {
-      setErrors({});
-      setValidated(true);
+    setFormError(null);
+    if (!result.success) {
+      const next: Errors = {};
+      for (const issue of result.error.issues) {
+        const field = String(issue.path[0]);
+        next[field] ??= issue.message;
+      }
+      setErrors(next);
+      setStatus("idle");
       return;
     }
-    const next: Errors = {};
-    for (const issue of result.error.issues) {
-      const field = String(issue.path[0]);
-      next[field] ??= issue.message;
+
+    setErrors({});
+    setStatus("working");
+    let failure: ActionResult;
+    try {
+      failure = await action(result.data);
+    } catch {
+      failure = "generic";
     }
-    setErrors(next);
-    setValidated(false);
+    setFormError(failure ?? null);
+    setStatus(failure ? "idle" : "done");
   }
 
-  return { errors, validated, onSubmit };
+  return { errors, status, formError, onSubmit };
+}
+
+/** Where an email link should come back to, on the current site. */
+function useEmailLink() {
+  const locale = useLocale();
+  return (href: string) =>
+    `${window.location.origin}/api/v1/auth/callback?next=${encodeURIComponent(getPathname({ href, locale }))}`;
 }
 
 function Field({
@@ -137,24 +179,56 @@ function PasswordField({
   );
 }
 
-function FormFooter({ label, validated, result }: { label: string; validated: boolean; result: string }) {
+function FormFooter({
+  label,
+  status,
+  formError,
+}: {
+  label: string;
+  status: "idle" | "working" | "done";
+  formError: string | null;
+}) {
+  const t = useTranslations("auth");
   return (
     <>
+      {formError && (
+        <p role="alert" className="flex gap-2 text-sm text-destructive">
+          <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
+          {t(`errors.${formError}`)}
+        </p>
+      )}
       <button
         type="submit"
-        className="h-12 w-full rounded-xl bg-brand-red text-sm font-bold text-brand-red-foreground transition-colors outline-none hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        disabled={status === "working"}
+        className="h-12 w-full rounded-xl bg-brand-red text-sm font-bold text-brand-red-foreground transition-colors outline-none hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70"
       >
-        {label}
+        {status === "working" ? t("working") : label}
       </button>
-      <p role="status" className="text-sm empty:hidden">
-        {validated && (
-          <span className="flex gap-2">
-            <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
-            {result}
-          </span>
-        )}
-      </p>
     </>
+  );
+}
+
+/** Replaces a finished form, so the outcome is seen and typed passwords are cleared. */
+function DonePanel({ message }: { message: string }) {
+  const t = useTranslations("auth");
+  const ref = useRef<HTMLParagraphElement>(null);
+
+  // The long form has just gone, so the page may be scrolled past this message.
+  useEffect(() => {
+    ref.current?.scrollIntoView({ block: "center" });
+    ref.current?.focus({ preventScroll: true });
+  }, []);
+
+  return (
+    <div className="grid gap-4">
+      <p ref={ref} tabIndex={-1} role="status" className="flex gap-3 rounded-2xl bg-muted p-4 text-sm font-medium outline-none">
+        <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+        {message}
+      </p>
+      <Link href="/sign-in" className="text-center text-sm font-semibold underline underline-offset-4">
+        {t("backToSignIn")}
+      </Link>
+    </div>
   );
 }
 
@@ -181,7 +255,7 @@ function AgreementNotice() {
 }
 
 // Colours and layout follow Google's sign-in branding guidelines, which keep the
-// button light in both themes. Connects through Supabase Auth in Phase 2.
+// button light in both themes. Needs Google credentials before it can be connected.
 function GoogleButton({ label }: { label: string }) {
   const t = useTranslations("auth");
   const [clicked, setClicked] = useState(false);
@@ -219,7 +293,25 @@ function GoogleButton({ label }: { label: string }) {
 
 export function RegisterForm() {
   const t = useTranslations("auth");
-  const { errors, validated, onSubmit } = useAuthForm(registerSchema);
+  const locale = useLocale();
+  const emailLink = useEmailLink();
+  const { errors, status, formError, onSubmit } = useAuthForm(registerSchema, async (values) => {
+    const { error } = await getSupabaseBrowserClient().auth.signUp({
+      email: values.email,
+      password: values.password,
+      options: {
+        data: { full_name: values.name, locale },
+        emailRedirectTo: emailLink("/"),
+      },
+    });
+    // Answers an email already in use exactly like a new one, so this form never
+    // reveals who has an account.
+    if (error?.code === "user_already_exists" || error?.code === "email_exists") return undefined;
+    return error ? errorKey(error) : undefined;
+  });
+
+  if (status === "done") return <DonePanel message={t("registerResult")} />;
+
   return (
     <form onSubmit={onSubmit} noValidate className="grid gap-4">
       <GoogleButton label={t("googleRegister")} />
@@ -227,7 +319,7 @@ export function RegisterForm() {
       <TextField name="email" label={t("email")} type="email" autoComplete="email" error={errors.email} />
       <PasswordField name="password" label={t("password")} autoComplete="new-password" hint={t("passwordHint")} error={errors.password} />
       <PasswordField name="confirmPassword" label={t("confirmPassword")} autoComplete="new-password" error={errors.confirmPassword} />
-      <FormFooter label={t("registerSubmit")} validated={validated} result={t("registerResult")} />
+      <FormFooter label={t("registerSubmit")} status={status} formError={formError} />
       <AgreementNotice />
       <p className="text-center text-sm text-muted-foreground">
         {t("haveAccount")}{" "}
@@ -239,18 +331,39 @@ export function RegisterForm() {
   );
 }
 
+const noSubscribe = () => () => {};
+
 export function SignInForm() {
   const t = useTranslations("auth");
-  const { errors, validated, onSubmit } = useAuthForm(signInSchema);
+  const router = useRouter();
+  // Set by the email link route when a link could not be used.
+  const linkExpired = useSyncExternalStore(
+    noSubscribe,
+    () => new URLSearchParams(window.location.search).get("link") === "expired",
+    () => false,
+  );
+  const { errors, status, formError, onSubmit } = useAuthForm(signInSchema, async (values) => {
+    const { error } = await getSupabaseBrowserClient().auth.signInWithPassword(values);
+    if (error) return errorKey(error);
+    router.push("/");
+    return undefined;
+  });
+
   return (
     <form onSubmit={onSubmit} noValidate className="grid gap-4">
+      {linkExpired && (
+        <p role="alert" className="flex gap-2 text-sm">
+          <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+          {t("errors.linkExpired")}
+        </p>
+      )}
       <GoogleButton label={t("googleSignIn")} />
       <TextField name="email" label={t("email")} type="email" autoComplete="email" error={errors.email} />
       <PasswordField name="password" label={t("password")} autoComplete="current-password" error={errors.password} />
       <Link href="/forgot-password" className="-mt-1 w-fit text-sm font-semibold underline underline-offset-4">
         {t("forgotLink")}
       </Link>
-      <FormFooter label={t("signInSubmit")} validated={validated} result={t("signInResult")} />
+      <FormFooter label={t("signInSubmit")} status={status} formError={formError} />
       <AgreementNotice />
       <p className="text-center text-sm text-muted-foreground">
         {t("noAccount")}{" "}
@@ -262,15 +375,21 @@ export function SignInForm() {
   );
 }
 
-/** Where the emailed reset link will land. Phase 2 adds checking the link's token. */
+/** Where the emailed reset link lands, with a temporary session from that link. */
 export function ResetPasswordForm() {
   const t = useTranslations("auth");
-  const { errors, validated, onSubmit } = useAuthForm(resetPasswordSchema);
+  const { errors, status, formError, onSubmit } = useAuthForm(resetPasswordSchema, async (values) => {
+    const { error } = await getSupabaseBrowserClient().auth.updateUser({ password: values.password });
+    return error ? errorKey(error) : undefined;
+  });
+
+  if (status === "done") return <DonePanel message={t("resetResult")} />;
+
   return (
     <form onSubmit={onSubmit} noValidate className="grid gap-4">
       <PasswordField name="password" label={t("newPassword")} autoComplete="new-password" hint={t("passwordHint")} error={errors.password} />
       <PasswordField name="confirmPassword" label={t("confirmNewPassword")} autoComplete="new-password" error={errors.confirmPassword} />
-      <FormFooter label={t("resetSubmit")} validated={validated} result={t("resetResult")} />
+      <FormFooter label={t("resetSubmit")} status={status} formError={formError} />
       <p className="text-center text-sm text-muted-foreground">
         <Link href="/sign-in" className="font-semibold text-foreground underline underline-offset-4">
           {t("backToSignIn")}
@@ -282,11 +401,20 @@ export function ResetPasswordForm() {
 
 export function ForgotPasswordForm() {
   const t = useTranslations("auth");
-  const { errors, validated, onSubmit } = useAuthForm(forgotPasswordSchema);
+  const emailLink = useEmailLink();
+  const { errors, status, formError, onSubmit } = useAuthForm(forgotPasswordSchema, async (values) => {
+    const { error } = await getSupabaseBrowserClient().auth.resetPasswordForEmail(values.email, {
+      redirectTo: emailLink("/reset-password"),
+    });
+    return error ? errorKey(error) : undefined;
+  });
+
+  if (status === "done") return <DonePanel message={t("forgotResult")} />;
+
   return (
     <form onSubmit={onSubmit} noValidate className="grid gap-4">
       <TextField name="email" label={t("email")} type="email" autoComplete="email" error={errors.email} />
-      <FormFooter label={t("forgotSubmit")} validated={validated} result={t("forgotResult")} />
+      <FormFooter label={t("forgotSubmit")} status={status} formError={formError} />
       <p className="text-center text-sm text-muted-foreground">
         <Link href="/sign-in" className="font-semibold text-foreground underline underline-offset-4">
           {t("backToSignIn")}
