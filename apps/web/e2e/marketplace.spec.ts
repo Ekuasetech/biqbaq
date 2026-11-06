@@ -232,6 +232,80 @@ test.describe("public marketplace", () => {
     await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("Ankara Tote Bag");
   });
 
+  test("registration validates, and is honest that no account is created", async ({ page }) => {
+    await page.goto("/register");
+    await page.getByRole("button", { name: "Create account" }).click();
+    await expect(page.getByText("Enter your full name.")).toBeVisible();
+    await expect(page.getByText("Enter a valid email address.")).toBeVisible();
+    await expect(page.getByText("Use at least 8 characters.")).toBeVisible();
+
+    await page.getByLabel("Full name").fill("Ada Sample");
+    await page.getByLabel("Email").fill("ada@example.com");
+    await page.getByLabel("Password", { exact: true }).fill("long-enough");
+    await page.getByLabel("Confirm password", { exact: true }).fill("different");
+    await page.getByRole("button", { name: "Create account" }).click();
+    await expect(page.getByText("The passwords don't match.")).toBeVisible();
+
+    await page.getByLabel("Confirm password", { exact: true }).fill("long-enough");
+    await page.getByRole("button", { name: "Create account" }).click();
+    await expect(page.getByText("no account was created")).toBeVisible();
+    await expect(page).toHaveURL(/\/register$/);
+  });
+
+  test("Google sign-in appears on sign-up and sign-in, and is honest that it is not connected", async ({ page }) => {
+    for (const [path, name] of [["/register", "Sign up with Google"], ["/sign-in", "Sign in with Google"]] as const) {
+      await page.goto(path);
+      const url = page.url();
+      await page.getByRole("button", { name }).click();
+      await expect(page.getByText("Google sign-in isn't connected")).toBeVisible();
+      expect(page.url()).toBe(url);
+    }
+    await page.goto("/forgot-password");
+    await expect(page.getByRole("button", { name: /Google/ })).toHaveCount(0);
+    await page.goto("/fr/register");
+    await expect(page.getByRole("button", { name: "S'inscrire avec Google" })).toBeVisible();
+  });
+
+  test("the password can be shown and hidden", async ({ page }) => {
+    await page.goto("/sign-in");
+    const password = page.getByLabel("Password", { exact: true });
+    await expect(password).toHaveAttribute("type", "password");
+    await page.getByRole("button", { name: "Show Password" }).click();
+    await expect(password).toHaveAttribute("type", "text");
+    await page.getByRole("button", { name: "Hide Password" }).click();
+    await expect(password).toHaveAttribute("type", "password");
+  });
+
+  test("the account forms send nothing to any server", async ({ page }) => {
+    const posts: string[] = [];
+    page.on("request", (request) => {
+      if (request.method() !== "GET") posts.push(request.url());
+    });
+    await page.goto("/sign-in");
+    await page.getByLabel("Email").fill("ada@example.com");
+    await page.getByLabel("Password", { exact: true }).fill("a-secret-password");
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await expect(page.getByText("you weren't signed in")).toBeVisible();
+    expect(posts).toEqual([]);
+    await expect(page).not.toHaveURL(/secret/);
+  });
+
+  test("account pages link to each other, starting from the header", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("banner").getByRole("link", { name: "Sign in" }).click();
+    await expect(page).toHaveURL(/\/sign-in$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome back");
+    await page.getByRole("link", { name: "Forgot your password?" }).click();
+    await expect(page).toHaveURL(/\/forgot-password$/);
+    await page.getByRole("button", { name: "Send reset link" }).click();
+    await expect(page.getByText("Enter a valid email address.")).toBeVisible();
+    await page.getByRole("link", { name: "Back to sign in" }).click();
+    await page.getByRole("main").getByRole("link", { name: "Create a free account" }).first().click();
+    await expect(page).toHaveURL(/\/register$/);
+    await page.goto("/fr/sign-in");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Bon retour");
+  });
+
   test("an unknown car shows a not-found page", async ({ page }) => {
     await page.goto("/cargo-cars/does-not-exist");
     await expect(page.getByRole("heading", { name: "Car not found" })).toBeVisible();
@@ -239,7 +313,7 @@ test.describe("public marketplace", () => {
     (page as unknown as { problems: string[] }).problems = [];
   });
 
-  for (const path of ["/", "/products", "/products/ankara-tote-bag", "/cargo-cars", "/cargo-cars/2021-toyota-sienna", "/blog", "/register", "/fr/products"]) {
+  for (const path of ["/", "/products", "/products/ankara-tote-bag", "/cargo-cars", "/cargo-cars/2021-toyota-sienna", "/blog", "/register", "/sign-in", "/forgot-password", "/fr/products"]) {
     test(`blog and ads appear exactly once on ${path}`, async ({ page }) => {
       await page.goto(path);
       const french = path.startsWith("/fr");

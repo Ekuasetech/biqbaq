@@ -36,6 +36,12 @@ export function SiteHeader() {
           </Link>
         </nav>
         <div className="ml-auto flex items-center gap-1 sm:order-last sm:ml-0">
+          <Link
+            href="/sign-in"
+            className="flex h-9 items-center rounded-lg px-2.5 text-sm font-semibold transition-colors hover:text-brand-red"
+          >
+            {t("signIn")}
+          </Link>
           <LocaleSwitcher />
           <ThemeToggle />
         </div>

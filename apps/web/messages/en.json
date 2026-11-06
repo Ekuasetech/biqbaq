@@ -11,6 +11,7 @@
   },
   "nav": {
     "products": "Products",
+    "signIn": "Sign in",
     "allCategories": "All categories",
     "mainLabel": "Main",
     "searchPlaceholder": "Search products",
@@ -226,10 +227,45 @@
     "notFoundBody": "This listing may have been removed or is no longer available.",
     "backToCars": "Back to Cargo Cars"
   },
-  "register": {
-    "title": "Create a free account",
-    "body": "Account registration isn't available yet in this preview. It's coming soon.",
-    "browse": "Browse products"
+  "auth": {
+    "registerTitle": "Create a free account",
+    "registerSubtitle": "Post and promote your products and services, and find cars going to Nigeria to send your cargo home.",
+    "signInTitle": "Welcome back",
+    "signInSubtitle": "Sign in to your Biqbaq account.",
+    "forgotTitle": "Reset your password",
+    "forgotSubtitle": "Enter your email and we'll send you a link to reset your password.",
+    "name": "Full name",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters.",
+    "confirmPassword": "Confirm password",
+    "showPassword": "Show {field}",
+    "hidePassword": "Hide {field}",
+    "googleRegister": "Sign up with Google",
+    "googleSignIn": "Sign in with Google",
+    "googleResult": "Google sign-in isn't connected in this preview, so nothing happened.",
+    "or": "or",
+    "registerSubmit": "Create account",
+    "signInSubmit": "Sign in",
+    "forgotSubmit": "Send reset link",
+    "registerResult": "Your details are valid, but no account was created: accounts aren't connected in this preview.",
+    "signInResult": "Your details are valid, but you weren't signed in: accounts aren't connected in this preview.",
+    "forgotResult": "Your email is valid, but no link was sent: accounts aren't connected in this preview.",
+    "haveAccount": "Already have an account?",
+    "signInLink": "Sign in",
+    "noAccount": "New to Biqbaq?",
+    "registerLink": "Create a free account",
+    "forgotLink": "Forgot your password?",
+    "backToSignIn": "Back to sign in",
+    "errors": {
+      "nameRequired": "Enter your full name.",
+      "nameTooLong": "Your name is too long.",
+      "emailInvalid": "Enter a valid email address.",
+      "passwordRequired": "Enter your password.",
+      "passwordTooShort": "Use at least 8 characters.",
+      "passwordTooLong": "Use 72 characters or fewer.",
+      "passwordsDoNotMatch": "The passwords don't match."
+    }
   },
   "notFound": {
     "title": "Page not found",

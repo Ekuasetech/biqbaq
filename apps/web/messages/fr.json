@@ -11,6 +11,7 @@
   },
   "nav": {
     "products": "Produits",
+    "signIn": "Connexion",
     "allCategories": "Toutes les catégories",
     "mainLabel": "Principale",
     "searchPlaceholder": "Rechercher des produits",
@@ -226,10 +227,45 @@
     "notFoundBody": "Cette annonce a peut-être été retirée ou n'est plus disponible.",
     "backToCars": "Retour aux voitures cargo"
   },
-  "register": {
-    "title": "Créer un compte gratuit",
-    "body": "L'inscription n'est pas encore offerte dans cet aperçu. Elle arrive bientôt.",
-    "browse": "Voir les produits"
+  "auth": {
+    "registerTitle": "Créer un compte gratuit",
+    "registerSubtitle": "Publiez et faites connaître vos produits et services, et trouvez des voitures en partance pour le Nigeria pour envoyer vos colis au pays.",
+    "signInTitle": "Bon retour",
+    "signInSubtitle": "Connectez-vous à votre compte Biqbaq.",
+    "forgotTitle": "Réinitialiser votre mot de passe",
+    "forgotSubtitle": "Entrez votre courriel et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+    "name": "Nom complet",
+    "email": "Courriel",
+    "password": "Mot de passe",
+    "passwordHint": "Au moins 8 caractères.",
+    "confirmPassword": "Confirmer le mot de passe",
+    "showPassword": "Afficher : {field}",
+    "hidePassword": "Masquer : {field}",
+    "googleRegister": "S'inscrire avec Google",
+    "googleSignIn": "Se connecter avec Google",
+    "googleResult": "La connexion avec Google n'est pas activée dans cet aperçu : rien ne s'est produit.",
+    "or": "ou",
+    "registerSubmit": "Créer le compte",
+    "signInSubmit": "Se connecter",
+    "forgotSubmit": "Envoyer le lien",
+    "registerResult": "Vos renseignements sont valides, mais aucun compte n'a été créé : les comptes ne sont pas activés dans cet aperçu.",
+    "signInResult": "Vos renseignements sont valides, mais vous n'avez pas été connecté : les comptes ne sont pas activés dans cet aperçu.",
+    "forgotResult": "Votre courriel est valide, mais aucun lien n'a été envoyé : les comptes ne sont pas activés dans cet aperçu.",
+    "haveAccount": "Vous avez déjà un compte?",
+    "signInLink": "Se connecter",
+    "noAccount": "Nouveau sur Biqbaq?",
+    "registerLink": "Créer un compte gratuit",
+    "forgotLink": "Mot de passe oublié?",
+    "backToSignIn": "Retour à la connexion",
+    "errors": {
+      "nameRequired": "Entrez votre nom complet.",
+      "nameTooLong": "Votre nom est trop long.",
+      "emailInvalid": "Entrez une adresse courriel valide.",
+      "passwordRequired": "Entrez votre mot de passe.",
+      "passwordTooShort": "Utilisez au moins 8 caractères.",
+      "passwordTooLong": "Utilisez 72 caractères ou moins.",
+      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas."
+    }
   },
   "notFound": {
     "title": "Page introuvable",
