@@ -1,0 +1,239 @@
+{
+  "metadata": {
+    "title": "Biqbaq: marketplace for Nigerians in Canada",
+    "description": "Discover products and connect with Nigerian sellers across Canada."
+  },
+  "common": {
+    "skipToContent": "Skip to content",
+    "views": "{count, plural, one {# view} other {# views}}",
+    "previewNotice": "Preview: all listings, sellers and reviews shown here are sample data.",
+    "home": "Home"
+  },
+  "nav": {
+    "products": "Products",
+    "allCategories": "All categories",
+    "mainLabel": "Main",
+    "searchPlaceholder": "Search products",
+    "searchLabel": "Search products",
+    "search": "Search",
+    "toggleTheme": "Switch between light and dark mode",
+    "switchLanguage": "Passer au français",
+    "otherLanguage": "FR"
+  },
+  "footer": {
+    "tagline": "Connecting Nigerians across Canada.",
+    "shop": "Shop",
+    "explore": "Explore"
+  },
+  "home": {
+    "eyebrow": "For Nigerians in Canada",
+    "slideSellerTitle": "Find groceries and other products in your city",
+    "slideCargoTitle": "Find cargo vehicles heading to Nigeria and send your goods",
+    "slideTorontoTitle": "The Platform made for Entrepreneurs to do business",
+    "subtitle": "Create a Free Account, post and promote your products and services, find cars going to Nigeria to send your cargo home.",
+    "browse": "Browse all products",
+    "createAccount": "Create A Free Account",
+    "slideSellerAlt": "A smiling seller in a colourful head wrap and apron, standing in a Nigerian grocery store in Canada",
+    "slideCargoAlt": "A silver Toyota Sienna packed with luggage and boxes, being loaded into a shipping container at a port",
+    "slideTorontoAlt": "A smiling professional in a winter coat and scarf, with the Canadian flag and the Toronto skyline in the background",
+    "slidesPause": "Pause the photo slideshow",
+    "slidesPlay": "Play the photo slideshow",
+    "categoriesTitle": "Shop by category",
+    "allCategories": "All categories",
+    "featuredTitle": "New on Biqbaq",
+    "viewAll": "View all",
+    "promotionsLabel": "Get started on Biqbaq",
+    "banner1Eyebrow": "Get started",
+    "banner1Title": "Create a Free Account",
+    "banner1Cta": "Sign up",
+    "banner2Eyebrow": "Referrals",
+    "banner2Title": "Get a free website After Referrals",
+    "banner2Cta": "Learn more",
+    "banner3Eyebrow": "Discover",
+    "banner3Title": "Search for Sellers",
+    "banner3Cta": "Start searching",
+    "banner4Eyebrow": "Cargo Cars",
+    "banner4Title": "Send goods home with cargo cars",
+    "banner4Cta": "View cars",
+    "spotlightTitle": "In the spotlight",
+    "viewProduct": "View product",
+    "viewProductNamed": "View product: {name}",
+    "placeholderNote": "Placeholder content: final wording to come.",
+    "testimonialsTitle": "What customers say",
+    "testimonialBody": "Sample testimonial: real customer feedback will appear here once it has been collected.",
+    "testimonialAuthor": "Sample customer {n}",
+    "faqTitle": "Frequently asked questions",
+    "faqMoreTitle": "Have a question about a product?",
+    "faqMoreBody": "Every product page lets you contact its seller directly.",
+    "faq1Q": "Do I need an account to browse?",
+    "faq1A": "No. Anyone can browse listings without registering.",
+    "faq2Q": "How do I contact a seller?",
+    "faq2A": "Open a product and use its contact form. You can send a message without creating an account.",
+    "faq3Q": "What does “Unverified Seller” mean?",
+    "faq3A": "The seller's identity has not been verified yet. The label appears on their products so that you can decide with that in mind.",
+    "faq4Q": "Where are the sellers based?",
+    "faq4A": "Biqbaq currently serves Nigerians in Canada, with all prices in Canadian dollars. Each listing shows where its seller is based.",
+    "faq5Q": "How do I become a seller?",
+    "faq5A": "Register, then apply for a seller role from your account. Each application is reviewed before it is approved."
+  },
+  "categories": {
+    "fashion": "Fashion",
+    "food": "Food & groceries",
+    "beauty": "Beauty",
+    "home": "Home"
+  },
+  "products": {
+    "title": "Products",
+    "resultCount": "{count, plural, =0 {No products} one {# product} other {# products}}",
+    "resultsFor": "Results for “{query}”",
+    "allCategories": "All",
+    "categoriesLabel": "Categories",
+    "sort": "Sort by",
+    "sortNewest": "Newest",
+    "sortPriceAsc": "Price: low to high",
+    "sortPriceDesc": "Price: high to low",
+    "sortName": "Name",
+    "apply": "Apply",
+    "emptyTitle": "No products found",
+    "emptyBody": "Try a different search or remove a filter.",
+    "clearFilters": "Clear filters",
+    "paginationLabel": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {total}"
+  },
+  "markets": {
+    "CA": "Canada",
+    "NG": "Nigeria"
+  },
+  "availability": {
+    "in_stock": "In stock",
+    "limited": "Limited stock",
+    "out_of_stock": "Out of stock"
+  },
+  "condition": {
+    "new": "New",
+    "used": "Used"
+  },
+  "seller": {
+    "verified": "Verified Seller",
+    "unverified": "Unverified Seller",
+    "soldBy": "Sold by",
+    "basedIn": "Based in {city}, {country}",
+    "location": "{city}, {country}",
+    "about": "About the seller"
+  },
+  "productDetail": {
+    "breadcrumbLabel": "Breadcrumb",
+    "description": "Description",
+    "condition": "Condition",
+    "category": "Category",
+    "favourite": "Save to favourites",
+    "favouriteHint": "Saving favourites will be available once sign-in is added.",
+    "viewImage": "View image {number}",
+    "reviews": "Customer reviews",
+    "noReviews": "No reviews yet.",
+    "ratingSummary": "{average} out of 5 from {count, plural, one {# review} other {# reviews}}",
+    "ratingLabel": "Rated {rating} out of 5",
+    "verifiedPurchase": "Verified purchase",
+    "related": "You may also like",
+    "notFoundTitle": "Product not found",
+    "notFoundBody": "This product may have been removed or is no longer available.",
+    "backToProducts": "Back to products"
+  },
+  "share": {
+    "title": "Share",
+    "whatsapp": "Share on WhatsApp",
+    "facebook": "Share on Facebook",
+    "copy": "Copy link",
+    "copied": "Link copied",
+    "copyFailed": "Could not copy the link",
+    "native": "Share"
+  },
+  "contact": {
+    "title": "Contact the seller",
+    "intro": "Send a message about this product. You don't need an account.",
+    "name": "Your name",
+    "email": "Your email",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send message",
+    "previewResult": "Your message is valid, but it was not sent: sending isn't connected in this preview.",
+    "errors": {
+      "nameRequired": "Enter your name.",
+      "nameTooLong": "Your name is too long.",
+      "emailInvalid": "Enter a valid email address.",
+      "subjectRequired": "Enter a subject.",
+      "subjectTooLong": "The subject is too long.",
+      "messageRequired": "Enter a message.",
+      "messageTooLong": "The message is too long."
+    }
+  },
+  "ads": {
+    "sectionTitle": "Sponsored",
+    "label": "Ad",
+    "learnMore": "Learn more"
+  },
+  "blog": {
+    "sectionTitle": "From the Biqbaq blog",
+    "pageTitle": "Biqbaq blog",
+    "pageBody": "Articles and guides are coming soon. The topics on the home page are samples for this preview.",
+    "browse": "Browse products",
+    "mostRead": "Most read",
+    "readers": "{count, plural, one {# reader} other {# readers}}",
+    "readMinutes": "{count} min read",
+    "topics": {
+      "business": "Business",
+      "cargo": "Cargo",
+      "food": "Food",
+      "fashion": "Fashion"
+    }
+  },
+  "cargoCars": {
+    "title": "Cargo Cars",
+    "sectionTitle": "Cargo cars going to Nigeria",
+    "to": "to",
+    "departs": "Departs around {date}",
+    "space": "About {percent}% of space available",
+    "body": "Find cars going from Canada to Nigeria with space for your goods, and send your cargo home.",
+    "listLabel": "Cars going to Nigeria",
+    "count": "{count, plural, one {# car} other {# cars}}",
+    "soonestFirst": "Soonest departures first",
+    "filterFrom": "Leaving from",
+    "filterTo": "Going to",
+    "allCities": "All cities",
+    "allDestinations": "All destinations",
+    "apply": "Apply",
+    "emptyTitle": "No cars found",
+    "emptyBody": "Try a different city or destination.",
+    "clearFilters": "Clear filters",
+    "metaDescription": "{name} going from {origin} to {destination}, with space for your goods.",
+    "tripDetails": "Trip details",
+    "departureLabel": "Estimated departure",
+    "goingTo": "Going to",
+    "spaceLabel": "Cargo space",
+    "estimateNote": "Dates and space are estimates from the dealer, so confirm them before you arrange anything.",
+    "dealer": "Dealer",
+    "contactTitle": "Contact the dealer",
+    "contactIntro": "Ask about space for your goods. You don't need an account.",
+    "restrictions": "Cargo restrictions",
+    "related": "More cars going to Nigeria",
+    "status": {
+      "accepting_cargo": "Accepting cargo",
+      "full": "Full"
+    },
+    "notFoundTitle": "Car not found",
+    "notFoundBody": "This listing may have been removed or is no longer available.",
+    "backToCars": "Back to Cargo Cars"
+  },
+  "register": {
+    "title": "Create a free account",
+    "body": "Account registration isn't available yet in this preview. It's coming soon.",
+    "browse": "Browse products"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you're looking for doesn't exist.",
+    "home": "Go to the home page"
+  }
+}

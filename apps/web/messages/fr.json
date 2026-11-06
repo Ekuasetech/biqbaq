@@ -1,0 +1,239 @@
+{
+  "metadata": {
+    "title": "Biqbaq : le marché des Nigérians au Canada",
+    "description": "Découvrez des produits et entrez en contact avec des vendeurs nigérians partout au Canada."
+  },
+  "common": {
+    "skipToContent": "Aller au contenu",
+    "views": "{count, plural, one {# vue} other {# vues}}",
+    "previewNotice": "Aperçu : les annonces, vendeurs et avis affichés ici sont des données d'exemple.",
+    "home": "Accueil"
+  },
+  "nav": {
+    "products": "Produits",
+    "allCategories": "Toutes les catégories",
+    "mainLabel": "Principale",
+    "searchPlaceholder": "Rechercher des produits",
+    "searchLabel": "Rechercher des produits",
+    "search": "Rechercher",
+    "toggleTheme": "Basculer entre le mode clair et le mode sombre",
+    "switchLanguage": "Switch to English",
+    "otherLanguage": "EN"
+  },
+  "footer": {
+    "tagline": "Relier les Nigérians partout au Canada.",
+    "shop": "Boutique",
+    "explore": "Explorer"
+  },
+  "home": {
+    "eyebrow": "Pour les Nigérians au Canada",
+    "slideSellerTitle": "Trouvez des produits d'épicerie et d'autres articles dans votre ville",
+    "slideCargoTitle": "Trouvez des véhicules cargo en partance pour le Nigeria et envoyez vos marchandises",
+    "slideTorontoTitle": "La plateforme conçue pour que les entrepreneurs fassent des affaires",
+    "subtitle": "Créez un compte gratuit, publiez et faites connaître vos produits et services, et trouvez des voitures en partance pour le Nigeria pour envoyer vos colis au pays.",
+    "browse": "Voir tous les produits",
+    "createAccount": "Créer un compte gratuit",
+    "slideSellerAlt": "Une personne souriante, portant un foulard coloré et un tablier, dans une épicerie nigériane au Canada",
+    "slideCargoAlt": "Une Toyota Sienna argentée remplie de bagages et de boîtes, chargée dans un conteneur maritime au port",
+    "slideTorontoAlt": "Une personne souriante en manteau d'hiver et foulard, devant le drapeau canadien et les gratte-ciel de Toronto",
+    "slidesPause": "Mettre le diaporama en pause",
+    "slidesPlay": "Lancer le diaporama",
+    "categoriesTitle": "Acheter par catégorie",
+    "allCategories": "Toutes les catégories",
+    "featuredTitle": "Nouveautés sur Biqbaq",
+    "viewAll": "Tout voir",
+    "promotionsLabel": "Commencer sur Biqbaq",
+    "banner1Eyebrow": "Pour commencer",
+    "banner1Title": "Créez un compte gratuit",
+    "banner1Cta": "S'inscrire",
+    "banner2Eyebrow": "Parrainage",
+    "banner2Title": "Obtenez un site Web gratuit après des parrainages",
+    "banner2Cta": "En savoir plus",
+    "banner3Eyebrow": "Découvrir",
+    "banner3Title": "Recherchez des vendeurs",
+    "banner3Cta": "Lancer la recherche",
+    "banner4Eyebrow": "Voitures cargo",
+    "banner4Title": "Envoyez des marchandises au pays avec des voitures cargo",
+    "banner4Cta": "Voir les voitures",
+    "spotlightTitle": "À l'honneur",
+    "viewProduct": "Voir le produit",
+    "viewProductNamed": "Voir le produit : {name}",
+    "placeholderNote": "Contenu provisoire : le texte définitif reste à venir.",
+    "testimonialsTitle": "Ce que disent les clients",
+    "testimonialBody": "Témoignage d'exemple : les vrais avis de clients apparaîtront ici une fois recueillis.",
+    "testimonialAuthor": "Client d'exemple {n}",
+    "faqTitle": "Questions fréquentes",
+    "faqMoreTitle": "Une question sur un produit?",
+    "faqMoreBody": "Chaque page de produit vous permet de contacter directement son vendeur.",
+    "faq1Q": "Ai-je besoin d'un compte pour naviguer?",
+    "faq1A": "Non. Tout le monde peut parcourir les annonces sans s'inscrire.",
+    "faq2Q": "Comment contacter un vendeur?",
+    "faq2A": "Ouvrez un produit et utilisez son formulaire de contact. Vous pouvez envoyer un message sans créer de compte.",
+    "faq3Q": "Que signifie « Vendeur non vérifié »?",
+    "faq3A": "L'identité du vendeur n'a pas encore été vérifiée. Cette mention figure sur ses produits pour que vous puissiez décider en connaissance de cause.",
+    "faq4Q": "Où sont situés les vendeurs?",
+    "faq4A": "Biqbaq s'adresse pour l'instant aux Nigérians au Canada, et tous les prix sont en dollars canadiens. Chaque annonce indique où se trouve son vendeur.",
+    "faq5Q": "Comment devenir vendeur?",
+    "faq5A": "Inscrivez-vous, puis demandez le rôle de vendeur depuis votre compte. Chaque demande est examinée avant d'être approuvée."
+  },
+  "categories": {
+    "fashion": "Mode",
+    "food": "Alimentation et épicerie",
+    "beauty": "Beauté",
+    "home": "Maison"
+  },
+  "products": {
+    "title": "Produits",
+    "resultCount": "{count, plural, =0 {Aucun produit} one {# produit} other {# produits}}",
+    "resultsFor": "Résultats pour « {query} »",
+    "allCategories": "Toutes",
+    "categoriesLabel": "Catégories",
+    "sort": "Trier par",
+    "sortNewest": "Les plus récents",
+    "sortPriceAsc": "Prix croissant",
+    "sortPriceDesc": "Prix décroissant",
+    "sortName": "Nom",
+    "apply": "Appliquer",
+    "emptyTitle": "Aucun produit trouvé",
+    "emptyBody": "Essayez une autre recherche ou retirez un filtre.",
+    "clearFilters": "Effacer les filtres",
+    "paginationLabel": "Pagination",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "pageOf": "Page {page} sur {total}"
+  },
+  "markets": {
+    "CA": "Canada",
+    "NG": "Nigeria"
+  },
+  "availability": {
+    "in_stock": "En stock",
+    "limited": "Stock limité",
+    "out_of_stock": "Rupture de stock"
+  },
+  "condition": {
+    "new": "Neuf",
+    "used": "Occasion"
+  },
+  "seller": {
+    "verified": "Vendeur vérifié",
+    "unverified": "Vendeur non vérifié",
+    "soldBy": "Vendu par",
+    "basedIn": "Situé à {city}, {country}",
+    "location": "{city}, {country}",
+    "about": "À propos du vendeur"
+  },
+  "productDetail": {
+    "breadcrumbLabel": "Fil d'Ariane",
+    "description": "Description",
+    "condition": "État",
+    "category": "Catégorie",
+    "favourite": "Ajouter aux favoris",
+    "favouriteHint": "Les favoris seront disponibles une fois la connexion ajoutée.",
+    "viewImage": "Voir l'image {number}",
+    "reviews": "Avis des clients",
+    "noReviews": "Aucun avis pour le moment.",
+    "ratingSummary": "{average} sur 5 selon {count, plural, one {# avis} other {# avis}}",
+    "ratingLabel": "Noté {rating} sur 5",
+    "verifiedPurchase": "Achat vérifié",
+    "related": "Vous aimerez peut-être aussi",
+    "notFoundTitle": "Produit introuvable",
+    "notFoundBody": "Ce produit a peut-être été retiré ou n'est plus disponible.",
+    "backToProducts": "Retour aux produits"
+  },
+  "share": {
+    "title": "Partager",
+    "whatsapp": "Partager sur WhatsApp",
+    "facebook": "Partager sur Facebook",
+    "copy": "Copier le lien",
+    "copied": "Lien copié",
+    "copyFailed": "Impossible de copier le lien",
+    "native": "Partager"
+  },
+  "contact": {
+    "title": "Contacter le vendeur",
+    "intro": "Envoyez un message au sujet de ce produit. Aucun compte n'est requis.",
+    "name": "Votre nom",
+    "email": "Votre courriel",
+    "subject": "Objet",
+    "message": "Message",
+    "send": "Envoyer le message",
+    "previewResult": "Votre message est valide, mais il n'a pas été envoyé : l'envoi n'est pas activé dans cet aperçu.",
+    "errors": {
+      "nameRequired": "Entrez votre nom.",
+      "nameTooLong": "Votre nom est trop long.",
+      "emailInvalid": "Entrez une adresse courriel valide.",
+      "subjectRequired": "Entrez un objet.",
+      "subjectTooLong": "L'objet est trop long.",
+      "messageRequired": "Entrez un message.",
+      "messageTooLong": "Le message est trop long."
+    }
+  },
+  "ads": {
+    "sectionTitle": "Commandité",
+    "label": "Publicité",
+    "learnMore": "En savoir plus"
+  },
+  "blog": {
+    "sectionTitle": "Sur le blogue de Biqbaq",
+    "pageTitle": "Blogue de Biqbaq",
+    "pageBody": "Les articles et les guides arrivent bientôt. Les sujets de la page d'accueil sont des exemples pour cet aperçu.",
+    "browse": "Voir les produits",
+    "mostRead": "Le plus lu",
+    "readers": "{count, plural, one {# lecteur} other {# lecteurs}}",
+    "readMinutes": "{count} min de lecture",
+    "topics": {
+      "business": "Affaires",
+      "cargo": "Cargo",
+      "food": "Alimentation",
+      "fashion": "Mode"
+    }
+  },
+  "cargoCars": {
+    "title": "Voitures cargo",
+    "sectionTitle": "Voitures cargo en partance pour le Nigeria",
+    "to": "vers",
+    "departs": "Départ vers le {date}",
+    "space": "Environ {percent} % de l'espace disponible",
+    "body": "Trouvez des voitures allant du Canada au Nigeria avec de l'espace pour vos marchandises, et envoyez vos colis au pays.",
+    "listLabel": "Voitures en partance pour le Nigeria",
+    "count": "{count, plural, one {# voiture} other {# voitures}}",
+    "soonestFirst": "Départs les plus proches en premier",
+    "filterFrom": "Au départ de",
+    "filterTo": "À destination de",
+    "allCities": "Toutes les villes",
+    "allDestinations": "Toutes les destinations",
+    "apply": "Appliquer",
+    "emptyTitle": "Aucune voiture trouvée",
+    "emptyBody": "Essayez une autre ville ou une autre destination.",
+    "clearFilters": "Effacer les filtres",
+    "metaDescription": "{name} allant de {origin} à {destination}, avec de l'espace pour vos marchandises.",
+    "tripDetails": "Détails du trajet",
+    "departureLabel": "Départ estimé",
+    "goingTo": "Destination",
+    "spaceLabel": "Espace pour les marchandises",
+    "estimateNote": "Les dates et l'espace sont des estimations du concessionnaire : confirmez-les avant de prendre vos dispositions.",
+    "dealer": "Concessionnaire",
+    "contactTitle": "Contacter le concessionnaire",
+    "contactIntro": "Renseignez-vous sur l'espace pour vos marchandises. Aucun compte n'est requis.",
+    "restrictions": "Restrictions sur les marchandises",
+    "related": "Autres voitures en partance pour le Nigeria",
+    "status": {
+      "accepting_cargo": "Accepte des marchandises",
+      "full": "Complet"
+    },
+    "notFoundTitle": "Voiture introuvable",
+    "notFoundBody": "Cette annonce a peut-être été retirée ou n'est plus disponible.",
+    "backToCars": "Retour aux voitures cargo"
+  },
+  "register": {
+    "title": "Créer un compte gratuit",
+    "body": "L'inscription n'est pas encore offerte dans cet aperçu. Elle arrive bientôt.",
+    "browse": "Voir les produits"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "body": "La page que vous recherchez n'existe pas.",
+    "home": "Aller à la page d'accueil"
+  }
+}

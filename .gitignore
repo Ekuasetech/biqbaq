@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+.expo/
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Secrets: only .env.example files are committed
+.env
+.env.*
+!.env.example
+
+# Supabase local state
+supabase/.branches/
+supabase/.temp/
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+
+# Local design references (third-party material and large originals)
+reference/
+
+# OS and editor
+.DS_Store
+.vscode/
+.idea/

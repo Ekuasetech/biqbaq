@@ -1,0 +1,13 @@
+{
+  "name": "biqbaq",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Marketplace for Nigerians in Canada",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  }
+}
