@@ -2,6 +2,7 @@ import { Ban, CalendarDays, MapPin, MoveRight, Package } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { carPhotoName, PageTransition } from "@/components/layout/page-transition";
 import { SiteExtras } from "@/components/layout/site-extras";
 import { ContactForm } from "@/components/product/contact-form";
 import { ProductGallery } from "@/components/product/product-gallery";
@@ -55,6 +56,7 @@ export default async function CargoVehiclePage({ params }: Props) {
   }).format(new Date(vehicle.estimatedDeparture));
 
   return (
+    <PageTransition>
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
       <nav aria-label={t("productDetail.breadcrumbLabel")} className="mb-4 text-sm text-muted-foreground">
         <ol className="flex flex-wrap items-center gap-1.5">
@@ -69,7 +71,7 @@ export default async function CargoVehiclePage({ params }: Props) {
       </nav>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <ProductGallery images={vehicle.images} />
+        <ProductGallery images={vehicle.images} photoName={carPhotoName(vehicle.slug)} />
 
         <div className="flex flex-col gap-5">
           <div>
@@ -163,5 +165,6 @@ export default async function CargoVehiclePage({ params }: Props) {
 
       <SiteExtras locale={locale} />
     </div>
+    </PageTransition>
   );
 }

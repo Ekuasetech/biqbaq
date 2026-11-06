@@ -1,6 +1,7 @@
 import { CalendarDays, MoveRight, Package } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
+import { carPhotoName, SharedPhoto } from "@/components/layout/page-transition";
 import { reveal } from "@/components/layout/reveal";
 import { SellerBadge } from "@/components/product/seller-badge";
 import { ViewCount } from "@/components/product/view-count";
@@ -19,6 +20,7 @@ export function CargoVehicleCard({ vehicle, delay = 0 }: { vehicle: CargoVehicle
 
   return (
     <article className="group relative flex h-full flex-col gap-2 rounded-2xl focus-within:ring-2 focus-within:ring-ring">
+      <SharedPhoto name={carPhotoName(vehicle.slug)}>
       <div {...reveal("fade", delay)} className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted">
         {image && (
           <Image
@@ -32,6 +34,7 @@ export function CargoVehicleCard({ vehicle, delay = 0 }: { vehicle: CargoVehicle
         {/* Keeps the photo clickable mid-reveal, when the title's overlay is confined to its own box. */}
         <Link href={href} tabIndex={-1} aria-hidden className="absolute inset-0" />
       </div>
+      </SharedPhoto>
       <div {...reveal("rise", delay + 200)} className="flex flex-1 flex-col gap-1.5 rounded-2xl bg-card p-3 shadow-sm transition-shadow group-hover:shadow-md">
         <h3 className="text-sm leading-snug font-semibold">
           {/* The link covers the whole card, photo included, through the ::after overlay. */}

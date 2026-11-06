@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Suspense } from "react";
+import { PageTransition } from "@/components/layout/page-transition";
 import { SiteExtras } from "@/components/layout/site-extras";
 import { ProductGrid } from "@/components/product/product-card";
 import { buttonVariants } from "@/components/ui/button";
@@ -153,6 +154,7 @@ export default async function ProductsPage({ params, searchParams }: PageProps<"
   const t = await getTranslations({ locale, namespace: "products" });
 
   return (
+    <PageTransition>
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <h1 className="mb-5 font-heading text-3xl font-extrabold tracking-tight">{t("title")}</h1>
       <Suspense fallback={<ResultsSkeleton />}>
@@ -160,5 +162,6 @@ export default async function ProductsPage({ params, searchParams }: PageProps<"
       </Suspense>
       <SiteExtras locale={locale} />
     </div>
+    </PageTransition>
   );
 }

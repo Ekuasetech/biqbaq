@@ -3,10 +3,11 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
+import { SharedPhoto } from "@/components/layout/page-transition";
 import { cn } from "@/lib/utils";
 import type { ProductImage } from "@/modules/product-catalog";
 
-export function ProductGallery({ images }: { images: ProductImage[] }) {
+export function ProductGallery({ images, photoName }: { images: ProductImage[]; photoName: string }) {
   const t = useTranslations("productDetail");
   const [selected, setSelected] = useState(0);
   const current = images[selected];
@@ -15,9 +16,11 @@ export function ProductGallery({ images }: { images: ProductImage[] }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-        <Image src={current.url} alt={current.alt} fill preload sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
-      </div>
+      <SharedPhoto name={photoName}>
+        <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
+          <Image src={current.url} alt={current.alt} fill preload sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
+        </div>
+      </SharedPhoto>
       {images.length > 1 && (
         <div className="flex gap-2">
           {images.map((image, index) => (

@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
+import { productPhotoName, SharedPhoto } from "@/components/layout/page-transition";
 import { reveal } from "@/components/layout/reveal";
 import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
@@ -25,6 +26,7 @@ export function ProductCard({
 
   return (
     <article className="group relative flex h-full flex-col gap-2 rounded-2xl focus-within:ring-2 focus-within:ring-ring">
+      <SharedPhoto name={productPhotoName(product.slug)}>
       <div {...reveal("fade", delay)} className="relative aspect-square overflow-hidden rounded-2xl bg-muted">
         {image && (
           <Image
@@ -43,6 +45,7 @@ export function ProductCard({
         {/* Keeps the photo clickable mid-reveal, when the title's overlay is confined to its own box. */}
         <Link href={`/products/${product.slug}`} tabIndex={-1} aria-hidden className="absolute inset-0" />
       </div>
+      </SharedPhoto>
       <div
         {...reveal("rise", delay + 200)}
         className="flex flex-1 items-start gap-2 rounded-2xl bg-card p-3 shadow-sm transition-shadow group-hover:shadow-md"

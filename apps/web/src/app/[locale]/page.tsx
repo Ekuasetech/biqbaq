@@ -5,6 +5,7 @@ import { Suspense, type ReactNode } from "react";
 import { AdsSection, AdsSkeleton } from "@/components/advertising/ads-section";
 import { BlogSection } from "@/components/blog/blog-section";
 import { HeroHeadline, HeroSlideshow, HeroSlidesProvider } from "@/components/layout/hero-slideshow";
+import { PageTransition } from "@/components/layout/page-transition";
 import { reveal, RevealWords } from "@/components/layout/reveal";
 import { ProductGrid } from "@/components/product/product-card";
 import { SellerBadge } from "@/components/product/seller-badge";
@@ -75,6 +76,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   ];
 
   return (
+    <PageTransition>
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       {/* Hero */}
       <section>
@@ -341,5 +343,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         </div>
       </section>
     </div>
+    </PageTransition>
   );
 }

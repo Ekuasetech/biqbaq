@@ -401,6 +401,88 @@ test.describe("public marketplace", () => {
     });
   });
 
+  test.describe("page transitions", () => {
+    // Records the view transition animations that run during a navigation.
+    const record = (page: import("@playwright/test").Page) =>
+      page.addInitScript(() => {
+        const seen = new Set<string>();
+        (window as unknown as { seen: Set<string> }).seen = seen;
+        const start = document.startViewTransition.bind(document);
+        document.startViewTransition = ((callback: never) => {
+          const transition = start(callback);
+          transition.ready.then(() => {
+            for (const animation of document.getAnimations()) {
+              const effect = animation.effect as KeyframeEffect;
+              if (effect.pseudoElement?.startsWith("::view-transition")) {
+                seen.add(`${effect.pseudoElement}`);
+              }
+            }
+          }).catch(() => undefined);
+          return transition;
+        }) as typeof document.startViewTransition;
+      });
+    const seen = (page: import("@playwright/test").Page) =>
+      page.evaluate(() => [...(window as unknown as { seen: Set<string> }).seen]);
+
+    test("a car's photo morphs into its page, with the page and header handled", async ({ page }) => {
+      await record(page);
+      await page.goto("/cargo-cars");
+      await page.waitForLoadState("networkidle");
+      await page.getByRole("list", { name: "Cars going to Nigeria" }).getByRole("link", { name: "2019 Honda Pilot" }).click();
+      await expect(page).toHaveURL(/\/cargo-cars\/2019-honda-pilot$/);
+      await expect.poll(() => seen(page)).toContain("::view-transition-group(car-photo-2019-honda-pilot)");
+      const animations = await seen(page);
+      // The header stays anchored, so it must not animate.
+      expect(animations).not.toContain("::view-transition-new(site-header)");
+      // After the animation, the live page works normally.
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("2019 Honda Pilot");
+      await page.getByRole("button", { name: "View image 2" }).click();
+      await expect(page.getByRole("img", { name: /Pilot, placeholder image 2/ })).toBeVisible();
+    });
+
+    test("every page type animates in", async ({ page }) => {
+      await record(page);
+      await page.goto("/");
+      await page.waitForLoadState("networkidle");
+      await page.getByRole("banner").getByRole("link", { name: "Sign in" }).click();
+      await expect(page).toHaveURL(/\/sign-in$/);
+      await expect.poll(async () => (await seen(page)).join()).toMatch(/view-transition-new/);
+    });
+
+    test("reduced motion gives instant page changes", async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.goto("/cargo-cars");
+      await page.waitForLoadState("networkidle");
+      await page.getByRole("list", { name: "Cars going to Nigeria" }).getByRole("link", { name: "2019 Honda Pilot" }).click();
+      await expect(page).toHaveURL(/2019-honda-pilot$/);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("2019 Honda Pilot");
+    });
+
+    test("browser back and forward still work", async ({ page }) => {
+      await page.goto("/products");
+      await page.waitForLoadState("networkidle");
+      await page.getByRole("link", { name: "Suya Spice Blend" }).click().catch(() => undefined);
+      await page.goto("/cargo-cars");
+      await page.goBack();
+      await expect(page).toHaveURL(/\/products$/);
+      await page.goForward();
+      await expect(page).toHaveURL(/\/cargo-cars$/);
+    });
+
+    test("a page never has two photos competing for the same morph", async ({ page }) => {
+      for (const path of ["/", "/products", "/cargo-cars", "/products/ankara-tote-bag", "/cargo-cars/2021-toyota-sienna"]) {
+        await page.goto(path);
+        await page.waitForLoadState("networkidle");
+        // Each photo is named after its listing, so a repeated photo means a repeated name.
+        const photos = await page.locator("article img").evaluateAll((images) =>
+          images.map((image) => image.getAttribute("src")),
+        );
+        expect(photos.length).toBeGreaterThan(0);
+        expect(new Set(photos).size).toBe(photos.length);
+      }
+    });
+  });
+
   test("the password can be shown and hidden", async ({ page }) => {
     await page.goto("/sign-in");
     const password = page.getByLabel("Password", { exact: true });

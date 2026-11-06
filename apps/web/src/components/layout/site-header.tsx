@@ -3,7 +3,6 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "./locale-switcher";
-import { reveal } from "./reveal";
 import { SearchForm } from "./search-form";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -20,7 +19,12 @@ export function SiteHeader() {
   const t = useTranslations("nav");
 
   return (
-    <header {...reveal("rise")} className="sticky top-0 z-40 bg-background/90 backdrop-blur">
+    <header
+      data-rv="rise"
+      suppressHydrationWarning
+      style={{ viewTransitionName: "site-header" }}
+      className="sticky top-0 z-40 bg-background/90 backdrop-blur"
+    >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2 rounded-lg font-heading text-xl font-extrabold tracking-tight">
           <BrandMark />

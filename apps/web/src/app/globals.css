@@ -172,6 +172,75 @@
   }
 }
 
+/*
+ * Page navigation animations (see PageTransition). The old page leaves quickly so
+ * it does not compete for attention, and the new page arrives more gently.
+ */
+::view-transition {
+  /* Clicks during an animation reach the live page instead of being lost. */
+  pointer-events: none;
+}
+/* The banner and footer swap instantly: only the page content moves. */
+::view-transition-old(root) {
+  display: none;
+}
+::view-transition-new(root) {
+  animation: none;
+}
+::view-transition-old(.page-exit) {
+  animation: page-leave 180ms ease-in both;
+}
+::view-transition-new(.page-enter) {
+  animation: page-arrive 480ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+/* A card's photo morphing into the large photo on the next page. */
+::view-transition-group(.morph) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  z-index: 50;
+}
+::view-transition-image-pair(.morph) {
+  animation-name: morph-soften;
+}
+/* The header is the fixed point that shows that the content moved, not the screen. */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+@keyframes page-leave {
+  to {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.985);
+  }
+}
+@keyframes page-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+    filter: blur(6px);
+  }
+}
+@keyframes morph-soften {
+  30% {
+    filter: blur(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
 /* Blur is costly on phones, so keep their reveals to a simple fade and rise. */
 @media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
   .rv [data-rv="rise"]:not([data-rv-shown]),

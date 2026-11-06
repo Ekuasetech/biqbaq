@@ -2,6 +2,7 @@ import { Heart } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { productPhotoName, PageTransition } from "@/components/layout/page-transition";
 import { SiteExtras } from "@/components/layout/site-extras";
 import { ContactForm } from "@/components/product/contact-form";
 import { ProductGrid } from "@/components/product/product-card";
@@ -60,6 +61,7 @@ export default async function ProductPage({ params }: Props) {
   });
 
   return (
+    <PageTransition>
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
       <nav aria-label={t("productDetail.breadcrumbLabel")} className="mb-4 text-sm text-muted-foreground">
         <ol className="flex flex-wrap items-center gap-1.5">
@@ -78,7 +80,7 @@ export default async function ProductPage({ params }: Props) {
       </nav>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <ProductGallery images={product.images} />
+        <ProductGallery images={product.images} photoName={productPhotoName(product.slug)} />
 
         <div className="flex flex-col gap-5">
           <div>
@@ -167,5 +169,6 @@ export default async function ProductPage({ params }: Props) {
 
       <SiteExtras locale={locale} />
     </div>
+    </PageTransition>
   );
 }
