@@ -39,9 +39,17 @@ export function AccountMenu() {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="hidden max-w-40 truncate text-sm font-semibold lg:block" title={t("accountLabel", { name })}>
-        {name}
-      </span>
+      <Link
+        href="/account"
+        aria-label={t("accountLink")}
+        title={t("accountLabel", { name })}
+        className="flex h-9 items-center gap-2 rounded-lg px-1 text-sm font-semibold transition-colors hover:text-brand-red"
+      >
+        <span aria-hidden className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+          {name.charAt(0).toUpperCase()}
+        </span>
+        <span className="hidden max-w-40 truncate lg:block">{name}</span>
+      </Link>
       <button
         type="button"
         onClick={async () => {

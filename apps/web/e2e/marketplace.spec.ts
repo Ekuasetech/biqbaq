@@ -725,6 +725,130 @@ test.describe("public marketplace", () => {
       ignoreExpectedFailures(page);
     });
 
+    test.describe("account page", () => {
+      async function confirmedAccount(page: import("@playwright/test").Page, request: import("@playwright/test").APIRequestContext) {
+        const email = newEmail("account");
+        await register(page, email);
+        await page.goto(await emailLink(request, email));
+        await expect(signedIn(page)).toBeVisible();
+        return email;
+      }
+      const applications = (page: import("@playwright/test").Page) => page.getByRole("region", { name: "Your applications" });
+      const apply = (page: import("@playwright/test").Page) => page.getByRole("region", { name: "Apply for a role" });
+
+      async function fillSeller(page: import("@playwright/test").Page) {
+        await page.getByLabel("Seller or business name").fill("Ada's Shop");
+        await page.getByLabel("Contact information").fill("416-555-0100");
+        await page.getByLabel("City").fill("Toronto");
+        await page.getByLabel("What do you mainly sell?").selectOption("food");
+        await page.getByLabel("Tell us about your business").fill("Nigerian groceries");
+      }
+
+      test("signed-out visitors are asked to sign in", async ({ page }) => {
+        await page.goto("/account");
+        await expect(page.getByRole("heading", { name: "Please sign in" })).toBeVisible();
+        await expect(page.getByRole("main").getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/sign-in");
+      });
+
+      test("the header opens the account, which shows Buyer and has no ads", async ({ page, request }) => {
+        const email = await confirmedAccount(page, request);
+        await page.getByRole("banner").getByRole("link", { name: "Your account" }).click();
+        await expect(page).toHaveURL(/\/account$/);
+        const main = page.getByRole("main");
+        // Took up to about 3 seconds with six browsers running at once on one machine.
+        await expect(main).toContainText(email, { timeout: 15000 });
+        await expect(page.getByRole("region", { name: "Your roles" })).toContainText("Buyer");
+        await expect(page.getByRole("region", { name: "Your roles" })).toContainText("Active");
+        // The previous page may stay hidden in the page for quick back navigation, so this checks what is visible.
+        await expect(main.locator("#ads-title:visible, #blog-title:visible")).toHaveCount(0);
+        await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
+      });
+
+      test("Co-admin and Super Admin are never offered", async ({ page, request }) => {
+        await confirmedAccount(page, request);
+        await page.goto("/account");
+        await expect(apply(page).getByRole("button", { name: "Apply as Seller", exact: false })).toHaveCount(2);
+        await expect(apply(page).getByRole("button", { name: /Apply as/ })).toHaveCount(4);
+        await expect(apply(page)).not.toContainText("Super Admin");
+        await expect(apply(page)).not.toContainText("Co-admin");
+      });
+
+      test("apply as a Seller, wait for review, withdraw and apply again", async ({ page, request }) => {
+        await confirmedAccount(page, request);
+        await page.goto("/account");
+        await apply(page).getByRole("button", { name: "Apply as Seller", exact: false }).first().click();
+        await page.getByRole("button", { name: "Submit application" }).click();
+        await expect(page.getByText("This is required.").first()).toBeVisible();
+        await fillSeller(page);
+        await page.getByRole("button", { name: "Submit application" }).click();
+        await expect(page.getByText("waiting for review").first()).toBeInViewport();
+        await expect(applications(page)).toContainText("Seller");
+        await expect(applications(page)).toContainText("Waiting for review");
+
+        // Applying grants nothing, and the role can't be applied for twice.
+        await expect(page.getByRole("region", { name: "Your roles" })).not.toContainText("Seller");
+        await expect(apply(page).getByRole("button", { name: /Apply as Seller\b/ })).toHaveCount(1);
+        await expect(apply(page).getByRole("button", { name: /Apply as/ })).toHaveCount(3);
+
+        await page.reload();
+        await expect(applications(page)).toContainText("Waiting for review");
+        await applications(page).getByRole("button", { name: "Withdraw Seller application" }).click();
+        await expect(applications(page)).toContainText("Withdrawn");
+        await expect(apply(page).getByRole("button", { name: /Apply as/ })).toHaveCount(4);
+
+        await apply(page).getByRole("button", { name: "Apply as Seller", exact: false }).first().click();
+        await fillSeller(page);
+        await page.getByRole("button", { name: "Submit application" }).click();
+        await expect(applications(page)).toContainText("Waiting for review");
+      });
+
+      test("Marketer, Admin and Seller Staff applications work too", async ({ page, request }) => {
+        await confirmedAccount(page, request);
+        await page.goto("/account");
+        for (const role of ["Marketer", "Admin"]) {
+          await apply(page).getByRole("button", { name: `Apply as ${role}` }).click();
+          await page.getByLabel("Why are you applying?").fill("I would like to help");
+          await page.getByRole("button", { name: "Submit application" }).click();
+          await expect(applications(page)).toContainText(role);
+        }
+        await apply(page).getByRole("button", { name: "Apply as Seller Staff" }).click();
+        await page.getByLabel("Which seller will you work with?").fill("Ada's Shop");
+        await page.getByRole("button", { name: "Submit application" }).click();
+        await expect(applications(page)).toContainText("Seller Staff");
+        await expect(apply(page).getByRole("button", { name: /Apply as/ })).toHaveCount(1);
+      });
+
+      test("the name can be changed, and the header follows", async ({ page, request }) => {
+        await confirmedAccount(page, request);
+        await page.goto("/account");
+        await page.getByLabel("Name", { exact: true }).fill("Ada Renamed");
+        await page.getByRole("button", { name: "Save name" }).click();
+        await expect(page.getByText("Your name has been saved.")).toBeVisible();
+        await expect(page.getByRole("banner")).toContainText("Ada Renamed");
+        await page.reload();
+        await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Ada Renamed");
+        await page.getByLabel("Name", { exact: true }).fill("   ");
+        await page.getByRole("button", { name: "Save name" }).click();
+        await expect(page.getByText("Enter a name of up to 100 characters.")).toBeVisible();
+      });
+
+      test("signing out on the account page hides the data", async ({ page, request }) => {
+        const email = await confirmedAccount(page, request);
+        await page.goto("/account");
+        await expect(page.getByRole("main")).toContainText(email);
+        await signOut(page);
+        await expect(page.getByRole("heading", { name: "Please sign in" })).toBeVisible();
+        await expect(page.getByRole("main")).not.toContainText(email);
+      });
+
+      test("works in French", async ({ page, request }) => {
+        await confirmedAccount(page, request);
+        await page.goto("/fr/account");
+        await expect(page.getByRole("heading", { level: 1 })).toHaveText("Votre compte");
+        await expect(page.getByRole("region", { name: "Vos rôles" })).toContainText("Acheteur");
+      });
+    });
+
     test("signing up in French keeps French after the email link", async ({ page, request }) => {
       const email = newEmail("french");
       await page.goto("/fr/register");

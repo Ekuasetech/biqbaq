@@ -306,11 +306,90 @@
     "resetResult": "Votre mot de passe a été mis à jour.",
     "signOut": "Se déconnecter",
     "working": "Veuillez patienter…",
-    "accountLabel": "Connecté : {name}"
+    "accountLabel": "Connecté : {name}",
+    "accountLink": "Votre compte"
   },
   "notFound": {
     "title": "Page introuvable",
     "body": "La page que vous recherchez n'existe pas.",
     "home": "Aller à la page d'accueil"
+  },
+  "account": {
+    "title": "Votre compte",
+    "profileTitle": "Vos renseignements",
+    "name": "Nom",
+    "email": "Courriel",
+    "saveName": "Enregistrer le nom",
+    "nameSaved": "Votre nom a été enregistré.",
+    "working": "Veuillez patienter…",
+    "rolesTitle": "Vos rôles",
+    "roles": {
+      "buyer": "Acheteur",
+      "seller": "Vendeur",
+      "seller_staff": "Personnel du vendeur",
+      "marketer": "Spécialiste du marketing",
+      "admin": "Administrateur",
+      "co_admin": "Coadministrateur",
+      "super_admin": "Super administrateur"
+    },
+    "roleStatus": {
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "revoked": "Révoqué"
+    },
+    "reason": "Motif : {reason}",
+    "applicationsTitle": "Vos demandes",
+    "noApplications": "Vous n'avez encore demandé aucun rôle.",
+    "applicationStatus": {
+      "pending": "En attente d'examen",
+      "approved": "Approuvée",
+      "rejected": "Refusée",
+      "withdrawn": "Retirée"
+    },
+    "submitted": "Soumise le {date}",
+    "withdraw": "Retirer la demande : {role}",
+    "applyTitle": "Demander un rôle",
+    "applyIntro": "Chaque demande est examinée par Biqbaq. Vous obtenez le rôle seulement une fois la demande approuvée.",
+    "applicationSent": "Votre demande a été envoyée et attend d'être examinée.",
+    "noRolesLeft": "Il n'y a aucun autre rôle à demander pour le moment.",
+    "applyFor": "Postuler : {role}",
+    "applyingFor": "Demande : {role}",
+    "roleDescriptions": {
+      "seller": "Publiez vos produits et services sur Biqbaq. Les vendeurs doivent être établis au Canada.",
+      "seller_staff": "Aidez à gérer le compte d'un vendeur. Le vendeur doit aussi vous ajouter.",
+      "marketer": "Recommandez Biqbaq et suivez vos inscriptions.",
+      "admin": "Aidez à gérer la plateforme au quotidien."
+    },
+    "fields": {
+      "businessName": "Nom du vendeur ou de l'entreprise",
+      "contact": "Coordonnées",
+      "city": "Ville",
+      "cityHint": "Votre ville au Canada.",
+      "category": "Que vendez-vous principalement?",
+      "chooseCategory": "Choisir une catégorie",
+      "description": "Parlez-nous de votre entreprise",
+      "sellerName": "Avec quel vendeur travaillerez-vous?",
+      "staffHint": "Le vendeur doit aussi vous ajouter avant que vous puissiez accéder à son compte.",
+      "invitation": "Invitation ou référence (facultatif)",
+      "reason": "Pourquoi faites-vous cette demande?"
+    },
+    "submitApplication": "Soumettre la demande",
+    "cancel": "Annuler",
+    "signedOutTitle": "Veuillez vous connecter",
+    "signedOutBody": "Connectez-vous pour voir votre compte et demander des rôles.",
+    "signIn": "Se connecter",
+    "accountNotActive": "Votre compte n'est pas actif : vous ne pouvez pas demander de rôle pour le moment.",
+    "errors": {
+      "required": "Ce champ est obligatoire.",
+      "tooLong": "Ce texte est trop long.",
+      "nameInvalid": "Entrez un nom d'au plus 100 caractères.",
+      "alreadyPending": "Vous avez déjà une demande en attente pour ce rôle.",
+      "alreadyHeld": "Vous avez déjà ce rôle.",
+      "detailsInvalid": "Certains renseignements sont manquants ou refusés. Veuillez vérifier le formulaire.",
+      "notAllowed": "Vous n'êtes pas autorisé à faire cela pour le moment.",
+      "notFound": "Cette demande ne peut plus être modifiée. Actualisez la page pour voir la dernière version.",
+      "loadFailed": "Impossible de charger votre compte. Veuillez actualiser la page.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer."
+    }
   }
 }

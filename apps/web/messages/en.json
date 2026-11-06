@@ -306,11 +306,90 @@
     "resetResult": "Your password has been updated.",
     "signOut": "Sign out",
     "working": "Please wait…",
-    "accountLabel": "Signed in as {name}"
+    "accountLabel": "Signed in as {name}",
+    "accountLink": "Your account"
   },
   "notFound": {
     "title": "Page not found",
     "body": "The page you're looking for doesn't exist.",
     "home": "Go to the home page"
+  },
+  "account": {
+    "title": "Your account",
+    "profileTitle": "Your details",
+    "name": "Name",
+    "email": "Email",
+    "saveName": "Save name",
+    "nameSaved": "Your name has been saved.",
+    "working": "Please wait…",
+    "rolesTitle": "Your roles",
+    "roles": {
+      "buyer": "Buyer",
+      "seller": "Seller",
+      "seller_staff": "Seller Staff",
+      "marketer": "Marketer",
+      "admin": "Admin",
+      "co_admin": "Co-admin",
+      "super_admin": "Super Admin"
+    },
+    "roleStatus": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "revoked": "Revoked"
+    },
+    "reason": "Reason: {reason}",
+    "applicationsTitle": "Your applications",
+    "noApplications": "You haven't applied for any roles yet.",
+    "applicationStatus": {
+      "pending": "Waiting for review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn"
+    },
+    "submitted": "Submitted {date}",
+    "withdraw": "Withdraw {role} application",
+    "applyTitle": "Apply for a role",
+    "applyIntro": "Every application is reviewed by Biqbaq. You get the role only once it's approved.",
+    "applicationSent": "Your application has been sent, and is waiting for review.",
+    "noRolesLeft": "There are no other roles to apply for right now.",
+    "applyFor": "Apply as {role}",
+    "applyingFor": "Applying as {role}",
+    "roleDescriptions": {
+      "seller": "List your products and services on Biqbaq. Sellers must be based in Canada.",
+      "seller_staff": "Help run a seller's account. The seller must also add you.",
+      "marketer": "Refer people to Biqbaq and track your sign-ups.",
+      "admin": "Help run the platform day to day."
+    },
+    "fields": {
+      "businessName": "Seller or business name",
+      "contact": "Contact information",
+      "city": "City",
+      "cityHint": "Your city in Canada.",
+      "category": "What do you mainly sell?",
+      "chooseCategory": "Choose a category",
+      "description": "Tell us about your business",
+      "sellerName": "Which seller will you work with?",
+      "staffHint": "The seller must also add you before you can access their account.",
+      "invitation": "Invitation or reference (optional)",
+      "reason": "Why are you applying?"
+    },
+    "submitApplication": "Submit application",
+    "cancel": "Cancel",
+    "signedOutTitle": "Please sign in",
+    "signedOutBody": "Sign in to see your account and apply for roles.",
+    "signIn": "Sign in",
+    "accountNotActive": "Your account isn't active, so you can't apply for roles right now.",
+    "errors": {
+      "required": "This is required.",
+      "tooLong": "This is too long.",
+      "nameInvalid": "Enter a name of up to 100 characters.",
+      "alreadyPending": "You already have an application waiting for this role.",
+      "alreadyHeld": "You already have this role.",
+      "detailsInvalid": "Some details are missing or not accepted. Please check the form.",
+      "notAllowed": "You aren't allowed to do this right now.",
+      "notFound": "This application can no longer be changed. Refresh the page to see the latest.",
+      "loadFailed": "We couldn't load your account. Please refresh the page.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }
