@@ -23,6 +23,8 @@ npx supabase test db             # database and security tests
 
 Emails sent locally land in the test inbox at http://127.0.0.1:54324, not real inboxes.
 
+To try the admin screens, create an account, then run `./scripts/make-local-super-admin.sh you@example.com`. This only works once per local database, and only on the local copy.
+
 Real project settings belong in `apps/web/.env.local`, copied from `.env.example`. On this computer the generated local files override it, so development and tests cannot touch the real project. Never commit real keys.
 
 ## Where to start

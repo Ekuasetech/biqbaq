@@ -390,6 +390,63 @@
       "notFound": "Cette demande ne peut plus être modifiée. Actualisez la page pour voir la dernière version.",
       "loadFailed": "Impossible de charger votre compte. Veuillez actualiser la page.",
       "generic": "Une erreur s'est produite. Veuillez réessayer."
+    },
+    "adminLink": "Examiner les demandes de rôle"
+  },
+  "admin": {
+    "section": "Administration",
+    "title": "Demandes de rôle",
+    "statusFilter": "Filtrer par statut",
+    "statusTabs": {
+      "pending": "En attente",
+      "approved": "Approuvées",
+      "rejected": "Refusées",
+      "withdrawn": "Retirées",
+      "all": "Toutes"
+    },
+    "searchLabel": "Rechercher",
+    "searchPlaceholder": "Nom, courriel ou entreprise",
+    "searchButton": "Rechercher",
+    "roleFilter": "Rôle",
+    "allRoles": "Tous les rôles",
+    "empty": "Aucune demande trouvée.",
+    "count": "{count, plural, one {# demande} other {# demandes}}",
+    "applicationFrom": "Demande de {name}",
+    "decidedBy": "Décidée par {name} le {date}",
+    "viewDetails": "Voir les détails",
+    "hideDetails": "Masquer les détails",
+    "detailsTitle": "Détails de la demande",
+    "historyTitle": "Autres demandes de cette personne",
+    "noHistory": "Aucune.",
+    "country": "Pays",
+    "approve": "Approuver",
+    "reject": "Refuser",
+    "confirmReject": "Confirmer le refus",
+    "cancel": "Annuler",
+    "working": "Veuillez patienter…",
+    "reasonLabel": "Motif du refus",
+    "reasonHint": "Le demandeur peut voir ce motif.",
+    "permissionsTitle": "Permissions de cet administrateur",
+    "permissionsHint": "Un administrateur commence sans aucune permission et n'a que ce que vous cochez ici.",
+    "staffNote": "L'approbation ne donne accès à aucun vendeur. Le vendeur doit aussi ajouter cette personne.",
+    "decision": {
+      "approved": "La demande a été approuvée et le rôle est maintenant actif.",
+      "rejected": "La demande a été refusée."
+    },
+    "pagination": "Pagination",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "pageOf": "Page {page} sur {total}",
+    "noAccessTitle": "Vous n'avez pas accès",
+    "noAccessBody": "Cette section est réservée au super administrateur.",
+    "signInBody": "Veuillez vous connecter pour continuer.",
+    "backToAccount": "Retour à votre compte",
+    "signIn": "Se connecter",
+    "errors": {
+      "notAllowed": "Vous n'êtes pas autorisé à faire cela.",
+      "alreadyDecided": "Cette demande a déjà été traitée. Actualisez pour voir la dernière version.",
+      "reasonRequired": "Entrez un motif de refus.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer."
     }
   }
 }

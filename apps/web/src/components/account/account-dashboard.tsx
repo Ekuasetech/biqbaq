@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useSessionUser } from "@/lib/supabase/use-session-user";
 import { cn } from "@/lib/utils";
 import { CATEGORY_SLUGS } from "@/modules/product-catalog/types";
 import {
@@ -352,7 +353,7 @@ function ApplyCard({ roles, onSubmitted }: { roles: ApplicableRole[]; onSubmitte
  */
 export function AccountDashboard() {
   const t = useTranslations("account");
-  const [user, setUser] = useState<User | null | undefined>(undefined);
+  const user = useSessionUser();
   const [data, setData] = useState<AccountData | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
 
@@ -374,21 +375,6 @@ export function AccountDashboard() {
       roles: roles.data as UserRole[],
       applications: applications.data as RoleApplication[],
     });
-  }, []);
-
-  useEffect(() => {
-    let supabase;
-    try {
-      supabase = getSupabaseBrowserClient();
-    } catch {
-      setTimeout(() => setUser(null), 0);
-      return;
-    }
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Keeps the same identity on token refreshes, so the page does not reload.
-      setUser((current) => (current?.id === session?.user?.id && current ? current : session?.user ?? null));
-    });
-    return () => listener.subscription.unsubscribe();
   }, []);
 
   const userId = user?.id;
@@ -429,6 +415,11 @@ export function AccountDashboard() {
       <div className="grid gap-4">
         <ProfileCard user={user} data={data} onSaved={reload} />
         <RolesCard roles={data.roles} />
+        {data.roles.some((role) => role.role_key === "super_admin" && role.status === "active") && (
+          <Link href="/admin/role-applications" className={cn(primaryButton, "w-fit")}>
+            {t("adminLink")}
+          </Link>
+        )}
       </div>
       <div className="grid gap-4">
         {data.accountStatus === "active" ? (

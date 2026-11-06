@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 
 // Dev-only, from next-themes when a language switch re-renders the root layout.
@@ -839,6 +840,197 @@ test.describe("public marketplace", () => {
         await signOut(page);
         await expect(page.getByRole("heading", { name: "Please sign in" })).toBeVisible();
         await expect(page.getByRole("main")).not.toContainText(email);
+      });
+
+      test.describe("Super Admin role applications", () => {
+        // Local database only. Bypasses the guard, so each test can have its own Super Admin.
+        function sql(statement: string) {
+          return execFileSync("docker", ["exec", "-i", "supabase_db_biqbaq", "psql", "-U", "supabase_admin", "-d", "postgres", "-q", "-tA", "-c", statement], {
+            env: { ...process.env, PATH: `${process.env.PATH}:/Applications/Docker.app/Contents/Resources/bin` },
+          }).toString().trim();
+        }
+        function makeSuperAdmin(email: string) {
+          sql(`set session_replication_role = replica; insert into public.user_roles (user_id, role_key) select id, 'super_admin' from auth.users where email = '${email}';`);
+        }
+        const screen = "/admin/role-applications";
+        // By email, as applicants in tests running at the same time share a name.
+        const cardFor = (page: import("@playwright/test").Page, email: string) =>
+          page.getByRole("article").filter({ hasText: email });
+
+        async function newApplicant(browser: import("@playwright/test").Browser, request: import("@playwright/test").APIRequestContext) {
+          const context = await browser.newContext();
+          const page = await context.newPage();
+          const email = await confirmedAccount(page, request);
+          await page.goto("/account");
+          await expect(page.getByRole("main")).toContainText(email, { timeout: 15000 });
+          return { page, email, context };
+        }
+
+        test("signed-out visitors and ordinary users get no access, or data", async ({ page, request }) => {
+          await page.goto(screen);
+          await expect(page.getByRole("heading", { name: "You don't have access" })).toBeVisible();
+          await confirmedAccount(page, request);
+          await page.goto(screen);
+          await expect(page.getByText("This area is for Super Admin only.")).toBeVisible();
+          await expect(page.getByRole("article")).toHaveCount(0);
+          await page.goto("/account");
+          await expect(page.getByRole("region", { name: "Your roles" })).toBeVisible({ timeout: 15000 });
+          await expect(page.getByRole("link", { name: "Review role applications" })).toHaveCount(0);
+        });
+
+        test("reject with a reason, reapply, then approve: the full journey", async ({ page, browser, request }) => {
+          test.setTimeout(90000);
+          const owner = await confirmedAccount(page, request);
+          makeSuperAdmin(owner);
+          const applicant = await newApplicant(browser, request);
+
+          await apply(applicant.page).getByRole("button", { name: "Apply as Seller", exact: false }).first().click();
+          await fillSeller(applicant.page);
+          await applicant.page.getByRole("button", { name: "Submit application" }).click();
+          await expect(applications(applicant.page)).toContainText("Waiting for review");
+
+          // The owner reaches the screen from their account, and finds the application.
+          await page.goto("/account");
+          await page.getByRole("link", { name: "Review role applications" }).click({ timeout: 15000 });
+          await expect(page).toHaveURL(/\/admin\/role-applications$/);
+          await page.getByLabel("Search", { exact: true }).fill(applicant.email);
+          await page.getByRole("button", { name: "Search", exact: true }).click();
+          await expect(page.getByText("1 application")).toBeVisible();
+          const card = cardFor(page, applicant.email);
+          await expect(card).toContainText(applicant.email);
+          await card.getByRole("button", { name: "View details" }).click();
+          await expect(card).toContainText("Ada's Shop");
+          await expect(card).toContainText("Food & groceries");
+
+          // Rejecting needs a reason, which the applicant then sees.
+          await card.getByRole("button", { name: "Reject" }).click();
+          await card.getByRole("button", { name: "Confirm rejection" }).click();
+          await expect(card.getByText("Enter a reason for rejecting.")).toBeVisible();
+          await card.getByLabel("Reason for rejecting").fill("Please add a phone number");
+          await card.getByRole("button", { name: "Confirm rejection" }).click();
+          await expect(page.getByText("The application was rejected.")).toBeVisible();
+
+          await applicant.page.reload();
+          await expect(applications(applicant.page)).toContainText("Rejected", { timeout: 15000 });
+          await expect(applications(applicant.page)).toContainText("Please add a phone number");
+          await expect(page.getByRole("region", { name: "Your roles" })).toHaveCount(0);
+
+          // They apply again, and the reviewer can see the earlier rejection.
+          await apply(applicant.page).getByRole("button", { name: "Apply as Seller", exact: false }).first().click();
+          await fillSeller(applicant.page);
+          await applicant.page.getByRole("button", { name: "Submit application" }).click();
+          await expect(applications(applicant.page)).toContainText("Waiting for review");
+
+          await page.getByRole("button", { name: "Search", exact: true }).click();
+          await page.reload();
+          await page.getByLabel("Search", { exact: true }).fill(applicant.email);
+          await page.getByRole("button", { name: "Search", exact: true }).click();
+          const second = cardFor(page, applicant.email);
+          await second.getByRole("button", { name: "View details" }).click({ timeout: 15000 });
+          await expect(second.getByRole("region").or(second)).toContainText("Please add a phone number");
+          await second.getByRole("button", { name: "Approve" }).click();
+          await expect(page.getByText("The application was approved")).toBeVisible();
+
+          // The approved role is live, and the whole journey is in the audit log.
+          await applicant.page.reload();
+          const roles = applicant.page.getByRole("region", { name: "Your roles" });
+          await expect(roles).toContainText("Seller", { timeout: 15000 });
+          await expect(applicant.page.getByRole("region", { name: "Your applications" })).toContainText("Approved");
+          const actions = sql(`select string_agg(action, ',' order by created_at) from public.audit_logs where actor_id = (select id from auth.users where email = '${owner}')`);
+          expect(actions).toBe("role_application.reject,role_application.approve");
+
+          // It moves out of the queue, and into Approved.
+          await page.getByRole("button", { name: "Waiting" }).click();
+          await expect(page.getByText("No applications found.")).toBeVisible();
+          await page.getByRole("button", { name: "Approved" }).click();
+          await expect(cardFor(page, applicant.email)).toContainText("Decided by");
+          await cardFor(page, applicant.email).getByRole("button", { name: "View details" }).click();
+          await expect(cardFor(page, applicant.email).getByRole("button", { name: "Approve" })).toHaveCount(0);
+          await applicant.context.close();
+        });
+
+        test("an Admin is approved with only the permissions ticked", async ({ page, browser, request }) => {
+          test.setTimeout(90000);
+          const owner = await confirmedAccount(page, request);
+          makeSuperAdmin(owner);
+          const applicant = await newApplicant(browser, request);
+          await apply(applicant.page).getByRole("button", { name: "Apply as Admin" }).click();
+          await applicant.page.getByLabel("Why are you applying?").fill("To help run things");
+          await applicant.page.getByRole("button", { name: "Submit application" }).click();
+          await expect(applications(applicant.page)).toContainText("Waiting for review");
+
+          await page.goto(screen);
+          await page.getByLabel("Search", { exact: true }).fill(applicant.email);
+          await page.getByRole("button", { name: "Search", exact: true }).click();
+          await expect(page.getByText("1 application")).toBeVisible({ timeout: 15000 });
+          const card = cardFor(page, applicant.email);
+          await card.getByRole("button", { name: "View details" }).click();
+          await card.getByLabel("View platform reports").check();
+          await card.getByRole("button", { name: "Approve" }).click();
+          await expect(page.getByText("The application was approved")).toBeVisible();
+
+          const granted = sql(`select string_agg(p.permission_key, ',') from public.user_role_permissions p join public.user_roles r on r.id = p.user_role_id join auth.users u on u.id = r.user_id where u.email = '${applicant.email}'`);
+          expect(granted).toBe("reports.view");
+          // Being an Admin does not open this screen.
+          await applicant.page.goto(screen);
+          await expect(applicant.page.getByText("This area is for Super Admin only.")).toBeVisible();
+          await applicant.context.close();
+        });
+
+        test("filters work, and Seller Staff approval warns it gives no seller access", async ({ page, browser, request }) => {
+          test.setTimeout(90000);
+          const owner = await confirmedAccount(page, request);
+          makeSuperAdmin(owner);
+          const applicant = await newApplicant(browser, request);
+          await apply(applicant.page).getByRole("button", { name: "Apply as Seller Staff" }).click();
+          await applicant.page.getByLabel("Which seller will you work with?").fill("Ada's Shop");
+          await applicant.page.getByRole("button", { name: "Submit application" }).click();
+          await expect(applications(applicant.page)).toContainText("Waiting for review");
+
+          await page.goto(screen);
+          await page.getByLabel("Search", { exact: true }).fill(applicant.email);
+          await page.getByRole("button", { name: "Search", exact: true }).click();
+          await expect(page.getByText("1 application")).toBeVisible({ timeout: 15000 });
+          await page.getByLabel("Role", { exact: true }).selectOption("marketer");
+          await expect(page.getByText("No applications found.")).toBeVisible();
+          await page.getByLabel("Role", { exact: true }).selectOption("seller_staff");
+          await cardFor(page, applicant.email).getByRole("button", { name: "View details" }).click();
+          await expect(page.getByText("Approving gives no access to any seller.")).toBeVisible();
+          await page.getByLabel("Search", { exact: true }).fill("nothing-matches-this");
+          await page.getByRole("button", { name: "Search", exact: true }).click();
+          await expect(page.getByText("No applications found.")).toBeVisible();
+          await applicant.context.close();
+        });
+
+        test("an application text cannot inject anything into the screen", async ({ page, browser, request }) => {
+          test.setTimeout(90000);
+          const owner = await confirmedAccount(page, request);
+          makeSuperAdmin(owner);
+          const applicant = await newApplicant(browser, request);
+          const attack = '<img src=x onerror="window.injected=true"><script>window.injected=true</script>';
+          await apply(applicant.page).getByRole("button", { name: "Apply as Marketer" }).click();
+          await applicant.page.getByLabel("Why are you applying?").fill(attack);
+          await applicant.page.getByRole("button", { name: "Submit application" }).click();
+          await expect(applications(applicant.page)).toContainText("Waiting for review");
+
+          await page.goto(screen);
+          await page.getByLabel("Search", { exact: true }).fill(applicant.email);
+          await page.getByRole("button", { name: "Search", exact: true }).click();
+          await expect(page.getByText("1 application")).toBeVisible({ timeout: 15000 });
+          const card = cardFor(page, applicant.email);
+          await card.getByRole("button", { name: "View details" }).click();
+          await expect(card).toContainText("onerror");
+          expect(await page.evaluate(() => (window as unknown as { injected?: boolean }).injected)).toBeUndefined();
+          await applicant.context.close();
+        });
+
+        test("works in French", async ({ page, request }) => {
+          const owner = await confirmedAccount(page, request);
+          makeSuperAdmin(owner);
+          await page.goto(`/fr${screen}`);
+          await expect(page.getByRole("heading", { level: 1 })).toHaveText("Demandes de rôle");
+          await expect(page.getByRole("button", { name: "En attente" })).toBeVisible({ timeout: 15000 });
+        });
       });
 
       test("works in French", async ({ page, request }) => {

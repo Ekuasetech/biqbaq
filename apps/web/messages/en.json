@@ -390,6 +390,63 @@
       "notFound": "This application can no longer be changed. Refresh the page to see the latest.",
       "loadFailed": "We couldn't load your account. Please refresh the page.",
       "generic": "Something went wrong. Please try again."
+    },
+    "adminLink": "Review role applications"
+  },
+  "admin": {
+    "section": "Administration",
+    "title": "Role Applications",
+    "statusFilter": "Filter by status",
+    "statusTabs": {
+      "pending": "Waiting",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn",
+      "all": "All"
+    },
+    "searchLabel": "Search",
+    "searchPlaceholder": "Name, email or business",
+    "searchButton": "Search",
+    "roleFilter": "Role",
+    "allRoles": "All roles",
+    "empty": "No applications found.",
+    "count": "{count, plural, one {# application} other {# applications}}",
+    "applicationFrom": "Application from {name}",
+    "decidedBy": "Decided by {name} on {date}",
+    "viewDetails": "View details",
+    "hideDetails": "Hide details",
+    "detailsTitle": "Application details",
+    "historyTitle": "Other applications from this person",
+    "noHistory": "None.",
+    "country": "Country",
+    "approve": "Approve",
+    "reject": "Reject",
+    "confirmReject": "Confirm rejection",
+    "cancel": "Cancel",
+    "working": "Please wait…",
+    "reasonLabel": "Reason for rejecting",
+    "reasonHint": "The applicant can see this.",
+    "permissionsTitle": "Permissions for this Admin",
+    "permissionsHint": "An Admin starts with no permissions, and has only what you tick here.",
+    "staffNote": "Approving gives no access to any seller. The seller must also add this person.",
+    "decision": {
+      "approved": "The application was approved, and the role is now active.",
+      "rejected": "The application was rejected."
+    },
+    "pagination": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {total}",
+    "noAccessTitle": "You don't have access",
+    "noAccessBody": "This area is for Super Admin only.",
+    "signInBody": "Please sign in to continue.",
+    "backToAccount": "Back to your account",
+    "signIn": "Sign in",
+    "errors": {
+      "notAllowed": "You aren't allowed to do this.",
+      "alreadyDecided": "This application has already been decided. Refresh to see the latest.",
+      "reasonRequired": "Enter a reason for rejecting.",
+      "generic": "Something went wrong. Please try again."
     }
   }
 }
