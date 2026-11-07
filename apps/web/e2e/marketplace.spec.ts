@@ -977,6 +977,142 @@ test.describe("public marketplace", () => {
             }
           });
 
+          test("Super Admin gives, changes, suspends and removes a role, and it takes effect", async ({ page, browser, request }) => {
+            test.setTimeout(150000);
+            const owner = await confirmedAccount(page, request);
+            makeSuperAdmin(owner);
+            const person = await newApplicant(browser, request);
+            const moderation = person.page.getByRole("link", { name: "Moderation", exact: true });
+            await person.page.goto("/account");
+            await expect(person.page.getByRole("heading").first()).toBeVisible();
+            await expect(moderation).toHaveCount(0);
+
+            await page.goto("/account");
+            await page.getByRole("link", { name: "People and roles" }).click();
+            await expect(page).toHaveURL(/\/admin\/people$/);
+            await page.getByLabel("Search by name or email").fill(person.email);
+            await page.getByRole("button", { name: "Search", exact: true }).click();
+            const card = page.getByRole("article", { name: person.email });
+            await expect(page.getByRole("article")).toHaveCount(1);
+            const buyer = card.getByRole("listitem", { name: "Buyer" });
+            await expect(buyer.getByRole("button")).toHaveCount(0);
+
+            // Give the Admin role, with one permission.
+            await card.getByRole("button", { name: "Give a role" }).click();
+            const give = card.getByRole("form", { name: "Give a role" });
+            await give.getByRole("button", { name: "Give role" }).click();
+            await expect(give.getByText("Choose a role.")).toBeVisible();
+            await give.getByLabel("Role to give").selectOption("super_admin");
+            await expect(give.getByText("A Super Admin has full control of Biqbaq")).toBeVisible();
+            await give.getByLabel("Role to give").selectOption("admin");
+            await give.getByLabel("Moderate product listings").check();
+            await give.getByLabel("Reason").fill("Helping with listings");
+            await give.getByRole("button", { name: "Give role" }).click();
+            const admin = card.getByRole("listitem", { name: "Admin", exact: true });
+            await expect(admin).toContainText("Moderate product listings");
+            await person.page.reload();
+            await expect(moderation).toBeVisible();
+
+            // Suspending takes the access away, and restoring gives it back.
+            await admin.getByRole("button", { name: "Suspend role" }).click();
+            await admin.getByLabel("Reason").fill("Under review");
+            await admin.getByRole("button", { name: "Confirm: Suspend role" }).click();
+            await expect(admin).toContainText("Suspended");
+            await expect(admin).toContainText("Reason: Under review");
+            await person.page.reload();
+            await expect(person.page.getByRole("heading").first()).toBeVisible();
+            await expect(moderation).toHaveCount(0);
+            await admin.getByRole("button", { name: "Restore role" }).click();
+            await admin.getByLabel("Reason").fill("Cleared");
+            await admin.getByRole("button", { name: "Confirm: Restore role" }).click();
+            await expect(admin.getByRole("button", { name: "Suspend role" })).toBeVisible();
+            await person.page.reload();
+            await expect(moderation).toBeVisible();
+
+            // Removing a permission takes effect too.
+            await admin.getByRole("button", { name: "Change permissions" }).click();
+            await admin.getByLabel("Moderate product listings").uncheck();
+            await admin.getByRole("button", { name: "Save permissions" }).click();
+            await expect(admin).toContainText("No permissions yet");
+            await person.page.reload();
+            await expect(person.page.getByRole("heading").first()).toBeVisible();
+            await expect(moderation).toHaveCount(0);
+
+            // Removing the role is final, and the account and its other roles stay.
+            await admin.getByRole("button", { name: "Remove role" }).click();
+            await admin.getByLabel("Reason").fill("Left the team");
+            await admin.getByRole("button", { name: "Confirm: Remove role" }).click();
+            await expect(admin).toContainText("Removed");
+            await expect(admin.getByRole("button")).toHaveCount(0);
+            await expect(buyer).toContainText("Active");
+
+            // They were told at each step, and it is all in the audit log under their email.
+            expect(sql(`select string_agg(distinct b.payload ->> 'template', ',' order by b.payload ->> 'template') from public.background_jobs b join auth.users u on u.id = b.user_id where u.email = '${person.email}' and b.payload ->> 'template' like 'role_%'`)).toBe("role_assigned,role_restored,role_revoked,role_suspended");
+            await page.goto("/admin/audit-log");
+            await page.getByLabel("Action").selectOption("role.revoked");
+            await page.getByLabel("Search people, targets and reasons").fill(person.email);
+            await page.getByRole("button", { name: "Search", exact: true }).click();
+            const results = page.getByRole("region", { name: "Audit log entries" });
+            await expect(results).toContainText("1 entry");
+            await expect(results).toContainText(`On: ${person.email}`);
+          });
+
+          test("suspending a seller takes their shop off the site, and restoring brings it back", async ({ page, browser, request }) => {
+            test.setTimeout(150000);
+            const { page: shop, email } = await approvedSeller(page, browser, request);
+            const shopLink = await shop.getByRole("link", { name: "View public page" }).getAttribute("href");
+            const visitor = await (await browser.newContext()).newPage();
+            await visitor.goto(shopLink!);
+            await expect(visitor.getByRole("main")).toContainText("Ada's Shop");
+
+            await page.goto("/admin/people");
+            await page.getByLabel("Search by name or email").fill(email);
+            await page.getByRole("button", { name: "Search", exact: true }).click();
+            const seller = page.getByRole("article", { name: email }).getByRole("listitem", { name: "Seller", exact: true });
+            await seller.getByRole("button", { name: "Suspend role" }).click();
+            await expect(seller.getByText("Their shop and its products leave the site too.")).toBeVisible();
+            await seller.getByLabel("Reason").fill("Fraud report");
+            await seller.getByRole("button", { name: "Confirm: Suspend role" }).click();
+            await expect(seller).toContainText("Reason: Fraud report");
+
+            await expect(async () => {
+              const response = await visitor.goto(shopLink!);
+              expect(response?.status()).toBe(404);
+            }).toPass({ timeout: 90000 });
+            (visitor as unknown as { problems?: string[] }).problems = [];
+
+            // Moderation shows it suspended, and explains why it can't simply be reopened.
+            await page.goto("/admin/moderation");
+            const shops = page.getByRole("region", { name: "Shops" });
+            await shops.getByLabel("Search by name").fill(email);
+            await shops.getByRole("button", { name: "Search" }).click();
+            const card = shops.getByRole("article", { name: "Ada's Shop" }).filter({ hasText: email });
+            await card.getByRole("button", { name: "Restore shop" }).click();
+            await card.getByLabel("Reason").fill("Reopening");
+            await card.getByRole("button", { name: "Confirm: Restore shop" }).click();
+            await expect(card.getByText("Restore the role in People and roles")).toBeVisible();
+            ignoreExpectedFailures(page); // The browser logs a refused action as an error.
+
+            await page.goto("/admin/people");
+            await page.getByLabel("Search by name or email").fill(email);
+            await page.getByRole("button", { name: "Search", exact: true }).click();
+            await seller.getByRole("button", { name: "Restore role" }).click();
+            await seller.getByLabel("Reason").fill("Cleared");
+            await seller.getByRole("button", { name: "Confirm: Restore role" }).click();
+            await expect(seller.getByRole("button", { name: "Suspend role" })).toBeVisible();
+            await expect(async () => {
+              await visitor.goto(shopLink!);
+              await expect(visitor.getByRole("main")).toContainText("Ada's Shop", { timeout: 2000 });
+            }).toPass({ timeout: 90000 });
+          });
+
+          test("only Super Admin can open People and roles", async ({ page, request }) => {
+            await confirmedAccount(page, request);
+            await page.goto("/admin/people");
+            await expect(page.getByText("You don't have access")).toBeVisible();
+            await expect(page.getByRole("button", { name: "Give a role" })).toHaveCount(0);
+          });
+
           test("a moderator suspends and restores a product and a shop, and the seller is told", async ({ page, browser, request }) => {
             test.setTimeout(150000);
             const { page: shop, email } = await approvedSeller(page, browser, request);

@@ -15,8 +15,8 @@ interface Copy {
 }
 
 const ROLE_NAMES: Record<EmailLocale, Record<string, string>> = {
-  en: { seller: "Seller", seller_staff: "Seller Staff", marketer: "Marketer", admin: "Admin" },
-  fr: { seller: "Vendeur", seller_staff: "Personnel du vendeur", marketer: "Marketeur", admin: "Administrateur" },
+  en: { seller: "Seller", seller_staff: "Seller Staff", marketer: "Marketer", admin: "Admin", co_admin: "Co-admin", super_admin: "Super Admin" },
+  fr: { seller: "Vendeur", seller_staff: "Personnel du vendeur", marketer: "Marketeur", admin: "Administrateur", co_admin: "Co-administrateur", super_admin: "Super administrateur" },
 };
 
 type Build = (role: string) => Copy;
@@ -250,6 +250,68 @@ const TEMPLATES: Record<string, Record<EmailLocale, Build>> = {
       reason: "Motif",
       action: "Accéder à ma boutique",
       path: "/account/shop",
+    }),
+  },
+  role_assigned: {
+    en: (role) => ({
+      subject: "You have a new role on Biqbaq",
+      body: `You have been given the ${role} role on Biqbaq.`,
+      action: "Go to your account",
+      path: "/account",
+    }),
+    fr: (role) => ({
+      subject: "Vous avez un nouveau rôle sur Biqbaq",
+      body: `Le rôle ${role} vous a été attribué sur Biqbaq.`,
+      action: "Accéder à votre compte",
+      path: "/account",
+    }),
+  },
+  role_suspended: {
+    en: (role) => ({
+      subject: "One of your roles was suspended",
+      body: `Your ${role} role on Biqbaq was suspended, so you can't use it for now. Your account and any other roles are not affected.`,
+      reason: "Reason",
+      action: "Go to your account",
+      path: "/account",
+    }),
+    fr: (role) => ({
+      subject: "L'un de vos rôles a été suspendu",
+      body: `Votre rôle ${role} sur Biqbaq a été suspendu : vous ne pouvez pas l'utiliser pour le moment. Votre compte et vos autres rôles ne sont pas touchés.`,
+      reason: "Motif",
+      action: "Accéder à votre compte",
+      path: "/account",
+    }),
+  },
+  role_restored: {
+    en: (role) => ({
+      subject: "Your role was restored",
+      body: `Your ${role} role on Biqbaq was restored, so you can use it again.`,
+      reason: "Reason",
+      action: "Go to your account",
+      path: "/account",
+    }),
+    fr: (role) => ({
+      subject: "Votre rôle a été rétabli",
+      body: `Votre rôle ${role} sur Biqbaq a été rétabli : vous pouvez de nouveau l'utiliser.`,
+      reason: "Motif",
+      action: "Accéder à votre compte",
+      path: "/account",
+    }),
+  },
+  role_revoked: {
+    en: (role) => ({
+      subject: "One of your roles was removed",
+      body: `Your ${role} role on Biqbaq was removed. Your account and any other roles are not affected.`,
+      reason: "Reason",
+      action: "Go to your account",
+      path: "/account",
+    }),
+    fr: (role) => ({
+      subject: "L'un de vos rôles a été retiré",
+      body: `Votre rôle ${role} sur Biqbaq a été retiré. Votre compte et vos autres rôles ne sont pas touchés.`,
+      reason: "Motif",
+      action: "Accéder à votre compte",
+      path: "/account",
     }),
   },
 };

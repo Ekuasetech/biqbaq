@@ -42,6 +42,8 @@ Needs: Q-01, Q-02, BD-09, BD-17 (BD-18 has an interim rule).
 
 **Built, for item 6:** Super Admin's Platform settings and Audit log screens, on the local copy. Settings cover only what works today (publishing, notification emails, Contact Seller limits, product photos), each with its own limits, a required reason and history. Feature switches for reviews, referrals, payments and others are added with those features.
 
+**Built, for items 4 and 5:** Super Admin's People and roles screen, on the local copy: find anyone, give a role, change an Admin's or Co-admin's permissions, and suspend, restore or remove a role, with a reason, audit and an email to the person. Not built: an Admin's own screen for delegating to a Co-admin (the database supports it), suspending a whole account, and creating a marketer who has no account yet.
+
 ## Phase 3: Sellers and marketplace
 
 Needs: Q-03, Q-06, Q-08, Q-09, Q-12, BD-08, BD-10, BD-14, BD-16.

@@ -78,6 +78,7 @@ export function moderationErrorKey(error: { code?: string; message?: string }): 
   if (error.message === "REASON_REQUIRED") return "reasonRequired";
   if (error.message === "REASON_TOO_LONG") return "reasonTooLong";
   if (error.message === "CANNOT_MODERATE_OWN") return "ownShop";
+  if (error.message === "SELLER_ROLE_NOT_ACTIVE") return "roleInactive";
   if (error.code === "42501") return "notAllowed";
   if (error.code === "55000" || error.code === "P0002") return "changed";
   return "generic";

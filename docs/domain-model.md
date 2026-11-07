@@ -32,7 +32,7 @@ Order -> Product(s), Seller, Buyer -> PaymentTransactions
 | **Application vs assignment** | Applying never grants anything (§3.1). Only an approved application creates an assignment |
 | **Seller role vs seller verification** | Approval lets you act as a seller; verification is identity (§4.3) |
 | **Platform role vs staff membership** | Seller Staff needs both (§3.6). The role alone reaches no seller's data |
-| **Role vs seller suspension** | A suspended role removes permissions; a suspended seller stops selling while the user keeps other roles |
+| **Role vs seller suspension** | A suspended shop stops selling while the user keeps their roles. Suspending or removing the Seller role also suspends the shop automatically (Q-31) |
 | **Product owner vs actor** | On-behalf actions keep both (§3.4) |
 | **Marketer vs seller referrals** | Reported separately (§14.5), and both use one attribution rule |
 

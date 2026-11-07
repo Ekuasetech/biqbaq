@@ -407,7 +407,8 @@
     "viewAllApplications": "Voir toutes les demandes",
     "settingsLink": "Paramètres de la plateforme",
     "auditLogLink": "Journal d'audit",
-    "moderationLink": "Modération"
+    "moderationLink": "Modération",
+    "peopleLink": "Personnes et rôles"
   },
   "admin": {
     "section": "Administration",
@@ -876,7 +877,68 @@
       "changed": "Ceci a déjà changé. La liste affiche maintenant la dernière version.",
       "generic": "Cela n'a pas fonctionné. Veuillez réessayer.",
       "loadFailed": "Cette liste n'a pas pu être chargée. Veuillez actualiser la page.",
-      "ownShop": "Vous ne pouvez pas modérer votre propre boutique ou vos propres produits. Un autre administrateur doit le faire."
+      "ownShop": "Vous ne pouvez pas modérer votre propre boutique ou vos propres produits. Un autre administrateur doit le faire.",
+      "roleInactive": "Le rôle Vendeur du propriétaire de cette boutique est suspendu ou retiré. Rétablissez le rôle dans Personnes et rôles, et la boutique reviendra avec lui."
+    }
+  },
+  "people": {
+    "title": "Personnes et rôles",
+    "search": "Chercher par nom ou courriel",
+    "filterRole": "Rôle",
+    "allPeople": "Tout le monde",
+    "searchButton": "Chercher",
+    "empty": "Personne ne correspond à cette recherche.",
+    "pagination": "Pages",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {page} sur {pages}",
+    "reason": "Motif",
+    "reasonHint": "La personne lit ce motif dans son courriel : rédigez-le à son intention.",
+    "assignReasonHint": "Pour le journal d'audit. Il n'est pas inclus dans le courriel envoyé à la personne.",
+    "working": "En cours...",
+    "confirm": "Confirmer : {action}",
+    "cancel": "Annuler",
+    "role": "Rôle à attribuer",
+    "chooseRole": "Choisir un rôle",
+    "sellerHint": "Les rôles Vendeur et Personnel du vendeur passent par une demande : ils ne peuvent pas être attribués ici.",
+    "superAdminWarning": "Un Super Admin a le contrôle total de Biqbaq, y compris sur vous. Ne choisissez ceci que pour une personne en qui vous avez entièrement confiance.",
+    "permissions": "Permissions",
+    "permissionsHint": "Ce rôle n'a aucune permission tant que vous n'en choisissez pas.",
+    "noPermissions": "Aucune permission pour le moment : ce rôle ne peut rien faire.",
+    "savePermissions": "Enregistrer les permissions",
+    "giveRole": "Attribuer le rôle",
+    "statusReason": "Motif : {reason}",
+    "actions": {
+      "assign": "Attribuer un rôle",
+      "suspend": "Suspendre le rôle",
+      "restore": "Rétablir le rôle",
+      "revoke": "Retirer le rôle",
+      "permissions": "Modifier les permissions"
+    },
+    "hints": {
+      "suspend": "La personne perd immédiatement l'accès de ce rôle. Son compte et ses autres rôles restent.",
+      "restore": "La personne retrouve ce rôle et ses permissions.",
+      "revoke": "C'est définitif pour ce rôle. La personne ne peut le retrouver que par une nouvelle demande ou une nouvelle attribution, sans aucune permission au départ. Son compte et ses autres rôles restent."
+    },
+    "status": {
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "revoked": "Retiré"
+    },
+    "errors": {
+      "reasonRequired": "Entrez un motif.",
+      "reasonTooLong": "Le motif est trop long.",
+      "roleRequired": "Choisissez un rôle.",
+      "lastSuperAdmin": "C'est le seul Super Admin : ce rôle ne peut être ni suspendu ni retiré. Attribuez d'abord ce rôle à une autre personne.",
+      "notAllowed": "Vous n'avez pas la permission de faire ceci.",
+      "changed": "Ceci a déjà changé. Actualisez la page pour voir la dernière version.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer.",
+      "loadFailed": "Cette liste n'a pas pu être chargée. Veuillez actualiser la page."
+    },
+    "sellerHints": {
+      "suspend": "Sa boutique et ses produits quittent aussi le site.",
+      "restore": "Sa boutique revient aussi, si la suspension de ce rôle l'avait retirée. Une boutique suspendue séparément dans la modération reste suspendue.",
+      "revoke": "Sa boutique et ses produits quittent aussi le site."
     }
   }
 }

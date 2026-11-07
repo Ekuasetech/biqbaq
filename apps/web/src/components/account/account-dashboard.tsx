@@ -433,6 +433,9 @@ export function AccountDashboard() {
             <Link href="/admin/verification" className={cn(primaryButton, "w-fit")}>
               {t("verificationLink")}
             </Link>
+            <Link href="/admin/people" className={cn(primaryButton, "w-fit")}>
+              {t("peopleLink")}
+            </Link>
             <Link href="/admin/settings" className={cn(primaryButton, "w-fit")}>
               {t("settingsLink")}
             </Link>

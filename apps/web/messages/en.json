@@ -407,7 +407,8 @@
     "viewAllApplications": "View all applications",
     "settingsLink": "Platform settings",
     "auditLogLink": "Audit log",
-    "moderationLink": "Moderation"
+    "moderationLink": "Moderation",
+    "peopleLink": "People and roles"
   },
   "admin": {
     "section": "Administration",
@@ -876,7 +877,68 @@
       "changed": "This has already changed. The list now shows the latest.",
       "generic": "That didn't work. Please try again.",
       "loadFailed": "This list couldn't be loaded. Please refresh the page.",
-      "ownShop": "You can't moderate your own shop or products. Another administrator has to do this."
+      "ownShop": "You can't moderate your own shop or products. Another administrator has to do this.",
+      "roleInactive": "This shop's owner has a suspended or removed Seller role. Restore the role in People and roles, and the shop comes back with it."
+    }
+  },
+  "people": {
+    "title": "People and roles",
+    "search": "Search by name or email",
+    "filterRole": "Role",
+    "allPeople": "Everyone",
+    "searchButton": "Search",
+    "empty": "Nobody matches this search.",
+    "pagination": "Pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "reason": "Reason",
+    "reasonHint": "The person reads this in their email, so write it for them.",
+    "assignReasonHint": "For the audit log. It isn't included in the email to them.",
+    "working": "Working...",
+    "confirm": "Confirm: {action}",
+    "cancel": "Cancel",
+    "role": "Role to give",
+    "chooseRole": "Choose a role",
+    "sellerHint": "The Seller and Seller Staff roles come through an application, so they can't be given here.",
+    "superAdminWarning": "A Super Admin has full control of Biqbaq, including over you. Only choose this for someone you completely trust.",
+    "permissions": "Permissions",
+    "permissionsHint": "This role has no permissions until you choose them.",
+    "noPermissions": "No permissions yet, so this role can't do anything.",
+    "savePermissions": "Save permissions",
+    "giveRole": "Give role",
+    "statusReason": "Reason: {reason}",
+    "actions": {
+      "assign": "Give a role",
+      "suspend": "Suspend role",
+      "restore": "Restore role",
+      "revoke": "Remove role",
+      "permissions": "Change permissions"
+    },
+    "hints": {
+      "suspend": "They lose this role's access straight away. Their account and other roles stay.",
+      "restore": "They get this role and its permissions back.",
+      "revoke": "This is final for this role. They can only get it back through a new application or by being given it again, starting with no permissions. Their account and other roles stay."
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "revoked": "Removed"
+    },
+    "errors": {
+      "reasonRequired": "Enter a reason.",
+      "reasonTooLong": "The reason is too long.",
+      "roleRequired": "Choose a role.",
+      "lastSuperAdmin": "This is the only Super Admin, so this role can't be suspended or removed. Give someone else the role first.",
+      "notAllowed": "You don't have permission to do this.",
+      "changed": "This has already changed. Refresh the page to see the latest.",
+      "generic": "That didn't work. Please try again.",
+      "loadFailed": "This list couldn't be loaded. Please refresh the page."
+    },
+    "sellerHints": {
+      "suspend": "Their shop and its products leave the site too.",
+      "restore": "Their shop comes back too, if suspending this role took it down. A shop suspended separately in Moderation stays suspended.",
+      "revoke": "Their shop and its products leave the site too."
     }
   }
 }

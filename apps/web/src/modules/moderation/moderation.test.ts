@@ -16,6 +16,7 @@ describe("moderationErrorKey", () => {
     expect(moderationErrorKey({ code: "23514", message: "REASON_TOO_LONG" })).toBe("reasonTooLong");
     expect(moderationErrorKey({ code: "42501", message: "NOT_AUTHORIZED" })).toBe("notAllowed");
     expect(moderationErrorKey({ code: "42501", message: "CANNOT_MODERATE_OWN" })).toBe("ownShop");
+    expect(moderationErrorKey({ code: "55000", message: "SELLER_ROLE_NOT_ACTIVE" })).toBe("roleInactive");
     expect(moderationErrorKey({ code: "55000", message: "PRODUCT_NOT_SUSPENDABLE" })).toBe("changed");
     expect(moderationErrorKey({ code: "P0002", message: "SELLER_NOT_FOUND" })).toBe("changed");
     expect(moderationErrorKey({ code: "XX000", message: "internal details" })).toBe("generic");

@@ -3,6 +3,10 @@ import { renderEmail } from "./templates";
 
 const TEMPLATES = [
   "welcome",
+  "role_assigned",
+  "role_suspended",
+  "role_restored",
+  "role_revoked",
   "product_suspended",
   "product_restored",
   "shop_suspended",
@@ -46,6 +50,14 @@ describe("renderEmail", () => {
     expect(renderEmail("verification_revoked", { reason: "Closed" }, person, SITE)?.html).toContain("Closed");
     expect(renderEmail("verification_restored", { reason: "internal note" }, person, SITE)?.text).not.toContain("internal note");
     expect(renderEmail("verification_verified", { reason: "internal note" }, person, SITE)?.html).not.toContain("internal note");
+  });
+
+  it("names every role a person can be given, not its key", () => {
+    for (const role of ["admin", "co_admin", "super_admin", "marketer"]) {
+      const text = renderEmail("role_assigned", { role }, person, SITE)?.text;
+      expect(text).not.toContain(`the ${role} role`);
+    }
+    expect(renderEmail("role_assigned", { role: "co_admin" }, person, SITE)?.text).toContain("Co-admin");
   });
 
   it("names the product and gives the reason, keeping the product name out of the subject", () => {
