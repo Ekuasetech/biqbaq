@@ -6,7 +6,7 @@ import { renderEmail } from "@/modules/notifications/templates";
 interface ClaimedEmail {
   job_id: string;
   template: string | null;
-  data: { role?: unknown; reason?: unknown } | null;
+  data: { role?: unknown; reason?: unknown; product?: unknown } | null;
   recipient_email: string | null;
   recipient_name: string | null;
   recipient_locale: string | null;

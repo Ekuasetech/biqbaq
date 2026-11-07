@@ -156,6 +156,102 @@ const TEMPLATES: Record<string, Record<EmailLocale, Build>> = {
       path: "/account/shop",
     }),
   },
+  product_suspended: {
+    en: (product) => ({
+      subject: "One of your products was suspended",
+      body: `Biqbaq has suspended your product "${product}", so it is no longer on the site. It can't be published, edited or deleted while suspended.`,
+      reason: "Reason",
+      action: "Go to My shop",
+      path: "/account/shop",
+    }),
+    fr: (product) => ({
+      subject: "L'un de vos produits a été suspendu",
+      body: `Biqbaq a suspendu votre produit « ${product} », qui n'est donc plus sur le site. Il ne peut pas être publié, modifié ou supprimé pendant la suspension.`,
+      reason: "Motif",
+      action: "Accéder à ma boutique",
+      path: "/account/shop",
+    }),
+  },
+  product_restored: {
+    en: (product) => ({
+      subject: "Your product's suspension was lifted",
+      body: `Biqbaq has lifted the suspension on your product "${product}". It is not public yet, so publish it from My shop when you are ready.`,
+      reason: "Reason",
+      action: "Go to My shop",
+      path: "/account/shop",
+    }),
+    fr: (product) => ({
+      subject: "La suspension de votre produit a été levée",
+      body: `Biqbaq a levé la suspension de votre produit « ${product} ». Il n'est pas encore public : publiez-le depuis votre boutique lorsque vous serez prêt.`,
+      reason: "Motif",
+      action: "Accéder à ma boutique",
+      path: "/account/shop",
+    }),
+  },
+  shop_suspended: {
+    en: () => ({
+      subject: "Your shop was suspended",
+      body: "Biqbaq has suspended your shop, so it and your products are no longer on the site.",
+      reason: "Reason",
+      action: "Go to My shop",
+      path: "/account/shop",
+    }),
+    fr: () => ({
+      subject: "Votre boutique a été suspendue",
+      body: "Biqbaq a suspendu votre boutique. Elle et vos produits ne sont donc plus sur le site.",
+      reason: "Motif",
+      action: "Accéder à ma boutique",
+      path: "/account/shop",
+    }),
+  },
+  shop_restored: {
+    en: () => ({
+      subject: "Your shop was restored",
+      body: "Biqbaq has restored your shop, and it is back on the site.",
+      reason: "Reason",
+      action: "Go to My shop",
+      path: "/account/shop",
+    }),
+    fr: () => ({
+      subject: "Votre boutique a été rétablie",
+      body: "Biqbaq a rétabli votre boutique, qui est de retour sur le site.",
+      reason: "Motif",
+      action: "Accéder à ma boutique",
+      path: "/account/shop",
+    }),
+  },
+  publishing_suspended: {
+    en: () => ({
+      subject: "Publishing was suspended for your shop",
+      body: "Biqbaq has suspended publishing for your shop, so you can't publish products for now. Products already live stay live.",
+      reason: "Reason",
+      action: "Go to My shop",
+      path: "/account/shop",
+    }),
+    fr: () => ({
+      subject: "La publication a été suspendue pour votre boutique",
+      body: "Biqbaq a suspendu la publication pour votre boutique : vous ne pouvez pas publier de produits pour le moment. Les produits déjà en ligne le restent.",
+      reason: "Motif",
+      action: "Accéder à ma boutique",
+      path: "/account/shop",
+    }),
+  },
+  publishing_restored: {
+    en: () => ({
+      subject: "You can publish again",
+      body: "Biqbaq has restored publishing for your shop, so you can publish products again.",
+      reason: "Reason",
+      action: "Go to My shop",
+      path: "/account/shop",
+    }),
+    fr: () => ({
+      subject: "Vous pouvez publier de nouveau",
+      body: "Biqbaq a rétabli la publication pour votre boutique : vous pouvez de nouveau publier des produits.",
+      reason: "Motif",
+      action: "Accéder à ma boutique",
+      path: "/account/shop",
+    }),
+  },
 };
 
 const GREETING: Record<EmailLocale, (name: string | null) => string> = {
@@ -169,7 +265,7 @@ export const escapeHtml = (value: string) =>
 /** Null means this version of the code has no such template. */
 export function renderEmail(
   template: string,
-  data: { role?: unknown; reason?: unknown },
+  data: { role?: unknown; reason?: unknown; product?: unknown },
   recipient: { name: string | null; locale: string | null },
   siteUrl: string,
 ): RenderedEmail | null {
@@ -178,7 +274,8 @@ export function renderEmail(
 
   const locale: EmailLocale = recipient.locale === "fr" ? "fr" : "en";
   const roleKey = typeof data.role === "string" ? data.role : "";
-  const copy = versions[locale](ROLE_NAMES[locale][roleKey] ?? roleKey);
+  const subject = typeof data.product === "string" ? data.product : (ROLE_NAMES[locale][roleKey] ?? roleKey);
+  const copy = versions[locale](subject);
   const reason = copy.reason && typeof data.reason === "string" ? data.reason : null;
   const link = `${siteUrl.replace(/\/$/, "")}${locale === "fr" ? "/fr" : ""}${copy.path}`;
   const greeting = GREETING[locale](recipient.name);

@@ -977,6 +977,96 @@ test.describe("public marketplace", () => {
             }
           });
 
+          test("a moderator suspends and restores a product and a shop, and the seller is told", async ({ page, browser, request }) => {
+            test.setTimeout(150000);
+            const { page: shop, email } = await approvedSeller(page, browser, request);
+            const id = unique();
+            const name = `Reported ${id}`;
+            await addProduct(shop, name);
+            await item(shop, name).getByRole("button", { name: "Publish" }).click();
+            await expect(item(shop, name)).toContainText("Published");
+            const visitor = await (await browser.newContext()).newPage();
+            await visitor.goto(`/products?q=${encodeURIComponent(name)}`);
+            await expect(visitor.getByRole("main")).toContainText(name);
+
+            await page.goto("/account");
+            await page.getByRole("link", { name: "Moderation", exact: true }).click();
+            await expect(page).toHaveURL(/\/admin\/moderation$/);
+            const products = page.getByRole("region", { name: "Products" });
+            await products.getByLabel("Search by name").fill(name);
+            await products.getByRole("button", { name: "Search" }).click();
+            const card = page.getByRole("article", { name });
+            await card.getByRole("button", { name: "Suspend product" }).click();
+            await card.getByRole("button", { name: "Confirm: Suspend product" }).click();
+            await expect(card.getByText("Enter a reason.")).toBeVisible();
+            await card.getByLabel("Reason").fill(`Fake item ${id}`);
+            await card.getByRole("button", { name: "Confirm: Suspend product" }).click();
+
+            // Suspending takes it off the list of live products, and off the public site.
+            await expect(products.getByText("Nothing matches this search.")).toBeVisible();
+            await expect(async () => {
+              await visitor.goto(`/products?q=${encodeURIComponent(name)}`);
+              await expect(visitor.getByRole("main")).toContainText("No products", { timeout: 2000 });
+            }).toPass({ timeout: 90000 });
+
+            // The seller is told why, and sees it on My shop.
+            expect(sql(`select payload -> 'data' ->> 'reason' from public.background_jobs b join auth.users u on u.id = b.user_id where u.email = '${email}' and b.payload ->> 'template' = 'product_suspended'`)).toBe(`Fake item ${id}`);
+            await shop.reload();
+            await expect(item(shop, name)).toContainText("Suspended by Biqbaq");
+            await expect(item(shop, name).getByRole("button", { name: "Publish" })).toHaveCount(0);
+
+            // Lifting it needs the seller to publish again.
+            await products.getByLabel("Show").selectOption("suspended");
+            await card.getByRole("button", { name: "Lift suspension" }).click();
+            await card.getByLabel("Reason").fill("Checked, it is genuine");
+            await card.getByRole("button", { name: "Confirm: Lift suspension" }).click();
+            await expect(products.getByText("Nothing matches this search.")).toBeVisible();
+            await shop.reload();
+            await expect(item(shop, name)).toContainText("Not public");
+
+            // A shop, found by its owner's email.
+            const shops = page.getByRole("region", { name: "Shops" });
+            await shops.getByLabel("Search by name").fill(email);
+            await shops.getByRole("button", { name: "Search" }).click();
+            const shopCard = shops.getByRole("article", { name: "Ada's Shop" }).filter({ hasText: email });
+            await expect(shopCard).toBeVisible();
+            await shopCard.getByRole("button", { name: "Suspend publishing" }).click();
+            await shopCard.getByLabel("Reason").fill("Too many complaints");
+            await shopCard.getByRole("button", { name: "Confirm: Suspend publishing" }).click();
+            await expect(shopCard).toContainText("Publishing suspended");
+            await shopCard.getByRole("button", { name: "Restore publishing" }).click();
+            await shopCard.getByLabel("Reason").fill("Resolved");
+            await shopCard.getByRole("button", { name: "Confirm: Restore publishing" }).click();
+            await expect(shopCard.getByRole("button", { name: "Suspend publishing" })).toBeVisible();
+
+            await shopCard.getByRole("button", { name: "Suspend shop" }).click();
+            await shopCard.getByLabel("Reason").fill("Fraud report");
+            await shopCard.getByRole("button", { name: "Confirm: Suspend shop" }).click();
+            await expect(shopCard).toContainText("Suspended");
+            await shop.reload();
+            await expect(shop.getByText("Your shop is suspended", { exact: false })).toBeVisible();
+            await shopCard.getByRole("button", { name: "Restore shop" }).click();
+            await shopCard.getByLabel("Reason").fill("Cleared");
+            await shopCard.getByRole("button", { name: "Confirm: Restore shop" }).click();
+            await expect(shopCard.getByRole("button", { name: "Suspend shop" })).toBeVisible();
+
+            // Everything is in the audit log.
+            await page.goto("/admin/audit-log");
+            await page.getByLabel("Search people, targets and reasons").fill("Fraud report");
+            await page.getByRole("button", { name: "Search", exact: true }).click();
+            await expect(page.getByRole("region", { name: "Audit log entries" })).toContainText("Suspended a shop");
+          });
+
+          test("someone with no moderation permission gets no moderation screen", async ({ page, request }) => {
+            await confirmedAccount(page, request);
+            await page.goto("/account");
+            await expect(page.getByRole("heading").first()).toBeVisible();
+            await expect(page.getByRole("link", { name: "Moderation", exact: true })).toHaveCount(0);
+            await page.goto("/admin/moderation");
+            await expect(page.getByText("You don't have access")).toBeVisible();
+            await expect(page.getByText("Suspend product")).toHaveCount(0);
+          });
+
           test("a seller edits their shop details, and only the public ones show", async ({ page, browser, request }) => {
             test.setTimeout(120000);
             const { page: shop } = await approvedSeller(page, browser, request);

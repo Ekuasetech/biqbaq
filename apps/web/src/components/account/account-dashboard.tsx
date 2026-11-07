@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { CircleAlert, Info } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { ModerationLink } from "@/components/admin/moderation";
 import { RecentApplications } from "@/components/admin/recent-applications";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -423,6 +424,7 @@ export function AccountDashboard() {
             {t("shopLink")}
           </Link>
         )}
+        <ModerationLink className={cn(primaryButton, "w-fit")}>{t("moderationLink")}</ModerationLink>
         {isSuperAdmin && (
           <div className="flex flex-wrap gap-2">
             <Link href="/admin/role-applications" className={cn(primaryButton, "w-fit")}>

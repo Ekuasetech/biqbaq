@@ -61,9 +61,10 @@ Progress at 2026-11-06, on the local copy only:
 - **Built, with Cloudinary:** signed product photo uploads. Local work stores files in a separate `biqbaq-local` folder. Known limit: someone who uploads a file and never finishes leaves an unused file in Cloudinary, so a clean-up job is needed once background jobs exist. Deleting a product also keeps its files for now.
 - **Built, for verification:** a seller's request on My shop, and the Super Admin screen to approve, reject, suspend, restore and revoke, with history and audit. Requests are written notes, with no document uploads (BD-16), and the seller only sees decisions on screen until emails are built.
 - **Built, for shop details:** sellers edit their name, city, category, description and private contact details on My shop, through the audited `update_my_shop`. The shop's web address never changes, and logos are not built yet. The public page usually updates straight away, but one full test run showed it can lag by up to about a minute if the page was being cached at that moment.
-- **Not built:** staff, identity provider, reviews, favourites, moderation screens, and view counting (Q-16). Vehicles, blog and ads still use sample data, until their own phases.
+- **Built, for moderation:** the Moderation screen, for Super Admin and Admins with `products.moderate`, `sellers.manage` or `sellers.publishing`, each seeing only what their permission allows. It suspends and restores products, shops and publishing with a required reason. Each action is audited, and the seller is emailed the reason. Screens for on-behalf actions and a shop's allowance are not built.
+- **Not built:** staff, identity provider, reviews, favourites, and view counting (Q-16). Vehicles, blog and ads still use sample data, until their own phases.
 - `supabase/seed.sql` holds invented shops for local use. `supabase db push` does not load it, so it never reaches the real project.
-- Public pages can show old data for about a minute after a change made outside the seller's own screen, such as a moderator suspending a product. This needs revisiting when the moderation screens are built.
+- Public pages can show old data for about a minute if a page is being cached at the moment of a change. The seller's and moderator's screens refresh them immediately otherwise.
 - `scripts/test-publish-race.sh` proves the limit holds when two publishes overlap. Run it after changing `publish_product`.
 
 The owner decided that publishing does not need a verified contact email (Q-06), so this phase no longer depends on Phase 4.

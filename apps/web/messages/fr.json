@@ -406,7 +406,8 @@
     "noRecentApplications": "Aucune demande en attente.",
     "viewAllApplications": "Voir toutes les demandes",
     "settingsLink": "Paramètres de la plateforme",
-    "auditLogLink": "Journal d'audit"
+    "auditLogLink": "Journal d'audit",
+    "moderationLink": "Modération"
   },
   "admin": {
     "section": "Administration",
@@ -462,7 +463,8 @@
       "alreadyDecided": "Cette demande a déjà été traitée. Actualisez pour voir la dernière version.",
       "reasonRequired": "Entrez un motif de refus.",
       "generic": "Une erreur s'est produite. Veuillez réessayer."
-    }
+    },
+    "noModerationAccess": "Cet espace est réservé aux personnes ayant une permission de modération."
   },
   "shop": {
     "title": "Ma boutique",
@@ -812,6 +814,69 @@
       "product_image_remove": "A retiré une photo de produit",
       "product_image_primary": "A changé la photo principale d'un produit",
       "setting_update": "A changé un paramètre"
+    }
+  },
+  "moderation": {
+    "title": "Modération",
+    "reason": "Motif",
+    "reasonHint": "Le vendeur lit ce motif dans son courriel : rédigez-le à son intention.",
+    "working": "En cours...",
+    "confirm": "Confirmer : {action}",
+    "cancel": "Annuler",
+    "show": "Afficher",
+    "search": "Chercher par nom",
+    "searchButton": "Chercher",
+    "empty": "Rien ne correspond à cette recherche.",
+    "pagination": "Pages",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {page} sur {pages}",
+    "products": {
+      "title": "Produits",
+      "suspend": "Suspendre le produit",
+      "restore": "Lever la suspension",
+      "restoreHint": "Le produit revient non public, et le vendeur choisit quand le republier.",
+      "filters": {
+        "published": "Produits en ligne",
+        "suspended": "Produits suspendus",
+        "unpublished": "Non publics",
+        "all": "Tous les produits"
+      },
+      "status": {
+        "published": "En ligne",
+        "unpublished": "Non public",
+        "archived": "Archivé",
+        "suspended": "Suspendu"
+      }
+    },
+    "shops": {
+      "title": "Boutiques",
+      "products": "{count, plural, one {# produit} other {# produits}}",
+      "suspend": "Suspendre la boutique",
+      "suspendHint": "La boutique et tous ses produits quittent le site public, et elle ne peut plus recevoir de demandes.",
+      "restore": "Rétablir la boutique",
+      "suspendPublishing": "Suspendre la publication",
+      "suspendPublishingHint": "Le vendeur ne peut plus publier, mais les produits déjà en ligne le restent.",
+      "restorePublishing": "Rétablir la publication",
+      "publishingOff": "Publication suspendue",
+      "filters": {
+        "all": "Toutes les boutiques",
+        "suspended": "Boutiques suspendues",
+        "publishing_suspended": "Publication suspendue"
+      },
+      "status": {
+        "active": "Active",
+        "suspended": "Suspendue"
+      }
+    },
+    "errors": {
+      "reasonRequired": "Entrez un motif.",
+      "reasonTooLong": "Le motif est trop long.",
+      "notAllowed": "Vous n'avez pas la permission de faire ceci.",
+      "changed": "Ceci a déjà changé. La liste affiche maintenant la dernière version.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer.",
+      "loadFailed": "Cette liste n'a pas pu être chargée. Veuillez actualiser la page.",
+      "ownShop": "Vous ne pouvez pas modérer votre propre boutique ou vos propres produits. Un autre administrateur doit le faire."
     }
   }
 }

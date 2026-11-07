@@ -406,7 +406,8 @@
     "noRecentApplications": "No applications are waiting.",
     "viewAllApplications": "View all applications",
     "settingsLink": "Platform settings",
-    "auditLogLink": "Audit log"
+    "auditLogLink": "Audit log",
+    "moderationLink": "Moderation"
   },
   "admin": {
     "section": "Administration",
@@ -462,7 +463,8 @@
       "alreadyDecided": "This application has already been decided. Refresh to see the latest.",
       "reasonRequired": "Enter a reason for rejecting.",
       "generic": "Something went wrong. Please try again."
-    }
+    },
+    "noModerationAccess": "This area is for people with a moderation permission."
   },
   "shop": {
     "title": "My shop",
@@ -812,6 +814,69 @@
       "product_image_remove": "Removed a product photo",
       "product_image_primary": "Changed a product's main photo",
       "setting_update": "Changed a setting"
+    }
+  },
+  "moderation": {
+    "title": "Moderation",
+    "reason": "Reason",
+    "reasonHint": "The seller reads this in their email, so write it for them.",
+    "working": "Working...",
+    "confirm": "Confirm: {action}",
+    "cancel": "Cancel",
+    "show": "Show",
+    "search": "Search by name",
+    "searchButton": "Search",
+    "empty": "Nothing matches this search.",
+    "pagination": "Pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "products": {
+      "title": "Products",
+      "suspend": "Suspend product",
+      "restore": "Lift suspension",
+      "restoreHint": "The product comes back as not public, and the seller chooses when to publish it again.",
+      "filters": {
+        "published": "Live products",
+        "suspended": "Suspended products",
+        "unpublished": "Not public",
+        "all": "All products"
+      },
+      "status": {
+        "published": "Live",
+        "unpublished": "Not public",
+        "archived": "Archived",
+        "suspended": "Suspended"
+      }
+    },
+    "shops": {
+      "title": "Shops",
+      "products": "{count, plural, one {# product} other {# products}}",
+      "suspend": "Suspend shop",
+      "suspendHint": "The shop and all its products leave the public site, and it can't receive enquiries.",
+      "restore": "Restore shop",
+      "suspendPublishing": "Suspend publishing",
+      "suspendPublishingHint": "The seller can't publish, but products already live stay live.",
+      "restorePublishing": "Restore publishing",
+      "publishingOff": "Publishing suspended",
+      "filters": {
+        "all": "All shops",
+        "suspended": "Suspended shops",
+        "publishing_suspended": "Publishing suspended"
+      },
+      "status": {
+        "active": "Active",
+        "suspended": "Suspended"
+      }
+    },
+    "errors": {
+      "reasonRequired": "Enter a reason.",
+      "reasonTooLong": "The reason is too long.",
+      "notAllowed": "You don't have permission to do this.",
+      "changed": "This has already changed. The list now shows the latest.",
+      "generic": "That didn't work. Please try again.",
+      "loadFailed": "This list couldn't be loaded. Please refresh the page.",
+      "ownShop": "You can't moderate your own shop or products. Another administrator has to do this."
     }
   }
 }

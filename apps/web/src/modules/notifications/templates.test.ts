@@ -3,6 +3,12 @@ import { renderEmail } from "./templates";
 
 const TEMPLATES = [
   "welcome",
+  "product_suspended",
+  "product_restored",
+  "shop_suspended",
+  "shop_restored",
+  "publishing_suspended",
+  "publishing_restored",
   "application_received",
   "application_approved",
   "application_rejected",
@@ -40,6 +46,14 @@ describe("renderEmail", () => {
     expect(renderEmail("verification_revoked", { reason: "Closed" }, person, SITE)?.html).toContain("Closed");
     expect(renderEmail("verification_restored", { reason: "internal note" }, person, SITE)?.text).not.toContain("internal note");
     expect(renderEmail("verification_verified", { reason: "internal note" }, person, SITE)?.html).not.toContain("internal note");
+  });
+
+  it("names the product and gives the reason, keeping the product name out of the subject", () => {
+    const email = renderEmail("product_suspended", { product: "Tote <b>bag</b>", reason: "Fake" }, person, SITE);
+    expect(email?.text).toContain('"Tote <b>bag</b>"');
+    expect(email?.text).toContain("Reason: Fake");
+    expect(email?.html).not.toContain("<b>");
+    expect(email?.subject).not.toContain("Tote");
   });
 
   it("cannot be used to inject markup through a name or reason", () => {

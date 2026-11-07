@@ -33,6 +33,8 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 | Q-26 | **When should the welcome email go out?** The owner asked for a welcome email and a verification email at sign-up (2026-11-06); the PRD does not list a welcome email. | After the address is confirmed, so the sign-up form cannot be used to send it to a stranger. It is sent once per person, and accounts confirmed before this was built do not get one | Before launch |
 | Q-27 | **How is a visitor's internet address found on the live host?** Rate limits use `x-real-ip`, or else the last entry of `x-forwarded-for`, which suits one proxy in front of the app. | Check when the host is chosen (Q-11), since the wrong header would let a visitor get around the per-address limit | Before launch |
 | Q-28 | **Can a verified seller rename their shop and stay verified?** | **Decided by the owner (2026-11-07):** yes. They stay verified, and every change is logged with the old and new name, as with Q-03 | Decided |
+| Q-29 | **May an Admin moderate their own shop?** | **Decided by the owner (2026-11-07):** no. Only Super Admin may act on their own shop or products | Decided |
+| Q-30 | **Should sellers be emailed about moderation, with the reason?** | **Decided by the owner (2026-11-07):** yes, so moderators write reasons for the seller to read | Decided |
 | Q-25 | **Who checks the French emails?** The emails go out in the person's chosen language. The French text has not had a native review. | Reviewed along with the rest of the French text | Before launch |
 
 ## PRD §27 decisions, and how much the design depends on them
