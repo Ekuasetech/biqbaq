@@ -28,6 +28,14 @@ export const SETTING_GROUPS: { id: string; settings: SettingDefinition[] }[] = [
     ],
   },
   {
+    id: "features",
+    settings: [
+      { key: "reviews.enabled", id: "reviewsEnabled", kind: "toggle" },
+      { key: "favourites.enabled", id: "favouritesEnabled", kind: "toggle" },
+      { key: "reviews.max_per_hour", id: "reviewsPerHour", kind: "number", min: 1, max: 100 },
+    ],
+  },
+  {
     id: "email",
     settings: [{ key: "email.notifications_enabled", id: "emailNotifications", kind: "toggle" }],
   },

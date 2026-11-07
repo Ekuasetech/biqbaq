@@ -22,6 +22,7 @@ import {
   type SettingChange,
   type SettingDefinition,
 } from "@/modules/platform-configuration";
+import { refreshCatalog } from "@/modules/product-catalog/actions";
 
 const secondaryButton =
   "inline-flex h-10 items-center justify-center rounded-lg border border-border px-4 text-sm font-semibold hover:bg-muted disabled:opacity-60";
@@ -78,6 +79,8 @@ function SettingRow({ setting, value, onSaved }: { setting: SettingDefinition; v
       setFailure(settingErrorKey(error));
       return;
     }
+    // Some settings change public pages. If this refresh fails, they catch up within about a minute.
+    await refreshCatalog().catch(() => undefined);
     await onSaved();
     setSaving(false);
     setEditing(false);

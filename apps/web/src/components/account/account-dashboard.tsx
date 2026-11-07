@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { CircleAlert, Info } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { FavouritesCard } from "@/components/account/favourites-card";
 import { StaffCard } from "@/components/account/staff-card";
 import { ModerationLink } from "@/components/admin/moderation";
 import { RecentApplications } from "@/components/admin/recent-applications";
@@ -445,6 +446,7 @@ export function AccountDashboard() {
           </section>
         )}
         <StaffCard />
+        <FavouritesCard />
         {isSuperAdmin ? <RecentApplications /> : <ApplicationsCard applications={data.applications} onChanged={reload} />}
       </div>
     </div>

@@ -140,8 +140,6 @@
     "description": "Description",
     "condition": "État",
     "category": "Catégorie",
-    "favourite": "Ajouter aux favoris",
-    "favouriteHint": "Les favoris seront disponibles une fois la connexion ajoutée.",
     "viewImage": "Voir l'image {number}",
     "reviews": "Avis des clients",
     "noReviews": "Aucun avis pour le moment.",
@@ -703,6 +701,10 @@
       "api": {
         "title": "API publique des vendeurs",
         "help": "Limite la fréquence à laquelle une adresse Internet peut demander les produits d'un vendeur. Les sites web des vendeurs l'utilisent."
+      },
+      "features": {
+        "title": "Fonctionnalités",
+        "help": "Activez ou désactivez des parties du site pour tout le monde."
       }
     },
     "items": {
@@ -761,6 +763,18 @@
       "apiRequests": {
         "label": "Requêtes par adresse Internet",
         "help": "Le nombre maximal de requêtes par heure depuis une adresse Internet. Chaque visiteur du site d'un vendeur compte séparément."
+      },
+      "reviewsEnabled": {
+        "label": "Avis sur les produits",
+        "help": "Désactivé masque tous les avis et le formulaire. Les avis sont conservés."
+      },
+      "favouritesEnabled": {
+        "label": "Favoris",
+        "help": "Désactivé masque le bouton d'enregistrement. Les produits enregistrés sont conservés."
+      },
+      "reviewsPerHour": {
+        "label": "Avis par personne",
+        "help": "Le nombre maximal de nouveaux avis qu'une personne peut écrire en une heure."
       }
     },
     "history": {
@@ -840,7 +854,9 @@
       "staff_suspended": "A suspendu un membre du personnel",
       "staff_removed": "A retiré un membre du personnel",
       "staff_leave": "A quitté le personnel d'une boutique",
-      "staff_approve": "A approuvé un membre du personnel"
+      "staff_approve": "A approuvé un membre du personnel",
+      "review_hide": "A masqué un avis",
+      "review_restore": "A réaffiché un avis"
     }
   },
   "moderation": {
@@ -905,6 +921,25 @@
       "loadFailed": "Cette liste n'a pas pu être chargée. Veuillez actualiser la page.",
       "ownShop": "Vous ne pouvez pas modérer votre propre boutique ou vos propres produits. Un autre administrateur doit le faire.",
       "roleInactive": "Le rôle Vendeur du propriétaire de cette boutique est suspendu ou retiré. Rétablissez le rôle dans Personnes et rôles, et la boutique reviendra avec lui."
+    },
+    "reviews": {
+      "title": "Avis",
+      "about": "Avis sur {product}",
+      "by": "Par {name}",
+      "rating": "{rating} sur 5",
+      "hide": "Masquer l'avis",
+      "show": "Afficher l'avis",
+      "hideHint": "Il reste enregistré, mais disparaît de la page du produit.",
+      "hiddenBecause": "Masqué parce que : {reason}",
+      "filters": {
+        "published": "Affichés",
+        "hidden": "Masqués",
+        "all": "Tous les avis"
+      },
+      "status": {
+        "published": "Affiché",
+        "hidden": "Masqué"
+      }
     }
   },
   "people": {
@@ -1052,6 +1087,40 @@
       "options": "Ajoutez ?category=, ?availability=, ?sort=newest, price_asc, price_desc ou name, ?page= et ?pageSize= (jusqu'à 100), ou ?locale=fr pour le français.",
       "links": "Chaque produit a une url. Lorsqu'un visiteur clique sur un produit de votre site, envoyez-le vers cette page Biqbaq.",
       "limits": "Aucune clé n'est nécessaire, et elle peut être appelée depuis le navigateur d'un visiteur. Chaque visiteur peut faire jusqu'à la limite horaire fixée par Biqbaq, et les réponses sont mises en cache pendant une minute."
+    }
+  },
+  "reviews": {
+    "favourite": "Ajouter aux favoris",
+    "saved": "Enregistré",
+    "signInToSave": "Connectez-vous pour enregistrer les produits qui vous plaisent.",
+    "myFavourites": "Produits enregistrés",
+    "unavailable": "Ce produit n'est plus disponible.",
+    "remove": "Retirer",
+    "signIn": "Connectez-vous",
+    "signInToReview": "pour écrire un avis.",
+    "ownShop": "Vous ne pouvez pas évaluer les produits de votre propre boutique, ni d'une boutique où vous travaillez.",
+    "hiddenNote": "Biqbaq a masqué votre avis sur ce produit.",
+    "write": "Écrire un avis",
+    "edit": "Modifier votre avis",
+    "delete": "Supprimer votre avis",
+    "yourRating": "Votre note",
+    "stars": "{count, plural, one {# étoile} other {# étoiles}}",
+    "yourReview": "Votre avis (facultatif)",
+    "publicHint": "Votre avis et votre nom d'affichage sont publics.",
+    "publish": "Publier l'avis",
+    "working": "Enregistrement...",
+    "cancel": "Annuler",
+    "deleted": "Votre avis a été supprimé.",
+    "anonymous": "Un client de Biqbaq",
+    "errors": {
+      "ratingRequired": "Choisissez une note de 1 à 5 étoiles.",
+      "tooLong": "Votre avis est trop long.",
+      "ownShop": "Vous ne pouvez pas évaluer les produits de votre propre boutique, ni d'une boutique où vous travaillez.",
+      "hidden": "Biqbaq a masqué cet avis : il ne peut pas être modifié.",
+      "disabled": "Ceci n'est pas disponible pour le moment.",
+      "rateLimited": "Vous avez écrit plusieurs avis récemment. Veuillez réessayer dans une heure.",
+      "unavailable": "Ce produit n'est plus disponible.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
     }
   }
 }

@@ -42,6 +42,8 @@ export const AUDIT_ACTIONS = [
   "staff.suspended",
   "staff.removed",
   "staff.leave",
+  "review.hide",
+  "review.restore",
   "setting.update",
 ] as const;
 

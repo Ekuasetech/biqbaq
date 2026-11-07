@@ -345,7 +345,7 @@ reset role;
 select pg_temp.act_as('00000000-0000-4000-8000-0000000000a3');
 set local role authenticated;
 select is_empty($$ select key from platform_settings $$, 'ordinary users cannot read private settings');
-select results_eq($$ select key from public_platform_settings $$, $$ values ('media.max_image_bytes') $$, 'they can read public settings');
+select results_eq($$ select key from public_platform_settings order by key $$, $$ values ('favourites.enabled'), ('media.max_image_bytes'), ('reviews.enabled') $$, 'they can read public settings, and only those marked public');
 select throws_ok($$ select update_platform_setting('media.max_image_bytes', '1') $$, '42501', null, 'ordinary users cannot change settings');
 select is_empty($$ select id from platform_settings_history $$, 'ordinary users cannot read settings history');
 reset role;
@@ -354,7 +354,7 @@ reset role;
 
 select set_config('request.jwt.claims', '', true);
 set local role anon;
-select results_eq($$ select key from public_platform_settings $$, $$ values ('media.max_image_bytes') $$, 'visitors can read public settings');
+select results_eq($$ select key from public_platform_settings order by key $$, $$ values ('favourites.enabled'), ('media.max_image_bytes'), ('reviews.enabled') $$, 'visitors can read public settings, and only those marked public');
 select throws_ok($$ select * from platform_settings $$, '42501', null, 'visitors cannot read the settings table');
 select throws_ok($$ select * from profiles $$, '42501', null, 'visitors cannot read profiles');
 select throws_ok($$ select * from roles $$, '42501', null, 'visitors cannot read roles');

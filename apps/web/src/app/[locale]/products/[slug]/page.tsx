@@ -1,4 +1,3 @@
-import { Heart } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -6,16 +5,16 @@ import { productPhotoName, PageTransition } from "@/components/layout/page-trans
 import { SiteExtras } from "@/components/layout/site-extras";
 import { ContactForm } from "@/components/product/contact-form";
 import { ProductGrid } from "@/components/product/product-card";
+import { FavouriteButton, ReviewForm } from "@/components/product/product-engagement";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { RatingStars } from "@/components/product/rating-stars";
 import { SellerBadge } from "@/components/product/seller-badge";
 import { ShareButtons } from "@/components/product/share-buttons";
 import { ViewCount } from "@/components/product/view-count";
-import { Button } from "@/components/ui/button";
 import { getPathname, Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { averageRating, formatPrice } from "@/lib/format";
-import { getProductBySlug, listProductSlugs, listRelatedProducts } from "@/modules/product-catalog";
+import { getFeatureFlags, getProductBySlug, listProductSlugs, listRelatedProducts } from "@/modules/product-catalog";
 
 type Props = PageProps<"/[locale]/products/[slug]">;
 
@@ -56,6 +55,7 @@ export default async function ProductPage({ params }: Props) {
 
   const t = await getTranslations({ locale });
   const related = await listRelatedProducts(product, 4);
+  const features = await getFeatureFlags();
   const average = averageRating(product.reviews.map((r) => r.rating));
   const dateFormat = new Intl.DateTimeFormat(locale === "fr" ? "fr-CA" : "en-CA", {
     dateStyle: "medium",
@@ -87,7 +87,7 @@ export default async function ProductPage({ params }: Props) {
         <div className="flex flex-col gap-5">
           <div>
             <h1 className="font-heading text-3xl font-extrabold tracking-tight text-balance">{product.name}</h1>
-            {average !== null && (
+            {features.reviews && average !== null && (
               <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                 <RatingStars rating={average} />
                 {t("productDetail.ratingSummary", { average, count: product.reviews.length })}
@@ -122,12 +122,7 @@ export default async function ProductPage({ params }: Props) {
             )}
           </div>
 
-          <div>
-            <Button variant="outline" size="lg" className="h-10" disabled>
-              <Heart aria-hidden /> {t("productDetail.favourite")}
-            </Button>
-            <p className="mt-1.5 text-xs text-muted-foreground">{t("productDetail.favouriteHint")}</p>
-          </div>
+          {features.favourites && <FavouriteButton productId={product.id} />}
 
           <ShareButtons title={product.name} />
         </div>
@@ -140,6 +135,7 @@ export default async function ProductPage({ params }: Props) {
           <ContactForm productId={product.id} />
         </section>
 
+        {features.reviews && (
         <section aria-labelledby="reviews-title">
           <h2 id="reviews-title" className="font-heading text-2xl font-bold tracking-tight">{t("productDetail.reviews")}</h2>
           {product.reviews.length === 0 ? (
@@ -150,20 +146,22 @@ export default async function ProductPage({ params }: Props) {
                 <li key={review.id} className="rounded-2xl bg-card p-4 shadow-sm">
                   <div className="flex flex-wrap items-center gap-2 text-sm">
                     <RatingStars rating={review.rating} />
-                    <span className="font-semibold">{review.author}</span>
+                    <span className="font-semibold">{review.author || t("reviews.anonymous")}</span>
                     {review.verifiedPurchase && (
                       <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
                         {t("productDetail.verifiedPurchase")}
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-sm">{review.body}</p>
+                  {review.body && <p className="mt-1 whitespace-pre-line break-words text-sm">{review.body}</p>}
                   <p className="mt-1 text-xs text-muted-foreground">{dateFormat.format(new Date(review.createdAt))}</p>
                 </li>
               ))}
             </ul>
           )}
+          <ReviewForm productId={product.id} />
         </section>
+        )}
       </div>
 
       {related.length > 0 && (

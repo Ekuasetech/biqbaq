@@ -140,8 +140,6 @@
     "description": "Description",
     "condition": "Condition",
     "category": "Category",
-    "favourite": "Save to favourites",
-    "favouriteHint": "Saving favourites will be available once sign-in is added.",
     "viewImage": "View image {number}",
     "reviews": "Customer reviews",
     "noReviews": "No reviews yet.",
@@ -703,6 +701,10 @@
       "api": {
         "title": "Public seller API",
         "help": "Limits how often one internet address can ask for a seller's products. Sellers' own websites use this."
+      },
+      "features": {
+        "title": "Features",
+        "help": "Switch parts of the site on or off for everyone."
       }
     },
     "items": {
@@ -761,6 +763,18 @@
       "apiRequests": {
         "label": "Requests per internet address",
         "help": "Most requests one internet address can make in an hour. Each visitor to a seller's website counts separately."
+      },
+      "reviewsEnabled": {
+        "label": "Product reviews",
+        "help": "Off hides every review and the review form. Reviews are kept."
+      },
+      "favouritesEnabled": {
+        "label": "Favourites",
+        "help": "Off hides the save button. Saved products are kept."
+      },
+      "reviewsPerHour": {
+        "label": "Reviews per person",
+        "help": "Most new reviews one person can write in an hour."
       }
     },
     "history": {
@@ -840,7 +854,9 @@
       "staff_suspended": "Suspended a staff member",
       "staff_removed": "Removed a staff member",
       "staff_leave": "Left a shop's staff",
-      "staff_approve": "Approved a staff member"
+      "staff_approve": "Approved a staff member",
+      "review_hide": "Hid a review",
+      "review_restore": "Showed a hidden review"
     }
   },
   "moderation": {
@@ -905,6 +921,25 @@
       "loadFailed": "This list couldn't be loaded. Please refresh the page.",
       "ownShop": "You can't moderate your own shop or products. Another administrator has to do this.",
       "roleInactive": "This shop's owner has a suspended or removed Seller role. Restore the role in People and roles, and the shop comes back with it."
+    },
+    "reviews": {
+      "title": "Reviews",
+      "about": "Review of {product}",
+      "by": "By {name}",
+      "rating": "{rating} out of 5",
+      "hide": "Hide review",
+      "show": "Show review",
+      "hideHint": "It stays saved, but disappears from the product page.",
+      "hiddenBecause": "Hidden because: {reason}",
+      "filters": {
+        "published": "Showing",
+        "hidden": "Hidden",
+        "all": "All reviews"
+      },
+      "status": {
+        "published": "Showing",
+        "hidden": "Hidden"
+      }
     }
   },
   "people": {
@@ -1052,6 +1087,40 @@
       "options": "Add ?category=, ?availability=, ?sort=newest, price_asc, price_desc or name, ?page= and ?pageSize= (up to 100), or ?locale=fr for French.",
       "links": "Each product has a url. When a visitor clicks a product on your website, send them to that Biqbaq page.",
       "limits": "No key is needed, and it can be called from a visitor's browser. Each visitor can make up to the hourly limit Biqbaq sets, and answers are cached for a minute."
+    }
+  },
+  "reviews": {
+    "favourite": "Save to favourites",
+    "saved": "Saved",
+    "signInToSave": "Sign in to save products you like.",
+    "myFavourites": "Saved products",
+    "unavailable": "This product is no longer available.",
+    "remove": "Remove",
+    "signIn": "Sign in",
+    "signInToReview": "to write a review.",
+    "ownShop": "You can't review products from your own shop, or one you work for.",
+    "hiddenNote": "Biqbaq has hidden your review of this product.",
+    "write": "Write a review",
+    "edit": "Edit your review",
+    "delete": "Delete your review",
+    "yourRating": "Your rating",
+    "stars": "{count, plural, one {# star} other {# stars}}",
+    "yourReview": "Your review (optional)",
+    "publicHint": "Your review and your display name are shown publicly.",
+    "publish": "Post review",
+    "working": "Saving...",
+    "cancel": "Cancel",
+    "deleted": "Your review was deleted.",
+    "anonymous": "A Biqbaq customer",
+    "errors": {
+      "ratingRequired": "Choose a rating from 1 to 5 stars.",
+      "tooLong": "Your review is too long.",
+      "ownShop": "You can't review products from your own shop, or one you work for.",
+      "hidden": "Biqbaq has hidden this review, so it can't be changed.",
+      "disabled": "This isn't available right now.",
+      "rateLimited": "You've written several reviews recently. Please try again in an hour.",
+      "unavailable": "This product is no longer available.",
+      "generic": "That didn't work. Please try again."
     }
   }
 }

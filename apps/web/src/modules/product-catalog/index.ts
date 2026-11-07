@@ -83,7 +83,25 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   cacheLife("minutes");
   cacheTag(CATALOG_CACHE_TAG);
   const row = unwrap(await products().select(PRODUCT_COLUMNS).eq("slug", slug).maybeSingle());
-  return row ? toProduct(row as unknown as ProductRow) : null;
+  if (!row) return null;
+  const product = toProduct(row as unknown as ProductRow);
+  const reviews = unwrap(
+    await getSupabasePublicClient()
+      .from("public_reviews")
+      .select("id, rating, body, is_verified_purchase, created_at, author_name")
+      .eq("product_id", product.id)
+      .order("created_at", { ascending: false })
+      .limit(200),
+  ) as { id: string; rating: number; body: string; is_verified_purchase: boolean; created_at: string; author_name: string | null }[];
+  product.reviews = reviews.map((review) => ({
+    id: review.id,
+    author: review.author_name ?? "",
+    rating: review.rating,
+    body: review.body,
+    verifiedPurchase: review.is_verified_purchase,
+    createdAt: review.created_at,
+  }));
+  return product;
 }
 
 /** Newest first, up to a limit: pages beyond it are built the first time they are visited. */
@@ -154,4 +172,16 @@ async function relatedProducts(id: string, category: string, limit: number): Pro
 
 export async function listRelatedProducts(product: Product, limit: number): Promise<Product[]> {
   return relatedProducts(product.id, product.category, limit);
+}
+
+/** The public on/off switches Super Admin controls (PRD §7.3, §7.4). */
+export async function getFeatureFlags(): Promise<{ reviews: boolean; favourites: boolean }> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CATALOG_CACHE_TAG);
+  const rows = unwrap(
+    await getSupabasePublicClient().from("public_platform_settings").select("key, value").in("key", ["reviews.enabled", "favourites.enabled"]),
+  ) as { key: string; value: unknown }[];
+  const on = (key: string) => rows.find((row) => row.key === key)?.value !== false;
+  return { reviews: on("reviews.enabled"), favourites: on("favourites.enabled") };
 }

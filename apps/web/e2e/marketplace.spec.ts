@@ -1226,6 +1226,77 @@ test.describe("public marketplace", () => {
             await expect.poll(api, { timeout: 90000 }).toEqual([]);
           });
 
+          test("a buyer reviews and saves a product, the seller cannot, and a moderator hides it", async ({ page, browser, request }) => {
+            test.setTimeout(150000);
+            const { page: shop } = await approvedSeller(page, browser, request);
+            const name = `Reviewed ${unique()}`;
+            await addProduct(shop, name);
+            await item(shop, name).getByRole("button", { name: "Publish" }).click();
+            await expect(item(shop, name)).toContainText("Published");
+            const slug = sql(`select slug from public.products where name = '${name}'`);
+
+            // A visitor is asked to sign in.
+            const visitor = await (await browser.newContext()).newPage();
+            await visitor.goto(`/products/${slug}`);
+            const reviews = visitor.getByRole("region", { name: "Customer reviews" });
+            await expect(reviews).toContainText("No reviews yet.");
+            await expect(reviews).toContainText("to write a review.");
+            await expect(visitor.getByRole("link", { name: "Save to favourites" })).toBeVisible();
+
+            // The seller cannot review their own product.
+            await shop.goto(`/products/${slug}`);
+            await expect(shop.getByText("You can't review products from your own shop")).toBeVisible();
+
+            // A buyer reviews it.
+            const buyer = await newApplicant(browser, request);
+            await buyer.page.goto(`/products/${slug}`);
+            const section = buyer.page.getByRole("region", { name: "Customer reviews" });
+            await section.getByRole("button", { name: "Write a review" }).click();
+            await section.getByRole("button", { name: "Post review" }).click();
+            await expect(section.getByText("Choose a rating from 1 to 5 stars.")).toBeVisible();
+            // Clicks the fourth star, as a person would.
+            await section.getByRole("radio", { name: "4 stars" }).locator("xpath=..").click();
+            await expect(section.getByRole("radio", { name: "4 stars" })).toBeChecked();
+            await section.getByLabel("Your review (optional)").fill("Lovely quality <b>bold</b>");
+            await section.getByRole("button", { name: "Post review" }).click();
+            await expect(section.getByText("Lovely quality <b>bold</b>")).toBeVisible({ timeout: 15000 });
+            await expect(buyer.page.getByText("4 out of 5 from 1 review")).toBeVisible();
+            await expect(section.getByRole("button", { name: "Edit your review" })).toBeVisible();
+
+            // Everyone sees it.
+            await expect(async () => {
+              await visitor.reload();
+              await expect(visitor.getByRole("region", { name: "Customer reviews" })).toContainText("Lovely quality", { timeout: 2000 });
+            }).toPass({ timeout: 90000 });
+
+            // Saving it for later.
+            const save = buyer.page.getByRole("button", { name: "Save to favourites" });
+            await save.click();
+            await expect(buyer.page.getByRole("button", { name: "Saved" })).toHaveAttribute("aria-pressed", "true");
+            await buyer.page.goto("/account");
+            const saved = buyer.page.getByRole("region", { name: "Saved products" });
+            await expect(saved.getByRole("link", { name })).toBeVisible();
+            await saved.getByRole("button", { name: "Remove" }).click();
+            await expect(buyer.page.getByRole("region", { name: "Saved products" })).toHaveCount(0);
+
+            // A moderator hides it, with a reason.
+            await page.goto("/admin/moderation");
+            const panel = page.getByRole("region", { name: "Reviews" });
+            await panel.getByLabel("Search by name").fill(name);
+            await panel.getByRole("button", { name: "Search" }).click();
+            const card = panel.getByRole("article", { name: `Review of ${name}` });
+            await card.getByRole("button", { name: "Hide review" }).click();
+            await card.getByLabel("Reason").fill("Not about the product");
+            await card.getByRole("button", { name: "Confirm: Hide review" }).click();
+            await expect(panel.getByText("Nothing matches this search.")).toBeVisible();
+            await expect(async () => {
+              await visitor.reload();
+              await expect(visitor.getByRole("region", { name: "Customer reviews" })).toContainText("No reviews yet.", { timeout: 2000 });
+            }).toPass({ timeout: 90000 });
+            await buyer.page.goto(`/products/${slug}`);
+            await expect(buyer.page.getByText("Biqbaq has hidden your review of this product.")).toBeVisible();
+          });
+
           test("only Super Admin can open People and roles", async ({ page, request }) => {
             await confirmedAccount(page, request);
             await page.goto("/admin/people");
