@@ -545,6 +545,18 @@
         "unavailable": "L’envoi de photos n’est pas disponible pour le moment. Veuillez réessayer plus tard.",
         "generic": "La photo n’a pas été envoyée. Veuillez réessayer."
       }
+    },
+    "profile": {
+      "title": "Détails de la boutique",
+      "edit": "Modifier les détails",
+      "saved": "Les détails de votre boutique ont été enregistrés.",
+      "name": "Nom de la boutique",
+      "city": "Ville",
+      "category": "Que vendez-vous principalement ?",
+      "description": "À propos de votre boutique",
+      "contact": "Coordonnées",
+      "contactHint": "Privé. Seuls vous et les administrateurs de Biqbaq pouvez voir ceci.",
+      "publicHint": "Tout sauf vos coordonnées apparaît sur la page publique de votre boutique. L'adresse web de votre boutique reste la même."
     }
   },
   "errorPage": {

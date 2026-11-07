@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
 import { ProductPhotos } from "@/components/seller/product-photos";
+import { ShopProfile } from "@/components/seller/shop-profile";
 import { VerificationCard } from "@/components/seller/verification-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -376,6 +377,17 @@ export function MyShop() {
           )}
         </div>
       </section>
+
+      {shop.status === "active" && (
+        <ShopProfile
+          shop={shop}
+          categorySlugs={categories.map((category) => category.slug)}
+          onSaved={async () => {
+            await refreshPublicPages();
+            await reload();
+          }}
+        />
+      )}
 
       <VerificationCard
         status={shop.verification_status}

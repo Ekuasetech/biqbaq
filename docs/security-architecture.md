@@ -45,7 +45,7 @@ Default deny. Every table has RLS on, and no policy means no access.
 | `user_roles`, grants | Self; Super Admin | None (RPC only) |
 | `role_applications` | Applicant; Super Admin | None (RPC only, including submitting, so role-specific validation cannot be skipped) |
 | `sellers` | Members; admins with `sellers.manage`. Public uses `public_sellers` | Owner, safe columns only |
-| `seller_private` | Owner; `sellers.manage` | None (RPC, because changing email resets verification) |
+| `seller_private` | Owner; `sellers.manage` | None (`update_my_shop`, which audits every change) |
 | Staff tables | Seller members; the staff member's own row | `staff.manage` holders, via RPC |
 | `products` | Members; `products.moderate`. Public uses `public_products` | Members with permission, content columns only; status changes RPC only |
 | `product_publication_ledger` | Members; Super Admin | None |

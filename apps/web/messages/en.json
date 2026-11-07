@@ -545,6 +545,18 @@
         "unavailable": "Photo uploads aren't available right now. Please try again later.",
         "generic": "The photo didn't upload. Please try again."
       }
+    },
+    "profile": {
+      "title": "Shop details",
+      "edit": "Edit shop details",
+      "saved": "Your shop details were saved.",
+      "name": "Shop name",
+      "city": "City",
+      "category": "What do you mainly sell?",
+      "description": "About your shop",
+      "contact": "Contact information",
+      "contactHint": "Private. Only you and Biqbaq administrators can see this.",
+      "publicHint": "Everything except your contact information shows on your public shop page. Your shop's web address stays the same."
     }
   },
   "errorPage": {

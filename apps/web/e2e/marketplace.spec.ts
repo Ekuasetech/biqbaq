@@ -919,6 +919,44 @@ test.describe("public marketplace", () => {
           }
           const item = (page: import("@playwright/test").Page, name: string) => page.getByRole("article", { name });
 
+          test("a seller edits their shop details, and only the public ones show", async ({ page, browser, request }) => {
+            test.setTimeout(120000);
+            const { page: shop } = await approvedSeller(page, browser, request);
+            const id = unique();
+            await expect(shop.getByRole("region", { name: "Ada's Shop" })).toBeVisible();
+            const shopLink = await shop.getByRole("link", { name: "View public page" }).getAttribute("href");
+
+            const details = shop.getByRole("region", { name: "Shop details" });
+            await details.getByRole("button", { name: "Edit shop details" }).click();
+            await details.getByLabel("Shop name").fill("   ");
+            await details.getByRole("button", { name: "Save" }).click();
+            await expect(details.getByText("This is required.")).toBeVisible();
+
+            await details.getByLabel("Shop name").fill(`Renamed ${id}`);
+            await details.getByLabel("City").fill("Halifax");
+            await details.getByLabel("About your shop").fill(`Public words ${id}`);
+            await details.getByLabel("Contact information").fill(`PRIVATE-${id}`);
+            await details.getByRole("button", { name: "Save" }).click();
+            await expect(details.getByText("Your shop details were saved.")).toBeVisible();
+            await expect(shop.getByRole("heading", { name: `Renamed ${id}` })).toBeVisible();
+
+            // It shows publicly at the same address, without the private details. This is usually
+            // immediate, but a page being cached at that moment can lag by about a minute.
+            const visitor = await (await browser.newContext()).newPage();
+            await expect(async () => {
+              await visitor.goto(shopLink!);
+              await expect(visitor.getByRole("main")).toContainText(`Renamed ${id}`, { timeout: 2000 });
+            }).toPass({ timeout: 90000 });
+            await expect(visitor.getByRole("main")).toContainText("Halifax");
+            await expect(visitor.getByRole("main")).toContainText(`Public words ${id}`);
+            expect(await visitor.content()).not.toContain(`PRIVATE-${id}`);
+
+            // The private details come back for the owner, after a reload.
+            await shop.reload();
+            await shop.getByRole("region", { name: "Shop details" }).getByRole("button", { name: "Edit shop details" }).click();
+            await expect(shop.getByLabel("Contact information")).toHaveValue(`PRIVATE-${id}`);
+          });
+
           test("a seller's first two products go live, and the limit holds through deleting", async ({ page, browser, request }) => {
             test.setTimeout(120000);
             const { page: shop, email } = await approvedSeller(page, browser, request);

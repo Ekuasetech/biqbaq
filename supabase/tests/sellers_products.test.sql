@@ -68,7 +68,7 @@ reset role;
 select pg_temp.act_as('00000000-0000-4000-8000-0000000000c2');
 set local role authenticated;
 select is((select contact_information from seller_private), '416-555-0100', 'a seller can read their own private details');
-select lives_ok($$ update sellers set description = 'New words' where owner_user_id = auth.uid() $$, 'a seller can edit their shop');
+select throws_ok($$ update sellers set description = 'New words' where owner_user_id = auth.uid() $$, '42501', null, 'shop details change only through update_my_shop, which audits them');
 select throws_ok($$ update sellers set verification_status = 'manually_verified' $$, '42501', null, 'a seller cannot verify themselves');
 select throws_ok($$ update sellers set allowance_override = 1000 $$, '42501', null, 'a seller cannot raise their own allowance');
 select throws_ok($$ update sellers set status = 'active' $$, '42501', null, 'a seller cannot change their shop status');
