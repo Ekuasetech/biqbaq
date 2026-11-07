@@ -78,7 +78,7 @@ Default deny. Every table has RLS on, and no policy means no access.
 | Payment webhooks | Signature checked before parsing; dedupe by event ID; amounts confirmed with the provider |
 | Uploads | Ownership check before signing; size, format and dimensions verified after upload |
 | Email delivery | A real recipient needs `EMAIL_LIVE_SENDING=true` and no `EMAIL_TEST_RECIPIENT`; otherwise mail goes to the test address or is refused. Reserved test addresses never reach Resend. People's text is escaped in HTML and kept out of subjects. Only Resend's status and error name are stored |
-| Anonymous contact | Validation, length limits, IP and per-seller rate limits, honeypot (Q-13), header injection blocked by the Resend API's structured fields |
+| Anonymous contact | The seller's address is only read by the server-only `prepare_contact_enquiry`, and only for a public product and a confirmed address. The log holds keyed hashes and no message. Validation, length limits, IP and per-seller rate limits, honeypot (Q-13), header injection blocked by the Resend API's structured fields |
 | Public API | Restricted views, an explicit response schema so new columns cannot leak, rate limiting |
 | Open redirects | Ad destinations are validated as `https` URLs. Referral codes are looked up, not reflected |
 | Blog and description content | Sanitized on render; no raw HTML from sellers |

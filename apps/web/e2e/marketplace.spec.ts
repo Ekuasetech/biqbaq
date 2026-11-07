@@ -1654,15 +1654,45 @@ test.describe("public marketplace", () => {
     await expect(page.getByText("Verified Seller").first()).toBeVisible();
   });
 
-  test("contact form validates, and is honest that nothing is sent", async ({ page }) => {
+  test("contact form validates, and sends the enquiry to the seller without showing their address", async ({ page, request }) => {
+    const token = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+    await page.setExtraHTTPHeaders({ "x-forwarded-for": `10.1.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}` });
+    const responses: string[] = [];
+    page.on("response", async (response) => {
+      if (response.url().includes("/contact")) responses.push(await response.text());
+    });
     await page.goto("/products/ankara-tote-bag");
     await page.getByRole("button", { name: "Send message" }).click();
     await expect(page.getByText("Enter your name.")).toBeVisible();
     await expect(page.getByText("Enter a valid email address.")).toBeVisible();
     await page.getByLabel("Your name").fill("Ada");
+    await page.getByLabel("Your email").fill(`visitor-${token}@example.com`);
+    await page.getByLabel("Subject").fill(`Hello ${token}`);
+    await page.getByLabel("Message").fill("Is this in stock?");
+    await page.getByRole("button", { name: "Send message" }).click();
+    await expect(page.getByText("Your message was sent to the seller.")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByLabel("Message")).toHaveValue("");
+
+    const mailpit = "http://127.0.0.1:54324/api/v1";
+    const query = encodeURIComponent(`subject:"Hello ${token}"`);
+    await expect.poll(async () => (await (await request.get(`${mailpit}/search?query=${query}`)).json()).messages.length).toBe(1);
+    const found = (await (await request.get(`${mailpit}/search?query=${query}`)).json()).messages[0];
+    const message = await (await request.get(`${mailpit}/message/${found.ID}`)).json();
+    expect(message.To[0].Address).toBe("adire-studio@example.com");
+    expect(message.ReplyTo[0].Address).toBe(`visitor-${token}@example.com`);
+    expect(message.Text).toContain("Is this in stock?");
+    expect(message.Text).toContain("Ankara");
+
+    expect(responses.join()).not.toContain("adire-studio@");
+    expect(await page.content()).not.toContain("adire-studio@");
+  });
+
+  test("a cargo car's form stays honest that nothing is sent, until cars are real", async ({ page }) => {
+    await page.goto("/cargo-cars/2021-toyota-sienna");
+    await page.getByLabel("Your name").fill("Ada");
     await page.getByLabel("Your email").fill("ada@example.com");
     await page.getByLabel("Subject").fill("Hello");
-    await page.getByLabel("Message").fill("Is this in stock?");
+    await page.getByLabel("Message").fill("Is there room?");
     await page.getByRole("button", { name: "Send message" }).click();
     await expect(page.getByText("it was not sent")).toBeVisible();
   });
@@ -1723,4 +1753,54 @@ test("the email worker cannot be run from outside", async ({ request }) => {
   const body = await response.json();
   expect(body.error.code).toBe("WORKER_NOT_CONFIGURED");
   expect(JSON.stringify(body)).not.toContain("claimed");
+});
+
+test.describe("the contact API", () => {
+  const address = () => `10.2.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+  const enquiry = (email: string) => ({ name: "Ada", email, subject: "Spam check", message: "Hello" });
+
+  async function productId(page: import("@playwright/test").Page) {
+    let id = "";
+    page.on("request", (sent) => {
+      const match = /\/api\/v1\/products\/([^/]+)\/contact/.exec(sent.url());
+      if (match) id = match[1];
+    });
+    await page.goto("/products/ankara-tote-bag");
+    await page.route("**/contact", (route) => route.fulfill({ status: 202, body: "{}" }));
+    await page.getByLabel("Your name").fill("Ada");
+    await page.getByLabel("Your email").fill("ada@example.com");
+    await page.getByLabel("Subject").fill("Id");
+    await page.getByLabel("Message").fill("Id");
+    await page.getByRole("button", { name: "Send message" }).click();
+    await expect.poll(() => id).not.toBe("");
+    return id;
+  }
+
+  test("refuses what it should, and stops at the limit", async ({ page, request }) => {
+    const id = await productId(page);
+    const url = `/api/v1/products/${id}/contact`;
+    const ip = address();
+    const headers = { "x-forwarded-for": ip };
+    const token = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+
+    expect((await request.post("/api/v1/products/not-an-id/contact", { data: enquiry("a@example.com"), headers })).status()).toBe(404);
+    expect((await request.post("/api/v1/products/00000000-0000-4000-8000-000000000000/contact", { data: enquiry("a@example.com"), headers })).status()).toBe(404);
+    expect((await request.post(url, { data: { ...enquiry("nope") }, headers })).status()).toBe(400);
+    expect((await request.post(url, { data: { ...enquiry("a@example.com"), extra: "x" }, headers })).status()).toBe(400);
+    expect((await request.post(url, { data: "x".repeat(20001), headers: { ...headers, "content-type": "application/json" } })).status()).toBe(400);
+
+    // A robot filling in the hidden field is told it worked, and nothing is sent.
+    const robot = `robot-${token}@example.com`;
+    expect((await request.post(url, { data: { ...enquiry(robot), website: "http://spam.example" }, headers })).status()).toBe(202);
+    const inbox = await (await request.get(`http://127.0.0.1:54324/api/v1/search?query=${encodeURIComponent(`from:"${robot}" OR "${robot}"`)}`)).json();
+    expect(inbox.messages.length).toBe(0);
+
+    const statuses = [];
+    for (let i = 0; i < 6; i += 1) {
+      const response = await request.post(url, { data: enquiry(`limit-${token}-${i}@example.com`), headers });
+      statuses.push(response.status());
+      expect(await response.text()).not.toContain("adire-studio@");
+    }
+    expect(statuses).toEqual([202, 202, 202, 202, 202, 429]);
+  });
 });

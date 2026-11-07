@@ -1,6 +1,6 @@
 "use client";
 
-import { Info } from "lucide-react";
+import { CircleAlert, CircleCheck, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -11,21 +11,51 @@ import { CONTACT_LIMITS, contactEnquirySchema } from "@/modules/seller-contact/s
 
 type FieldErrors = Partial<Record<"name" | "email" | "subject" | "message", string>>;
 
-// Sending arrives in Phase 4 (Resend, server validation, rate limiting), so this
-// only validates, and tells the visitor plainly that nothing was sent.
-export function ContactForm() {
+type Outcome = "preview" | "sent" | "rateLimited" | "unavailable" | "failed";
+
+// With no product, as on a cargo car while those are sample data, this only validates
+// and tells the visitor plainly that nothing was sent.
+export function ContactForm({ productId }: { productId?: string }) {
   const t = useTranslations("contact");
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [validated, setValidated] = useState(false);
+  const [outcome, setOutcome] = useState<Outcome | null>(null);
+  const [working, setWorking] = useState(false);
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = contactEnquirySchema.safeParse(
-      Object.fromEntries(new FormData(event.currentTarget)),
-    );
+    if (working) return;
+    const form = event.currentTarget;
+    const { website, ...fields } = Object.fromEntries(new FormData(form));
+    const result = contactEnquirySchema.safeParse(fields);
     if (result.success) {
       setErrors({});
-      setValidated(true);
+      if (!productId) {
+        setOutcome("preview");
+        return;
+      }
+      setWorking(true);
+      setOutcome(null);
+      try {
+        const response = await fetch(`/api/v1/products/${productId}/contact`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(website ? { ...result.data, website } : result.data),
+        });
+        if (response.ok) {
+          form.reset();
+          setOutcome("sent");
+        } else if (response.status === 429) {
+          setOutcome("rateLimited");
+        } else if (response.status === 404 || response.status === 503) {
+          setOutcome("unavailable");
+        } else {
+          setOutcome("failed");
+        }
+      } catch {
+        setOutcome("failed");
+      } finally {
+        setWorking(false);
+      }
       return;
     }
     const next: FieldErrors = {};
@@ -34,7 +64,7 @@ export function ContactForm() {
       next[field] ??= issue.message;
     }
     setErrors(next);
-    setValidated(false);
+    setOutcome(null);
   }
 
   const field = (name: keyof FieldErrors) => ({
@@ -73,15 +103,26 @@ export function ContactForm() {
         <Textarea {...field("message")} rows={5} maxLength={CONTACT_LIMITS.message} />
         {error("message")}
       </div>
+      {/* Hidden from people, so only a robot fills it in. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] size-px overflow-hidden">
+        <label htmlFor="contact-website">Website</label>
+        <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
       <div className="flex flex-col gap-3 sm:col-span-2">
-        <Button type="submit" size="lg" className="h-11 w-full bg-brand-red px-6 text-brand-red-foreground hover:bg-brand-red/90 sm:w-fit">
-          {t("send")}
+        <Button type="submit" size="lg" disabled={working} className="h-11 w-full bg-brand-red px-6 text-brand-red-foreground hover:bg-brand-red/90 sm:w-fit">
+          {working ? t("sending") : t("send")}
         </Button>
         <p role="status" className="min-h-5 text-sm">
-          {validated && (
-            <span className="flex gap-2">
-              <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
-              {t("previewResult")}
+          {outcome && (
+            <span className={`flex gap-2 ${outcome === "sent" || outcome === "preview" ? "" : "text-destructive"}`}>
+              {outcome === "sent" ? (
+                <CircleCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
+              ) : outcome === "preview" ? (
+                <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+              ) : (
+                <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
+              )}
+              {t(`outcome.${outcome}`)}
             </span>
           )}
         </p>

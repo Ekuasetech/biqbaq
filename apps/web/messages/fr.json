@@ -170,7 +170,6 @@
     "subject": "Objet",
     "message": "Message",
     "send": "Envoyer le message",
-    "previewResult": "Votre message est valide, mais il n'a pas été envoyé : l'envoi n'est pas activé dans cet aperçu.",
     "errors": {
       "nameRequired": "Entrez votre nom.",
       "nameTooLong": "Votre nom est trop long.",
@@ -179,6 +178,14 @@
       "subjectTooLong": "L'objet est trop long.",
       "messageRequired": "Entrez un message.",
       "messageTooLong": "Le message est trop long."
+    },
+    "sending": "Envoi...",
+    "outcome": {
+      "preview": "Votre message est valide, mais il n'a pas été envoyé : l'envoi n'est pas activé dans cet aperçu.",
+      "sent": "Votre message a été envoyé au vendeur. Il répondra à l'adresse courriel que vous avez saisie.",
+      "rateLimited": "Vous avez envoyé plusieurs messages récemment. Veuillez réessayer dans une heure.",
+      "unavailable": "Ce vendeur ne peut pas recevoir de messages pour le moment.",
+      "failed": "Votre message n'a pas pu être envoyé. Veuillez réessayer."
     }
   },
   "legal": {

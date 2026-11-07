@@ -70,8 +70,8 @@ The owner decided that publishing does not need a verified contact email (Q-06),
 Needs: BD-04, BD-05, Q-10, Q-13.
 
 1. `background_jobs`, the worker and `EmailService` with Resend are **built**, and send the decision emails below. The Auth email hook is **built** on the local copy, so sign-up and password emails go through `EmailService` too.
-2. Send enquiries to the seller's login email, which is already verified (Q-06).
-3. Anonymous contact form.
+2. Send enquiries to the seller's login email, which is already verified (Q-06). **Built.**
+3. Anonymous contact form. **Built** for products; cargo cars follow once they use real data.
 4. Messaging, inbox and Realtime.
 5. In-app notifications and preferences.
 

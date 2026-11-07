@@ -362,7 +362,7 @@ select is_empty(
 );
 select is_empty(
   $$ select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-     where n.nspname = 'public' and p.proname not in ('record_product_image', 'claim_email_jobs', 'complete_background_job', 'fail_background_job') and not has_function_privilege('authenticated', p.oid, 'execute') $$,
+     where n.nspname = 'public' and p.proname not in ('record_product_image', 'claim_email_jobs', 'complete_background_job', 'fail_background_job', 'prepare_contact_enquiry', 'finish_contact_enquiry') and not has_function_privilege('authenticated', p.oid, 'execute') $$,
   'signed-in users keep the functions that do their own checks'
 );
 

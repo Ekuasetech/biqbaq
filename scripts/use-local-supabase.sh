@@ -9,6 +9,7 @@ case "${API_URL:-}" in
   http://127.0.0.1*) ;;
   *) echo "Local Supabase is not running. Start it with: npx supabase start" >&2; exit 1 ;;
 esac
+CONTACT_SECRET="$(openssl rand -hex 32)"
 HOOK_SECRET="$(sed -n 's/^secrets = "\(v1,whsec_.*\)"$/\1/p' supabase/config.toml)"
 for file in apps/web/.env.development.local apps/web/.env.production.local; do
   {
@@ -19,6 +20,7 @@ for file in apps/web/.env.development.local apps/web/.env.production.local; do
     echo "CLOUDINARY_FOLDER=biqbaq-local"
     echo "SEND_EMAIL_HOOK_SECRET=$HOOK_SECRET"
     echo "EMAIL_LOCAL_INBOX_URL=http://127.0.0.1:54324"
+    echo "CONTACT_HASH_SECRET=$CONTACT_SECRET"
   } > "$file"
 done
 echo "Web app now uses the local Supabase copy."

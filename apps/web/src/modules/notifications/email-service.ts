@@ -15,7 +15,7 @@ const readEnv = (): EmailEnv => ({
 });
 
 /** Delivers to this computer's test inbox, so account tests never reach Resend. */
-async function sendToLocalInbox(url: string, to: string, email: RenderedEmail, timeoutMs: number): Promise<SendResult> {
+async function sendToLocalInbox(url: string, to: string, email: RenderedEmail, timeoutMs: number, replyTo?: string): Promise<SendResult> {
   try {
     const response = await fetch(`${url}/api/v1/send`, {
       method: "POST",
@@ -26,6 +26,7 @@ async function sendToLocalInbox(url: string, to: string, email: RenderedEmail, t
         Subject: email.subject,
         Text: email.text,
         HTML: email.html,
+        ...(replyTo ? { ReplyTo: [{ Email: replyTo }] } : {}),
       }),
       signal: AbortSignal.timeout(timeoutMs),
     });
@@ -52,7 +53,7 @@ export const EmailService = {
     const delivery = resolveDelivery(to, options.useLocalInbox ? { ...env, localInboxUrl: process.env.EMAIL_LOCAL_INBOX_URL } : env);
     if (delivery.kind === "suppress") return { status: "suppressed" };
     if (delivery.kind === "refuse") return { status: "failed", code: delivery.reason, retry: true };
-    if (delivery.kind === "local_inbox") return sendToLocalInbox(delivery.url, to, email, timeoutMs);
+    if (delivery.kind === "local_inbox") return sendToLocalInbox(delivery.url, to, email, timeoutMs, options.replyTo);
 
     const redirected = delivery.redirectedFrom !== undefined;
     const note = redirected ? `Test email, which would have gone to ${delivery.redirectedFrom}` : null;

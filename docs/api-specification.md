@@ -73,7 +73,6 @@ Authenticated. Authorization is enforced on the server. Everything else goes via
 | `POST /checkout` | Server-side payment initialization | 7 |
 | `POST /webhooks/payments/{provider}` | Signature-verified provider events | 7 |
 | `POST /webhooks/verification/{provider}` | Signature-verified provider results | 10 |
-| `POST /internal/jobs/run` | Worker trigger; requires a scheduler secret | 4 |
 
 ### `POST /products/{id}/contact`
 

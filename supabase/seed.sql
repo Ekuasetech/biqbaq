@@ -8,6 +8,9 @@ insert into auth.users (id, email) values
   ('00000000-0000-4000-8000-0000000000d3', 'kano-naturals@example.com'),
   ('00000000-0000-4000-8000-0000000000d4', 'oyo-weavers@example.com');
 
+-- Enquiries only go to a confirmed address, so the sample shops can receive them.
+update auth.users set email_confirmed_at = now() where id::text like '00000000-0000-4000-8000-0000000000d%';
+
 insert into public.user_roles (user_id, role_key)
 select id, 'seller' from auth.users where email like '%@example.com' and id::text like '00000000-0000-4000-8000-0000000000d%';
 

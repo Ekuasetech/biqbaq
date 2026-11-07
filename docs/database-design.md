@@ -66,7 +66,7 @@ Slugs must be unique, and real titles repeat (two 2021 Toyota Siennas), so a gen
 | `conversations` | `buyer_id`, `seller_id`, `product_id`, `vehicle_listing_id`, `status`, `last_message_at` | At most one listing reference, enforced by `CHECK` |
 | `conversation_reads` | `conversation_id`, `user_id`, `last_read_at`, `archived_at` | Per-user unread count and archive |
 | `messages` | `conversation_id`, `sender_id`, `body`, `created_at` | Indexed on (`conversation_id`, `created_at`) |
-| `contact_enquiries` | `product_id`, `seller_id`, `visitor_email_hash`, `ip_hash`, `status`, `provider_message_id` | Delivery log; the message itself is not stored |
+| `contact_enquiries` | `product_id`, `seller_id`, `visitor_email_hash`, `ip_hash`, `status`, `provider_message_id`, `last_error` | Delivery log; the message itself is not stored |
 
 ## Content and advertising (Phase 6)
 

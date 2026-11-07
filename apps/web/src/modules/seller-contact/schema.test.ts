@@ -16,6 +16,11 @@ describe("contactEnquirySchema", () => {
   it("rejects overlong messages", () => {
     expect(firstError({ ...valid, message: "x".repeat(CONTACT_LIMITS.message + 1) })).toBe("messageTooLong");
   });
+  it("keeps a name and subject on one line, as they reach an email's headers", () => {
+    const result = contactEnquirySchema.parse({ ...valid, name: "Ada\r\nBcc: x@y.com", subject: "Hi\nBcc: x@y.com" });
+    expect(result.name).toBe("Ada Bcc: x@y.com");
+    expect(result.subject).toBe("Hi Bcc: x@y.com");
+  });
   it("rejects a line break in the email, which could inject headers", () => {
     expect(firstError({ ...valid, email: "a@b.com\nBcc: x@y.com" })).toBe("emailInvalid");
   });

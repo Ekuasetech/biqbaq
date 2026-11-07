@@ -170,7 +170,6 @@
     "subject": "Subject",
     "message": "Message",
     "send": "Send message",
-    "previewResult": "Your message is valid, but it was not sent: sending isn't connected in this preview.",
     "errors": {
       "nameRequired": "Enter your name.",
       "nameTooLong": "Your name is too long.",
@@ -179,6 +178,14 @@
       "subjectTooLong": "The subject is too long.",
       "messageRequired": "Enter a message.",
       "messageTooLong": "The message is too long."
+    },
+    "sending": "Sending...",
+    "outcome": {
+      "preview": "Your message is valid, but it was not sent: sending isn't connected in this preview.",
+      "sent": "Your message was sent to the seller. They will reply to the email address you entered.",
+      "rateLimited": "You've sent several messages recently. Please try again in an hour.",
+      "unavailable": "This seller can't receive messages right now.",
+      "failed": "Your message could not be sent. Please try again."
     }
   },
   "legal": {
