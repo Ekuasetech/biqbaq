@@ -22,6 +22,7 @@ No API key. CORS open for this read endpoint so that independent sites can call 
 | `category` | category slug | |
 | `availability` | availability value | |
 | `sort` | `newest` (default), `price_asc`, `price_desc`, `name` | |
+| `locale` | `en` (default), `fr` | Category names and the `url` follow it |
 
 Response `200`:
 
@@ -50,7 +51,8 @@ Response `200`:
 - **Excluded:** drafts, unpublished, archived, suspended and deleted products, and all private seller data.
 - **Stable:** `id` never changes. `url` is the canonical page, where clicks must go (§10.5).
 - **Headers:** `Cache-Control` with `s-maxage` and `stale-while-revalidate`, plus `ETag`. Product changes invalidate the seller's cache tag.
-- **Rate limit:** per IP, returning `429` with `Retry-After`. The exact limit is set at implementation and configurable.
+- **Rate limit:** per IP, 600 requests an hour by default (the `api.max_requests_per_hour` setting), returning `429` with `Retry-After`. Each visitor to a seller's website counts separately, as their browser makes the call.
+- **Built (2026-11-07):** also returns `seller.city`, `seller.url` and each product's `publishedAt`. `400` for a bad query, `405` for anything but `GET` and `OPTIONS`, and `304` for a matching `If-None-Match`.
 - **Output:** built from an explicit schema, not by passing database rows through.
 
 ## Trusted operations

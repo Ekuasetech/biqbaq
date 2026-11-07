@@ -699,6 +699,10 @@
       "staff": {
         "title": "Invitations de personnel",
         "help": "Empêche une boutique d'utiliser les invitations pour envoyer des courriels sans limite."
+      },
+      "api": {
+        "title": "API publique des vendeurs",
+        "help": "Limite la fréquence à laquelle une adresse Internet peut demander les produits d'un vendeur. Les sites web des vendeurs l'utilisent."
       }
     },
     "items": {
@@ -753,6 +757,10 @@
       "staffInvitations": {
         "label": "Invitations par boutique",
         "help": "Le nombre maximal d'invitations de personnel par boutique en une heure."
+      },
+      "apiRequests": {
+        "label": "Requêtes par adresse Internet",
+        "help": "Le nombre maximal de requêtes par heure depuis une adresse Internet. Chaque visiteur du site d'un vendeur compte séparément."
       }
     },
     "history": {
@@ -1029,5 +1037,21 @@
     "confirmDecline": "Oui, refuser",
     "awaitingSeller": "Vous avez accepté. La boutique doit encore vous approuver avant que vous puissiez commencer.",
     "roleBlocked": "Biqbaq a suspendu ou retiré votre rôle Personnel du vendeur : vous ne pouvez pas travailler dans cette boutique."
+  },
+  "shopApi": {
+    "title": "Affichez vos produits sur votre propre site web",
+    "intro": "Si vous avez votre propre site web, donnez cette adresse à la personne qui le crée. Elle permet à votre site d'afficher vos produits publiés sur Biqbaq. Biqbaq ne crée ni n'héberge votre site.",
+    "address": "L'adresse des produits de votre boutique",
+    "copy": "Copier l'adresse",
+    "open": "L'ouvrir",
+    "copied": "Copiée.",
+    "copyFailed": "Votre navigateur n'a pas permis la copie. Sélectionnez l'adresse et copiez-la vous-même.",
+    "forDeveloper": "Notes pour la personne qui crée votre site",
+    "developer": {
+      "what": "Elle renvoie vos produits publiés en JSON, avec les noms, descriptions, prix, photos, disponibilités et catégories. Les brouillons et les produits non publics ne sont jamais inclus.",
+      "options": "Ajoutez ?category=, ?availability=, ?sort=newest, price_asc, price_desc ou name, ?page= et ?pageSize= (jusqu'à 100), ou ?locale=fr pour le français.",
+      "links": "Chaque produit a une url. Lorsqu'un visiteur clique sur un produit de votre site, envoyez-le vers cette page Biqbaq.",
+      "limits": "Aucune clé n'est nécessaire, et elle peut être appelée depuis le navigateur d'un visiteur. Chaque visiteur peut faire jusqu'à la limite horaire fixée par Biqbaq, et les réponses sont mises en cache pendant une minute."
+    }
   }
 }

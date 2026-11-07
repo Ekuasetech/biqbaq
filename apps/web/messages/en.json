@@ -699,6 +699,10 @@
       "staff": {
         "title": "Staff invitations",
         "help": "Stops a shop from using invitations to email strangers without limit."
+      },
+      "api": {
+        "title": "Public seller API",
+        "help": "Limits how often one internet address can ask for a seller's products. Sellers' own websites use this."
       }
     },
     "items": {
@@ -753,6 +757,10 @@
       "staffInvitations": {
         "label": "Invitations per shop",
         "help": "Most staff invitations one shop can send in an hour."
+      },
+      "apiRequests": {
+        "label": "Requests per internet address",
+        "help": "Most requests one internet address can make in an hour. Each visitor to a seller's website counts separately."
       }
     },
     "history": {
@@ -1029,5 +1037,21 @@
     "confirmDecline": "Yes, decline them",
     "awaitingSeller": "You have accepted. The shop still needs to approve you before you can start.",
     "roleBlocked": "Biqbaq has suspended or removed your Seller Staff role, so you can't work in this shop."
+  },
+  "shopApi": {
+    "title": "Show your products on your own website",
+    "intro": "If you have your own website, give this address to whoever builds it. It lets your website list your published products from Biqbaq. Biqbaq doesn't build or host your website.",
+    "address": "Your shop's product address",
+    "copy": "Copy address",
+    "open": "Open it",
+    "copied": "Copied.",
+    "copyFailed": "Your browser didn't allow copying. Select the address and copy it yourself.",
+    "forDeveloper": "Notes for your website developer",
+    "developer": {
+      "what": "It returns your published products as JSON, with names, descriptions, prices, photos, availability and categories. Drafts and unpublished products are never included.",
+      "options": "Add ?category=, ?availability=, ?sort=newest, price_asc, price_desc or name, ?page= and ?pageSize= (up to 100), or ?locale=fr for French.",
+      "links": "Each product has a url. When a visitor clicks a product on your website, send them to that Biqbaq page.",
+      "limits": "No key is needed, and it can be called from a visitor's browser. Each visitor can make up to the hourly limit Biqbaq sets, and answers are cached for a minute."
+    }
   }
 }

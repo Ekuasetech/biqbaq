@@ -40,6 +40,10 @@ export const SETTING_GROUPS: { id: string; settings: SettingDefinition[] }[] = [
     ],
   },
   {
+    id: "api",
+    settings: [{ key: "api.max_requests_per_hour", id: "apiRequests", kind: "number", min: 10, max: 100000 }],
+  },
+  {
     id: "staff",
     settings: [{ key: "staff.max_invitations_per_hour", id: "staffInvitations", kind: "number", min: 1, max: 100 }],
   },

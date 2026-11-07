@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
 import { ProductPhotos } from "@/components/seller/product-photos";
+import { ShopApi } from "@/components/seller/shop-api";
 import { ShopProfile } from "@/components/seller/shop-profile";
 import { ShopStaff } from "@/components/seller/shop-staff";
 import { VerificationCard } from "@/components/seller/verification-card";
@@ -401,6 +402,8 @@ export function MyShop() {
           }}
         />
       )}
+
+      {shop.status === "active" && isOwner && <ShopApi slug={shop.slug} />}
 
       {isOwner && (
         <VerificationCard

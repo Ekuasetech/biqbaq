@@ -90,7 +90,7 @@ As PRD §26. These need answers first:
 
 | Phase | Scope | Needs |
 | --- | --- | --- |
-| 5 | Public seller API | None |
+| 5 | Public seller API | None. **Built** on the local copy (2026-11-07), with each shop's address and notes for its developer on My shop |
 | 6 | Blog, advertising | BD-15 |
 | 7 | Payments | BD-02, BD-03, BD-12 |
 | 8 | Marketers, referrals | BD-11, Q-07 |

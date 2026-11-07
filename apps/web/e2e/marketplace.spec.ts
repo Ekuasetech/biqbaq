@@ -1151,6 +1151,7 @@ test.describe("public marketplace", () => {
             await expect(person.page).toHaveURL(/\/account\/shop\?seller=/);
             await expect(person.page.getByText("You are working here as staff.")).toBeVisible();
             await expect(person.page.getByRole("region", { name: "Shop details" })).toHaveCount(0);
+            await expect(person.page.getByRole("region", { name: "Show your products on your own website" })).toHaveCount(0);
             await expect(person.page.getByRole("region", { name: "Staff", exact: true })).toHaveCount(0);
 
             // They can create, but were not given publish or delete.
@@ -1200,6 +1201,29 @@ test.describe("public marketplace", () => {
             await outsider.page.goto(`/account/shop?seller=${sellerId}`);
             await expect(outsider.page.getByText("You don't have a shop yet")).toBeVisible();
             await expect(shop.getByRole("region", { name: "Staff", exact: true })).toBeVisible();
+          });
+
+          test("a seller's own change shows in the public API", async ({ page, browser, request }) => {
+            test.setTimeout(120000);
+            const { page: shop } = await approvedSeller(page, browser, request);
+            const slug = sql(`select slug from public.sellers order by created_at desc limit 1`);
+            const name = `API ${unique()}`;
+
+            // The seller finds their address on My shop, and it is the one that works.
+            const card = shop.getByRole("region", { name: "Show your products on your own website" });
+            const shown = await card.getByLabel("Your shop's product address").inputValue();
+            expect(new URL(shown).pathname).toBe(`/api/v1/sellers/${slug}/products`);
+            await card.getByText("Notes for your website developer").click();
+            await expect(card).toContainText("send them to that Biqbaq page");
+            const api = async () => (await (await request.get(`/api/v1/sellers/${slug}/products`)).json()).data.map((p: { name: string }) => p.name);
+            expect(await api()).toEqual([]);
+            await addProduct(shop, name);
+            expect(await api()).toEqual([]);
+            await item(shop, name).getByRole("button", { name: "Publish" }).click();
+            await expect(item(shop, name)).toContainText("Published");
+            await expect.poll(api, { timeout: 90000 }).toEqual([name]);
+            await item(shop, name).getByRole("button", { name: "Unpublish" }).click();
+            await expect.poll(api, { timeout: 90000 }).toEqual([]);
           });
 
           test("only Super Admin can open People and roles", async ({ page, request }) => {
@@ -2221,3 +2245,122 @@ test.describe("the contact API", () => {
     expect(statuses).toEqual([202, 202, 202, 202, 202, 429]);
   });
 });
+
+test.describe("the public seller API", () => {
+  const sql = (statement: string) =>
+    execFileSync("docker", ["exec", "-i", "supabase_db_biqbaq", "psql", "-U", "supabase_admin", "-d", "postgres", "-q", "-tA", "-c", statement], {
+      env: { ...process.env, PATH: `${process.env.PATH}:/Applications/Docker.app/Contents/Resources/bin` },
+    }).toString().trim();
+  const id = `${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+  const slug = `api-shop-${id}`;
+  const email = `api-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
+  const address = () => ({ "x-forwarded-for": `10.3.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}` });
+
+  test.beforeAll(() => {
+    sql(`insert into auth.users (id, email, email_confirmed_at) values (gen_random_uuid(), '${email}', now())`);
+    sql(`insert into public.user_roles (user_id, role_key) select id, 'seller' from auth.users where email = '${email}'`);
+    sql(`insert into public.sellers (owner_user_id, slug, name, city, verification_status) select id, '${slug}', 'API Shop', 'Toronto', 'manually_verified' from auth.users where email = '${email}'`);
+    sql(`insert into public.seller_private (seller_id, contact_information) select id, 'PRIVATE-${id}' from public.sellers where slug = '${slug}'`);
+    const rows = [
+      ["Alpha", 3000, "in_stock", "fashion", "published", "1 day"],
+      ["Bravo", 1000, "limited", "food", "published", "2 days"],
+      ["Charlie", 2000, "in_stock", "fashion", "published", "3 days"],
+      ["Draft one", 500, "in_stock", "fashion", "draft", null],
+      ["Hidden one", 500, "in_stock", "fashion", "unpublished", "4 days"],
+      ["Suspended one", 500, "in_stock", "fashion", "suspended", "5 days"],
+    ];
+    for (const [name, price, availability, category, status, age] of rows) {
+      sql(`insert into public.products (seller_id, name, description, price_minor, availability, category_id) select s.id, '${name} ${id}', 'Words', ${price}, '${availability}', c.id from public.sellers s, public.categories c where s.slug = '${slug}' and c.slug = '${category}'`);
+      sql(`set session_replication_role = replica; update public.products set status = '${status}', first_published_at = ${age ? `now() - interval '${age}'` : "null"} where name = '${name} ${id}'`);
+    }
+    sql(`set session_replication_role = replica; update public.products set deleted_at = now(), status = 'archived' where name = 'Hidden one ${id}'`);
+  });
+
+  test.afterAll(() => {
+    sql(`set session_replication_role = replica; delete from public.products where seller_id = (select id from public.sellers where slug = '${slug}'); delete from public.seller_private where seller_id = (select id from public.sellers where slug = '${slug}'); delete from public.sellers where slug = '${slug}'; delete from public.user_roles where user_id = (select id from auth.users where email = '${email}'); delete from public.profiles where id = (select id from auth.users where email = '${email}'); delete from auth.users where email = '${email}';`);
+    // Counters are not removed here: another worker may be counting at this moment. The cleanup after the run removes them.
+  });
+
+  test("returns only the seller's public products, in the documented shape", async ({ request }) => {
+    const response = await request.get(`/api/v1/sellers/${slug}/products`, { headers: address() });
+    expect(response.status()).toBe(200);
+    expect(response.headers()["access-control-allow-origin"]).toBe("*");
+    expect(response.headers()["cache-control"]).toContain("s-maxage");
+    expect(response.headers()["etag"]).toBeTruthy();
+    const body = await response.json();
+    expect(body.seller).toMatchObject({ name: "API Shop", slug, city: "Toronto", verified: true });
+    expect(body.data.map((product: { name: string }) => product.name)).toEqual([`Alpha ${id}`, `Bravo ${id}`, `Charlie ${id}`]);
+    expect(body.meta).toEqual({ page: 1, pageSize: 20, total: 3, totalPages: 1 });
+    const product = body.data[0];
+    expect(Object.keys(product).sort()).toEqual(["availability", "category", "description", "id", "images", "name", "price", "publishedAt", "slug", "url"]);
+    expect(product.price).toEqual({ amountMinor: 3000, currency: "CAD" });
+    expect(product.category).toEqual({ slug: "fashion", name: "Fashion" });
+    const text = JSON.stringify(body);
+    for (const secret of [`PRIVATE-${id}`, email, "owner", "seller_id", "Draft one", "Hidden one", "Suspended one"]) expect(text).not.toContain(secret);
+  });
+
+  test("the product link opens its page on Biqbaq", async ({ request, page }) => {
+    const body = await (await request.get(`/api/v1/sellers/${slug}/products`, { headers: address() })).json();
+    const url = new URL(body.data[0].url);
+    await page.goto(url.pathname);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(`Alpha ${id}`);
+    const french = await (await request.get(`/api/v1/sellers/${slug}/products?locale=fr`, { headers: address() })).json();
+    expect(new URL(french.data[0].url).pathname.startsWith("/fr/products/")).toBe(true);
+    expect(french.data.find((p: { category: { slug: string } }) => p.category.slug === "fashion").category.name).not.toBe("Fashion");
+  });
+
+  test("filters, sorts and pages", async ({ request }) => {
+    const names = async (query: string) =>
+      (await (await request.get(`/api/v1/sellers/${slug}/products?${query}`, { headers: address() })).json()).data.map((p: { name: string }) => p.name.split(" ")[0]);
+    expect(await names("category=fashion")).toEqual(["Alpha", "Charlie"]);
+    expect(await names("availability=limited")).toEqual(["Bravo"]);
+    expect(await names("category=no-such-thing")).toEqual([]);
+    expect(await names("sort=price_asc")).toEqual(["Bravo", "Charlie", "Alpha"]);
+    expect(await names("sort=price_desc")).toEqual(["Alpha", "Charlie", "Bravo"]);
+    expect(await names("sort=name")).toEqual(["Alpha", "Bravo", "Charlie"]);
+    const first = await (await request.get(`/api/v1/sellers/${slug}/products?pageSize=2&sort=name`, { headers: address() })).json();
+    const second = await (await request.get(`/api/v1/sellers/${slug}/products?pageSize=2&page=2&sort=name`, { headers: address() })).json();
+    expect(first.meta).toEqual({ page: 1, pageSize: 2, total: 3, totalPages: 2 });
+    expect([...first.data, ...second.data].map((p: { name: string }) => p.name.split(" ")[0])).toEqual(["Alpha", "Bravo", "Charlie"]);
+    expect(await names("page=50")).toEqual([]);
+  });
+
+  test("refuses bad requests, unknown and suspended sellers, and answers browsers", async ({ request }) => {
+    expect((await request.get(`/api/v1/sellers/${slug}/products?pageSize=1000`, { headers: address() })).status()).toBe(400);
+    expect((await request.get(`/api/v1/sellers/${slug}/products?sort=random`, { headers: address() })).status()).toBe(400);
+    const unknown = await request.get(`/api/v1/sellers/no-such-shop-${id}/products`, { headers: address() });
+    expect(unknown.status()).toBe(404);
+    expect((await unknown.json()).error.code).toBe("SELLER_NOT_FOUND");
+    expect((await request.get(`/api/v1/sellers/Not%20A%20Slug/products`, { headers: address() })).status()).toBe(404);
+    const preflight = await request.fetch(`/api/v1/sellers/${slug}/products`, { method: "OPTIONS", headers: { Origin: "https://abc-store.example", "Access-Control-Request-Method": "GET" } });
+    expect(preflight.status()).toBe(204);
+    expect(preflight.headers()["access-control-allow-origin"]).toBe("*");
+    expect((await request.post(`/api/v1/sellers/${slug}/products`, { headers: address() })).status()).toBe(405);
+  });
+
+  test("an unchanged answer is not sent twice", async ({ request }) => {
+    const headers = address();
+    const first = await request.get(`/api/v1/sellers/${slug}/products`, { headers });
+    const etag = first.headers()["etag"];
+    const again = await request.get(`/api/v1/sellers/${slug}/products`, { headers: { ...headers, "If-None-Match": etag } });
+    expect(again.status()).toBe(304);
+    expect(await again.text()).toBe("");
+  });
+
+  test("one internet address cannot go past the limit", async ({ request }) => {
+    sql(`update public.platform_settings set value = '10' where key = 'api.max_requests_per_hour'`);
+    try {
+      const headers = address();
+      const statuses = [];
+      for (let i = 0; i < 11; i += 1) statuses.push((await request.get(`/api/v1/sellers/${slug}/products`, { headers })).status());
+      expect(statuses.slice(0, 10).every((status) => status === 200)).toBe(true);
+      const limited = await request.get(`/api/v1/sellers/${slug}/products`, { headers });
+      expect(limited.status()).toBe(429);
+      expect(limited.headers()["retry-after"]).toBe("3600");
+      expect((await request.get(`/api/v1/sellers/${slug}/products`, { headers: address() })).status()).toBe(200);
+    } finally {
+      sql(`update public.platform_settings set value = '600' where key = 'api.max_requests_per_hour'`);
+    }
+  });
+});
+
