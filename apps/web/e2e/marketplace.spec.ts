@@ -97,16 +97,18 @@ test.describe("public marketplace", () => {
     await expect(page).toHaveURL(/\/cargo-cars\/2021-toyota-sienna$/);
   });
 
+  // Product views are real counts now (see "views count once per visitor"), so they vary.
+  // Cargo cars are still sample data, with sample numbers.
   test("view counts appear on products and cargo cars", async ({ page }) => {
     await page.goto("/");
     const products = page.getByRole("region", { name: "New on Biqbaq" });
-    await expect(products.getByRole("article").filter({ hasText: "Ankara Tote Bag" })).toContainText("1,240 views");
+    await expect(products.getByRole("article").filter({ hasText: "Ankara Tote Bag" })).toContainText(/\d+ views?/);
     const cargo = page.getByRole("region", { name: "Cargo cars going to Nigeria" });
     await expect(cargo.getByRole("article").first()).toContainText("1,876 views");
     await page.goto("/products");
-    await expect(page.getByRole("article").first()).toContainText(/\d views/);
+    await expect(page.getByRole("article").first()).toContainText(/\d+ views?/);
     await page.goto("/products/ankara-tote-bag");
-    await expect(page.getByRole("main").getByText("1,240 views").first()).toBeVisible();
+    await expect(page.getByRole("main").getByText(/^[\d,]+ views?$/).first()).toBeVisible();
   });
 
   test("home shows blog topics below the cargo cars", async ({ page }) => {
@@ -1295,6 +1297,57 @@ test.describe("public marketplace", () => {
             }).toPass({ timeout: 90000 });
             await buyer.page.goto(`/products/${slug}`);
             await expect(buyer.page.getByText("Biqbaq has hidden your review of this product.")).toBeVisible();
+          });
+
+          test("views count once per visitor per day, and never the seller or bots", async ({ page, browser, request }) => {
+            test.setTimeout(150000);
+            const { page: shop } = await approvedSeller(page, browser, request);
+            const name = `Viewed ${unique()}`;
+            await addProduct(shop, name);
+            await item(shop, name).getByRole("button", { name: "Publish" }).click();
+            await expect(item(shop, name)).toContainText("Published");
+            const slug = sql(`select slug from public.products where name = '${name}'`);
+            const id = sql(`select id from public.products where name = '${name}'`);
+            const views = () => Number(sql(`select coalesce((select views from public.product_view_totals where product_id = '${id}'), 0)`));
+            const visit = async (headers: Record<string, string>) => {
+              const context = await browser.newContext({ extraHTTPHeaders: headers });
+              const visitor = await context.newPage();
+              const counted = visitor.waitForResponse((response) => response.url().includes(`/api/v1/products/${id}/view`));
+              await visitor.goto(`/products/${slug}`);
+              expect((await counted).status()).toBe(204);
+              return { visitor, context };
+            };
+            const ip = () => `10.4.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+
+            // The seller looking at their own product does not count.
+            const own = shop.waitForResponse((response) => response.url().includes(`/api/v1/products/${id}/view`));
+            await shop.goto(`/products/${slug}`);
+            await own;
+            expect(views()).toBe(0);
+
+            // A visitor counts once, however often they come back that day.
+            const first = ip();
+            const { visitor, context } = await visit({ "x-forwarded-for": first });
+            expect(views()).toBe(1);
+            const again = visitor.waitForResponse((response) => response.url().includes(`/api/v1/products/${id}/view`));
+            await visitor.reload();
+            await again;
+            expect(views()).toBe(1);
+            await context.close();
+
+            // A second visitor counts, and a bot does not.
+            await (await visit({ "x-forwarded-for": ip() })).context.close();
+            expect(views()).toBe(2);
+            expect((await request.post(`/api/v1/products/${id}/view`, { headers: { "user-agent": "Googlebot/2.1", "x-forwarded-for": ip() } })).status()).toBe(204);
+            expect((await request.post(`/api/v1/products/not-an-id/view`)).status()).toBe(204);
+            expect(views()).toBe(2);
+
+            // The page shows the count once its cache catches up.
+            const reader = await (await browser.newContext()).newPage();
+            await expect(async () => {
+              await reader.goto(`/products/${slug}`);
+              await expect(reader.getByRole("main")).toContainText(/[23] views/, { timeout: 2000 });
+            }).toPass({ timeout: 90000 });
           });
 
           test("only Super Admin can open People and roles", async ({ page, request }) => {

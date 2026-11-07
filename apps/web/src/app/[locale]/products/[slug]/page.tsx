@@ -8,6 +8,7 @@ import { ProductGrid } from "@/components/product/product-card";
 import { FavouriteButton, ReviewForm } from "@/components/product/product-engagement";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { RatingStars } from "@/components/product/rating-stars";
+import { RecordView } from "@/components/product/record-view";
 import { SellerBadge } from "@/components/product/seller-badge";
 import { ShareButtons } from "@/components/product/share-buttons";
 import { ViewCount } from "@/components/product/view-count";
@@ -96,6 +97,7 @@ export default async function ProductPage({ params }: Props) {
             <p className="mt-3 text-3xl font-bold">{formatPrice(product.price, locale)}</p>
             <p className="mt-1 text-sm font-medium">{t(`availability.${product.availability}`)}</p>
             <ViewCount count={product.views} className="mt-1" />
+            <RecordView productId={product.id} />
           </div>
 
           <div className="rounded-2xl bg-card p-4 shadow-sm">

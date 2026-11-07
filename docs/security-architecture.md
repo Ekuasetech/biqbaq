@@ -77,6 +77,7 @@ Default deny. Every table has RLS on, and no policy means no access.
 | Tokens (invites) | Random, hashed at rest, expiring, single-use |
 | Payment webhooks | Signature checked before parsing; dedupe by event ID; amounts confirmed with the provider |
 | Uploads | Ownership check before signing; size, format and dimensions verified after upload |
+| View counts | One per visitor per product per day (Q-16). Visitors are told apart by account, or by a keyed hash of address and browser, with no cookie. Only today's and yesterday's hashes are kept, so it cannot become a browsing history. The seller, their staff and bots are not counted |
 | Email delivery | A real recipient needs `EMAIL_LIVE_SENDING=true` and no `EMAIL_TEST_RECIPIENT`; otherwise mail goes to the test address or is refused. Reserved test addresses never reach Resend. People's text is escaped in HTML and kept out of subjects. Only Resend's status and error name are stored |
 | Anonymous contact | The seller's address is only read by the server-only `prepare_contact_enquiry`, and only for a public product and a confirmed address. The log holds keyed hashes and no message. Validation, length limits, IP and per-seller rate limits, honeypot (Q-13), header injection blocked by the Resend API's structured fields |
 | Public API | Restricted views, an explicit response schema so new columns cannot leak, rate limiting |
