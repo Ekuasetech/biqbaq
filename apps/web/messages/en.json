@@ -404,7 +404,9 @@
     "verificationLink": "Review seller verification",
     "recentApplications": "Recent Applications",
     "noRecentApplications": "No applications are waiting.",
-    "viewAllApplications": "View all applications"
+    "viewAllApplications": "View all applications",
+    "settingsLink": "Platform settings",
+    "auditLogLink": "Audit log"
   },
   "admin": {
     "section": "Administration",
@@ -659,5 +661,157 @@
     },
     "applicationsHint": "A seller appears here once their application is approved.",
     "applicationsLink": "Review new applications"
+  },
+  "settings": {
+    "title": "Platform settings",
+    "on": "On",
+    "off": "Off",
+    "change": "Change",
+    "changeLabel": "Change {name}",
+    "turnOn": "Turn this on",
+    "newValue": "New value",
+    "newValueMegabytes": "New value, in MB",
+    "range": "Between {min} and {max}.",
+    "reason": "Why are you changing this?",
+    "save": "Save change",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "groups": {
+      "publishing": {
+        "title": "Publishing",
+        "help": "Who can put products on the site. Products already live stay live."
+      },
+      "email": {
+        "title": "Email",
+        "help": "Sign-up, password and Contact Seller emails always go out, because people depend on them."
+      },
+      "contact": {
+        "title": "Contact Seller limits",
+        "help": "Hourly limits that stop spam through the Contact Seller form."
+      },
+      "media": {
+        "title": "Product photos",
+        "help": "What sellers can upload. Photos already uploaded are not affected."
+      }
+    },
+    "items": {
+      "publishingGlobal": {
+        "label": "Seller publishing",
+        "help": "Off stops every seller from publishing."
+      },
+      "publishingVerified": {
+        "label": "Publishing by verified sellers",
+        "help": "Off stops verified sellers from publishing."
+      },
+      "publishingUnverified": {
+        "label": "Publishing by unverified sellers",
+        "help": "Off stops unverified sellers from publishing."
+      },
+      "unverifiedAllowance": {
+        "label": "Unverified seller allowance",
+        "help": "How many different products an unverified seller can ever publish. Deleting a product does not give a place back."
+      },
+      "emailNotifications": {
+        "label": "Notification emails",
+        "help": "Decisions on applications and verification, new application alerts and welcome emails."
+      },
+      "contactPerIp": {
+        "label": "Messages per internet address",
+        "help": "Most messages one internet address can send in an hour."
+      },
+      "contactPerEmail": {
+        "label": "Messages per visitor email",
+        "help": "Most messages one visitor email can send in an hour."
+      },
+      "contactPerSeller": {
+        "label": "Messages per seller",
+        "help": "Most messages one seller can receive in an hour. Too low, and spam could block real customers."
+      },
+      "maxImageSize": {
+        "label": "Largest photo size",
+        "help": "Photos are shrunk in the browser to fit this."
+      },
+      "maxDimension": {
+        "label": "Largest photo width or height",
+        "help": "In pixels."
+      },
+      "maxImages": {
+        "label": "Photos per product",
+        "help": "The most photos one product can have."
+      },
+      "allowedFormats": {
+        "label": "Allowed photo formats",
+        "help": "The file types sellers can upload."
+      }
+    },
+    "history": {
+      "title": "Recent changes",
+      "empty": "No settings have been changed yet.",
+      "change": "{from} to {to}",
+      "reason": "Reason: {reason}",
+      "who": "{name}, {date}",
+      "unknown": "Unknown"
+    },
+    "errors": {
+      "invalidValue": "Enter a value between {min} and {max}. Whole numbers only, except photo size. For formats, choose at least one.",
+      "reasonRequired": "Enter a reason for this change.",
+      "reasonTooLong": "The reason is too long.",
+      "notAllowed": "You don't have permission to change this.",
+      "generic": "That didn't work. Please try again.",
+      "loadFailed": "The settings couldn't be loaded. Please refresh the page."
+    }
+  },
+  "auditLog": {
+    "title": "Audit log",
+    "filterAction": "Action",
+    "allActions": "All actions",
+    "search": "Search people, targets and reasons",
+    "searchButton": "Search",
+    "results": "Audit log entries",
+    "count": "{count, plural, one {# entry} other {# entries}}",
+    "empty": "Nothing matches this search.",
+    "loadFailed": "The audit log couldn't be loaded. Please refresh the page.",
+    "who": "By {name}",
+    "system": "the system",
+    "target": "On: {target}",
+    "onBehalf": "On behalf of: {seller}",
+    "reason": "Reason: {reason}",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details",
+    "pagination": "Audit log pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "actions": {
+      "role_application_submit": "Applied for a role",
+      "role_application_withdraw": "Withdrew an application",
+      "role_application_approve": "Approved an application",
+      "role_application_reject": "Rejected an application",
+      "role_assign": "Gave a role",
+      "role_bootstrap": "Set up the first Super Admin",
+      "role_active": "Restored a role",
+      "role_suspended": "Suspended a role",
+      "role_revoked": "Removed a role",
+      "permission_grant": "Gave a permission",
+      "permission_revoke": "Removed a permission",
+      "seller_profile_update": "Edited shop details",
+      "seller_verification_change": "Changed seller verification",
+      "seller_active": "Restored a shop",
+      "seller_suspended": "Suspended a shop",
+      "seller_publishing_suspend": "Suspended a shop's publishing",
+      "seller_publishing_restore": "Restored a shop's publishing",
+      "seller_allowance_override": "Changed a shop's allowance",
+      "product_create": "Created a product",
+      "product_edit": "Edited a published product",
+      "product_publish": "Published a product",
+      "product_unpublish": "Unpublished a product",
+      "product_delete": "Deleted a product",
+      "product_suspend": "Suspended a product",
+      "product_restore": "Restored a product",
+      "product_image_add": "Added a product photo",
+      "product_image_remove": "Removed a product photo",
+      "product_image_primary": "Changed a product's main photo",
+      "setting_update": "Changed a setting"
+    }
   }
 }

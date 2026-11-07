@@ -919,6 +919,64 @@ test.describe("public marketplace", () => {
           }
           const item = (page: import("@playwright/test").Page, name: string) => page.getByRole("article", { name });
 
+          test("Super Admin changes a setting, sees why and who, and finds it in the audit log", async ({ page, browser, request }) => {
+            test.setTimeout(120000);
+            const owner = await confirmedAccount(page, request);
+            makeSuperAdmin(owner);
+            const id = unique();
+            await page.goto("/admin/settings");
+
+            const row = page.getByRole("listitem", { name: "Messages per seller" });
+            await expect(row.getByTestId("value-contactPerSeller")).toHaveText("50");
+            await row.getByRole("button", { name: "Change" }).click();
+            const form = row.getByRole("form");
+
+            // Refused in the browser first.
+            await form.getByLabel("New value").fill("0");
+            await form.getByLabel("Why are you changing this?").fill(`Test ${id}`);
+            await form.getByRole("button", { name: "Save change" }).click();
+            await expect(form.getByText("Enter a value between 1 and 100000.")).toBeVisible();
+            await form.getByLabel("New value").fill("60");
+            await form.getByLabel("Why are you changing this?").fill("");
+            await form.getByRole("button", { name: "Save change" }).click();
+            await expect(form.getByText("Enter a reason for this change.")).toBeVisible();
+
+            try {
+              await form.getByLabel("Why are you changing this?").fill(`Test ${id}`);
+              await form.getByRole("button", { name: "Save change" }).click();
+              await expect(row.getByTestId("value-contactPerSeller")).toHaveText("60");
+              const history = page.getByRole("region", { name: "Recent changes" });
+              await expect(history).toContainText("50 to 60");
+              await expect(history).toContainText(`Reason: Test ${id}`);
+
+              // The same change, in the audit log, found by searching its reason.
+              await page.goto("/admin/audit-log");
+              await page.getByLabel("Search people, targets and reasons").fill(id);
+              await page.getByRole("button", { name: "Search", exact: true }).click();
+              const results = page.getByRole("region", { name: "Audit log entries" });
+              await expect(results).toContainText("1 entry");
+              await expect(results).toContainText("Changed a setting");
+              await expect(results).toContainText(owner);
+              await expect(results).toContainText("contact.max_per_seller_hour");
+              await results.getByRole("button", { name: "Show details" }).click();
+              await expect(results.locator("pre")).toContainText('"new": 60');
+              await page.getByLabel("Action").selectOption("product.publish");
+              await expect(results).toContainText("Nothing matches this search.");
+            } finally {
+              // Other tests rely on this limit.
+              sql(`update public.platform_settings set value = '50' where key = 'contact.max_per_seller_hour'`);
+            }
+          });
+
+          test("only Super Admin can open the settings and audit log", async ({ page, request }) => {
+            await confirmedAccount(page, request);
+            for (const path of ["/admin/settings", "/admin/audit-log"]) {
+              await page.goto(path);
+              await expect(page.getByText("You don't have access")).toBeVisible();
+              await expect(page.getByText("Seller publishing")).toHaveCount(0);
+            }
+          });
+
           test("a seller edits their shop details, and only the public ones show", async ({ page, browser, request }) => {
             test.setTimeout(120000);
             const { page: shop } = await approvedSeller(page, browser, request);

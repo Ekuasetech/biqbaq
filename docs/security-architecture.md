@@ -58,7 +58,7 @@ Default deny. Every table has RLS on, and no policy means no access.
 | Payment tables | Seller's members with permission; authorized admins. Never provider secrets | None (server only) |
 | `referral_attributions` | The referrer sees own, limited fields; Super Admin | None |
 | `audit_logs` | Super Admin; holders of a permission if delegated | None; append-only |
-| `platform_settings` | Public keys via a view; admins with permission | RPC only, with history |
+| `platform_settings` | Public keys via a view; Super Admin only for now | `update_platform_setting` only, with per-setting limits, a required reason, history and audit |
 | `advertisements` | Public sees live ads only, via a view; Super Admin sees all | **Super Admin only**, via RPC and audited. Checked with `has_active_role('super_admin')`, not a grantable permission, so it cannot be delegated to Admins or anyone else |
 | `background_jobs`, `rate_limit_counters`, `payment_webhook_events` | None for clients | Server only |
 

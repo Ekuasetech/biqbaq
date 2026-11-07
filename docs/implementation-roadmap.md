@@ -40,6 +40,8 @@ Needs: Q-01, Q-02, BD-09, BD-17 (BD-18 has an interim rule).
 5. Admin permission assignment; protected dashboards and the role switcher.
 6. Platform Configuration page (basic), audit log viewer.
 
+**Built, for item 6:** Super Admin's Platform settings and Audit log screens, on the local copy. Settings cover only what works today (publishing, notification emails, Contact Seller limits, product photos), each with its own limits, a required reason and history. Feature switches for reviews, referrals, payments and others are added with those features.
+
 ## Phase 3: Sellers and marketplace
 
 Needs: Q-03, Q-06, Q-08, Q-09, Q-12, BD-08, BD-10, BD-14, BD-16.

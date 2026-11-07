@@ -336,10 +336,10 @@ select results_eq(
   $$ values ('2'::jsonb, '3'::jsonb, '00000000-0000-4000-8000-0000000000a6'::uuid, 'Testing') $$,
   'the change is recorded with who, what and why'
 );
-select throws_ok($$ select update_platform_setting('publishing.unverified_allowance', '"lots"') $$, '23514', null, 'a setting cannot change type');
-select throws_ok($$ select update_platform_setting('publishing.unverified_allowance', '-1') $$, '23514', null, 'a limit cannot be negative');
-select throws_ok($$ select update_platform_setting('publishing.unverified_allowance', '1.5') $$, '23514', null, 'a limit must be a whole number');
-select throws_ok($$ select update_platform_setting('does.not.exist', 'true') $$, 'P0002', null, 'unknown settings are refused');
+select throws_ok($$ select update_platform_setting('publishing.unverified_allowance', '"lots"', 'Testing') $$, '23514', null, 'a setting cannot change type');
+select throws_ok($$ select update_platform_setting('publishing.unverified_allowance', '-1', 'Testing') $$, '23514', null, 'a limit cannot be negative');
+select throws_ok($$ select update_platform_setting('publishing.unverified_allowance', '1.5', 'Testing') $$, '23514', null, 'a limit must be a whole number');
+select throws_ok($$ select update_platform_setting('does.not.exist', 'true', 'Testing') $$, 'P0002', null, 'unknown settings are refused');
 
 reset role;
 select pg_temp.act_as('00000000-0000-4000-8000-0000000000a3');

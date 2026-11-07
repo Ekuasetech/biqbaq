@@ -404,7 +404,9 @@
     "verificationLink": "Examiner la vérification des vendeurs",
     "recentApplications": "Demandes récentes",
     "noRecentApplications": "Aucune demande en attente.",
-    "viewAllApplications": "Voir toutes les demandes"
+    "viewAllApplications": "Voir toutes les demandes",
+    "settingsLink": "Paramètres de la plateforme",
+    "auditLogLink": "Journal d'audit"
   },
   "admin": {
     "section": "Administration",
@@ -659,5 +661,157 @@
     },
     "applicationsHint": "Un vendeur apparaît ici une fois sa demande approuvée.",
     "applicationsLink": "Examiner les nouvelles demandes"
+  },
+  "settings": {
+    "title": "Paramètres de la plateforme",
+    "on": "Activé",
+    "off": "Désactivé",
+    "change": "Modifier",
+    "changeLabel": "Modifier {name}",
+    "turnOn": "Activer",
+    "newValue": "Nouvelle valeur",
+    "newValueMegabytes": "Nouvelle valeur, en Mo",
+    "range": "Entre {min} et {max}.",
+    "reason": "Pourquoi faites-vous ce changement ?",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "cancel": "Annuler",
+    "groups": {
+      "publishing": {
+        "title": "Publication",
+        "help": "Qui peut mettre des produits sur le site. Les produits déjà en ligne le restent."
+      },
+      "email": {
+        "title": "Courriel",
+        "help": "Les courriels d'inscription, de mot de passe et de contact vendeur sont toujours envoyés, car les gens en dépendent."
+      },
+      "contact": {
+        "title": "Limites du contact vendeur",
+        "help": "Limites horaires qui bloquent le pourriel envoyé par le formulaire de contact."
+      },
+      "media": {
+        "title": "Photos de produits",
+        "help": "Ce que les vendeurs peuvent téléverser. Les photos déjà téléversées ne sont pas touchées."
+      }
+    },
+    "items": {
+      "publishingGlobal": {
+        "label": "Publication par les vendeurs",
+        "help": "Désactivé empêche tous les vendeurs de publier."
+      },
+      "publishingVerified": {
+        "label": "Publication par les vendeurs vérifiés",
+        "help": "Désactivé empêche les vendeurs vérifiés de publier."
+      },
+      "publishingUnverified": {
+        "label": "Publication par les vendeurs non vérifiés",
+        "help": "Désactivé empêche les vendeurs non vérifiés de publier."
+      },
+      "unverifiedAllowance": {
+        "label": "Limite des vendeurs non vérifiés",
+        "help": "Le nombre de produits différents qu'un vendeur non vérifié peut publier au total. Supprimer un produit ne redonne pas de place."
+      },
+      "emailNotifications": {
+        "label": "Courriels de notification",
+        "help": "Décisions sur les demandes et la vérification, alertes de nouvelles demandes et courriels de bienvenue."
+      },
+      "contactPerIp": {
+        "label": "Messages par adresse Internet",
+        "help": "Le nombre maximal de messages par heure depuis une adresse Internet."
+      },
+      "contactPerEmail": {
+        "label": "Messages par courriel de visiteur",
+        "help": "Le nombre maximal de messages par heure depuis un courriel de visiteur."
+      },
+      "contactPerSeller": {
+        "label": "Messages par vendeur",
+        "help": "Le nombre maximal de messages reçus par un vendeur en une heure. Trop bas, le pourriel pourrait bloquer de vrais clients."
+      },
+      "maxImageSize": {
+        "label": "Taille maximale d'une photo",
+        "help": "Les photos sont réduites dans le navigateur pour respecter cette taille."
+      },
+      "maxDimension": {
+        "label": "Largeur ou hauteur maximale d'une photo",
+        "help": "En pixels."
+      },
+      "maxImages": {
+        "label": "Photos par produit",
+        "help": "Le nombre maximal de photos pour un produit."
+      },
+      "allowedFormats": {
+        "label": "Formats de photo permis",
+        "help": "Les types de fichiers que les vendeurs peuvent téléverser."
+      }
+    },
+    "history": {
+      "title": "Changements récents",
+      "empty": "Aucun paramètre n'a encore été modifié.",
+      "change": "De {from} à {to}",
+      "reason": "Motif : {reason}",
+      "who": "{name}, {date}",
+      "unknown": "Inconnu"
+    },
+    "errors": {
+      "invalidValue": "Entrez une valeur entre {min} et {max}. Nombres entiers seulement, sauf pour la taille des photos. Pour les formats, choisissez-en au moins un.",
+      "reasonRequired": "Entrez un motif pour ce changement.",
+      "reasonTooLong": "Le motif est trop long.",
+      "notAllowed": "Vous n'avez pas la permission de modifier ceci.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer.",
+      "loadFailed": "Les paramètres n'ont pas pu être chargés. Veuillez actualiser la page."
+    }
+  },
+  "auditLog": {
+    "title": "Journal d'audit",
+    "filterAction": "Action",
+    "allActions": "Toutes les actions",
+    "search": "Chercher des personnes, des cibles et des motifs",
+    "searchButton": "Chercher",
+    "results": "Entrées du journal d'audit",
+    "count": "{count, plural, one {# entrée} other {# entrées}}",
+    "empty": "Rien ne correspond à cette recherche.",
+    "loadFailed": "Le journal d'audit n'a pas pu être chargé. Veuillez actualiser la page.",
+    "who": "Par {name}",
+    "system": "le système",
+    "target": "Sur : {target}",
+    "onBehalf": "Au nom de : {seller}",
+    "reason": "Motif : {reason}",
+    "showDetails": "Afficher les détails",
+    "hideDetails": "Masquer les détails",
+    "pagination": "Pages du journal d'audit",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {page} sur {pages}",
+    "actions": {
+      "role_application_submit": "A demandé un rôle",
+      "role_application_withdraw": "A retiré une demande",
+      "role_application_approve": "A approuvé une demande",
+      "role_application_reject": "A rejeté une demande",
+      "role_assign": "A donné un rôle",
+      "role_bootstrap": "A créé le premier Super Admin",
+      "role_active": "A rétabli un rôle",
+      "role_suspended": "A suspendu un rôle",
+      "role_revoked": "A retiré un rôle",
+      "permission_grant": "A donné une permission",
+      "permission_revoke": "A retiré une permission",
+      "seller_profile_update": "A modifié les détails d'une boutique",
+      "seller_verification_change": "A changé la vérification d'un vendeur",
+      "seller_active": "A rétabli une boutique",
+      "seller_suspended": "A suspendu une boutique",
+      "seller_publishing_suspend": "A suspendu la publication d'une boutique",
+      "seller_publishing_restore": "A rétabli la publication d'une boutique",
+      "seller_allowance_override": "A changé la limite d'une boutique",
+      "product_create": "A créé un produit",
+      "product_edit": "A modifié un produit publié",
+      "product_publish": "A publié un produit",
+      "product_unpublish": "A dépublié un produit",
+      "product_delete": "A supprimé un produit",
+      "product_suspend": "A suspendu un produit",
+      "product_restore": "A rétabli un produit",
+      "product_image_add": "A ajouté une photo de produit",
+      "product_image_remove": "A retiré une photo de produit",
+      "product_image_primary": "A changé la photo principale d'un produit",
+      "setting_update": "A changé un paramètre"
+    }
   }
 }
