@@ -1,8 +1,9 @@
 -- PostgreSQL lets everyone run a new function unless told otherwise, so signed-out
 -- visitors could call every function here. Each one still refused them through its
--- own check, but the permission layer should refuse first. New functions now start
--- closed, and must be granted explicitly.
-alter default privileges in schema public revoke execute on functions from public;
+-- own check, but the permission layer should refuse first.
+--
+-- A default for one schema cannot remove PostgreSQL's built-in rule, so each migration
+-- must revoke access to its own new functions. A database test fails if one forgets.
 
 revoke execute on all routines in schema public from public, anon;
 grant execute on all routines in schema public to authenticated;

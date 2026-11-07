@@ -53,7 +53,7 @@ Client access rules:
 
 **Publishing a product.** Client calls `publish_product(product_id)`. In one transaction, the function locks the seller row, checks the platform toggles, seller state, product completeness and allowance, writes the first-publication ledger row, sets the status, writes the audit entry, and enqueues cache invalidation. See [workflows.md](workflows.md).
 
-**Image upload (PRD §17).** Client validates format and size, then asks `/api/v1/media/sign`. The server checks ownership and limits from `platform_settings`, and returns a signed Cloudinary upload. Client uploads, then reports the result. The server fetches the asset's real size, format and dimensions from Cloudinary, deletes it if it breaks the limits, and only then saves metadata. This is the real enforcement; the browser check is UX only. Exact Cloudinary options get confirmed against its docs in Phase 3.
+**Image upload (PRD §17).** Client validates format and size, then asks `/api/v1/media/sign`. The server checks ownership and limits from `platform_settings`, and returns a signed Cloudinary upload. Client uploads, then reports the result. The server fetches the asset's real size, format and dimensions from Cloudinary, deletes it if it breaks the limits, and only then saves metadata. This is the real enforcement; the browser check is UX only. Photos are always redrawn in the browser, which removes hidden details such as GPS location. Exact Cloudinary options get confirmed against its docs in Phase 3.
 
 **Live messaging.** Messages are stored in PostgreSQL under RLS. Clients subscribe through Supabase Realtime, which applies the same participant rules.
 

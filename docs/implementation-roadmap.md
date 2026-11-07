@@ -56,7 +56,8 @@ Needs: Q-03, Q-06, Q-08, Q-09, Q-12, BD-08, BD-10, BD-14, BD-16.
 Progress at 2026-11-06, on the local copy only:
 
 - **Built:** a shop created on approval; the seller's "My shop" screen with drafts, editing, publishing, unpublishing and deleting; `publish_product`, with the limit, the permanent ledger and edit logging; moderation and on-behalf database functions, with no screens yet; public product, seller and search pages reading the database.
-- **Not built:** images (needs Cloudinary), shop profile editing, staff, verification screens, reviews, favourites, moderation screens, and view counting (Q-16). Vehicles, blog and ads still use sample data, until their own phases.
+- **Built, with Cloudinary:** signed product photo uploads. Local work stores files in a separate `biqbaq-local` folder. Known limit: someone who uploads a file and never finishes leaves an unused file in Cloudinary, so a clean-up job is needed once background jobs exist. Deleting a product also keeps its files for now.
+- **Not built:** shop profile editing, staff, verification screens, reviews, favourites, moderation screens, and view counting (Q-16). Vehicles, blog and ads still use sample data, until their own phases.
 - `supabase/seed.sql` holds invented shops for local use. `supabase db push` does not load it, so it never reaches the real project.
 - Public pages can show old data for about a minute after a change made outside the seller's own screen, such as a moderator suspending a product. This needs revisiting when the moderation screens are built.
 - `scripts/test-publish-race.sh` proves the limit holds when two publishes overlap. Run it after changing `publish_product`.

@@ -120,7 +120,9 @@ Only values the PRD confirms:
 | `publishing.global_enabled`, `.verified_enabled`, `.unverified_enabled` | `true` | Implied by §6.3 |
 | `blog.seller_publishing_enabled` | `false` | §11.2 |
 | `media.max_image_bytes` | `1048576` | §16.3 |
-| `media.allowed_formats`, `.max_dimensions`, `.max_images` | unset | BD-14 |
+| `media.allowed_formats` | `["jpg", "png", "webp"]` | BD-14 |
+| `media.max_dimension` | `4000` | BD-14 |
+| `media.max_images` | `5` | BD-14 |
 
 ## Migration order
 

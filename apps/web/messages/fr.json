@@ -512,7 +512,29 @@
       "loadFailed": "Impossible de charger votre boutique. Veuillez actualiser la page.",
       "generic": "Une erreur s’est produite. Veuillez réessayer."
     },
-    "signIn": "Se connecter"
+    "signIn": "Se connecter",
+    "photos": {
+      "title": "Photos",
+      "count": "{count} photos sur {max}",
+      "add": "Ajouter une photo",
+      "uploading": "Envoi en cours…",
+      "main": "Photo principale",
+      "makeMain": "Choisir comme photo principale",
+      "remove": "Retirer la photo",
+      "alt": "Photo {number} de {name}",
+      "help": "JPG, PNG ou WebP. Les grandes photos sont réduites pour vous, et les données de localisation sont retirées.",
+      "errors": {
+        "format": "Veuillez choisir une image JPG, PNG ou WebP.",
+        "unreadable": "Impossible de lire cette image. Veuillez en essayer une autre.",
+        "tooLarge": "Cette image ne peut pas être assez réduite. Veuillez en essayer une autre.",
+        "limit": "Ce produit a déjà le nombre maximal de photos.",
+        "rejected": "Cette image ne respecte pas les règles de taille ou de format.",
+        "notEditable": "Les photos de ce produit ne peuvent pas être modifiées pour le moment.",
+        "notAllowed": "Vous n’êtes pas autorisé à faire cela pour le moment.",
+        "unavailable": "L’envoi de photos n’est pas disponible pour le moment. Veuillez réessayer plus tard.",
+        "generic": "La photo n’a pas été envoyée. Veuillez réessayer."
+      }
+    }
   },
   "errorPage": {
     "title": "Une erreur s’est produite",

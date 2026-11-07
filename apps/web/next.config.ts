@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "fastly.picsum.photos" },
+      // Only this account's images, so other Cloudinary accounts cannot be served through here.
+      ...(process.env.CLOUDINARY_CLOUD_NAME
+        ? [{ protocol: "https" as const, hostname: "res.cloudinary.com", pathname: `/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/**` }]
+        : []),
     ],
   },
   turbopack: {

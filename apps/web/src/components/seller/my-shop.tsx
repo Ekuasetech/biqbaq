@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
+import { ProductPhotos } from "@/components/seller/product-photos";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +14,7 @@ import { formatPrice } from "@/lib/format";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSessionUser } from "@/lib/supabase/use-session-user";
 import { cn } from "@/lib/utils";
+import { getPhotoLimit, listShopPhotos, type ShopPhoto } from "@/modules/media-management/client";
 import { refreshCatalog } from "@/modules/product-catalog/actions";
 import {
   createDraft,
@@ -41,6 +43,8 @@ interface ShopData {
   products: SellerProduct[];
   categories: Category[];
   allowance: PublishingAllowance | null;
+  photos: ShopPhoto[];
+  photoLimit: number;
 }
 
 /** Keeps the public pages current. If this fails they catch up within about a minute. */
@@ -157,12 +161,16 @@ function ProductItem({
   sellerId,
   product,
   categories,
+  photos,
+  photoLimit,
   onChanged,
 }: {
   supabase: SupabaseClient;
   sellerId: string;
   product: SellerProduct;
   categories: Category[];
+  photos: ShopPhoto[];
+  photoLimit: number;
   onChanged: () => Promise<void>;
 }) {
   const t = useTranslations();
@@ -214,6 +222,17 @@ function ProductItem({
               <StatusPill tone={tone}>{t(`shop.status.${status}`)}</StatusPill>
             </div>
             {suspended && <p className="mt-2 text-sm text-muted-foreground">{t("shop.suspendedHelp")}</p>}
+            <ProductPhotos
+              productId={product.id}
+              productName={product.name}
+              photos={photos}
+              limit={photoLimit}
+              readOnly={suspended}
+              onChanged={async () => {
+                if (status === "published") await refreshPublicPages();
+                await onChanged();
+              }}
+            />
             {failure && <div className="mt-3"><Notice kind="error">{t(`shop.errors.${failure}`)}</Notice></div>}
             {confirming ? (
               <div className="mt-3 grid gap-2">
@@ -265,15 +284,21 @@ export function MyShop() {
       return;
     }
     if (!shop.data) {
-      setData({ shop: null, products: [], categories: [], allowance: null });
+      setData({ shop: null, products: [], categories: [], allowance: null, photos: [], photoLimit: 0 });
       return;
     }
-    const [products, categories, allowance] = await Promise.all([
-      listShopProducts(supabase, shop.data.id),
+    const products = await listShopProducts(supabase, shop.data.id);
+    if (products.error) {
+      setLoadFailed(true);
+      return;
+    }
+    const [categories, allowance, photos, photoLimit] = await Promise.all([
       listCategories(supabase),
       getMyAllowance(supabase),
+      listShopPhotos(supabase, products.data.map((product) => product.id)),
+      getPhotoLimit(supabase),
     ]);
-    if (products.error || categories.error || allowance.error) {
+    if (categories.error || allowance.error || photos.error || photoLimit.error) {
       setLoadFailed(true);
       return;
     }
@@ -283,6 +308,8 @@ export function MyShop() {
       products: products.data as SellerProduct[],
       categories: categories.data as Category[],
       allowance: allowance.data as PublishingAllowance,
+      photos: photos.data as ShopPhoto[],
+      photoLimit: photoLimit.data as number,
     });
   }, []);
 
@@ -316,7 +343,7 @@ export function MyShop() {
     );
   }
 
-  const { shop, allowance, categories, products } = data;
+  const { shop, allowance, categories, products, photos, photoLimit } = data;
   const left = placesLeft(allowance);
   const supabase = getSupabaseBrowserClient();
   const reload = () => load(user.id);
@@ -366,7 +393,7 @@ export function MyShop() {
         {products.length === 0 && !adding && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
         <ul className="grid gap-3">
           {products.map((product) => (
-            <ProductItem key={product.id} supabase={supabase} sellerId={shop.id} product={product} categories={categories} onChanged={reload} />
+            <ProductItem key={product.id} supabase={supabase} sellerId={shop.id} product={product} categories={categories} photos={photos.filter((photo) => photo.entity_id === product.id)} photoLimit={photoLimit} onChanged={reload} />
           ))}
         </ul>
       </section>

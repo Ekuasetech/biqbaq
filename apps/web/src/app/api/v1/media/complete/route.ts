@@ -1,0 +1,55 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { destroyAsset, fetchAsset, isCloudinaryUrl, isConfigured, mediaRoot } from "@/modules/media-management/cloudinary";
+import { assetProblem, isOwnPublicId, type MediaLimits } from "@/modules/media-management/rules";
+import { currentUser, fail, failFromDatabase } from "@/modules/media-management/server";
+
+const bodySchema = z.object({ productId: z.uuid(), publicId: z.string().max(300) });
+
+const discard = (publicId: string) => destroyAsset(publicId).catch((error) => console.error("Could not delete refused image", error));
+
+// Checks the real file with Cloudinary, because nothing the browser says can be trusted,
+// and removes it if it breaks the rules. Only then is it saved.
+export async function POST(request: Request) {
+  const body = bodySchema.safeParse(await request.json().catch(() => null));
+  if (!body.success) return fail(400, "INVALID_REQUEST");
+  if (!isConfigured()) return fail(503, "MEDIA_NOT_CONFIGURED");
+  const { productId, publicId } = body.data;
+
+  const { supabase, user } = await currentUser();
+  if (!user) return fail(401, "NOT_SIGNED_IN");
+
+  // Before touching the file, so nobody can delete a file that isn't theirs.
+  const allowed = await supabase.rpc("authorize_product_image", { p_product_id: productId });
+  const ownFile = isOwnPublicId(publicId, mediaRoot(), productId);
+  if (allowed.error) {
+    // The person controls this product, but it has filled up or been suspended meanwhile.
+    if (ownFile && allowed.error.code === "55000") await discard(publicId);
+    return failFromDatabase(allowed.error);
+  }
+  if (!ownFile) return fail(400, "IMAGE_REJECTED");
+
+  const asset = await fetchAsset(publicId);
+  if (!asset) return fail(400, "IMAGE_REJECTED");
+
+  if (assetProblem(asset, allowed.data as MediaLimits) || !isCloudinaryUrl(asset.secure_url)) {
+    await discard(publicId);
+    return fail(400, "IMAGE_REJECTED");
+  }
+
+  const saved = await getSupabaseAdminClient().rpc("record_product_image", {
+    p_actor: user.id,
+    p_product_id: productId,
+    p_public_id: publicId,
+    p_secure_url: asset.secure_url,
+  });
+  if (saved.error) {
+    // Completing the same upload twice must not delete the photo already saved.
+    if (saved.error.code === "23505") return fail(409, "IMAGE_REJECTED");
+    await discard(publicId);
+    return failFromDatabase(saved.error);
+  }
+
+  return NextResponse.json({ data: { id: saved.data } }, { status: 201 });
+}

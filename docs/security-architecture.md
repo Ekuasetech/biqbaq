@@ -23,7 +23,7 @@ Located in a `private` schema that the API does not expose, `SECURITY DEFINER`, 
 | `can_access_conversation(conv)` | Buyer, or a seller member with `messages.view` |
 | `can_reply_to_conversation(conv)` | Buyer, or a seller member with `messages.respond` |
 
-These helpers need `EXECUTE` granted to `authenticated`, because policies run as the caller. That does not expose them to the API, because the `private` schema is not exposed. Signed-out visitors read only through public views, so `anon` has no access to `private`, and can run no function in `public`. New functions in `public` start closed, and must be granted explicitly. A database test fails if any function is left open.
+These helpers need `EXECUTE` granted to `authenticated`, because policies run as the caller. That does not expose them to the API, because the `private` schema is not exposed. Signed-out visitors read only through public views, so `anon` has no access to `private`, and can run no function in `public`. PostgreSQL opens new functions to everyone by default, and a per-schema default cannot change that, so each migration must revoke access to its own new functions. A database test fails if any function is left open. `record_product_image` can only be run by the server, using the secret key.
 
 The `seller_staff` role check is what enforces §3.6: suspending the platform role or the membership each cuts access on its own. Same for owners: a suspended `seller` role removes access to seller management but leaves the records intact.
 

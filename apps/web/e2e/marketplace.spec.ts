@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { deflateSync } from "node:zlib";
 import { expect, test } from "@playwright/test";
 
 // Dev-only, from next-themes when a language switch re-renders the root layout.
@@ -998,6 +999,159 @@ test.describe("public marketplace", () => {
             await item(shop, "Half done").getByRole("button", { name: "Publish" }).click();
             await expect(item(shop, "Half done")).toContainText("Add a description and a category before publishing.");
             await expect(shop.getByRole("region", { name: "Ada's Shop" })).toContainText("2 publishing places left of 2");
+          });
+
+          test.describe("photos, through the real Cloudinary account", () => {
+            /** A valid PNG of any size, so limits can be tested without storing test images. */
+            function png(width: number, height: number) {
+              const crcTable = Array.from({ length: 256 }, (_, n) => {
+                let k = n;
+                for (let i = 0; i < 8; i++) k = k & 1 ? 0xedb88320 ^ (k >>> 1) : k >>> 1;
+                return k >>> 0;
+              });
+              const crc = (data: Buffer) => {
+                let value = 0xffffffff;
+                for (const byte of data) value = crcTable[(value ^ byte) & 0xff] ^ (value >>> 8);
+                return (value ^ 0xffffffff) >>> 0;
+              };
+              const chunk = (type: string, data: Buffer) => {
+                const length = Buffer.alloc(4);
+                length.writeUInt32BE(data.length);
+                const body = Buffer.concat([Buffer.from(type), data]);
+                const check = Buffer.alloc(4);
+                check.writeUInt32BE(crc(body));
+                return Buffer.concat([length, body, check]);
+              };
+              const header = Buffer.alloc(13);
+              header.writeUInt32BE(width, 0);
+              header.writeUInt32BE(height, 4);
+              header.set([8, 2, 0, 0, 0], 8);
+              const row = Buffer.concat([Buffer.from([0]), Buffer.alloc(width * 3, 0x55)]);
+              return Buffer.concat([
+                Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+                chunk("IHDR", header),
+                chunk("IDAT", deflateSync(Buffer.concat(Array.from({ length: height }, () => row)))),
+                chunk("IEND", Buffer.alloc(0)),
+              ]);
+            }
+            const photoInput = (page: import("@playwright/test").Page, name: string) => item(page, name).getByLabel("Add a photo");
+            const productIdOf = (name: string) => sql(`select id from public.products where name = '${name}'`);
+
+            test("a seller adds photos, the public sees them, and removing deletes them", async ({ page, browser, request }) => {
+              test.setTimeout(120000);
+              const { page: shop } = await approvedSeller(page, browser, request);
+              const name = `Photo ${unique()}`;
+              await addProduct(shop, name);
+
+              // A large photo is made smaller in the browser, rather than refused.
+              await photoInput(shop, name).setInputFiles({ name: "big.png", mimeType: "image/png", buffer: png(3000, 2000) });
+              await expect(item(shop, name)).toContainText("1 of 5 photos", { timeout: 30000 });
+              await expect(item(shop, name)).toContainText("Main photo");
+              const stored = sql(`select secure_url from public.media_assets where entity_id = '${productIdOf(name)}'`);
+              expect(stored).toMatch(/^https:\/\/res\.cloudinary\.com\/.+\/biqbaq-local\/products\//);
+              expect(stored).toMatch(/\.jpg$/);
+
+              await photoInput(shop, name).setInputFiles({ name: "second.png", mimeType: "image/png", buffer: png(50, 50) });
+              await expect(item(shop, name)).toContainText("2 of 5 photos", { timeout: 30000 });
+
+              // Choosing a different main photo.
+              await item(shop, name).getByRole("button", { name: "Make main photo" }).click();
+              await expect(item(shop, name).getByRole("button", { name: "Make main photo" })).toHaveCount(1);
+
+              // The public page shows it, loaded through the site's own image service.
+              await item(shop, name).getByRole("button", { name: "Publish" }).click();
+              await expect(item(shop, name)).toContainText("Published");
+              const visitor = await (await browser.newContext()).newPage();
+              await visitor.goto(`/products/${sql(`select slug from public.products where name = '${name}'`)}`);
+              const photo = visitor.getByRole("main").getByRole("img", { name }).first();
+              await expect(photo).toBeVisible();
+              await expect.poll(() => photo.evaluate((img: HTMLImageElement) => img.naturalWidth), { timeout: 15000 }).toBeGreaterThan(0);
+
+              // Removing both clears the record, and the files (checked after the run).
+              await item(shop, name).getByRole("button", { name: "Remove photo" }).first().click();
+              await expect(item(shop, name)).toContainText("1 of 5 photos");
+              await expect(item(shop, name)).toContainText("Main photo");
+              await item(shop, name).getByRole("button", { name: "Remove photo" }).click();
+              await expect(item(shop, name)).toContainText("0 of 5 photos");
+              expect(sql(`select count(*) from public.media_assets where entity_id = '${productIdOf(name)}'`)).toBe("0");
+              expect(sql(`select count(*) from public.audit_logs where action = 'product.image_remove' and target_id = '${productIdOf(name)}'`)).toBe("2");
+              sql(`update public.products set status = 'archived', deleted_at = now() where name = '${name}'`);
+            });
+
+            test("a file that is not an image is refused, with an explanation", async ({ page, browser, request }) => {
+              test.setTimeout(90000);
+              const { page: shop } = await approvedSeller(page, browser, request);
+              const name = `Bad file ${unique()}`;
+              await addProduct(shop, name);
+              await photoInput(shop, name).setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("hello") });
+              await expect(item(shop, name)).toContainText("Please choose a JPG, PNG or WebP image.");
+              await photoInput(shop, name).setInputFiles({ name: "fake.png", mimeType: "image/png", buffer: Buffer.from("not really a png") });
+              await expect(item(shop, name)).toContainText("We couldn't read that image.");
+              await expect(item(shop, name)).toContainText("0 of 5 photos");
+            });
+
+            test("going around the screen gets nowhere", async ({ page, browser, request }) => {
+              test.setTimeout(120000);
+              const { page: shop, context } = await approvedSeller(page, browser, request);
+              const name = `Bypass ${unique()}`;
+              await addProduct(shop, name);
+              const productId = productIdOf(name);
+              const sign = (from: import("@playwright/test").APIRequestContext) => from.post("/api/v1/media/sign", { data: { productId } });
+              const code = async (response: import("@playwright/test").APIResponse) => (await response.json()).error.code;
+
+              // Who may ask. "page" is the owner of this test's platform: a different person who is
+              // Super Admin, and may act for sellers, so an ordinary user is checked instead.
+              expect((await sign(request)).status()).toBe(401);
+              const stranger = await newApplicant(browser, request);
+              const refused = await sign(stranger.page.request);
+              expect(refused.status()).toBe(403);
+              expect(await code(refused)).toBe("NOT_AUTHORIZED");
+              expect((await context.request.post("/api/v1/media/sign", { data: { productId: "nonsense" } })).status()).toBe(400);
+
+              // The response holds no secret.
+              const signed = await sign(context.request);
+              expect(signed.status()).toBe(200);
+              const { data } = await signed.json();
+              expect(Object.keys(data.fields).sort()).toEqual(["allowed_formats", "api_key", "overwrite", "public_id", "signature", "timestamp"]);
+              expect(data.limits).toEqual({ max_images: 5, max_bytes: 1048576, max_dimension: 4000, formats: ["jpg", "png", "webp"] });
+
+              const upload = (fields: Record<string, string | number>, buffer: Buffer, filename: string, mimeType: string) =>
+                request.post(data.uploadUrl, { multipart: { ...fields, file: { name: filename, mimeType, buffer } } as never });
+
+              // Changing what was signed is refused by Cloudinary.
+              const tampered = await upload({ ...data.fields, public_id: `${data.fields.public_id}x` }, png(5, 5), "a.png", "image/png");
+              expect(tampered.status()).toBe(401);
+
+              // A format outside the list is refused by Cloudinary.
+              const gif = Buffer.from("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", "base64");
+              expect((await upload(data.fields, gif, "a.gif", "image/gif")).status()).toBe(400);
+
+              // An image that is too large, sent straight to Cloudinary, is caught and deleted.
+              const uploaded = await upload(data.fields, png(4001, 1), "wide.png", "image/png");
+              expect(uploaded.status()).toBe(200);
+              const finish = (from: import("@playwright/test").APIRequestContext, publicId: string) =>
+                from.post("/api/v1/media/complete", { data: { productId, publicId } });
+              const tooWide = await finish(context.request, data.fields.public_id);
+              expect(tooWide.status()).toBe(400);
+              expect(await code(tooWide)).toBe("IMAGE_REJECTED");
+              expect(sql(`select count(*) from public.media_assets where entity_id = '${productId}'`)).toBe("0");
+              // Deleted: asking again finds nothing to save.
+              expect(await code(await finish(context.request, data.fields.public_id))).toBe("IMAGE_REJECTED");
+
+              // A file from somewhere else cannot be claimed, or deleted by trying to.
+              expect(await code(await finish(context.request, "sample"))).toBe("IMAGE_REJECTED");
+              expect(await code(await finish(stranger.page.request, data.fields.public_id))).toBe("NOT_AUTHORIZED");
+
+              // A stranger cannot remove a photo.
+              await photoInput(shop, name).setInputFiles({ name: "ok.png", mimeType: "image/png", buffer: png(40, 40) });
+              await expect(item(shop, name)).toContainText("1 of 5 photos", { timeout: 30000 });
+              const assetId = sql(`select id from public.media_assets where entity_id = '${productId}'`);
+              expect((await stranger.page.request.delete(`/api/v1/media/${assetId}`)).status()).toBe(403);
+              expect((await request.delete(`/api/v1/media/${assetId}`)).status()).toBe(401);
+              expect(sql(`select count(*) from public.media_assets where id = '${assetId}'`)).toBe("1");
+              expect((await context.request.delete(`/api/v1/media/${assetId}`)).status()).toBe(204);
+              expect(sql(`select count(*) from public.media_assets where id = '${assetId}'`)).toBe("0");
+            });
           });
 
           test("a shop stays private: signed-out visitors and buyers get nothing", async ({ page, request }) => {

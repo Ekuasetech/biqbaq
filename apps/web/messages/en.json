@@ -512,7 +512,29 @@
       "loadFailed": "We couldn't load your shop. Please refresh the page.",
       "generic": "Something went wrong. Please try again."
     },
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "photos": {
+      "title": "Photos",
+      "count": "{count} of {max} photos",
+      "add": "Add a photo",
+      "uploading": "Uploading…",
+      "main": "Main photo",
+      "makeMain": "Make main photo",
+      "remove": "Remove photo",
+      "alt": "Photo {number} of {name}",
+      "help": "JPG, PNG or WebP. Large photos are made smaller for you, and location data is removed.",
+      "errors": {
+        "format": "Please choose a JPG, PNG or WebP image.",
+        "unreadable": "We couldn't read that image. Please try a different one.",
+        "tooLarge": "That image can't be made small enough. Please try a different one.",
+        "limit": "This product already has the most photos allowed.",
+        "rejected": "That image doesn't meet the size or format rules.",
+        "notEditable": "This product's photos can't be changed right now.",
+        "notAllowed": "You aren't allowed to do this right now.",
+        "unavailable": "Photo uploads aren't available right now. Please try again later.",
+        "generic": "The photo didn't upload. Please try again."
+      }
+    }
   },
   "errorPage": {
     "title": "Something went wrong",
