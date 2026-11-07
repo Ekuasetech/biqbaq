@@ -196,7 +196,7 @@ function SellerCard({ seller, onChanged }: { seller: SellerForReview; onChanged:
             <div className="grid gap-1.5">
               <Label htmlFor={`${seller.seller_id}-reason`}>{t(`reasonFor.${pending}`)}</Label>
               <Textarea id={`${seller.seller_id}-reason`} value={reason} maxLength={1000} rows={2} onChange={(event) => setReason(event.target.value)} className="rounded-xl" />
-              {pending === "reject" && <p className="text-xs text-muted-foreground">{t("reasonHint")}</p>}
+              {(pending === "reject" || pending === "suspend" || pending === "revoke") && <p className="text-xs text-muted-foreground">{t("reasonHint")}</p>}
             </div>
             <div className="flex flex-wrap gap-2">
               <button type="submit" disabled={working} className={primaryButton}>{working ? t("working") : t(`confirm.${pending}`)}</button>

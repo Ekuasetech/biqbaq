@@ -1704,3 +1704,11 @@ test.describe("public marketplace", () => {
     (page as unknown as { problems: string[] }).problems = [];
   });
 });
+
+test("the email worker cannot be run from outside", async ({ request }) => {
+  const response = await request.post("/api/v1/internal/jobs/run");
+  expect(response.status()).toBe(503);
+  const body = await response.json();
+  expect(body.error.code).toBe("WORKER_NOT_CONFIGURED");
+  expect(JSON.stringify(body)).not.toContain("claimed");
+});

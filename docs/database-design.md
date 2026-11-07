@@ -104,7 +104,7 @@ Slugs must be unique, and real titles repeat (two 2021 Toyota Siennas), so a gen
 | `audit_logs` | `actor_id`, `action`, `target_type`, `target_id`, `on_behalf_of_seller_id`, `reason`, `metadata`, `created_at` | Append-only; a trigger rejects `UPDATE` and `DELETE` |
 | `notifications` | `user_id`, `type`, `payload`, `read_at`, delivery status | |
 | `notification_preferences` | `user_id`, `channel`, `type`, `enabled` | |
-| `background_jobs` | `type`, `payload`, `status`, `attempts`, `run_at`, `last_error`, `idempotency_key` (unique) | ADR-0002 |
+| `background_jobs` | `type`, `user_id`, `payload`, `status`, `attempts`, `max_attempts`, `run_at`, `locked_until`, `last_error`, `provider_message_id`, `idempotency_key` (unique) | ADR-0002. Stores who an email is for, never the address, which is looked up when sending |
 | `view_events` | `entity_type`, `entity_id`, `visitor_hash`, `day` | Unique per listing, visitor and day (Q-16). A job rolls them up into `view_count` and `reader_count`, then prunes them, so public pages never write to listings |
 | `rate_limit_counters` | `bucket`, `window_start`, `count` | Pruned by a job |
 | `integration_snapshots` | `source`, `key`, `data`, `source_url`, `fetched_at` | Express Entry, FX, weather, jobs |

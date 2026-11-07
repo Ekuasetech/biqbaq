@@ -1,6 +1,6 @@
 # Role Application and Verification Workflows
 
-Status: **proposed, awaiting review**. Implements PRD §4 and §5. Each RPC runs in one transaction: it checks the caller, validates the transition, makes the change, writes the audit row, and enqueues notifications.
+Status: **proposed, awaiting review**. Implements PRD §4 and §5. Each RPC runs in one transaction: it checks the caller, validates the transition, makes the change, writes the audit row, and enqueues notifications. Decision emails are enqueued by database triggers on `role_applications` and `verification_history`, so they share the transaction and no route can skip them.
 
 ## Role applications
 
