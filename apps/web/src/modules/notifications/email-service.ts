@@ -1,6 +1,6 @@
 import "server-only";
 import { isRetriableStatus, resolveDelivery, type EmailEnv } from "./delivery";
-import type { RenderedEmail } from "./templates";
+import { escapeHtml, type RenderedEmail } from "./templates";
 
 export type SendResult =
   | { status: "sent"; messageId: string | null }
@@ -14,6 +14,27 @@ const readEnv = (): EmailEnv => ({
   liveSending: process.env.EMAIL_LIVE_SENDING,
 });
 
+/** Delivers to this computer's test inbox, so account tests never reach Resend. */
+async function sendToLocalInbox(url: string, to: string, email: RenderedEmail, timeoutMs: number): Promise<SendResult> {
+  try {
+    const response = await fetch(`${url}/api/v1/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        From: { Email: "biqbaq@example.com", Name: "Biqbaq" },
+        To: [{ Email: to }],
+        Subject: email.subject,
+        Text: email.text,
+        HTML: email.html,
+      }),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    return response.ok ? { status: "sent", messageId: null } : { status: "failed", code: `LOCAL_INBOX_${response.status}`, retry: true };
+  } catch {
+    return { status: "failed", code: "LOCAL_INBOX_UNREACHABLE", retry: true };
+  }
+}
+
 /** Every email Biqbaq sends goes through here (PRD §18.1). */
 export const EmailService = {
   isConfigured() {
@@ -21,13 +42,20 @@ export const EmailService = {
     return Boolean(env.apiKey && env.from && (env.testRecipient || env.liveSending === "true"));
   },
 
-  async send(to: string, email: RenderedEmail, options: { idempotencyKey: string; replyTo?: string }): Promise<SendResult> {
+  async send(
+    to: string,
+    email: RenderedEmail,
+    options: { idempotencyKey: string; replyTo?: string; timeoutMs?: number; useLocalInbox?: boolean },
+  ): Promise<SendResult> {
     const env = readEnv();
-    const delivery = resolveDelivery(to, env);
+    const timeoutMs = options.timeoutMs ?? 15_000;
+    const delivery = resolveDelivery(to, options.useLocalInbox ? { ...env, localInboxUrl: process.env.EMAIL_LOCAL_INBOX_URL } : env);
     if (delivery.kind === "suppress") return { status: "suppressed" };
     if (delivery.kind === "refuse") return { status: "failed", code: delivery.reason, retry: true };
+    if (delivery.kind === "local_inbox") return sendToLocalInbox(delivery.url, to, email, timeoutMs);
 
     const redirected = delivery.redirectedFrom !== undefined;
+    const note = redirected ? `Test email, which would have gone to ${delivery.redirectedFrom}` : null;
     let response: Response;
     try {
       response = await fetch("https://api.resend.com/emails", {
@@ -43,11 +71,11 @@ export const EmailService = {
           from: env.from,
           to: [delivery.to],
           subject: redirected ? `[Test] ${email.subject}` : email.subject,
-          text: email.text,
-          html: email.html,
+          text: note ? `${note}\n\n${email.text}` : email.text,
+          html: note ? `<p><em>${escapeHtml(note)}</em></p>${email.html}` : email.html,
           ...(options.replyTo ? { reply_to: options.replyTo } : {}),
         }),
-        signal: AbortSignal.timeout(15_000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
     } catch {
       return { status: "failed", code: "RESEND_UNREACHABLE", retry: true };

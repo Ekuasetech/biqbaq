@@ -233,6 +233,40 @@ select is_empty($$ select * from claim_email_jobs(10) $$, 'an abandoned job with
 reset role;
 select results_eq($$ select status, last_error from background_jobs $$, $$ values ('dead', 'WORKER_STOPPED') $$, 'and it is marked as stopped');
 
+-- A welcome email, once and only once the address is confirmed.
+delete from background_jobs;
+insert into auth.users (id, email) values ('00000000-0000-4000-8000-0000000000e5', 'new@mail.biqbaq-check.ca');
+select is((select count(*)::int from background_jobs), 0, 'an unconfirmed account gets no welcome email');
+update auth.users set email_confirmed_at = now() where id = '00000000-0000-4000-8000-0000000000e5';
+select results_eq(
+  $$ select user_id, payload ->> 'template' from background_jobs $$,
+  $$ values ('00000000-0000-4000-8000-0000000000e5'::uuid, 'welcome') $$,
+  'confirming the address sends the welcome email'
+);
+update auth.users set email_confirmed_at = null where id = '00000000-0000-4000-8000-0000000000e5';
+update auth.users set email_confirmed_at = now() where id = '00000000-0000-4000-8000-0000000000e5';
+update auth.users set email = 'moved@mail.biqbaq-check.ca', last_sign_in_at = now() where id = '00000000-0000-4000-8000-0000000000e5';
+select is((select count(*)::int from background_jobs), 1, 'it is only ever sent once');
+insert into auth.users (id, email, email_confirmed_at) values ('00000000-0000-4000-8000-0000000000e6', 'google@mail.biqbaq-check.ca', now());
+select is((select count(*)::int from background_jobs where user_id = '00000000-0000-4000-8000-0000000000e6'), 1, 'an account arriving confirmed, such as Google sign-in, is welcomed');
+insert into auth.users (id, email, email_confirmed_at) values ('00000000-0000-4000-8000-0000000000e7', 'tester@shop.test', now());
+update auth.users set email_confirmed_at = null where id = '00000000-0000-4000-8000-0000000000e4';
+update auth.users set email_confirmed_at = now() where id = '00000000-0000-4000-8000-0000000000e4';
+select is(
+  (select count(*)::int from background_jobs where user_id in ('00000000-0000-4000-8000-0000000000e7', '00000000-0000-4000-8000-0000000000e4')), 0,
+  'a test address gets no welcome email'
+);
+update platform_settings set value = 'false' where key = 'email.notifications_enabled';
+insert into auth.users (id, email, email_confirmed_at) values ('00000000-0000-4000-8000-0000000000e8', 'off@mail.biqbaq-check.ca', now());
+select is((select count(*)::int from background_jobs where user_id = '00000000-0000-4000-8000-0000000000e8'), 0, 'switching notification emails off covers the welcome email');
+update platform_settings set value = 'true' where key = 'email.notifications_enabled';
+select is_empty(
+  $$ select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'private' and p.proname = 'email_on_account_confirmed'
+       and (has_function_privilege('authenticated', p.oid, 'execute') or has_function_privilege('anon', p.oid, 'execute')) $$,
+  'nobody can call the welcome helper'
+);
+
 -- One email per event, however often it is raised.
 select private.enqueue_email('00000000-0000-4000-8000-0000000000e3', 'verification_verified', '{}', 'same-key');
 select private.enqueue_email('00000000-0000-4000-8000-0000000000e3', 'verification_verified', '{}', 'same-key');

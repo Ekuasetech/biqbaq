@@ -65,6 +65,7 @@ Authenticated. Authorization is enforced on the server. Everything else goes via
 | `POST /media/sign` | Authorize a Cloudinary upload for an entity the caller controls | 3 |
 | `POST /media/complete` | Verify the upload and save metadata | 3 |
 | `DELETE /media/{id}` | Remove from Cloudinary and the database | 3 |
+| `POST /auth/email-hook` | **Supabase Auth only.** Sends account emails. Needs a valid signature made with `SEND_EMAIL_HOOK_SECRET` | 4 |
 | `POST /internal/jobs/run` | **Scheduler only.** Sends one batch of waiting emails, with `Authorization: Bearer` and `JOBS_WORKER_SECRET`. Answers 503 until the secret is set | 4 |
 | `POST /products/{id}/contact` | **Public.** Anonymous enquiry, sent via Resend with Reply-To | 4 |
 | `POST /sellers/me/invitations` | Invite staff | 3 |

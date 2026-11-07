@@ -31,6 +31,19 @@ describe("resolveDelivery", () => {
     }
   });
 
+  it("uses this computer's test inbox for reserved addresses, and for nothing else", () => {
+    const localInboxUrl = "http://127.0.0.1:54324";
+    expect(resolveDelivery("a@example.com", { ...configured, localInboxUrl })).toEqual({ kind: "local_inbox", url: localInboxUrl });
+    expect(resolveDelivery("real@gmail.com", { ...configured, localInboxUrl, testRecipient: "me@b.ca" })).toMatchObject({ kind: "send", to: "me@b.ca" });
+    expect(resolveDelivery("real@gmail.com", { ...configured, localInboxUrl })).toEqual({ kind: "refuse", reason: "LIVE_SENDING_OFF" });
+  });
+
+  it("refuses a test inbox that is not on this computer", () => {
+    for (const localInboxUrl of ["https://evil.com", "http://127.0.0.1.evil.com", "http://localhost@evil.com"]) {
+      expect(resolveDelivery("a@example.com", { ...configured, localInboxUrl })).toEqual({ kind: "suppress" });
+    }
+  });
+
   it("does not mistake a real domain for a reserved one", () => {
     for (const to of ["a@myexample.com", "a@example.com.ng", "a@test.ca"]) {
       expect(resolveDelivery(to, { ...configured, liveSending: "true" })).toEqual({ kind: "send", to });

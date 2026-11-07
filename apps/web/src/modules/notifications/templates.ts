@@ -22,6 +22,20 @@ const ROLE_NAMES: Record<EmailLocale, Record<string, string>> = {
 type Build = (role: string) => Copy;
 
 const TEMPLATES: Record<string, Record<EmailLocale, Build>> = {
+  welcome: {
+    en: () => ({
+      subject: "Welcome to Biqbaq",
+      body: "Your email is confirmed and your account is ready. You can browse products from sellers in your city, find cargo cars going to Nigeria, and apply to sell from your account.",
+      action: "Go to your account",
+      path: "/account",
+    }),
+    fr: () => ({
+      subject: "Bienvenue sur Biqbaq",
+      body: "Votre adresse courriel est confirmée et votre compte est prêt. Vous pouvez parcourir les produits des vendeurs de votre ville, trouver des véhicules de fret en partance pour le Nigeria et demander à vendre depuis votre compte.",
+      action: "Accéder à votre compte",
+      path: "/account",
+    }),
+  },
   application_received: {
     en: (role) => ({
       subject: "New application waiting for review",
@@ -149,10 +163,10 @@ const GREETING: Record<EmailLocale, (name: string | null) => string> = {
   fr: (name) => (name ? `Bonjour ${name},` : "Bonjour,"),
 };
 
-const escapeHtml = (value: string) =>
+export const escapeHtml = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
-/** Null means the template does not exist, which no retry can fix. */
+/** Null means this version of the code has no such template. */
 export function renderEmail(
   template: string,
   data: { role?: unknown; reason?: unknown },

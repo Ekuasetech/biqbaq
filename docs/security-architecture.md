@@ -5,7 +5,7 @@ Status: **approved by the owner (2026-11-06)**. Covers authentication, authoriza
 ## 1. Authentication
 
 - Supabase Auth for registration, login, email verification, password reset and sessions, on web (HTTP-only cookies via `@supabase/ssr`) and mobile (tokens in `expo-secure-store`).
-- Verification and reset emails use Supabase's Send Email hook, which calls `EmailService` and so Resend.
+- Verification and reset emails use Supabase's Send Email hook (`POST /api/v1/auth/email-hook`), which calls `EmailService` and so Resend. Each request's signature is checked, and its links are credentials, so they are never stored or logged.
 - Google sign-in (Q-18) also goes through Supabase Auth, and a verified email with the same address means the same account, as one person has one account (§3.1).
 - A signup trigger creates the profile and the active `buyer` role, and records referral attribution. It treats signup metadata as untrusted: it reads only a referral code, and looks the code up. An error in this trigger would block all signups, so a bad or missing referral code must never raise one.
 - Suspended or deactivated accounts: `profiles.status` is checked by the authorization helpers, so a still-valid session cannot act. The account is also banned in Supabase Auth so that it can no longer log in.

@@ -30,6 +30,7 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 | Q-22 | **Is the account page ever slow for real visitors?** Details took up to about 3 seconds with six browsers on one machine, and two earlier batches timed out at 5 seconds (12 of 48), without the cause being established. Later runs had no failures in 104 attempts | Measure on the real project before launch | Phase 12 |
 | Q-23 | **Can a product be published at a price of $0?** | **Decided by the owner (2026-11-06):** yes | Decided |
 | Q-24 | **What should sellers be told when verification is suspended or removed?** | **Decided by the owner (2026-11-06):** the email includes the reason, so Super Admin writes those reasons for the seller to read. Reasons for verifying directly and restoring stay internal | Decided |
+| Q-26 | **When should the welcome email go out?** The owner asked for a welcome email and a verification email at sign-up (2026-11-06); the PRD does not list a welcome email. | After the address is confirmed, so the sign-up form cannot be used to send it to a stranger. It is sent once per person, and accounts confirmed before this was built do not get one | Before launch |
 | Q-25 | **Who checks the French emails?** The emails go out in the person's chosen language. The French text has not had a native review. | Reviewed along with the rest of the French text | Before launch |
 
 ## PRD §27 decisions, and how much the design depends on them
@@ -58,6 +59,6 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 ## Needed from the project owner, outside the design
 
 - Accounts and keys: Supabase, Cloudinary, Resend, and a verified sending domain.
-- Before launch, email needs its own settings: a Biqbaq sending domain (ideally a separate Resend account from the mobile app), a new `RESEND_API_KEY` and `EMAIL_FROM`, `EMAIL_LIVE_SENDING=true`, a blank `EMAIL_TEST_RECIPIENT`, a long random `JOBS_WORKER_SECRET`, and a scheduler calling the worker every minute or so.
+- Before launch, email needs its own settings: a Biqbaq sending domain (ideally a separate Resend account from the mobile app), a new `RESEND_API_KEY` and `EMAIL_FROM`, `EMAIL_LIVE_SENDING=true`, a blank `EMAIL_TEST_RECIPIENT`, a long random `JOBS_WORKER_SECRET`, and a scheduler calling the worker every minute or so. In the Supabase dashboard's Auth Hooks, turn on Send Email, pointing at the live `/api/v1/auth/email-hook`, and put its secret in `SEND_EMAIL_HOOK_SECRET`. The real project's setting for confirming email must also be on.
 - Confirmation that `biqbaq.com` (used in the PRD's examples) is the production domain.
 - Docker, or an equivalent, on the development machine for local Supabase and RLS tests.

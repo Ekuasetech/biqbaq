@@ -646,7 +646,8 @@ test.describe("public marketplace", () => {
     test("sign up, confirm by email, sign out and sign back in", async ({ page, request }) => {
       const email = newEmail("signup");
       await register(page, email);
-      await page.goto(await emailLink(request, email));
+      // This subject is Biqbaq's own, so it also proves the email came through EmailService.
+      await page.goto(await emailLink(request, email, /^Confirm your Biqbaq account$/));
       await expect(signedIn(page)).toBeVisible();
       await expect(page.getByRole("banner")).toContainText("Ada Sample");
       await signOut(page);
@@ -1703,6 +1704,17 @@ test.describe("public marketplace", () => {
     await expect(page.getByRole("heading", { name: "Page introuvable" })).toBeVisible();
     (page as unknown as { problems: string[] }).problems = [];
   });
+});
+
+test("account emails cannot be sent by anyone but Supabase", async ({ request }) => {
+  const payload = { user: { email: "victim@gmail.com" }, email_data: { email_action_type: "signup", token_hash: "x" } };
+  const unsigned = await request.post("/api/v1/auth/email-hook", { data: payload });
+  expect(unsigned.status()).toBe(401);
+  const forged = await request.post("/api/v1/auth/email-hook", {
+    data: payload,
+    headers: { "webhook-id": "msg_1", "webhook-timestamp": String(Math.floor(Date.now() / 1000)), "webhook-signature": "v1,AAAA" },
+  });
+  expect(forged.status()).toBe(401);
 });
 
 test("the email worker cannot be run from outside", async ({ request }) => {

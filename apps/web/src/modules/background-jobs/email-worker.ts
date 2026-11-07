@@ -53,7 +53,8 @@ export async function runEmailJobs(): Promise<WorkerResult> {
       siteUrl,
     );
     if (!email) {
-      await fail("UNKNOWN_TEMPLATE", false);
+      // Retried, because a worker still running older code should not end a newer email.
+      await fail("UNKNOWN_TEMPLATE", true);
       continue;
     }
 

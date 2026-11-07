@@ -21,6 +21,8 @@ npx supabase start               # local database, sign-in service and test inbo
 npx supabase test db             # database and security tests
 ```
 
+Local sign-up and password emails go through the web app, so it must be running on port 3000 for them to work. Real addresses are redirected to `EMAIL_TEST_RECIPIENT`, and `@example.com` addresses go to the local test inbox at http://127.0.0.1:54324.
+
 Emails sent locally land in the test inbox at http://127.0.0.1:54324, not real inboxes.
 
 To try the admin screens, create an account, then run `./scripts/make-local-super-admin.sh you@example.com`. This only works once per local database, and only on the local copy.

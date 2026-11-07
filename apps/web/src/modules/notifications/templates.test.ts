@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderEmail } from "./templates";
 
 const TEMPLATES = [
+  "welcome",
   "application_received",
   "application_approved",
   "application_rejected",

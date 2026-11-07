@@ -290,6 +290,14 @@ max_frequency = "5s"
 # enabled = true
 # uri = "pg-functions://<database>/<schema>/<hook_name>"
 
+# Sends account emails through the web app and so through EmailService (system-architecture.md).
+# Local only: the web app must be running on port 3000 for sign-up and password reset to work.
+# This secret is only for this local copy. The real project uses its own, set in its dashboard.
+[auth.hook.send_email]
+enabled = true
+uri = "http://host.docker.internal:3000/api/v1/auth/email-hook"
+secrets = "v1,whsec_yt5HAV1CZ0W2EIvV6EKRpYmsfZd9CEKRFQ1Nnyp7ZXM="
+
 # Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
 [auth.sms.twilio]
 enabled = false

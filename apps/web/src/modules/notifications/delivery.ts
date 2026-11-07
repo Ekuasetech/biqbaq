@@ -3,10 +3,13 @@ export interface EmailEnv {
   from?: string;
   testRecipient?: string;
   liveSending?: string;
+  /** This computer's test inbox. Only ever a local address. */
+  localInboxUrl?: string;
 }
 
 export type Delivery =
   | { kind: "send"; to: string; redirectedFrom?: string }
+  | { kind: "local_inbox"; url: string }
   | { kind: "suppress" }
   | { kind: "refuse"; reason: "NOT_CONFIGURED" | "LIVE_SENDING_OFF" };
 
@@ -14,12 +17,16 @@ export type Delivery =
 // bounces, and bounces hurt the sending domain's reputation.
 const RESERVED = /@(example\.(com|org|net)|[^@]+\.(test|example|invalid|localhost))$/i;
 
+const LOCAL_URL = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/;
+
 /**
  * Decides where an email really goes. It fails safe: a real recipient is only used when
  * live sending has been switched on and no test address is set.
  */
 export function resolveDelivery(to: string, env: EmailEnv): Delivery {
-  if (RESERVED.test(to)) return { kind: "suppress" };
+  if (RESERVED.test(to)) {
+    return env.localInboxUrl && LOCAL_URL.test(env.localInboxUrl) ? { kind: "local_inbox", url: env.localInboxUrl } : { kind: "suppress" };
+  }
   if (!env.apiKey || !env.from) return { kind: "refuse", reason: "NOT_CONFIGURED" };
   if (env.testRecipient) return { kind: "send", to: env.testRecipient, redirectedFrom: to };
   if (env.liveSending === "true") return { kind: "send", to };

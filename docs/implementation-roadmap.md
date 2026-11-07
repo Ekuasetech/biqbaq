@@ -69,13 +69,13 @@ The owner decided that publishing does not need a verified contact email (Q-06),
 
 Needs: BD-04, BD-05, Q-10, Q-13.
 
-1. `background_jobs`, the worker and `EmailService` with Resend are **built**, and send the decision emails below. The Auth email hook is not built yet, so sign-up and password emails stay in the local test inbox.
+1. `background_jobs`, the worker and `EmailService` with Resend are **built**, and send the decision emails below. The Auth email hook is **built** on the local copy, so sign-up and password emails go through `EmailService` too.
 2. Send enquiries to the seller's login email, which is already verified (Q-06).
 3. Anonymous contact form.
 4. Messaging, inbox and Realtime.
 5. In-app notifications and preferences.
 
-**Built, for email:** Super Admin is emailed about new role applications. Applicants are emailed about approvals and rejections, and sellers about verification changes. Still to come: a Super Admin screen for the on/off setting (`email.notifications_enabled`, PRD §18.2) and for failed jobs, and a production scheduler (Q-11).
+**Built, for email:** new accounts get a confirmation email, and a welcome email once confirmed. Super Admin is emailed about new role applications. Applicants are emailed about approvals and rejections, and sellers about verification changes. Still to come: a Super Admin screen for the on/off setting (`email.notifications_enabled`, PRD §18.2) and for failed jobs, and a production scheduler (Q-11).
 
 ## Phases 5 to 12
 
