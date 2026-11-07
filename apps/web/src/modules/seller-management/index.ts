@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { VerificationStatus } from "@/modules/verification";
 
 export interface MyShop {
   id: string;
@@ -7,6 +8,7 @@ export interface MyShop {
   city: string;
   status: "active" | "suspended";
   publishing_suspended: boolean;
+  verification_status: VerificationStatus;
 }
 
 export interface PublishingAllowance {
@@ -19,7 +21,7 @@ export interface PublishingAllowance {
 export async function getMyShop(supabase: SupabaseClient, userId: string) {
   return supabase
     .from("sellers")
-    .select("id, slug, name, city, status, publishing_suspended")
+    .select("id, slug, name, city, status, publishing_suspended, verification_status")
     .eq("owner_user_id", userId)
     .maybeSingle();
 }

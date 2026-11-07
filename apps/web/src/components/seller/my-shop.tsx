@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
 import { ProductPhotos } from "@/components/seller/product-photos";
+import { VerificationCard } from "@/components/seller/verification-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,6 +32,7 @@ import {
   type SellerProduct,
 } from "@/modules/product-catalog/seller-products";
 import { AVAILABILITIES } from "@/modules/product-catalog/types";
+import { getMyLatestRequest, type MyVerificationRequest } from "@/modules/verification";
 import { getMyAllowance, getMyShop, placesLeft, type MyShop as Shop, type PublishingAllowance } from "@/modules/seller-management";
 
 const secondaryButton =
@@ -45,6 +47,7 @@ interface ShopData {
   allowance: PublishingAllowance | null;
   photos: ShopPhoto[];
   photoLimit: number;
+  verificationRequest: MyVerificationRequest | null;
 }
 
 /** Keeps the public pages current. If this fails they catch up within about a minute. */
@@ -284,7 +287,7 @@ export function MyShop() {
       return;
     }
     if (!shop.data) {
-      setData({ shop: null, products: [], categories: [], allowance: null, photos: [], photoLimit: 0 });
+      setData({ shop: null, products: [], categories: [], allowance: null, photos: [], photoLimit: 0, verificationRequest: null });
       return;
     }
     const products = await listShopProducts(supabase, shop.data.id);
@@ -292,13 +295,14 @@ export function MyShop() {
       setLoadFailed(true);
       return;
     }
-    const [categories, allowance, photos, photoLimit] = await Promise.all([
+    const [categories, allowance, photos, photoLimit, verificationRequest] = await Promise.all([
       listCategories(supabase),
       getMyAllowance(supabase),
       listShopPhotos(supabase, products.data.map((product) => product.id)),
       getPhotoLimit(supabase),
+      getMyLatestRequest(supabase, shop.data.id),
     ]);
-    if (categories.error || allowance.error || photos.error || photoLimit.error) {
+    if (categories.error || allowance.error || photos.error || photoLimit.error || verificationRequest.error) {
       setLoadFailed(true);
       return;
     }
@@ -310,6 +314,7 @@ export function MyShop() {
       allowance: allowance.data as PublishingAllowance,
       photos: photos.data as ShopPhoto[],
       photoLimit: photoLimit.data as number,
+      verificationRequest: verificationRequest.data as MyVerificationRequest | null,
     });
   }, []);
 
@@ -343,7 +348,7 @@ export function MyShop() {
     );
   }
 
-  const { shop, allowance, categories, products, photos, photoLimit } = data;
+  const { shop, allowance, categories, products, photos, photoLimit, verificationRequest } = data;
   const left = placesLeft(allowance);
   const supabase = getSupabaseBrowserClient();
   const reload = () => load(user.id);
@@ -371,6 +376,13 @@ export function MyShop() {
           )}
         </div>
       </section>
+
+      <VerificationCard
+        status={shop.verification_status}
+        request={verificationRequest}
+        shopActive={shop.status === "active"}
+        onChanged={reload}
+      />
 
       <section aria-labelledby="shop-products" className="grid gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">

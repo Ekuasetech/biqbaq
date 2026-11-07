@@ -49,7 +49,7 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 | BD-13 | SMS provider | Interface only | Phase 10 |
 | BD-14 | Image formats, dimensions, counts | **Decided by the owner (2026-11-06):** JPG, PNG and WebP; up to 5 images per product; up to 4000 × 4000 pixels; 1 MB each, with photos shrunk automatically in the browser. All are platform settings | Decided |
 | BD-15 | Blog resubmission workflow | Revisions held separately from the live post | Phase 6 |
-| BD-16 | Manual verification evidence | Evidence references are free-form for now | Phase 3 |
+| BD-16 | Manual verification evidence | **Decided by the owner (2026-11-06):** a written note is enough, with no document uploads. Super Admin may verify a seller who has not asked, giving a reason | Decided |
 | BD-17 | Required application fields per role | **Decided by the owner (2026-11-06):** the fields in PRD §4.3, stored as validated JSON per role so they can change without a migration | Decided |
 | BD-18 | Reapply after rejection | Allowed only via a new application; at most one pending per role per user | Phase 2 |
 

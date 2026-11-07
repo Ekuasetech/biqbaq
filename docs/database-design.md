@@ -35,7 +35,6 @@ Effective permission = an **active** `user_roles` row, plus a matching `role_per
 | Table | Key columns | Notes |
 | --- | --- | --- |
 | `verification_requests` | `seller_id`, `method` (provider / manual), `status`, `provider`, `provider_reference`, `reason`, `reviewed_by`, `decided_at` | |
-| `verification_evidence` | `request_id`, `storage_path`, `content_type`, `uploaded_by` | Private bucket only |
 | `verification_history` | `seller_id`, `from_status`, `to_status`, `method`, `actor_id`, `reason`, `created_at` | Append-only |
 
 ## Catalogue

@@ -393,7 +393,11 @@
       "generic": "Une erreur s'est produite. Veuillez réessayer."
     },
     "adminLink": "Examiner les demandes de rôle",
-    "shopLink": "Gérer ma boutique"
+    "shopLink": "Gérer ma boutique",
+    "verificationLink": "Examiner la vérification des vendeurs",
+    "recentApplications": "Demandes récentes",
+    "noRecentApplications": "Aucune demande en attente.",
+    "viewAllApplications": "Voir toutes les demandes"
   },
   "admin": {
     "section": "Administration",
@@ -541,5 +545,100 @@
     "body": "Impossible de charger cette page. Veuillez réessayer dans un instant.",
     "retry": "Réessayer",
     "home": "Retour à l’accueil"
+  },
+  "verification": {
+    "adminTitle": "Vérification des vendeurs",
+    "cardTitle": "Vérification",
+    "status": {
+      "unverified": "Non vérifié",
+      "pending": "En attente d’examen",
+      "provider_verified": "Vérifié par le fournisseur",
+      "manually_verified": "Vérifié manuellement",
+      "rejected": "Non approuvé",
+      "suspended": "Vérification suspendue",
+      "expired": "Expiré"
+    },
+    "explain": {
+      "unverified": "Les boutiques vérifiées peuvent publier sans limite et affichent la mention Vendeur vérifié. Demandez-nous de vérifier votre boutique.",
+      "pending": "Votre demande attend d’être examinée. La décision s’affichera ici.",
+      "provider_verified": "Votre boutique est vérifiée. Les clients voient la mention Vendeur vérifié.",
+      "manually_verified": "Votre boutique est vérifiée. Les clients voient la mention Vendeur vérifié.",
+      "rejected": "Votre dernière demande n’a pas été approuvée. Vous pouvez la renouveler avec plus d’informations.",
+      "suspended": "Votre vérification est suspendue. Vos produits restent en ligne avec la mention Vendeur non vérifié, et la limite de publication s’applique de nouveau.",
+      "expired": "Votre vérification a expiré. Demandez-nous de vérifier de nouveau votre boutique."
+    },
+    "requestButton": "Demander la vérification",
+    "noteLabel": "Comment pouvons-nous confirmer votre identité ?",
+    "noteHint": "Parlez-nous de vous et de votre entreprise, et de la façon de le confirmer. N’indiquez ni numéros de pièce d’identité, ni mots de passe, ni copies de documents.",
+    "sendRequest": "Envoyer la demande",
+    "cancel": "Annuler",
+    "working": "Veuillez patienter…",
+    "reason": "Motif : {reason}",
+    "statusFilter": "Filtrer par statut",
+    "all": "Tous",
+    "searchLabel": "Rechercher",
+    "searchPlaceholder": "Nom de boutique, courriel ou ville",
+    "searchButton": "Rechercher",
+    "empty": "Aucun vendeur trouvé.",
+    "count": "{count, plural, one {# vendeur} other {# vendeurs}}",
+    "shopSuspended": "Cette boutique est suspendue.",
+    "publishingSuspended": "La publication est suspendue pour cette boutique. La vérification ne lève pas cette suspension.",
+    "requestedOn": "Demandé le {date}",
+    "viewDetails": "Voir les détails",
+    "hideDetails": "Masquer les détails",
+    "owner": "Propriétaire",
+    "contact": "Coordonnées",
+    "about": "À propos de l’entreprise",
+    "products": "Produits",
+    "viewShop": "Voir la page publique de la boutique",
+    "historyTitle": "Décisions précédentes",
+    "noHistory": "Aucune.",
+    "historyChange": "{from} → {to}",
+    "historyBy": "Par {name} le {date}",
+    "unknownPerson": "Inconnu",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "action": {
+      "suspend": "Suspendre la vérification",
+      "restore": "Rétablir la vérification",
+      "revoke": "Révoquer la vérification",
+      "verify": "Vérifier ce vendeur"
+    },
+    "reasonFor": {
+      "reject": "Motif du rejet",
+      "suspend": "Motif de la suspension",
+      "restore": "Motif du rétablissement",
+      "revoke": "Motif de la révocation",
+      "verify": "Pourquoi vérifiez-vous ce vendeur ?"
+    },
+    "reasonHint": "Le vendeur peut voir ce motif.",
+    "confirm": {
+      "reject": "Confirmer le rejet",
+      "suspend": "Confirmer la suspension",
+      "restore": "Confirmer le rétablissement",
+      "revoke": "Confirmer la révocation",
+      "verify": "Confirmer la vérification"
+    },
+    "done": {
+      "approved": "Le vendeur est maintenant vérifié.",
+      "rejected": "La demande a été rejetée.",
+      "suspend": "La vérification a été suspendue.",
+      "restore": "La vérification a été rétablie.",
+      "revoke": "La vérification a été révoquée.",
+      "verify": "Le vendeur est maintenant vérifié."
+    },
+    "pagination": "Pagination",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "pageOf": "Page {page} sur {total}",
+    "errors": {
+      "reasonRequired": "Entrez un motif.",
+      "noteRequired": "Indiquez comment nous pouvons confirmer votre identité.",
+      "notAllowed": "Vous n’êtes pas autorisé à faire cela.",
+      "changed": "Ceci a déjà changé. Actualisez pour voir la dernière version.",
+      "generic": "Une erreur s’est produite. Veuillez réessayer."
+    },
+    "applicationsHint": "Un vendeur apparaît ici une fois sa demande approuvée.",
+    "applicationsLink": "Examiner les nouvelles demandes"
   }
 }

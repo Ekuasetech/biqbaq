@@ -393,7 +393,11 @@
       "generic": "Something went wrong. Please try again."
     },
     "adminLink": "Review role applications",
-    "shopLink": "Manage my shop"
+    "shopLink": "Manage my shop",
+    "verificationLink": "Review seller verification",
+    "recentApplications": "Recent Applications",
+    "noRecentApplications": "No applications are waiting.",
+    "viewAllApplications": "View all applications"
   },
   "admin": {
     "section": "Administration",
@@ -541,5 +545,100 @@
     "body": "We couldn't load this page. Please try again in a moment.",
     "retry": "Try again",
     "home": "Back to home"
+  },
+  "verification": {
+    "adminTitle": "Seller Verification",
+    "cardTitle": "Verification",
+    "status": {
+      "unverified": "Not verified",
+      "pending": "Waiting for review",
+      "provider_verified": "Verified by provider",
+      "manually_verified": "Manually verified",
+      "rejected": "Not approved",
+      "suspended": "Verification suspended",
+      "expired": "Expired"
+    },
+    "explain": {
+      "unverified": "Verified shops can publish without a limit, and show a Verified Seller label. Ask us to verify your shop.",
+      "pending": "Your request is waiting for review. You'll see the decision here.",
+      "provider_verified": "Your shop is verified. Customers see the Verified Seller label.",
+      "manually_verified": "Your shop is verified. Customers see the Verified Seller label.",
+      "rejected": "Your last request wasn't approved. You can ask again with more information.",
+      "suspended": "Your verification is suspended. Your products stay up, with the Unverified Seller label, and the publishing limit applies again.",
+      "expired": "Your verification has expired. Ask us to verify your shop again."
+    },
+    "requestButton": "Request verification",
+    "noteLabel": "How can we confirm who you are?",
+    "noteHint": "Tell us about you and your business, and how we can confirm it. Don't include ID numbers, passwords or copies of documents.",
+    "sendRequest": "Send request",
+    "cancel": "Cancel",
+    "working": "Please wait…",
+    "reason": "Reason: {reason}",
+    "statusFilter": "Filter by status",
+    "all": "All",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Shop name, email or city",
+    "searchButton": "Search",
+    "empty": "No sellers found.",
+    "count": "{count, plural, one {# seller} other {# sellers}}",
+    "shopSuspended": "This shop is suspended.",
+    "publishingSuspended": "Publishing is suspended for this shop. Verifying it doesn't lift this.",
+    "requestedOn": "Requested on {date}",
+    "viewDetails": "View details",
+    "hideDetails": "Hide details",
+    "owner": "Owner",
+    "contact": "Contact information",
+    "about": "About the business",
+    "products": "Products",
+    "viewShop": "View public shop page",
+    "historyTitle": "Previous decisions",
+    "noHistory": "None.",
+    "historyChange": "{from} → {to}",
+    "historyBy": "By {name} on {date}",
+    "unknownPerson": "Unknown",
+    "approve": "Approve",
+    "reject": "Reject",
+    "action": {
+      "suspend": "Suspend verification",
+      "restore": "Restore verification",
+      "revoke": "Revoke verification",
+      "verify": "Verify this seller"
+    },
+    "reasonFor": {
+      "reject": "Reason for rejecting",
+      "suspend": "Reason for suspending",
+      "restore": "Reason for restoring",
+      "revoke": "Reason for revoking",
+      "verify": "Why are you verifying this seller?"
+    },
+    "reasonHint": "The seller can see this.",
+    "confirm": {
+      "reject": "Confirm rejection",
+      "suspend": "Confirm suspension",
+      "restore": "Confirm restoring",
+      "revoke": "Confirm revoking",
+      "verify": "Confirm verification"
+    },
+    "done": {
+      "approved": "The seller is now verified.",
+      "rejected": "The request was rejected.",
+      "suspend": "Verification was suspended.",
+      "restore": "Verification was restored.",
+      "revoke": "Verification was revoked.",
+      "verify": "The seller is now verified."
+    },
+    "pagination": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {total}",
+    "errors": {
+      "reasonRequired": "Enter a reason.",
+      "noteRequired": "Tell us how we can confirm who you are.",
+      "notAllowed": "You aren't allowed to do this.",
+      "changed": "This has already changed. Refresh to see the latest.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "applicationsHint": "A seller appears here once their application is approved.",
+    "applicationsLink": "Review new applications"
   }
 }

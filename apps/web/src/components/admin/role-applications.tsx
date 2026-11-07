@@ -245,7 +245,21 @@ function DecisionPanel({
   );
 }
 
-function ApplicationCard({
+/** What an Admin can be given, for the choices shown when approving one. */
+export function usePlatformPermissions() {
+  const [permissions, setPermissions] = useState<{ key: string; description: string }[]>([]);
+  useEffect(() => {
+    getSupabaseBrowserClient()
+      .from("permissions")
+      .select("key, description")
+      .eq("scope", "platform")
+      .order("key")
+      .then(({ data }) => setPermissions(data ?? []));
+  }, []);
+  return permissions;
+}
+
+export function ApplicationCard({
   application,
   permissions,
   onDecided,
@@ -300,9 +314,11 @@ function ApplicationCard({
               <h3 className="mb-2 text-sm font-bold">{t("historyTitle")}</h3>
               <History application={application} />
             </section>
-            {application.status === "pending" && (
-              <DecisionPanel application={application} permissions={permissions} onDecided={onDecided} />
-            )}
+          </div>
+        )}
+        {application.status === "pending" && (
+          <div className="mt-4">
+            <DecisionPanel application={application} permissions={permissions} onDecided={onDecided} />
           </div>
         )}
       </article>
@@ -319,7 +335,7 @@ function ApplicationsList() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<AdminApplication[] | null>(null);
-  const [permissions, setPermissions] = useState<{ key: string; description: string }[]>([]);
+  const permissions = usePlatformPermissions();
   const [failed, setFailed] = useState<string | null>(null);
   const [notice, setNotice] = useState<"approved" | "rejected" | null>(null);
 
@@ -343,14 +359,6 @@ function ApplicationsList() {
     return () => clearTimeout(timer);
   }, [load]);
 
-  useEffect(() => {
-    getSupabaseBrowserClient()
-      .from("permissions")
-      .select("key, description")
-      .eq("scope", "platform")
-      .order("key")
-      .then(({ data }) => setPermissions(data ?? []));
-  }, []);
 
   const total = rows?.[0]?.total ?? 0;
   const pages = Math.max(1, Math.ceil(total / ADMIN_PAGE_SIZE));
@@ -462,7 +470,7 @@ function ApplicationsList() {
  * Checking the role here only decides what this screen shows. The protection is in
  * the database, which refuses to list or decide anything for anyone else.
  */
-export function RoleApplicationsScreen() {
+export function SuperAdminOnly({ children }: { children: ReactNode }) {
   const t = useTranslations("admin");
   const user = useSessionUser();
   const [allowed, setAllowed] = useState<boolean | null>(null);
@@ -474,6 +482,7 @@ export function RoleApplicationsScreen() {
       const { data } = await getSupabaseBrowserClient()
         .from("user_roles")
         .select("role_key")
+        .eq("user_id", userId)
         .eq("role_key", "super_admin")
         .eq("status", "active");
       setAllowed((data ?? []).length > 0);
@@ -495,5 +504,13 @@ export function RoleApplicationsScreen() {
     );
   }
 
-  return <ApplicationsList />;
+  return children;
+}
+
+export function RoleApplicationsScreen() {
+  return (
+    <SuperAdminOnly>
+      <ApplicationsList />
+    </SuperAdminOnly>
+  );
 }

@@ -39,19 +39,18 @@ The application's "seller they intend to work with" (§4.3) is informational onl
 | Step | Actor | Operation | Effect |
 | --- | --- | --- | --- |
 | Normal attempt | Seller | Provider flow | Result from a signed provider callback. Success sets `provider_verified` |
-| Request | Seller | `request_manual_verification(evidence_refs, note)` | Available once normal verification failed or is unavailable. Status `pending` |
-| Upload evidence | Seller | Direct to private bucket, under their own seller path | Only the seller can write; only Super Admin can read |
-| Review | Super Admin | `get_verification_evidence_url(id)` | Short-lived URL. Each access is audited |
+| Request | Seller | `request_manual_verification(note)` | Available once normal verification failed or is unavailable. Status `pending`. The note is written text only for now |
+| Review | Super Admin | `admin_list_seller_verification`, `admin_verification_history` | Seller details, the note and previous decisions |
 | Approve | Super Admin | `decide_manual_verification(id, approve)` | Status `manually_verified`; reviewer and timestamp recorded |
 | Reject | Super Admin | `decide_manual_verification(id, reject, reason)` | Reason is required. Status `rejected` |
-| Suspend / revoke | Super Admin | `set_verification_status(seller, status, reason)` | The label returns, and the allowance applies again |
+| Verify directly / suspend / restore / revoke | Super Admin | `set_verification_status(seller, action, reason)` | Reason required. Suspending or revoking brings back the label and the allowance. Restoring returns the status it had before |
 
 Rules:
 
 - The check for this is `has_active_role('super_admin')`, not a grantable permission, so no Admin can be given it.
 - `provider_verified` and `manually_verified` remain distinct everywhere, including history.
 - Verification changes only verification. Seller suspension and publishing restrictions are checked separately in `publish_product`, so a verified but suspended seller stays blocked (§5.5).
-- A Super Admin can approve without a prior failed attempt only if BD-16 allows it. Until then, §5.3's route applies.
+- Super Admin can verify a seller who has not asked, giving a reason (BD-16). An open request must be approved or rejected instead, so it is never left open.
 - When the provider feature is off or absent, "unavailable" is true, so manual verification is the available route. This means the platform can launch before a provider is chosen.
 
 ## Unverified publishing

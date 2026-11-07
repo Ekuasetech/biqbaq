@@ -1001,6 +1001,144 @@ test.describe("public marketplace", () => {
             await expect(shop.getByRole("region", { name: "Ada's Shop" })).toContainText("2 publishing places left of 2");
           });
 
+          test.describe("verification", () => {
+            const review = "/admin/verification";
+            const find = async (page: import("@playwright/test").Page, filter: string, email: string) => {
+              await page.goto(review);
+              await page.getByRole("button", { name: filter, exact: true }).click();
+              await page.getByLabel("Search", { exact: true }).fill(email);
+              await page.getByRole("button", { name: "Search", exact: true }).click();
+              const card = page.getByRole("article").filter({ hasText: email });
+              await expect(card).toBeVisible({ timeout: 15000 });
+              return card;
+            };
+            const verification = (page: import("@playwright/test").Page) => page.getByRole("region", { name: "Verification" });
+
+            test("request, rejection, approval, then suspending and restoring: the full journey", async ({ page, browser, request }) => {
+              test.setTimeout(150000);
+              const { page: shop, email } = await approvedSeller(page, browser, request);
+              const id = unique();
+              await expect(verification(shop)).toContainText("Not verified");
+              await expect(shop.getByText("Verified shops can publish without a limit")).toBeVisible();
+
+              // A request needs a note.
+              await shop.getByRole("button", { name: "Request verification" }).click();
+              await shop.getByRole("button", { name: "Send request" }).click();
+              await expect(verification(shop)).toContainText("Tell us how we can confirm who you are.");
+              await shop.getByLabel("How can we confirm who you are?").fill("My store is on Queen Street");
+              await shop.getByRole("button", { name: "Send request" }).click();
+              await expect(verification(shop)).toContainText("Waiting for review");
+              await expect(shop.getByRole("button", { name: "Request verification" })).toHaveCount(0);
+              await expect(shop.getByRole("region", { name: "Ada's Shop" })).toContainText("2 publishing places left of 2");
+
+              // Super Admin reaches the screen from their account.
+              await page.goto("/account");
+              await page.getByRole("link", { name: "Review seller verification" }).click({ timeout: 15000 });
+              await expect(page).toHaveURL(/\/admin\/verification$/);
+              let card = await find(page, "Waiting for review", email);
+              await expect(card).toContainText("My store is on Queen Street");
+              await card.getByRole("button", { name: "View details" }).click();
+              await expect(card).toContainText("416-555-0100");
+
+              // Rejecting needs a reason, which the seller then sees.
+              await card.getByRole("button", { name: "Reject" }).click();
+              await card.getByRole("button", { name: "Confirm rejection" }).click();
+              await expect(card).toContainText("Enter a reason.");
+              await card.getByLabel("Reason for rejecting").fill("Please add a phone number");
+              await card.getByRole("button", { name: "Confirm rejection" }).click();
+              await expect(page.getByText("The request was rejected.")).toBeVisible();
+              await shop.reload();
+              await expect(verification(shop)).toContainText("Not approved", { timeout: 15000 });
+              await expect(verification(shop)).toContainText("Please add a phone number");
+
+              // They ask again, and are approved.
+              await shop.getByRole("button", { name: "Request verification" }).click();
+              await shop.getByLabel("How can we confirm who you are?").fill("Phone 416-555-0100");
+              await shop.getByRole("button", { name: "Send request" }).click();
+              await expect(verification(shop)).toContainText("Waiting for review");
+              card = await find(page, "Waiting for review", email);
+              await card.getByRole("button", { name: "Approve" }).click();
+              await expect(page.getByText("The seller is now verified.")).toBeVisible();
+
+              // The limit is gone, and the public label changes straight away.
+              await shop.reload();
+              await expect(verification(shop)).toContainText("Manually verified", { timeout: 15000 });
+              await expect(shop.getByRole("region", { name: "Ada's Shop" })).toContainText("Your shop is verified");
+              const names = [1, 2, 3].map((n) => `Verified ${n} ${id}`);
+              for (const name of names) {
+                await addProduct(shop, name);
+                await item(shop, name).getByRole("button", { name: "Publish" }).click();
+                await expect(item(shop, name)).toContainText("Published");
+              }
+              await item(shop, names[0]).getByRole("link", { name: "View" }).click();
+              await expect(shop.getByText("Verified Seller").first()).toBeVisible();
+              await shop.goto("/account/shop");
+
+              // Suspending brings back the label and the limit, and keeps the listings.
+              card = await find(page, "Manually verified", email);
+              await card.getByRole("button", { name: "Suspend verification" }).click();
+              await card.getByLabel("Reason for suspending").fill("Report received");
+              await card.getByRole("button", { name: "Confirm suspension" }).click();
+              await expect(page.getByText("Verification was suspended.")).toBeVisible();
+              await shop.reload();
+              await expect(verification(shop)).toContainText("Verification suspended", { timeout: 15000 });
+              await expect(shop.getByRole("button", { name: "Request verification" })).toHaveCount(0);
+              const fourth = `Verified 4 ${id}`;
+              await addProduct(shop, fourth);
+              await item(shop, fourth).getByRole("button", { name: "Publish" }).click();
+              await expect(item(shop, fourth)).toContainText("You've used all your publishing places");
+              await expect(item(shop, names[0])).toContainText("Published");
+
+              // Restoring returns it to manually verified, and every decision is on record.
+              card = await find(page, "Verification suspended", email);
+              await card.getByRole("button", { name: "Restore verification" }).click();
+              await card.getByLabel("Reason for restoring").fill("Report dismissed");
+              await card.getByRole("button", { name: "Confirm restoring" }).click();
+              await expect(page.getByText("Verification was restored.")).toBeVisible();
+              card = await find(page, "Manually verified", email);
+              await card.getByRole("button", { name: "View details" }).click();
+              const history = card.getByRole("list").last();
+              await expect(history).toContainText("Please add a phone number");
+              await expect(history).toContainText("Report received");
+              await expect(history).toContainText("Report dismissed");
+              await expect(history).toContainText("Verification suspended → Manually verified");
+              expect(sql(`select count(*) from public.audit_logs where action = 'seller.verification_change' and target_id = (select s.id::text from public.sellers s join auth.users u on u.id = s.owner_user_id where u.email = '${email}')`)).toBe("6");
+
+              sql(`update public.products set status = 'archived', deleted_at = now() where name like '% ${id}'`);
+            });
+
+            test("Super Admin can verify a seller who never asked, with a reason", async ({ page, browser, request }) => {
+              test.setTimeout(90000);
+              const { page: shop, email } = await approvedSeller(page, browser, request);
+              const card = await find(page, "Not verified", email);
+              await card.getByRole("button", { name: "Verify this seller" }).click();
+              await card.getByRole("button", { name: "Confirm verification" }).click();
+              await expect(card).toContainText("Enter a reason.");
+              await card.getByLabel("Why are you verifying this seller?").fill("Met in person");
+              await card.getByRole("button", { name: "Confirm verification" }).click();
+              await expect(page.getByText("The seller is now verified.")).toBeVisible();
+
+              await shop.reload();
+              await expect(verification(shop)).toContainText("Manually verified", { timeout: 15000 });
+              await expect(shop.getByRole("region", { name: "Ada's Shop" })).toContainText("Your shop is verified");
+              const owner = `(select s.id::text from public.sellers s join auth.users u on u.id = s.owner_user_id where u.email = '${email}')`;
+              expect(sql(`select reason from public.audit_logs where action = 'seller.verification_change' and target_id = ${owner}`)).toBe("Met in person");
+              expect(sql(`select count(*) from public.verification_requests where seller_id::text = ${owner}`)).toBe("0");
+            });
+
+            test("nobody else can reach the review screen, or its data", async ({ page, request }) => {
+              await page.goto(review);
+              await expect(page.getByRole("heading", { name: "You don't have access" })).toBeVisible();
+              await confirmedAccount(page, request);
+              await page.goto(review);
+              await expect(page.getByText("This area is for Super Admin only.")).toBeVisible();
+              await expect(page.getByRole("article")).toHaveCount(0);
+              await page.goto("/account");
+              await expect(page.getByRole("region", { name: "Your roles" })).toBeVisible({ timeout: 15000 });
+              await expect(page.getByRole("link", { name: "Review seller verification" })).toHaveCount(0);
+            });
+          });
+
           test.describe("photos, through the real Cloudinary account", () => {
             /** A valid PNG of any size, so limits can be tested without storing test images. */
             function png(width: number, height: number) {
@@ -1164,6 +1302,49 @@ test.describe("public marketplace", () => {
             await expect(page.getByRole("region", { name: "Your roles" })).toBeVisible({ timeout: 15000 });
             await expect(page.getByRole("link", { name: "Manage my shop" })).toHaveCount(0);
           });
+        });
+
+        test("a Super Admin's account shows only their own roles and applications, and Approve is easy to find", async ({ page, browser, request }) => {
+          test.setTimeout(90000);
+          const owner = await confirmedAccount(page, request);
+          makeSuperAdmin(owner);
+          const applicant = await newApplicant(browser, request);
+          await apply(applicant.page).getByRole("button", { name: "Apply as Seller", exact: false }).first().click();
+          await fillSeller(applicant.page);
+          await applicant.page.getByRole("button", { name: "Submit application" }).click();
+          await expect(applications(applicant.page)).toContainText("Waiting for review");
+
+          await page.goto("/account");
+          const roles = page.getByRole("region", { name: "Your roles" });
+          await expect(roles).toContainText("Super Admin", { timeout: 15000 });
+          await expect(roles.getByRole("listitem")).toHaveCount(2);
+          await expect(roles).not.toContainText("Seller");
+          // Their dashboard has Recent Applications instead, with Approve rather than Withdraw.
+          const recent = page.getByRole("region", { name: "Recent Applications" });
+          await expect(page.getByRole("region", { name: "Your applications" })).toHaveCount(0);
+          const waiting = recent.getByRole("article").filter({ hasText: applicant.email });
+          await expect(waiting).toContainText("Waiting for review");
+          await expect(waiting.getByRole("button", { name: "Approve" })).toBeVisible();
+          await expect(waiting.getByRole("button", { name: "Reject" })).toBeVisible();
+          await expect(page.getByRole("button", { name: /Withdraw/ })).toHaveCount(0);
+          await expect(page.getByRole("link", { name: "Manage my shop" })).toHaveCount(0);
+          await expect(apply(page).getByRole("button", { name: "Apply as Seller", exact: false }).first()).toBeVisible();
+
+          // The verification screen points to where new applications are.
+          await page.goto("/admin/verification");
+          await page.getByRole("link", { name: "Review new applications" }).click();
+          await expect(page).toHaveURL(/\/admin\/role-applications$/);
+
+          // Approving from the dashboard takes effect, and it leaves the list.
+          await page.goto("/account");
+          await waiting.getByRole("button", { name: "Approve" }).click({ timeout: 15000 });
+          await expect(recent.getByText("The application was approved")).toBeVisible();
+          await expect(waiting).toHaveCount(0);
+          await applicant.page.reload();
+          await expect(applicant.page.getByRole("link", { name: "Manage my shop" })).toBeVisible({ timeout: 15000 });
+
+          // Applicants keep their own list, with Withdraw.
+          await expect(applications(applicant.page)).toContainText("Approved");
         });
 
         test("signed-out visitors and ordinary users get no access, or data", async ({ page, request }) => {

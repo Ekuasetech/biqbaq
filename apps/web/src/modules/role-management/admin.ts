@@ -41,6 +41,10 @@ export async function listAdminApplications(supabase: SupabaseClient, filters: A
   });
 }
 
+export async function listRecentApplications(supabase: SupabaseClient) {
+  return supabase.rpc("admin_recent_role_applications", { p_limit: ADMIN_PAGE_SIZE });
+}
+
 export async function approveApplication(supabase: SupabaseClient, id: string, permissions: string[]) {
   return supabase.rpc("approve_role_application", { p_application_id: id, p_permissions: permissions });
 }

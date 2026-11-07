@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { CircleAlert, Info } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { RecentApplications } from "@/components/admin/recent-applications";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -361,8 +362,9 @@ export function AccountDashboard() {
     const supabase = getSupabaseBrowserClient();
     const [profile, roles, applications] = await Promise.all([
       supabase.from("profiles").select("display_name, status").eq("id", userId).single(),
-      supabase.from("user_roles").select("id, role_key, status, status_reason").order("created_at"),
-      supabase.from("role_applications").select("id, role_key, status, rejection_reason, created_at").order("created_at", { ascending: false }),
+      // Super Admin may read everyone's, so these must ask for this person's own.
+      supabase.from("user_roles").select("id, role_key, status, status_reason").eq("user_id", userId).order("created_at"),
+      supabase.from("role_applications").select("id, role_key, status, rejection_reason, created_at").eq("applicant_id", userId).order("created_at", { ascending: false }),
     ]);
     if (profile.error || roles.error || applications.error) {
       setLoadFailed(true);
@@ -409,6 +411,7 @@ export function AccountDashboard() {
   }
 
   const reload = () => void load(user.id);
+  const isSuperAdmin = data.roles.some((role) => role.role_key === "super_admin" && role.status === "active");
 
   return (
     <div className="grid items-start gap-4 lg:grid-cols-2">
@@ -420,10 +423,15 @@ export function AccountDashboard() {
             {t("shopLink")}
           </Link>
         )}
-        {data.roles.some((role) => role.role_key === "super_admin" && role.status === "active") && (
-          <Link href="/admin/role-applications" className={cn(primaryButton, "w-fit")}>
-            {t("adminLink")}
-          </Link>
+        {isSuperAdmin && (
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/role-applications" className={cn(primaryButton, "w-fit")}>
+              {t("adminLink")}
+            </Link>
+            <Link href="/admin/verification" className={cn(primaryButton, "w-fit")}>
+              {t("verificationLink")}
+            </Link>
+          </div>
         )}
       </div>
       <div className="grid gap-4">
@@ -434,7 +442,7 @@ export function AccountDashboard() {
             <Notice kind="error">{t("accountNotActive")}</Notice>
           </section>
         )}
-        <ApplicationsCard applications={data.applications} onChanged={reload} />
+        {isSuperAdmin ? <RecentApplications /> : <ApplicationsCard applications={data.applications} onChanged={reload} />}
       </div>
     </div>
   );
