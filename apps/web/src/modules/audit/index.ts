@@ -32,6 +32,16 @@ export const AUDIT_ACTIONS = [
   "product.image_add",
   "product.image_remove",
   "product.image_primary",
+  "staff.invite",
+  "staff.invite_cancel",
+  "staff.invite_accept",
+  "staff.invite_decline",
+  "staff.approve",
+  "staff.permissions",
+  "staff.active",
+  "staff.suspended",
+  "staff.removed",
+  "staff.leave",
   "setting.update",
 ] as const;
 

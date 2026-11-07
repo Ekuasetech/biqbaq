@@ -695,6 +695,10 @@
       "media": {
         "title": "Product photos",
         "help": "What sellers can upload. Photos already uploaded are not affected."
+      },
+      "staff": {
+        "title": "Staff invitations",
+        "help": "Stops a shop from using invitations to email strangers without limit."
       }
     },
     "items": {
@@ -745,6 +749,10 @@
       "allowedFormats": {
         "label": "Allowed photo formats",
         "help": "The file types sellers can upload."
+      },
+      "staffInvitations": {
+        "label": "Invitations per shop",
+        "help": "Most staff invitations one shop can send in an hour."
       }
     },
     "history": {
@@ -814,7 +822,17 @@
       "product_image_add": "Added a product photo",
       "product_image_remove": "Removed a product photo",
       "product_image_primary": "Changed a product's main photo",
-      "setting_update": "Changed a setting"
+      "setting_update": "Changed a setting",
+      "staff_invite": "Invited staff",
+      "staff_invite_cancel": "Cancelled a staff invitation",
+      "staff_invite_accept": "Accepted a staff invitation",
+      "staff_invite_decline": "Declined a staff invitation",
+      "staff_permissions": "Changed a staff member's permissions",
+      "staff_active": "Restored a staff member",
+      "staff_suspended": "Suspended a staff member",
+      "staff_removed": "Removed a staff member",
+      "staff_leave": "Left a shop's staff",
+      "staff_approve": "Approved a staff member"
     }
   },
   "moderation": {
@@ -940,5 +958,76 @@
       "restore": "Their shop comes back too, if suspending this role took it down. A shop suspended separately in Moderation stays suspended.",
       "revoke": "Their shop and its products leave the site too."
     }
+  },
+  "staff": {
+    "title": "Staff",
+    "intro": "People who help run your shop. You decide what each person can do.",
+    "myTitle": "Shops you work for",
+    "invite": "Invite staff",
+    "email": "Their email address",
+    "emailHint": "They accept by signing in with this address, and then you approve them here.",
+    "canDo": "What they can do",
+    "viewOnly": "Can view products only",
+    "sendInvitation": "Send invitation",
+    "sent": "Invitation sent.",
+    "working": "Working...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "empty": "You haven't added any staff yet.",
+    "pending": "Waiting for a reply",
+    "expires": "Expires {date}",
+    "cancelInvitation": "Cancel invitation",
+    "changePermissions": "Change what they can do",
+    "suspend": "Suspend access",
+    "restore": "Restore access",
+    "remove": "Remove",
+    "confirmRemove": "Yes, remove them",
+    "removeWarning": "They lose access straight away. To bring them back, invite them again.",
+    "invitedBy": "{shop} has invited you to join their staff",
+    "accept": "Accept",
+    "decline": "Decline",
+    "openShop": "Open shop",
+    "leave": "Leave this shop",
+    "workingAsStaff": "You are working here as staff.",
+    "permissionNames": {
+      "products_create": "Create products",
+      "products_edit": "Edit products and photos",
+      "products_publish": "Publish and unpublish products",
+      "products_delete": "Delete products",
+      "staff_manage": "Manage other staff"
+    },
+    "memberStatus": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "pending": "Waiting for your approval"
+    },
+    "shopState": {
+      "ready": "Active",
+      "suspended": "Access suspended",
+      "shopSuspended": "Shop suspended",
+      "awaitingSeller": "Waiting for the shop's approval",
+      "roleBlocked": "Role suspended"
+    },
+    "errors": {
+      "emailInvalid": "Enter a valid email address.",
+      "inviteOwner": "This is the shop owner's address.",
+      "alreadyStaff": "This person is already on your staff.",
+      "invitationPending": "This person already has an invitation waiting.",
+      "rateLimited": "You've sent several invitations recently. Please try again in an hour.",
+      "ownAccess": "You can't change your own access.",
+      "notAllowed": "You don't have permission to do this.",
+      "changed": "This has already changed. The page now shows the latest.",
+      "generic": "That didn't work. Please try again.",
+      "loadFailed": "This couldn't be loaded. Please refresh the page.",
+      "roleBlocked": "Biqbaq has suspended or removed this person's Seller Staff role, so you can't approve them."
+    },
+    "approveHint": "They have accepted. Their access starts when you approve them.",
+    "roleBlockedForOwner": "Biqbaq has suspended or removed this person's Seller Staff role, so they can't work in your shop.",
+    "approve": "Approve",
+    "declinePerson": "Decline",
+    "declineWarning": "They won't get access. To change your mind, invite them again.",
+    "confirmDecline": "Yes, decline them",
+    "awaitingSeller": "You have accepted. The shop still needs to approve you before you can start.",
+    "roleBlocked": "Biqbaq has suspended or removed your Seller Staff role, so you can't work in this shop."
   }
 }

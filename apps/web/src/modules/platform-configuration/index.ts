@@ -40,6 +40,10 @@ export const SETTING_GROUPS: { id: string; settings: SettingDefinition[] }[] = [
     ],
   },
   {
+    id: "staff",
+    settings: [{ key: "staff.max_invitations_per_hour", id: "staffInvitations", kind: "number", min: 1, max: 100 }],
+  },
+  {
     id: "media",
     settings: [
       { key: "media.max_image_bytes", id: "maxImageSize", kind: "megabytes", min: 0.1, max: 10 },

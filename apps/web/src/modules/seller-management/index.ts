@@ -29,6 +29,13 @@ export async function getMyShop(supabase: SupabaseClient, userId: string) {
     .maybeSingle();
 }
 
+const SHOP_COLUMNS = "id, slug, name, city, category, description, status, publishing_suspended, verification_status";
+
+/** A shop this person works for as staff. Security rules hide any other. */
+export async function getShopById(supabase: SupabaseClient, sellerId: string) {
+  return supabase.from("sellers").select(SHOP_COLUMNS).eq("id", sellerId).maybeSingle();
+}
+
 export async function getMyAllowance(supabase: SupabaseClient) {
   return supabase.rpc("my_publishing_allowance");
 }

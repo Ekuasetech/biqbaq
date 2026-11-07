@@ -24,7 +24,7 @@ Do not build, host, theme or manage independent seller websites. Biqbaq only pro
 ## Role and verification invariants
 - A role is active only through an approved, active assignment. A submitted or pending application never grants permissions.
 - Roles live in relationship tables, never in a single column on the profile.
-- Seller Staff access requires both the approved platform role and an active seller membership with permissions.
+- Seller Staff access requires both the platform role and an active seller membership with permissions. The seller invites and approves their staff, and approving gives the role; Super Admin does not approve staff but can suspend or remove the role (Q-32).
 - Admin approval grants no permissions until Super Admin assigns them. Nobody but Super Admin can touch Super Admin privileges.
 - Manual seller verification requires a Super Admin decision and an audit record, and does not bypass suspensions or publishing restrictions.
 - Actions on behalf of a seller keep owner and actor distinct, and are audited.

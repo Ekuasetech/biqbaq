@@ -2,10 +2,12 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
 import { ProductPhotos } from "@/components/seller/product-photos";
 import { ShopProfile } from "@/components/seller/shop-profile";
+import { ShopStaff } from "@/components/seller/shop-staff";
 import { VerificationCard } from "@/components/seller/verification-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +20,7 @@ import { useSessionUser } from "@/lib/supabase/use-session-user";
 import { cn } from "@/lib/utils";
 import { getPhotoLimit, listShopPhotos, type ShopPhoto } from "@/modules/media-management/client";
 import { refreshCatalog } from "@/modules/product-catalog/actions";
+import { can, getSellerAllowance, getShopAccess, type ShopAccess } from "@/modules/staff-management";
 import {
   createDraft,
   deleteProduct,
@@ -34,7 +37,7 @@ import {
 } from "@/modules/product-catalog/seller-products";
 import { AVAILABILITIES } from "@/modules/product-catalog/types";
 import { getMyLatestRequest, type MyVerificationRequest } from "@/modules/verification";
-import { getMyAllowance, getMyShop, placesLeft, type MyShop as Shop, type PublishingAllowance } from "@/modules/seller-management";
+import { getMyAllowance, getMyShop, getShopById, placesLeft, type MyShop as Shop, type PublishingAllowance } from "@/modules/seller-management";
 
 const secondaryButton =
   "inline-flex h-9 items-center justify-center rounded-lg border border-border bg-card px-3 text-sm font-semibold transition-colors outline-none hover:border-primary focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70";
@@ -43,6 +46,7 @@ const selectClass =
 
 interface ShopData {
   shop: Shop | null;
+  access: ShopAccess | null;
   products: SellerProduct[];
   categories: Category[];
   allowance: PublishingAllowance | null;
@@ -163,6 +167,7 @@ function ProductEditor({
 function ProductItem({
   supabase,
   sellerId,
+  access,
   product,
   categories,
   photos,
@@ -171,6 +176,7 @@ function ProductItem({
 }: {
   supabase: SupabaseClient;
   sellerId: string;
+  access: ShopAccess | null;
   product: SellerProduct;
   categories: Category[];
   photos: ShopPhoto[];
@@ -231,7 +237,7 @@ function ProductItem({
               productName={product.name}
               photos={photos}
               limit={photoLimit}
-              readOnly={suspended}
+              readOnly={suspended || !can(access, "products.edit")}
               onChanged={async () => {
                 if (status === "published") await refreshPublicPages();
                 await onChanged();
@@ -252,13 +258,13 @@ function ProductItem({
                   {status === "published" ? (
                     <>
                       <Link href={`/products/${product.slug}`} className={secondaryButton}>{t("shop.view")}</Link>
-                      <button type="button" disabled={busy} onClick={() => void run(unpublishProduct)} className={secondaryButton}>{t("shop.unpublish")}</button>
+                      {can(access, "products.publish") && <button type="button" disabled={busy} onClick={() => void run(unpublishProduct)} className={secondaryButton}>{t("shop.unpublish")}</button>}
                     </>
                   ) : (
-                    <button type="button" disabled={busy} onClick={() => void run(publishProduct)} className={secondaryButton}>{t("shop.publish")}</button>
+                    can(access, "products.publish") && <button type="button" disabled={busy} onClick={() => void run(publishProduct)} className={secondaryButton}>{t("shop.publish")}</button>
                   )}
-                  <button type="button" onClick={() => setEditing(true)} className={secondaryButton}>{t("shop.edit")}</button>
-                  <button type="button" onClick={() => setConfirming(true)} className={secondaryButton}>{t("shop.delete")}</button>
+                  {can(access, "products.edit") && <button type="button" onClick={() => setEditing(true)} className={secondaryButton}>{t("shop.edit")}</button>}
+                  {can(access, "products.delete") && <button type="button" onClick={() => setConfirming(true)} className={secondaryButton}>{t("shop.delete")}</button>}
                 </div>
               )
             )}
@@ -275,20 +281,23 @@ function ProductItem({
  */
 export function MyShop() {
   const t = useTranslations("shop");
+  const tStaff = useTranslations("staff");
   const user = useSessionUser();
+  // Staff open a shop they work for by its id. Without one, this is the person's own shop.
+  const staffSellerId = useSearchParams().get("seller");
   const [data, setData] = useState<ShopData | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [adding, setAdding] = useState(false);
 
   const load = useCallback(async (userId: string) => {
     const supabase = getSupabaseBrowserClient();
-    const shop = await getMyShop(supabase, userId);
+    const shop = staffSellerId ? await getShopById(supabase, staffSellerId) : await getMyShop(supabase, userId);
     if (shop.error) {
       setLoadFailed(true);
       return;
     }
     if (!shop.data) {
-      setData({ shop: null, products: [], categories: [], allowance: null, photos: [], photoLimit: 0, verificationRequest: null });
+      setData({ shop: null, access: null, products: [], categories: [], allowance: null, photos: [], photoLimit: 0, verificationRequest: null });
       return;
     }
     const products = await listShopProducts(supabase, shop.data.id);
@@ -296,20 +305,22 @@ export function MyShop() {
       setLoadFailed(true);
       return;
     }
-    const [categories, allowance, photos, photoLimit, verificationRequest] = await Promise.all([
+    const [shopAccess, categories, allowance, photos, photoLimit, verificationRequest] = await Promise.all([
+      getShopAccess(supabase, shop.data.id),
       listCategories(supabase),
-      getMyAllowance(supabase),
+      staffSellerId ? getSellerAllowance(supabase, shop.data.id) : getMyAllowance(supabase),
       listShopPhotos(supabase, products.data.map((product) => product.id)),
       getPhotoLimit(supabase),
       getMyLatestRequest(supabase, shop.data.id),
     ]);
-    if (categories.error || allowance.error || photos.error || photoLimit.error || verificationRequest.error) {
+    if (shopAccess.error || categories.error || allowance.error || photos.error || photoLimit.error || verificationRequest.error) {
       setLoadFailed(true);
       return;
     }
     setLoadFailed(false);
     setData({
       shop: shop.data as Shop,
+      access: shopAccess.access,
       products: products.data as SellerProduct[],
       categories: categories.data as Category[],
       allowance: allowance.data as PublishingAllowance,
@@ -317,7 +328,7 @@ export function MyShop() {
       photoLimit: photoLimit.data as number,
       verificationRequest: verificationRequest.data as MyVerificationRequest | null,
     });
-  }, []);
+  }, [staffSellerId]);
 
   const userId = user?.id;
   useEffect(() => {
@@ -349,7 +360,8 @@ export function MyShop() {
     );
   }
 
-  const { shop, allowance, categories, products, photos, photoLimit, verificationRequest } = data;
+  const { shop, access, allowance, categories, products, photos, photoLimit, verificationRequest } = data;
+  const isOwner = Boolean(access?.is_owner);
   const left = placesLeft(allowance);
   const supabase = getSupabaseBrowserClient();
   const reload = () => load(user.id);
@@ -361,6 +373,7 @@ export function MyShop() {
           <div>
             <h2 id="shop-summary" className={headingClass}>{shop.name}</h2>
             <p className="text-sm text-muted-foreground">{shop.city}</p>
+            {!isOwner && <p className="mt-1 text-sm font-medium">{tStaff("workingAsStaff")}</p>}
           </div>
           {shop.status === "active" && <Link href={`/sellers/${shop.slug}`} className={secondaryButton}>{t("viewPublic")}</Link>}
         </div>
@@ -378,7 +391,7 @@ export function MyShop() {
         </div>
       </section>
 
-      {shop.status === "active" && (
+      {shop.status === "active" && isOwner && (
         <ShopProfile
           shop={shop}
           categorySlugs={categories.map((category) => category.slug)}
@@ -389,17 +402,23 @@ export function MyShop() {
         />
       )}
 
-      <VerificationCard
-        status={shop.verification_status}
-        request={verificationRequest}
-        shopActive={shop.status === "active"}
-        onChanged={reload}
-      />
+      {isOwner && (
+        <VerificationCard
+          status={shop.verification_status}
+          request={verificationRequest}
+          shopActive={shop.status === "active"}
+          onChanged={reload}
+        />
+      )}
+
+      {shop.status === "active" && can(access, "staff.manage") && (
+        <ShopStaff sellerId={shop.id} available={access?.permissions ?? []} />
+      )}
 
       <section aria-labelledby="shop-products" className="grid gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 id="shop-products" className={headingClass}>{t("productsTitle")}</h2>
-          {!adding && shop.status === "active" && (
+          {!adding && shop.status === "active" && can(access, "products.create") && (
             <button type="button" onClick={() => setAdding(true)} className={primaryButton}>{t("addProduct")}</button>
           )}
         </div>
@@ -417,7 +436,7 @@ export function MyShop() {
         {products.length === 0 && !adding && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
         <ul className="grid gap-3">
           {products.map((product) => (
-            <ProductItem key={product.id} supabase={supabase} sellerId={shop.id} product={product} categories={categories} photos={photos.filter((photo) => photo.entity_id === product.id)} photoLimit={photoLimit} onChanged={reload} />
+            <ProductItem key={product.id} supabase={supabase} sellerId={shop.id} access={access} product={product} categories={categories} photos={photos.filter((photo) => photo.entity_id === product.id)} photoLimit={photoLimit} onChanged={reload} />
           ))}
         </ul>
       </section>

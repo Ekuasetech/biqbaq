@@ -782,8 +782,8 @@ test.describe("public marketplace", () => {
       test("Co-admin and Super Admin are never offered", async ({ page, request }) => {
         await confirmedAccount(page, request);
         await page.goto("/account");
-        await expect(apply(page).getByRole("button", { name: "Apply as Seller", exact: false })).toHaveCount(2);
-        await expect(apply(page).getByRole("button", { name: /Apply as/ })).toHaveCount(4);
+        await expect(apply(page).getByRole("button", { name: "Apply as Seller", exact: false })).toHaveCount(1);
+        await expect(apply(page).getByRole("button", { name: /Apply as/ })).toHaveCount(3);
         await expect(apply(page)).not.toContainText("Super Admin");
         await expect(apply(page)).not.toContainText("Co-admin");
       });
@@ -802,14 +802,14 @@ test.describe("public marketplace", () => {
 
         // Applying grants nothing, and the role can't be applied for twice.
         await expect(page.getByRole("region", { name: "Your roles" })).not.toContainText("Seller");
-        await expect(apply(page).getByRole("button", { name: /Apply as Seller\b/ })).toHaveCount(1);
-        await expect(apply(page).getByRole("button", { name: /Apply as/ })).toHaveCount(3);
+        await expect(apply(page).getByRole("button", { name: /Apply as Seller\b/ })).toHaveCount(0);
+        await expect(apply(page).getByRole("button", { name: /Apply as/ })).toHaveCount(2);
 
         await page.reload();
         await expect(applications(page)).toContainText("Waiting for review");
         await applications(page).getByRole("button", { name: "Withdraw Seller application" }).click();
         await expect(applications(page)).toContainText("Withdrawn");
-        await expect(apply(page).getByRole("button", { name: /Apply as/ })).toHaveCount(4);
+        await expect(apply(page).getByRole("button", { name: /Apply as/ })).toHaveCount(3);
 
         await apply(page).getByRole("button", { name: "Apply as Seller", exact: false }).first().click();
         await fillSeller(page);
@@ -817,7 +817,7 @@ test.describe("public marketplace", () => {
         await expect(applications(page)).toContainText("Waiting for review");
       });
 
-      test("Marketer, Admin and Seller Staff applications work too", async ({ page, request }) => {
+      test("Marketer and Admin applications work too, and nobody applies to be staff", async ({ page, request }) => {
         await confirmedAccount(page, request);
         await page.goto("/account");
         for (const role of ["Marketer", "Admin"]) {
@@ -826,10 +826,7 @@ test.describe("public marketplace", () => {
           await page.getByRole("button", { name: "Submit application" }).click();
           await expect(applications(page)).toContainText(role);
         }
-        await apply(page).getByRole("button", { name: "Apply as Seller Staff" }).click();
-        await page.getByLabel("Which seller will you work with?").fill("Ada's Shop");
-        await page.getByRole("button", { name: "Submit application" }).click();
-        await expect(applications(page)).toContainText("Seller Staff");
+        await expect(apply(page).getByRole("button", { name: "Apply as Seller Staff" })).toHaveCount(0);
         await expect(apply(page).getByRole("button", { name: /Apply as/ })).toHaveCount(1);
       });
 
@@ -1104,6 +1101,105 @@ test.describe("public marketplace", () => {
               await visitor.goto(shopLink!);
               await expect(visitor.getByRole("main")).toContainText("Ada's Shop", { timeout: 2000 });
             }).toPass({ timeout: 90000 });
+          });
+
+          test("a seller invites staff, who can do only what they were given", async ({ page, browser, request }) => {
+            test.setTimeout(180000);
+            const { page: shop } = await approvedSeller(page, browser, request);
+            const person = await newApplicant(browser, request);
+            const id = unique();
+            const name = `Staff made ${id}`;
+
+            // The seller invites them and chooses what they can do.
+            const staff = shop.getByRole("region", { name: "Staff", exact: true });
+            await expect(staff).toContainText("You haven't added any staff yet.");
+            await staff.getByRole("button", { name: "Invite staff" }).click();
+            const form = staff.getByRole("form", { name: "Invite staff" });
+            await form.getByLabel("Their email address").fill("not an address");
+            await form.getByRole("button", { name: "Send invitation" }).click();
+            await expect(form.getByText("Enter a valid email address.")).toBeVisible();
+            await form.getByLabel("Their email address").fill(person.email);
+            await form.getByLabel("Create products").check();
+            await form.getByLabel("Edit products and photos").check();
+            await form.getByRole("button", { name: "Send invitation" }).click();
+            await expect(staff.getByText("Invitation sent.")).toBeVisible();
+            await expect(staff.getByRole("listitem", { name: person.email })).toContainText("Create products, Edit products and photos");
+            expect(sql(`select count(*) from public.background_jobs b join auth.users u on u.id = b.user_id where u.email = '${person.email}' and b.payload ->> 'template' = 'staff_invitation'`)).toBe("1");
+
+            // They accept, but accepting alone gives no access.
+            await person.page.goto("/account");
+            const mine = person.page.getByRole("region", { name: "Shops you work for" });
+            await expect(mine).toContainText("Ada's Shop has invited you to join their staff");
+            await mine.getByRole("button", { name: "Accept" }).click();
+            await expect(mine).toContainText("Waiting for the shop's approval");
+            await expect(mine.getByRole("link", { name: "Open shop" })).toHaveCount(0);
+            const waitingUrl = `/account/shop?seller=${sql(`select m.seller_id from public.seller_staff_memberships m join auth.users p on p.id = m.user_id where p.email = '${person.email}'`)}`;
+            await person.page.goto(waitingUrl);
+            await expect(person.page.getByText("You don't have a shop yet")).toBeVisible();
+
+            // The seller sees they accepted, and approves them.
+            await shop.reload();
+            const accepted = shop.getByRole("region", { name: "Staff", exact: true }).getByRole("listitem", { name: person.email });
+            await expect(accepted).toContainText("Waiting for your approval");
+            await accepted.getByRole("button", { name: "Approve", exact: true }).click();
+            await expect(accepted).toContainText("Active");
+            await expect(accepted.getByRole("button", { name: "Approve", exact: true })).toHaveCount(0);
+
+            // Now they can work in the shop, with no step for Super Admin.
+            await person.page.goto("/account");
+            await person.page.getByRole("region", { name: "Shops you work for" }).getByRole("link", { name: "Open shop" }).click();
+            await expect(person.page).toHaveURL(/\/account\/shop\?seller=/);
+            await expect(person.page.getByText("You are working here as staff.")).toBeVisible();
+            await expect(person.page.getByRole("region", { name: "Shop details" })).toHaveCount(0);
+            await expect(person.page.getByRole("region", { name: "Staff", exact: true })).toHaveCount(0);
+
+            // They can create, but were not given publish or delete.
+            await addProduct(person.page, name);
+            await expect(item(person.page, name).getByRole("button", { name: "Edit" })).toBeVisible();
+            await expect(item(person.page, name).getByRole("button", { name: "Publish" })).toHaveCount(0);
+            await expect(item(person.page, name).getByRole("button", { name: "Delete" })).toHaveCount(0);
+
+            // The seller sees it, and gives publish too.
+            await shop.reload();
+            await expect(item(shop, name)).toBeVisible();
+            const member = shop.getByRole("region", { name: "Staff", exact: true }).getByRole("listitem", { name: person.email });
+            await member.getByRole("button", { name: "Change what they can do" }).click();
+            await member.getByLabel("Publish and unpublish products").check();
+            await member.getByRole("button", { name: "Save" }).click();
+            await expect(member).toContainText("Publish and unpublish products");
+            await person.page.reload();
+            await item(person.page, name).getByRole("button", { name: "Publish" }).click();
+            await expect(item(person.page, name)).toContainText("Published");
+
+            // The record keeps owner and actor apart.
+            expect(sql(`select u.email || ' for ' || s.slug from public.audit_logs a join auth.users u on u.id = a.actor_id join public.sellers s on s.id = a.on_behalf_of_seller_id join public.products p on p.id::text = a.target_id where a.action = 'product.publish' and p.name = '${name}'`)).toContain(person.email);
+
+            // Suspending ends their access straight away.
+            await member.getByRole("button", { name: "Suspend access" }).click();
+            await expect(member).toContainText("Suspended");
+            await person.page.reload();
+            await expect(person.page.getByText("You don't have a shop yet")).toBeVisible();
+            await member.getByRole("button", { name: "Restore access" }).click();
+            await expect(member.getByRole("button", { name: "Suspend access" })).toBeVisible();
+
+            // So does removing them, and their work stays with the shop.
+            await member.getByRole("button", { name: "Remove" }).click();
+            await member.getByRole("button", { name: "Yes, remove them" }).click();
+            await expect(shop.getByRole("region", { name: "Staff", exact: true }).getByRole("listitem", { name: person.email })).toHaveCount(0);
+            await person.page.reload();
+            await expect(person.page.getByText("You don't have a shop yet")).toBeVisible();
+            await shop.reload();
+            await expect(item(shop, name)).toContainText("Published");
+          });
+
+          test("a seller cannot see or reach another seller's staff or shop", async ({ page, browser, request }) => {
+            test.setTimeout(120000);
+            const { page: shop } = await approvedSeller(page, browser, request);
+            const sellerId = sql(`select id from public.sellers order by created_at desc limit 1`);
+            const outsider = await newApplicant(browser, request);
+            await outsider.page.goto(`/account/shop?seller=${sellerId}`);
+            await expect(outsider.page.getByText("You don't have a shop yet")).toBeVisible();
+            await expect(shop.getByRole("region", { name: "Staff", exact: true })).toBeVisible();
           });
 
           test("only Super Admin can open People and roles", async ({ page, request }) => {
@@ -1781,13 +1877,13 @@ test.describe("public marketplace", () => {
           await applicant.context.close();
         });
 
-        test("filters work, and Seller Staff approval warns it gives no seller access", async ({ page, browser, request }) => {
+        test("filters work", async ({ page, browser, request }) => {
           test.setTimeout(90000);
           const owner = await confirmedAccount(page, request);
           makeSuperAdmin(owner);
           const applicant = await newApplicant(browser, request);
-          await apply(applicant.page).getByRole("button", { name: "Apply as Seller Staff" }).click();
-          await applicant.page.getByLabel("Which seller will you work with?").fill("Ada's Shop");
+          await apply(applicant.page).getByRole("button", { name: "Apply as Marketer" }).click();
+          await applicant.page.getByLabel("Why are you applying?").fill("I know many sellers");
           await applicant.page.getByRole("button", { name: "Submit application" }).click();
           await expect(applications(applicant.page)).toContainText("Waiting for review");
 
@@ -1795,11 +1891,10 @@ test.describe("public marketplace", () => {
           await page.getByLabel("Search", { exact: true }).fill(applicant.email);
           await page.getByRole("button", { name: "Search", exact: true }).click();
           await expect(page.getByText("1 application")).toBeVisible({ timeout: 15000 });
-          await page.getByLabel("Role", { exact: true }).selectOption("marketer");
+          await page.getByLabel("Role", { exact: true }).selectOption("admin");
           await expect(page.getByText("No applications found.")).toBeVisible();
-          await page.getByLabel("Role", { exact: true }).selectOption("seller_staff");
-          await cardFor(page, applicant.email).getByRole("button", { name: "View details" }).click();
-          await expect(page.getByText("Approving gives no access to any seller.")).toBeVisible();
+          await page.getByLabel("Role", { exact: true }).selectOption("marketer");
+          await expect(cardFor(page, applicant.email)).toBeVisible();
           await page.getByLabel("Search", { exact: true }).fill("nothing-matches-this");
           await page.getByRole("button", { name: "Search", exact: true }).click();
           await expect(page.getByText("No applications found.")).toBeVisible();

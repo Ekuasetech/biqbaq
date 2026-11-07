@@ -3,6 +3,11 @@ import { renderEmail } from "./templates";
 
 const TEMPLATES = [
   "welcome",
+  "staff_invitation",
+  "staff_approved",
+  "staff_suspended",
+  "staff_restored",
+  "staff_removed",
   "role_assigned",
   "role_suspended",
   "role_restored",
@@ -58,6 +63,13 @@ describe("renderEmail", () => {
       expect(text).not.toContain(`the ${role} role`);
     }
     expect(renderEmail("role_assigned", { role: "co_admin" }, person, SITE)?.text).toContain("Co-admin");
+  });
+
+  it("names the shop in staff emails, and keeps it out of the subject and markup", () => {
+    const email = renderEmail("staff_invitation", { shop: "Ada <b>Shop</b>" }, person, SITE);
+    expect(email?.text).toContain("Ada <b>Shop</b> has invited you");
+    expect(email?.html).not.toContain("<b>");
+    expect(email?.subject).not.toContain("Ada");
   });
 
   it("names the product and gives the reason, keeping the product name out of the subject", () => {

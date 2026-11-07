@@ -189,7 +189,8 @@ function DecisionPanel({
 
   return (
     <div className="grid gap-4 rounded-2xl bg-muted/50 p-4">
-      {application.role_key === "seller_staff" && <Notice kind="info">{t("staffNote")}</Notice>}
+      {/* Nobody can apply for this now (Q-32), but an application made earlier can still be decided. */}
+      {(application.role_key as string) === "seller_staff" && <Notice kind="info">{t("staffNote")}</Notice>}
       {isAdmin && (
         <fieldset className="grid gap-2">
           <legend className="text-sm font-semibold">{t("permissionsTitle")}</legend>

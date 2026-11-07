@@ -23,17 +23,17 @@ const application = (role_key: RoleApplication["role_key"], status: RoleApplicat
 
 describe("rolesOpenForApplication", () => {
   it("offers every applicable role to a new Buyer, and never Buyer, Co-admin or Super Admin", () => {
-    expect(rolesOpenForApplication([role("buyer")], [])).toEqual(["seller", "seller_staff", "marketer", "admin"]);
+    expect(rolesOpenForApplication([role("buyer")], [])).toEqual(["seller", "marketer", "admin"]);
   });
 
   it("hides roles already held or suspended, but allows revoked ones again", () => {
     const roles = [role("seller"), role("marketer", "suspended"), role("admin", "revoked")];
-    expect(rolesOpenForApplication(roles, [])).toEqual(["seller_staff", "admin"]);
+    expect(rolesOpenForApplication(roles, [])).toEqual(["admin"]);
   });
 
   it("hides roles with an open application, but allows applying again after a decision", () => {
     const applications = [application("seller", "pending"), application("marketer", "rejected"), application("admin", "withdrawn")];
-    expect(rolesOpenForApplication([], applications)).toEqual(["seller_staff", "marketer", "admin"]);
+    expect(rolesOpenForApplication([], applications)).toEqual(["marketer", "admin"]);
   });
 });
 
@@ -63,11 +63,9 @@ describe("applicationSchemas", () => {
     expect(applicationSchemas.seller.parse({ ...seller, country: "NG" })).not.toHaveProperty("country");
   });
 
-  it("requires a reason for Admin and Marketer, and a seller for Seller Staff", () => {
+  it("requires a reason for Admin and Marketer", () => {
     expect(applicationSchemas.admin.safeParse({ reason: "" }).success).toBe(false);
     expect(applicationSchemas.marketer.safeParse({ reason: "I can help" }).success).toBe(true);
-    expect(applicationSchemas.seller_staff.safeParse({ seller_name: "Shop" }).success).toBe(true);
-    expect(applicationSchemas.seller_staff.safeParse({ seller_name: "" }).success).toBe(false);
   });
 });
 

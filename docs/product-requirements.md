@@ -184,6 +184,7 @@ Sellers can:
 * Request manual identity verification if normal verification cannot be completed.
 Seller role activation requires Super Admin approval.
 3.6 Seller Staff
+Owner decision, 2026-11-07 (Q-32): this replaces Super Admin approval below. A seller invites someone, they accept, and the seller approves them, which gives the role. Nobody applies to Super Admin for this role, who can still suspend or remove it.
 Seller Staff are associated with a specific seller and receive permissions from that seller.
 A user may apply for Seller Staff status, but the application alone does not provide access to any seller's resources.
 The following conditions are mandatory:
@@ -1413,7 +1414,7 @@ A feature is complete when:
 9. Controlled role activation: Additional roles require Super Admin approval.
 10. Multiple roles: One user account may have multiple approved active roles.
 11. Manual verification: Super Admin can manually approve seller identity verification when normal verification cannot be completed.
-12. Seller staff authorization: Seller Staff access requires both platform role approval and seller authorization.
+12. Seller staff authorization: Seller Staff access requires both the platform role and seller authorization. The seller approves staff, which gives the role (Q-32).
 13. Privacy: Customer and seller private information must be protected.
 14. Incremental development: Build, test and review features in manageable stages.
 End of Product Requirements Document.

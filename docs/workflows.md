@@ -17,18 +17,18 @@ Status: **proposed, awaiting review**. Implements PRD §4 and §5. Each RPC runs
 | Role | In the same transaction |
 | --- | --- |
 | Seller | Activate role. Create the `sellers` row as `unverified` from the application. Create a referral code if the programme is on |
-| Seller Staff | Activate role only. **No seller access** until a membership exists |
+| Seller Staff | No new applications (Q-32). One already made activates the role only, with **no seller access** until a seller approves them |
 | Admin | Activate role. Apply the permission list given by the Super Admin (may be empty, which grants nothing) |
 | Marketer | Activate role. Create the referral code; the URL is derived from it |
 
-**Seller Staff has two independent gates**, which can complete in either order. Access needs both:
+**Seller Staff (Q-32):** the seller decides, with no step for Super Admin.
 
 ```
-Super Admin approves application  --> user_roles: seller_staff active  --+
-                                                                         +--> access
-Seller invites -> user accepts -> seller assigns permissions  -----------+
-   (seller_staff_memberships active + seller_staff_permissions)
+Seller invites -> person accepts (membership pending, no access) -> seller approves
+   -> user_roles: seller_staff active + seller_staff_memberships active = access
 ```
+
+Suspending or removing either the membership or the role ends access on its own. A seller cannot approve someone whose role Super Admin has suspended or removed. Nobody applies for this role any more.
 
 The application's "seller they intend to work with" (§4.3) is informational only and gives no access.
 

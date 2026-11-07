@@ -2,7 +2,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { CATEGORY_SLUGS } from "@/modules/product-catalog/types";
 
-export const APPLICABLE_ROLES = ["seller", "seller_staff", "marketer", "admin"] as const;
+// Seller Staff is not here: a seller invites and approves their own staff (Q-32).
+export const APPLICABLE_ROLES = ["seller", "marketer", "admin"] as const;
 export type ApplicableRole = (typeof APPLICABLE_ROLES)[number];
 
 export type RoleKey = ApplicableRole | "buyer" | "co_admin" | "super_admin";
@@ -34,10 +35,6 @@ export const applicationSchemas = {
     city: required(100),
     category: z.enum(CATEGORY_SLUGS, "required"),
     description: required(1000),
-  }),
-  seller_staff: z.object({
-    seller_name: required(150),
-    invitation_reference: z.string("required").trim().max(100, "tooLong").optional(),
   }),
   marketer: z.object({ reason: required(1000) }),
   admin: z.object({ reason: required(1000) }),

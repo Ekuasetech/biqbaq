@@ -42,7 +42,7 @@ Order -> Product(s), Seller, Buyer -> PaymentTransactions
 | --- | --- | --- |
 | Buyer | Automatically at registration (not in the §4.1 application list) | Role defaults |
 | Seller | Application + Super Admin approval | Role defaults, scoped to their own seller |
-| Seller Staff | Application + approval + seller membership | Membership permissions only |
+| Seller Staff | Seller invites, person accepts, seller approves (Q-32) | Membership permissions only |
 | Marketer | Application + approval, or manual creation by Super Admin | Role defaults, own statistics only |
 | Admin | Application or nomination + approval | **None by default**: explicit grants only |
 | Co-admin | See Q-01 | **None by default**: explicit grants only |
@@ -100,7 +100,7 @@ Admin posts skip review. A seller's significant edit to a published post creates
 
 `publish_product` allows publication only if **all** of these are true:
 
-1. The caller is the seller's owner, or an admin with `products.publish_on_behalf`. Staff with `products.publish` are added when staff memberships are built.
+1. The caller is the seller's owner, or an admin with `products.publish_on_behalf`. Staff with `products.publish` may too, and are recorded as the actor, with the seller as owner.
 2. Global seller publishing is on, and the seller's own publishing is not suspended.
 3. Publishing for the seller's class (verified or unverified) is on.
 4. The product is complete: it has a name, description and category. A price of $0 is allowed (Q-23).

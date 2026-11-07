@@ -695,6 +695,10 @@
       "media": {
         "title": "Photos de produits",
         "help": "Ce que les vendeurs peuvent téléverser. Les photos déjà téléversées ne sont pas touchées."
+      },
+      "staff": {
+        "title": "Invitations de personnel",
+        "help": "Empêche une boutique d'utiliser les invitations pour envoyer des courriels sans limite."
       }
     },
     "items": {
@@ -745,6 +749,10 @@
       "allowedFormats": {
         "label": "Formats de photo permis",
         "help": "Les types de fichiers que les vendeurs peuvent téléverser."
+      },
+      "staffInvitations": {
+        "label": "Invitations par boutique",
+        "help": "Le nombre maximal d'invitations de personnel par boutique en une heure."
       }
     },
     "history": {
@@ -814,7 +822,17 @@
       "product_image_add": "A ajouté une photo de produit",
       "product_image_remove": "A retiré une photo de produit",
       "product_image_primary": "A changé la photo principale d'un produit",
-      "setting_update": "A changé un paramètre"
+      "setting_update": "A changé un paramètre",
+      "staff_invite": "A invité du personnel",
+      "staff_invite_cancel": "A annulé une invitation de personnel",
+      "staff_invite_accept": "A accepté une invitation de personnel",
+      "staff_invite_decline": "A refusé une invitation de personnel",
+      "staff_permissions": "A changé les permissions d'un membre du personnel",
+      "staff_active": "A rétabli un membre du personnel",
+      "staff_suspended": "A suspendu un membre du personnel",
+      "staff_removed": "A retiré un membre du personnel",
+      "staff_leave": "A quitté le personnel d'une boutique",
+      "staff_approve": "A approuvé un membre du personnel"
     }
   },
   "moderation": {
@@ -940,5 +958,76 @@
       "restore": "Sa boutique revient aussi, si la suspension de ce rôle l'avait retirée. Une boutique suspendue séparément dans la modération reste suspendue.",
       "revoke": "Sa boutique et ses produits quittent aussi le site."
     }
+  },
+  "staff": {
+    "title": "Personnel",
+    "intro": "Les personnes qui aident à gérer votre boutique. Vous décidez de ce que chacune peut faire.",
+    "myTitle": "Boutiques où vous travaillez",
+    "invite": "Inviter du personnel",
+    "email": "Son adresse courriel",
+    "emailHint": "La personne accepte en se connectant avec cette adresse, puis vous l'approuvez ici.",
+    "canDo": "Ce que la personne peut faire",
+    "viewOnly": "Peut seulement voir les produits",
+    "sendInvitation": "Envoyer l'invitation",
+    "sent": "Invitation envoyée.",
+    "working": "En cours...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "empty": "Vous n'avez encore ajouté aucun membre du personnel.",
+    "pending": "En attente de réponse",
+    "expires": "Expire le {date}",
+    "cancelInvitation": "Annuler l'invitation",
+    "changePermissions": "Modifier ce que la personne peut faire",
+    "suspend": "Suspendre l'accès",
+    "restore": "Rétablir l'accès",
+    "remove": "Retirer",
+    "confirmRemove": "Oui, retirer",
+    "removeWarning": "La personne perd l'accès immédiatement. Pour la faire revenir, invitez-la de nouveau.",
+    "invitedBy": "{shop} vous invite à rejoindre son personnel",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "openShop": "Ouvrir la boutique",
+    "leave": "Quitter cette boutique",
+    "workingAsStaff": "Vous travaillez ici en tant que membre du personnel.",
+    "permissionNames": {
+      "products_create": "Créer des produits",
+      "products_edit": "Modifier les produits et les photos",
+      "products_publish": "Publier et dépublier des produits",
+      "products_delete": "Supprimer des produits",
+      "staff_manage": "Gérer le reste du personnel"
+    },
+    "memberStatus": {
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "pending": "En attente de votre approbation"
+    },
+    "shopState": {
+      "ready": "Actif",
+      "suspended": "Accès suspendu",
+      "shopSuspended": "Boutique suspendue",
+      "awaitingSeller": "En attente de l'approbation de la boutique",
+      "roleBlocked": "Rôle suspendu"
+    },
+    "errors": {
+      "emailInvalid": "Entrez une adresse courriel valide.",
+      "inviteOwner": "C'est l'adresse du propriétaire de la boutique.",
+      "alreadyStaff": "Cette personne fait déjà partie de votre personnel.",
+      "invitationPending": "Cette personne a déjà une invitation en attente.",
+      "rateLimited": "Vous avez envoyé plusieurs invitations récemment. Veuillez réessayer dans une heure.",
+      "ownAccess": "Vous ne pouvez pas modifier votre propre accès.",
+      "notAllowed": "Vous n'avez pas la permission de faire ceci.",
+      "changed": "Ceci a déjà changé. La page affiche maintenant la dernière version.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer.",
+      "loadFailed": "Ceci n'a pas pu être chargé. Veuillez actualiser la page.",
+      "roleBlocked": "Biqbaq a suspendu ou retiré le rôle Personnel du vendeur de cette personne : vous ne pouvez pas l'approuver."
+    },
+    "approveHint": "La personne a accepté. Son accès commence lorsque vous l'approuvez.",
+    "roleBlockedForOwner": "Biqbaq a suspendu ou retiré le rôle Personnel du vendeur de cette personne : elle ne peut pas travailler dans votre boutique.",
+    "approve": "Approuver",
+    "declinePerson": "Refuser",
+    "declineWarning": "La personne n'aura pas accès. Pour changer d'avis, invitez-la de nouveau.",
+    "confirmDecline": "Oui, refuser",
+    "awaitingSeller": "Vous avez accepté. La boutique doit encore vous approuver avant que vous puissiez commencer.",
+    "roleBlocked": "Biqbaq a suspendu ou retiré votre rôle Personnel du vendeur : vous ne pouvez pas travailler dans cette boutique."
   }
 }

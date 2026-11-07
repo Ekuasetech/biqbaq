@@ -314,6 +314,36 @@ const TEMPLATES: Record<string, Record<EmailLocale, Build>> = {
       path: "/account",
     }),
   },
+  staff_invitation: {
+    en: (shop) => ({
+      subject: "You have been invited to help run a shop on Biqbaq",
+      body: `${shop} has invited you to join their staff on Biqbaq. To accept, sign in or create a free account with this email address. Your access starts once they approve you.`,
+      action: "Go to your account",
+      path: "/account",
+    }),
+    fr: (shop) => ({
+      subject: "Vous êtes invité à aider à gérer une boutique sur Biqbaq",
+      body: `${shop} vous invite à rejoindre son personnel sur Biqbaq. Pour accepter, connectez-vous ou créez un compte gratuit avec cette adresse courriel. Votre accès commence dès que la boutique vous approuve.`,
+      action: "Accéder à votre compte",
+      path: "/account",
+    }),
+  },
+  staff_approved: {
+    en: (shop) => ({ subject: "You can start working in the shop", body: `${shop} has approved you, so you can now work in their shop on Biqbaq.`, action: "Go to your account", path: "/account" }),
+    fr: (shop) => ({ subject: "Vous pouvez commencer à travailler dans la boutique", body: `${shop} vous a approuvé : vous pouvez maintenant travailler dans sa boutique sur Biqbaq.`, action: "Accéder à votre compte", path: "/account" }),
+  },
+  staff_suspended: {
+    en: (shop) => ({ subject: "Your staff access was suspended", body: `${shop} has suspended your staff access to their shop on Biqbaq.`, action: "Go to your account", path: "/account" }),
+    fr: (shop) => ({ subject: "Votre accès de personnel a été suspendu", body: `${shop} a suspendu votre accès de personnel à sa boutique sur Biqbaq.`, action: "Accéder à votre compte", path: "/account" }),
+  },
+  staff_restored: {
+    en: (shop) => ({ subject: "Your staff access was restored", body: `${shop} has restored your staff access to their shop on Biqbaq.`, action: "Go to your account", path: "/account" }),
+    fr: (shop) => ({ subject: "Votre accès de personnel a été rétabli", body: `${shop} a rétabli votre accès de personnel à sa boutique sur Biqbaq.`, action: "Accéder à votre compte", path: "/account" }),
+  },
+  staff_removed: {
+    en: (shop) => ({ subject: "Your staff access was removed", body: `${shop} has removed you from their staff on Biqbaq. Your account is not affected.`, action: "Go to your account", path: "/account" }),
+    fr: (shop) => ({ subject: "Votre accès de personnel a été retiré", body: `${shop} vous a retiré de son personnel sur Biqbaq. Votre compte n'est pas touché.`, action: "Accéder à votre compte", path: "/account" }),
+  },
 };
 
 const GREETING: Record<EmailLocale, (name: string | null) => string> = {
@@ -327,7 +357,7 @@ export const escapeHtml = (value: string) =>
 /** Null means this version of the code has no such template. */
 export function renderEmail(
   template: string,
-  data: { role?: unknown; reason?: unknown; product?: unknown },
+  data: { role?: unknown; reason?: unknown; product?: unknown; shop?: unknown },
   recipient: { name: string | null; locale: string | null },
   siteUrl: string,
 ): RenderedEmail | null {
@@ -336,7 +366,8 @@ export function renderEmail(
 
   const locale: EmailLocale = recipient.locale === "fr" ? "fr" : "en";
   const roleKey = typeof data.role === "string" ? data.role : "";
-  const subject = typeof data.product === "string" ? data.product : (ROLE_NAMES[locale][roleKey] ?? roleKey);
+  const named = [data.shop, data.product].find((value) => typeof value === "string") as string | undefined;
+  const subject = named ?? ROLE_NAMES[locale][roleKey] ?? roleKey;
   const copy = versions[locale](subject);
   const reason = copy.reason && typeof data.reason === "string" ? data.reason : null;
   const link = `${siteUrl.replace(/\/$/, "")}${locale === "fr" ? "/fr" : ""}${copy.path}`;

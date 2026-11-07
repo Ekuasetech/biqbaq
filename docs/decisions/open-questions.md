@@ -36,6 +36,7 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 | Q-29 | **May an Admin moderate their own shop?** | **Decided by the owner (2026-11-07):** no. Only Super Admin may act on their own shop or products | Decided |
 | Q-30 | **Should sellers be emailed about moderation, with the reason?** | **Decided by the owner (2026-11-07):** yes, so moderators write reasons for the seller to read | Decided |
 | Q-31 | **Should suspending a seller also suspend their shop?** | **Decided by the owner (2026-11-07):** yes, automatically. As working assumptions, removing the Seller role does the same; restoring the role brings back only a shop the role took down, so one suspended separately stays suspended; and a shop cannot be reopened while its owner's role is suspended or removed | Decided |
+| Q-32 | **Who approves seller staff?** PRD §3.6 required Super Admin approval. | **Decided by the owner (2026-11-07):** the seller, as staff are between a seller and their people. The flow is invite, accept, approve. Super Admin no longer approves them, but can still suspend or remove the role, and a seller cannot override that | Decided |
 | Q-25 | **Who checks the French emails?** The emails go out in the person's chosen language. The French text has not had a native review. | Reviewed along with the rest of the French text | Before launch |
 
 ## PRD §27 decisions, and how much the design depends on them
@@ -49,7 +50,7 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 | BD-05 | Separate or unified inbox | A conversation links to a product or a vehicle listing, so either UI works on the same tables | Phase 4 |
 | BD-06 | Job display approach | Isolated integration | Phase 10 |
 | BD-07 | Express Entry only, or broader | Isolated integration | Phase 10 |
-| BD-08 | Staff permissions: granular, presets or both | Stored as granular permissions; presets could be added as named bundles | Phase 3 |
+| BD-08 | Staff permissions: granular, presets or both | **Decided by the owner (2026-11-07):** this is between each seller and their staff. A seller ticks what each person can do, and the platform sets no presets | Decided |
 | BD-09 | Co-admin permissions and delegation | **Decided by the owner (2026-11-06):** a Co-admin has only the permissions given to them, from the permission catalogue, and no one can grant a permission they do not hold (no escalation) | Decided |
 | BD-10 | Product approval requirement | **Decided by the owner (2026-11-06):** none. Sellers publish without admin approval, and moderators can suspend listings afterwards | Decided |
 | BD-11 | Referral window and precedence | Most recent code at signup, no window, as a placeholder | Phase 8 |

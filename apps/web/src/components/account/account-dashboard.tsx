@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { CircleAlert, Info } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { StaffCard } from "@/components/account/staff-card";
 import { ModerationLink } from "@/components/admin/moderation";
 import { RecentApplications } from "@/components/admin/recent-applications";
 import { Input } from "@/components/ui/input";
@@ -260,16 +261,6 @@ function ApplicationForm({ role, onDone, onCancel }: { role: ApplicableRole; onD
           </Field>
         </>
       )}
-      {role === "seller_staff" && (
-        <>
-          <Field name="seller_name" label={t("fields.sellerName")} hint={t("fields.staffHint")} error={errors.seller_name}>
-            <Input {...field("seller_name")} maxLength={150} className={inputClass} />
-          </Field>
-          <Field name="invitation_reference" label={t("fields.invitation")} error={errors.invitation_reference}>
-            <Input {...field("invitation_reference")} maxLength={100} className={inputClass} />
-          </Field>
-        </>
-      )}
       {(role === "marketer" || role === "admin") && (
         <Field name="reason" label={t("fields.reason")} error={errors.reason}>
           <Textarea {...field("reason")} rows={4} maxLength={1000} className="text-base md:text-sm" />
@@ -453,6 +444,7 @@ export function AccountDashboard() {
             <Notice kind="error">{t("accountNotActive")}</Notice>
           </section>
         )}
+        <StaffCard />
         {isSuperAdmin ? <RecentApplications /> : <ApplicationsCard applications={data.applications} onChanged={reload} />}
       </div>
     </div>

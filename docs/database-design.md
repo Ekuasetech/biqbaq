@@ -26,7 +26,7 @@ Effective permission = an **active** `user_roles` row, plus a matching `role_per
 | --- | --- | --- |
 | `sellers` | `owner_user_id` (unique, Q-08), `slug` (unique), `name`, `city`, `country`, `category`, `description`, `status`, `publishing_suspended`, `verification_status`, `allowance_override` | Created when a seller application is approved |
 | `seller_private` | `seller_id`, `contact_information` | Split out so a public read can never include it. Enquiries go to the seller's login email (Q-06), so there is no separate contact email |
-| `seller_invitations` | `seller_id`, `invitee_email` or `invitee_user_id`, `token_hash`, `status`, `expires_at`, `permissions` | |
+| `seller_invitations` | `seller_id`, `invitee_email`, `status`, `expires_at`, `permissions`, `invited_by` | No token: it is claimed by signing in with that confirmed address, so forwarding the email gives no access |
 | `seller_staff_memberships` | `seller_id`, `user_id`, `status`, `invited_by` | Unique (`seller_id`, `user_id`) |
 | `seller_staff_permissions` | `membership_id`, `permission_key` | Granular (BD-08) |
 
