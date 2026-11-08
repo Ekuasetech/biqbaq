@@ -1,5 +1,6 @@
 "use client";
 
+import { useScrollToHash } from "@/lib/use-scroll-to-hash";
 import { EmailListManager } from "@/components/email-lists/email-list-manager";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useLocale, useTranslations } from "next-intl";
@@ -214,7 +215,7 @@ function ProductItem({
 
   return (
     <li>
-      <article aria-label={product.name} className={cardClass}>
+      <article id={`product-${product.id}`} aria-label={product.name} className={cn(cardClass, "scroll-mt-24 transition-shadow")}>
         {editing ? (
           <ProductEditor
             supabase={supabase}
@@ -360,6 +361,7 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
     const timer = setTimeout(() => void load(userId), 0);
     return () => clearTimeout(timer);
   }, [userId, load]);
+  useScrollToHash(Boolean(data));
 
   if (user === undefined || (user && !data && !loadFailed)) {
     return <Skeleton className="h-64 rounded-3xl" aria-hidden />;

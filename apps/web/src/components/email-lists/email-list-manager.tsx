@@ -1,5 +1,6 @@
 "use client";
 
+import { useScrollToHash } from "@/lib/use-scroll-to-hash";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
@@ -256,6 +257,7 @@ function Subscribers({
     return () => clearTimeout(timer);
   }, [load, version]);
 
+  useScrollToHash(rows !== null);
   const pages = Math.max(1, Math.ceil((rows?.[0]?.total ?? 0) / SUBSCRIBERS_PAGE_SIZE));
   return (
     <div className="grid gap-2">
@@ -281,7 +283,7 @@ function Subscribers({
       {rows && rows.length > 0 && (
         <ul aria-label={t("people.title")} className="grid gap-1">
           {rows.map((row) => (
-            <li key={row.email} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-muted/40 px-3 py-2 text-sm">
+            <li key={row.email} id={`client-${row.email}`} className="flex scroll-mt-24 flex-wrap items-center justify-between gap-2 rounded-xl bg-muted/40 px-3 py-2 text-sm">
               <span className="min-w-0 break-words">
                 <span className="font-semibold">{row.name || row.email}</span>
                 <span className="block break-all">{row.email}{row.phone ? ` · ${row.phone}` : ""}</span>
@@ -502,6 +504,7 @@ function Documents({ seller, version }: { seller: string | null; version: number
     return () => clearTimeout(timer);
   }, [load, version]);
 
+  useScrollToHash(rows !== null);
   return (
     <div className="grid gap-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -512,7 +515,7 @@ function Documents({ seller, version }: { seller: string | null; version: number
       {rows && rows.length > 0 && (
         <ul aria-label={t("documents.title")} className="grid gap-1">
           {rows.map((row) => (
-            <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-muted/40 px-3 py-2 text-sm">
+            <li key={row.id} id={`invoice-${row.id}`} className="flex scroll-mt-24 flex-wrap items-center justify-between gap-2 rounded-xl bg-muted/40 px-3 py-2 text-sm">
               <span className="min-w-0 break-words">
                 <span className="font-semibold">{row.label}</span> · {row.client_name}
                 <span className="block text-xs text-muted-foreground">

@@ -968,7 +968,7 @@ test.describe("public marketplace", () => {
             await expect(page.getByText("The application was approved")).toBeVisible();
             await seller.page.goto("/account");
             await seller.page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: /^My shop/ }).click({ timeout: 15000 });
-            await expect(seller.page).toHaveURL(/\/account\/shop$/);
+            await expect(seller.page).toHaveURL(/\/account\/shop$/, { timeout: 15000 });
             await expect(seller.page.getByRole("heading", { name: "Ada's Shop" })).toBeVisible({ timeout: 15000 });
             return seller;
           }
@@ -2223,6 +2223,30 @@ test.describe("public marketplace", () => {
             await page.goto("/admin/moderation");
             await expect(page.getByText("You don't have access")).toBeVisible();
             await expect(page.getByText("Suspend product")).toHaveCount(0);
+          });
+
+          test("the top-bar search finds the seller's own things and goes to them", async ({ page, browser, request }) => {
+            test.setTimeout(120000);
+            const { page: shop } = await approvedSeller(page, browser, request);
+            const name = `Findable ${unique()}`;
+            await addProduct(shop, name);
+            await shop.goto("/account");
+            const search = shop.getByRole("combobox", { name: "Search your things" });
+            await search.fill("F");
+            await expect(shop.getByRole("listbox", { name: "Search results" })).toBeHidden();
+            await search.fill(name.slice(0, 14));
+            const results = shop.getByRole("listbox", { name: "Search results" });
+            await expect(results.getByRole("group", { name: "Products" })).toContainText(name, { timeout: 15000 });
+            await expect(results).toContainText("Draft");
+            // Another shop's products are not found (the database decides).
+            await search.fill("Ankara Tote Bag");
+            await expect(results).toContainText("Nothing found", { timeout: 15000 });
+            await search.fill(name);
+            await expect(results.getByRole("option", { name: new RegExp(name) })).toBeVisible({ timeout: 15000 });
+            await search.press("ArrowDown");
+            await search.press("Enter");
+            await expect(shop).toHaveURL(/\/account\/shop\/products#product-/);
+            await expect(item(shop, name)).toBeInViewport({ timeout: 15000 });
           });
 
           test("a seller edits their shop details, and only the public ones show", async ({ page, browser, request }) => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { DashboardSearch } from "@/components/dashboard/dashboard-search";
 import {
   ArrowLeft,
   Bell,
@@ -428,9 +429,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             >
               <Menu className="size-5" aria-hidden />
             </button>
-            <p className="min-w-0 flex-1 truncate font-heading text-base font-bold sm:text-lg">
+            <p className="min-w-0 flex-1 truncate font-heading text-base font-bold sm:text-lg lg:flex-none">
               {firstName ? t("welcome", { name: firstName }) : t("welcomeAnonymous")} <span aria-hidden>👋</span>
             </p>
+            {user && <DashboardSearch className="order-last w-full md:order-none md:mx-auto md:w-auto md:max-w-md md:flex-1" />}
             <div className="flex items-center gap-1">
               <AccountMenu />
               <LocaleSwitcher />

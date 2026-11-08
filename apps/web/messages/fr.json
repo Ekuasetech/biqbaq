@@ -2184,6 +2184,30 @@
       "communication": "Communication",
       "records": "Registres"
     },
-    "logOut": "Se déconnecter"
+    "logOut": "Se déconnecter",
+    "search": {
+      "label": "Rechercher vos éléments",
+      "placeholder": "Rechercher ici...",
+      "resultsLabel": "Résultats de recherche",
+      "none": "Rien trouvé pour « {query} ».",
+      "kinds": {
+        "conversation": "Conversations",
+        "product": "Produits",
+        "vehicle": "Voitures cargo",
+        "client": "Clients",
+        "invoice": "Factures et reçus",
+        "biqbaq_client": "Clients de Biqbaq",
+        "biqbaq_invoice": "Factures de Biqbaq",
+        "person": "Personnes",
+        "shop": "Boutiques"
+      },
+      "productStatus": {
+        "draft": "Brouillon",
+        "published": "Publié",
+        "unpublished": "Non public",
+        "archived": "Archivé",
+        "suspended": "Suspendu par Biqbaq"
+      }
+    }
   }
 }

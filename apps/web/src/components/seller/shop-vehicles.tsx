@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+import { useScrollToHash } from "@/lib/use-scroll-to-hash";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
@@ -130,7 +132,7 @@ function VehicleItem({ vehicle, photoLimit, onChanged }: { vehicle: MyVehicle; p
   const supabase = getSupabaseBrowserClient();
   return (
     <li>
-      <article aria-label={name} className={cardClass}>
+      <article id={`vehicle-${vehicle.id}`} aria-label={name} className={cn(cardClass, "scroll-mt-24 transition-shadow")}>
         {editing ? (
           <Editor vehicle={vehicle} onCancel={() => setEditing(false)} onDone={() => onChanged().then(() => setEditing(false))} />
         ) : (
@@ -212,6 +214,7 @@ export function ShopVehicles({ verified, photoLimit }: { verified: boolean; phot
     const timer = setTimeout(() => void load(), 0);
     return () => clearTimeout(timer);
   }, [load]);
+  useScrollToHash(vehicles !== null);
 
   return (
     <section aria-labelledby="shop-vehicles" className="grid gap-3">

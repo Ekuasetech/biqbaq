@@ -265,6 +265,18 @@ function PeopleRoles() {
   const [rows, setRows] = useState<Person[] | null>(null);
   const [failed, setFailed] = useState(false);
 
+  // Opened from the dashboard search with ?q=, already filtered to that person (Q-56).
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const q = new URLSearchParams(window.location.search).get("q")?.slice(0, 100);
+      if (q) {
+        setTyped(q);
+        setSearch(q);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   const load = useCallback(async () => {
     const { data, error } = await listPeople(getSupabaseBrowserClient(), search, role, page);
     if (error) {
