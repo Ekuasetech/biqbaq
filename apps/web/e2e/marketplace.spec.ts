@@ -120,7 +120,7 @@ test.describe("public marketplace", () => {
     await expect(section.getByRole("article")).toHaveCount(5);
     const lead = section.getByRole("article").first();
     await expect(lead).toContainText("Most read");
-    await expect(lead).toContainText("Amara N. (sample)");
+    // The sample posts can be edited on the Blog screen, so their wording is not checked here.
     await expect(lead).toContainText(/[\d,]+ readers?/);
     await expect(section.locator("article img")).toHaveCount(5);
     await section.getByRole("link", { name: /sending cargo home/ }).click();
@@ -502,7 +502,8 @@ test.describe("public marketplace", () => {
       await expect(page.getByRole("list", { name: "All articles" }).getByRole("article")).toHaveCount(4);
       await expect(page.getByRole("region", { name: "Sponsored" }).getByRole("article")).toHaveCount(3);
       // The large lead article opens its own page too.
-      await page.getByRole("link", { name: "How to start selling your products online from Canada" }).click();
+      // Found by its address, which never changes, rather than its title, which an editor can change.
+      await page.locator('a[href$="/blog/how-to-start-selling-your-products-online-from-canada"]').first().click();
       await expect(page).toHaveURL(/\/blog\/how-to-start-selling-your-products-online-from-canada$/);
       await page.goto("/blog");
       await page.getByRole("link", { name: "Styling Ankara for a Canadian winter" }).click();
@@ -1209,7 +1210,8 @@ test.describe("public marketplace", () => {
           test("a seller's own change shows in the public API", async ({ page, browser, request }) => {
             test.setTimeout(120000);
             const { page: shop } = await approvedSeller(page, browser, request);
-            const slug = sql(`select slug from public.sellers order by created_at desc limit 1`);
+            // This shop's own address, from its page. Other tests create shops at the same time.
+            const slug = (await shop.getByRole("link", { name: "View public page" }).getAttribute("href"))!.split("/").pop()!;
             const name = `API ${unique()}`;
 
             // The seller finds their address on My shop, and it is the one that works.
@@ -1390,7 +1392,25 @@ test.describe("public marketplace", () => {
             await expect(editor.getByText("Enter a title.")).toBeVisible();
             await editor.getByLabel("Title", { exact: true }).fill(title);
             await editor.getByLabel("Summary").fill("A short summary.");
-            await editor.getByLabel("Article").fill("First paragraph <b>with tags</b>.\n\nSecond paragraph.");
+            // Typed in the Tiptap editor, with a heading, bold text and a link from its toolbar.
+            const article = editor.getByRole("textbox", { name: "Article" });
+            await article.click();
+            await editor.getByRole("button", { name: "Heading", exact: true }).click();
+            await page.keyboard.type("A heading");
+            await page.keyboard.press("Enter");
+            await page.keyboard.type("First paragraph <b>with tags</b>. ");
+            await editor.getByRole("button", { name: "Bold" }).click();
+            await page.keyboard.type("Strong words");
+            await editor.getByRole("button", { name: "Bold" }).click();
+            await page.keyboard.press("Enter");
+            await page.keyboard.type("Visit Biqbaq");
+            await page.keyboard.press("Shift+Home");
+            await editor.getByRole("button", { name: "Add a link" }).click();
+            await editor.getByLabel("Link address").fill("javascript:alert(1)");
+            await editor.getByRole("button", { name: "Add link" }).click();
+            await expect(editor.getByText("Enter a web address starting with https://, or an email address.")).toBeVisible();
+            await editor.getByLabel("Link address").fill("https://biqbaq.com/about");
+            await editor.getByRole("button", { name: "Add link" }).click();
             await editor.getByLabel("Category").selectOption("cargo");
             await editor.getByLabel("Tags").fill("Cargo, Lagos, cargo");
             await editor.getByRole("button", { name: "Save draft" }).click();
@@ -1404,6 +1424,17 @@ test.describe("public marketplace", () => {
             await post.getByLabel("Choose a cover photo").setInputFiles({ name: "cover.png", mimeType: "image/png", buffer: png(1200, 675) });
             await expect(post.getByText("Cover photo saved.")).toBeVisible({ timeout: 30000 });
             const slug = sql(`select slug from public.blog_posts where title = '${title}'`);
+
+            // A photo inside the article, with its description, through the same checks.
+            await post.getByRole("textbox", { name: "Article" }).click();
+            await page.keyboard.press("Control+End");
+            await post.getByRole("button", { name: "Add a photo" }).click();
+            await post.getByLabel("Describe the photo").fill("A loaded truck");
+            await post.getByLabel("Choose the photo").setInputFiles({ name: "inside.png", mimeType: "image/png", buffer: png(800, 600) });
+            await expect(post.getByRole("textbox", { name: "Article" }).locator("img")).toHaveAttribute("alt", "A loaded truck", { timeout: 30000 });
+            await post.getByRole("button", { name: "Save changes" }).click();
+            await expect(post.getByText("Saved.")).toBeVisible();
+            expect(Number(sql(`select count(*) from public.media_assets m join public.blog_posts b on b.id = m.entity_id where m.entity_type = 'blog_post' and b.slug = '${slug}'`))).toBe(1);
             expect(sql(`select cover_url from public.blog_posts where slug = '${slug}'`)).toMatch(/^https:\/\/res\.cloudinary\.com\/.+\/biqbaq-local\/blog\//);
 
             // Scheduled for tomorrow, it stays hidden.
@@ -1425,14 +1456,57 @@ test.describe("public marketplace", () => {
               await expect(reader.getByRole("heading", { name: title })).toBeVisible({ timeout: 2000 });
             }).toPass({ timeout: 90000 });
             await expect(reader.getByText("First paragraph <b>with tags</b>.")).toBeVisible();
+            await expect(reader.getByRole("heading", { level: 2, name: "A heading" })).toBeVisible();
+            await expect(reader.locator("article strong")).toHaveText("Strong words");
+            await expect(reader.getByRole("link", { name: "Visit Biqbaq" })).toHaveAttribute("href", "https://biqbaq.com/about");
+            await expect(reader.getByRole("link", { name: "Visit Biqbaq" })).toHaveAttribute("rel", "noopener noreferrer");
+            await expect(reader.getByRole("img", { name: "A loaded truck" })).toBeVisible();
             await expect(reader.getByRole("list", { name: "Tags" })).toContainText("Lagos");
             expect(await reader.locator("article b").count()).toBe(0);
             await expect.poll(() => Number(sql(`select coalesce((select readers from public.blog_read_totals t join public.blog_posts b on b.id = t.post_id where b.slug = '${slug}'), 0)`))).toBe(1);
+
+            // Comments: a visitor is asked to sign in, and a signed-in reader's comment shows straight away.
+            const comments = reader.getByRole("region", { name: "Comments" });
+            await expect(comments).toContainText("No comments yet.");
+            await expect(comments).toContainText("to join the conversation.");
+            const commenter = await newApplicant(browser, request);
+            await commenter.page.goto(`/blog/${slug}`);
+            const box = commenter.page.getByRole("region", { name: /^Comments/ });
+            await box.getByRole("button", { name: "Post comment" }).click();
+            await expect(box.getByText("Write something first.")).toBeVisible();
+            await box.getByLabel("Your comment").fill("Useful, thank you <script>x</script>");
+            await box.getByRole("button", { name: "Post comment" }).click();
+            await expect(box.getByText("Useful, thank you <script>x</script>")).toBeVisible();
+            await expect(box.getByRole("button", { name: "Delete my comment" })).toBeVisible();
+            await reader.reload();
+            await expect(reader.getByRole("region", { name: /^Comments/ })).toContainText("Useful, thank you");
+            await expect(reader.getByRole("region", { name: /^Comments/ }).getByRole("button", { name: "Delete my comment" })).toHaveCount(0);
+
+            // Super Admin hides it from the Blog screen, with a reason.
+            await post.getByRole("button", { name: "Back to all posts" }).click();
+            await page.getByRole("tab", { name: "Comments" }).click();
+            const hide = page.getByRole("article", { name: `Comment on ${title}` });
+            await hide.getByRole("button", { name: "Hide comment" }).click();
+            await hide.getByLabel("Reason").fill("Off topic");
+            await hide.getByRole("button", { name: "Confirm: Hide comment" }).click();
+            await expect(page.getByText("No comments here.")).toBeVisible();
+            await commenter.page.reload();
+            await expect(commenter.page.getByRole("region", { name: /^Comments/ })).toContainText("No comments yet.");
+            await page.getByRole("tab", { name: "Posts" }).click();
+            await page.getByRole("article", { name: title }).getByRole("button", { name: "Edit" }).click();
 
             // Taken back to draft, it leaves, and its cover can then be removed from Cloudinary.
             await expect(post.getByRole("button", { name: "Remove cover photo" })).toHaveCount(0);
             await post.getByRole("button", { name: "Back to draft" }).click();
             await expect(post.getByText("Back to draft, and no longer on the site.")).toBeVisible();
+            // Taking the photo out of the article deletes it from Cloudinary on the next save,
+            // once it is a few minutes old. The test makes it old rather than waiting.
+            await post.getByRole("textbox", { name: "Article" }).locator("img").click();
+            await page.keyboard.press("Delete");
+            sql(`update public.media_assets set created_at = now() - interval '1 hour' where entity_type = 'blog_post' and entity_id = (select id from public.blog_posts where slug = '${slug}')`);
+            await post.getByRole("button", { name: "Save changes" }).click();
+            await expect(post.getByText("Saved.")).toBeVisible();
+            expect(Number(sql(`select count(*) from public.media_assets m join public.blog_posts b on b.id = m.entity_id where m.entity_type = 'blog_post' and b.slug = '${slug}'`))).toBe(0);
             await post.getByRole("button", { name: "Remove cover photo" }).click();
             await expect(post.getByText("Cover photo removed.")).toBeVisible();
             expect(sql(`select coalesce(cover_url, 'none') from public.blog_posts where slug = '${slug}'`)).toBe("none");

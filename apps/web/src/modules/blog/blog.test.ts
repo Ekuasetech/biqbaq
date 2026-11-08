@@ -23,5 +23,6 @@ describe("toBlogPost", () => {
     expect(post.topicNames).toEqual({ en: "Cargo", fr: "Cargo" });
     expect(post.tags).toEqual([]);
     expect(post.readers).toBe(12);
+    expect(post.content).toBeNull();
   });
 });

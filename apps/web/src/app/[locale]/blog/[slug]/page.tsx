@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { BlogComments } from "@/components/blog/blog-comments";
 import { PostStats, WriterAvatar } from "@/components/blog/blog-post-card";
+import { RichTextView } from "@/components/blog/rich-text-view";
 import { PageTransition } from "@/components/layout/page-transition";
 import { SiteExtras } from "@/components/layout/site-extras";
 import { RecordView } from "@/components/product/record-view";
@@ -10,6 +12,7 @@ import { ShareButtons } from "@/components/product/share-buttons";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getBlogPostBySlug, listBlogPostSlugs } from "@/modules/blog";
+import { getFeatureFlags } from "@/modules/product-catalog";
 
 type Props = PageProps<"/[locale]/blog/[slug]">;
 
@@ -37,6 +40,7 @@ export default async function BlogPostPage({ params }: Props) {
   if (!post) notFound();
 
   const t = await getTranslations({ locale, namespace: "blog" });
+  const features = await getFeatureFlags();
   const published = new Intl.DateTimeFormat(locale === "fr" ? "fr-CA" : "en-CA", {
     dateStyle: "long",
     timeZone: "UTC",
@@ -69,11 +73,15 @@ export default async function BlogPostPage({ params }: Props) {
             <Image src={post.imageUrl} alt="" fill preload sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
           </div>
           <p className="mt-6 text-lg font-medium">{post.excerpt}</p>
-          {post.body.map((paragraph, index) => (
-            <p key={index} className="mt-4 whitespace-pre-line break-words leading-relaxed">
-              {paragraph}
-            </p>
-          ))}
+          {post.content ? (
+            <RichTextView doc={post.content} />
+          ) : (
+            post.body.map((paragraph, index) => (
+              <p key={index} className="mt-4 whitespace-pre-line break-words leading-relaxed">
+                {paragraph}
+              </p>
+            ))
+          )}
           {post.tags.length > 0 && (
             <ul aria-label={t("tags")} className="mt-6 flex flex-wrap gap-2">
               {post.tags.map((tag) => <li key={tag.slug} className="rounded-full bg-muted px-3 py-1 text-xs font-medium">{tag.name}</li>)}
@@ -83,6 +91,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="mt-8">
             <ShareButtons title={post.title} />
           </div>
+          {features.comments && <BlogComments postId={post.id} />}
         </article>
         <SiteExtras locale={locale} excludePost={post.slug} />
       </div>

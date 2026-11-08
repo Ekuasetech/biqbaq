@@ -778,6 +778,14 @@
       "reviewsPerHour": {
         "label": "Reviews per person",
         "help": "Most new reviews one person can write in an hour."
+      },
+      "commentsEnabled": {
+        "label": "Blog comments",
+        "help": "Off hides every comment and the comment form. Comments are kept."
+      },
+      "commentsPerHour": {
+        "label": "Comments per person",
+        "help": "Most comments one person can post in an hour."
       }
     },
     "history": {
@@ -867,7 +875,9 @@
       "blog_schedule": "Scheduled a blog post",
       "blog_unpublish": "Took a blog post back to draft",
       "blog_archive": "Archived a blog post",
-      "blog_category_create": "Added a blog category"
+      "blog_category_create": "Added a blog category",
+      "comment_hide": "Hid a comment",
+      "comment_restore": "Showed a hidden comment"
     }
   },
   "moderation": {
@@ -1180,7 +1190,7 @@
     },
     "hints": {
       "excerpt": "One or two sentences, shown on cards and at the top of the article.",
-      "body": "Leave a blank line between paragraphs. Text appears exactly as typed.",
+      "body": "Use the toolbar for headings, bold, lists, links and photos.",
       "author": "Shown on the post, such as Biqbaq or a writer's name.",
       "tags": "Separate tags with commas, up to 10.",
       "seoTitle": "Up to 70 characters. The title is used if this is empty.",
@@ -1230,7 +1240,11 @@
       "changed": "This has already changed. Showing the latest.",
       "generic": "That didn't work. Please try again.",
       "loadFailed": "Posts couldn't be loaded. Please refresh the page.",
-      "coverNeeded": "A live or scheduled post needs its cover photo. Take it back to draft first."
+      "coverNeeded": "A live or scheduled post needs its cover photo. Take it back to draft first.",
+      "contentInvalid": "Something in the article can't be saved. Remove anything pasted from elsewhere and try again.",
+      "imageNotUploaded": "Photos must be added with the photo button, not pasted from other sites.",
+      "imageLimit": "This article has as many photos as it can hold.",
+      "linkInvalid": "Enter a web address starting with https://, or an email address."
     },
     "photoErrors": {
       "FORMAT": "Choose a JPG, PNG or WebP photo.",
@@ -1242,6 +1256,77 @@
       "GENERIC": "That didn't work. Please try again."
     },
     "removeCover": "Remove cover photo",
-    "coverRemoved": "Cover photo removed."
+    "coverRemoved": "Cover photo removed.",
+    "editor": {
+      "toolbar": "Formatting",
+      "paragraph": "Normal text",
+      "heading2": "Heading",
+      "heading3": "Subheading",
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "strike": "Strikethrough",
+      "bulletList": "Bulleted list",
+      "orderedList": "Numbered list",
+      "quote": "Quote",
+      "divider": "Divider",
+      "link": "Add a link",
+      "unlink": "Remove the link",
+      "photo": "Add a photo",
+      "undo": "Undo",
+      "redo": "Redo",
+      "saveBeforePhotos": "Save the draft once to add photos to the article.",
+      "linkAddress": "Link address",
+      "applyLink": "Add link",
+      "cancel": "Cancel",
+      "photoDescription": "Describe the photo",
+      "choosePhoto": "Choose the photo",
+      "uploading": "Uploading...",
+      "photoHint": "The description helps people who can't see the photo. Photos are checked the same way as cover photos."
+    },
+    "comments": {
+      "filterLabel": "Show comments",
+      "search": "Search comments, posts and emails",
+      "empty": "No comments here.",
+      "on": "Comment on {post}",
+      "hide": "Hide comment",
+      "show": "Show comment",
+      "hiddenBecause": "Hidden because: {reason}",
+      "filters": {
+        "published": "Showing",
+        "hidden": "Hidden",
+        "all": "All"
+      },
+      "status": {
+        "published": "Showing",
+        "hidden": "Hidden"
+      }
+    },
+    "sections": "Blog sections",
+    "sectionNames": {
+      "posts": "Posts",
+      "comments": "Comments"
+    }
+  },
+  "comments": {
+    "title": "Comments",
+    "empty": "No comments yet. Be the first.",
+    "anonymous": "A Biqbaq reader",
+    "delete": "Delete my comment",
+    "formLabel": "Add a comment",
+    "yourComment": "Your comment",
+    "publicHint": "Your comment and your display name are shown publicly. Please be kind.",
+    "post": "Post comment",
+    "posting": "Posting...",
+    "signIn": "Sign in",
+    "signInToComment": "to join the conversation.",
+    "errors": {
+      "required": "Write something first.",
+      "tooLong": "Your comment is too long.",
+      "disabled": "Comments are switched off right now.",
+      "rateLimited": "You've posted several comments recently. Please try again in an hour.",
+      "unavailable": "This post is no longer available.",
+      "generic": "That didn't work. Please try again."
+    }
   }
 }

@@ -175,13 +175,13 @@ export async function listRelatedProducts(product: Product, limit: number): Prom
 }
 
 /** The public on/off switches Super Admin controls (PRD §7.3, §7.4). */
-export async function getFeatureFlags(): Promise<{ reviews: boolean; favourites: boolean }> {
+export async function getFeatureFlags(): Promise<{ reviews: boolean; favourites: boolean; comments: boolean }> {
   "use cache";
   cacheLife("minutes");
   cacheTag(CATALOG_CACHE_TAG);
   const rows = unwrap(
-    await getSupabasePublicClient().from("public_platform_settings").select("key, value").in("key", ["reviews.enabled", "favourites.enabled"]),
+    await getSupabasePublicClient().from("public_platform_settings").select("key, value").in("key", ["reviews.enabled", "favourites.enabled", "comments.enabled"]),
   ) as { key: string; value: unknown }[];
   const on = (key: string) => rows.find((row) => row.key === key)?.value !== false;
-  return { reviews: on("reviews.enabled"), favourites: on("favourites.enabled") };
+  return { reviews: on("reviews.enabled"), favourites: on("favourites.enabled"), comments: on("comments.enabled") };
 }

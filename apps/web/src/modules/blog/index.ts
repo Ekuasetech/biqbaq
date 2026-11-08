@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { getSupabasePublicClient } from "@/lib/supabase/public";
 import { CATALOG_CACHE_TAG } from "@/modules/product-catalog/types";
+import { tryCleanDoc, type Doc } from "./rich-text";
 
 /** Public fields of a published blog post (PRD §11.4), plus a reader count. */
 export interface BlogPost {
@@ -9,6 +10,8 @@ export interface BlogPost {
   title: string;
   excerpt: string;
   body: string[];
+  /** The formatted article, for posts written in the editor. Older posts have only paragraphs. */
+  content: Doc | null;
   imageUrl: string;
   topic: string;
   topicNames: { en: string; fr: string };
@@ -40,6 +43,7 @@ interface PostRow {
   readers: number;
   read_minutes: number;
   tags: { slug: string; name: string }[] | null;
+  content?: unknown;
 }
 
 /** Paragraphs are separated by a blank line. Text stays text: nothing in a post becomes markup. */
@@ -57,6 +61,8 @@ export function toBlogPost(row: PostRow): BlogPost {
     title: row.title,
     excerpt: row.excerpt,
     body: toParagraphs(row.body),
+    // Checked again on the way out, so the page only ever draws known formatting.
+    content: row.content ? tryCleanDoc(row.content) : null,
     imageUrl: row.cover_url ?? "",
     topic: row.category_slug ?? "",
     topicNames: { en: row.category_name_en ?? "", fr: row.category_name_fr ?? row.category_name_en ?? "" },

@@ -56,6 +56,7 @@ export interface EditablePost {
   title: string;
   excerpt: string;
   body: string;
+  content: unknown;
   category_slug: string | null;
   tags: string[];
   author_name: string;
@@ -84,18 +85,17 @@ export const getPost = (supabase: SupabaseClient, id: string) => supabase.rpc("g
 export const listCategories = (supabase: SupabaseClient) => supabase.from("blog_categories").select("slug, name_en, name_fr").order("name_en");
 export const createCategory = (supabase: SupabaseClient, slug: string, nameEn: string, nameFr: string) =>
   supabase.rpc("create_blog_category", { p_slug: slug, p_name_en: nameEn, p_name_fr: nameFr });
-export const savePost = (supabase: SupabaseClient, id: string | null, form: PostForm) =>
-  supabase.rpc("save_blog_post", {
-    p_id: id,
-    p_title: form.title,
-    p_excerpt: form.excerpt,
-    p_body: form.body,
-    p_category: form.category,
-    p_tags: form.tags,
-    p_author_name: form.author,
-    p_seo_title: form.seoTitle,
-    p_seo_description: form.seoDescription,
-  });
+/** Saves through the server, which checks the article before the database stores it. */
+export async function savePost(id: string | null, form: PostForm, content: unknown): Promise<{ data: string | null; error: { code?: string; message?: string } | null }> {
+  const response = await fetch("/api/v1/blog/posts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, ...form, content }),
+  }).catch(() => null);
+  const json = await response?.json().catch(() => null);
+  if (!response?.ok) return { data: null, error: { message: json?.error?.code ?? "GENERIC" } };
+  return { data: json.data.id as string, error: null };
+}
 export const setPostStatus = (supabase: SupabaseClient, id: string, status: "draft" | "published" | "archived", publishAt?: string) =>
   supabase.rpc("set_blog_post_status", { p_id: id, p_status: status, p_publish_at: publishAt ?? null });
 
@@ -110,6 +110,10 @@ export function blogErrorKey(error: { code?: string; message?: string }): string
     CATEGORY_INVALID: "categoryInvalid",
     POST_NOT_EDITABLE: "archived",
     COVER_NEEDED: "coverNeeded",
+    CONTENT_INVALID: "contentInvalid",
+    IMAGE_NOT_UPLOADED: "imageNotUploaded",
+    IMAGE_LIMIT_REACHED: "imageLimit",
+    NOT_AUTHORIZED: "notAllowed",
   };
   if (error.message && known[error.message]) return known[error.message];
   if (error.code === "42501") return "notAllowed";

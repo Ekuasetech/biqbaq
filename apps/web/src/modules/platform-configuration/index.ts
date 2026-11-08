@@ -33,6 +33,8 @@ export const SETTING_GROUPS: { id: string; settings: SettingDefinition[] }[] = [
       { key: "reviews.enabled", id: "reviewsEnabled", kind: "toggle" },
       { key: "favourites.enabled", id: "favouritesEnabled", kind: "toggle" },
       { key: "reviews.max_per_hour", id: "reviewsPerHour", kind: "number", min: 1, max: 100 },
+      { key: "comments.enabled", id: "commentsEnabled", kind: "toggle" },
+      { key: "comments.max_per_hour", id: "commentsPerHour", kind: "number", min: 1, max: 100 },
     ],
   },
   {

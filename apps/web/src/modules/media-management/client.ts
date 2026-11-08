@@ -96,6 +96,23 @@ export async function uploadBlogCover(postId: string, file: File): Promise<void>
   await postJson("/api/v1/media/blog-cover/complete", { postId, publicId: fields.public_id });
 }
 
+/** Uploads one photo for inside an article, and gives back its address to put in the text. */
+export async function uploadBlogImage(postId: string, file: File): Promise<string> {
+  if (!ACCEPTED_TYPES.includes(file.type)) throw new MediaError("FORMAT");
+  const { uploadUrl, fields, limits } = await postJson<{
+    uploadUrl: string;
+    fields: Record<string, string | number>;
+    limits: MediaLimits;
+  }>("/api/v1/media/blog-image/sign", { postId });
+  const form = new FormData();
+  for (const [key, value] of Object.entries(fields)) form.append(key, String(value));
+  form.append("file", await prepareImage(file, limits), "photo.jpg");
+  const upload = await fetch(uploadUrl, { method: "POST", body: form });
+  if (!upload.ok) throw new MediaError("UPLOAD_FAILED");
+  const { url } = await postJson<{ url: string }>("/api/v1/media/blog-image/complete", { postId, publicId: fields.public_id });
+  return url;
+}
+
 export const removeBlogCover = (postId: string) => postJson<void>("/api/v1/media/blog-cover/remove", { postId });
 
 export const removeProductPhoto = (id: string) => api<void>(`/api/v1/media/${id}`, { method: "DELETE" });

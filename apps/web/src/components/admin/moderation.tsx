@@ -40,7 +40,7 @@ const secondaryButton =
 type Result = PromiseLike<{ error: { code?: string; message?: string } | null }>;
 
 /** One action with a required reason. The seller reads the reason in their email. */
-function ReasonAction({
+export function ReasonAction({
   label,
   id,
   destructive,

@@ -30,6 +30,10 @@ import {
   type BlogCategory,
   type EditablePost,
 } from "@/modules/blog/admin";
+import { ReasonAction } from "@/components/admin/moderation";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
+import { listCommentsForModeration, setCommentHidden, type CommentForModeration } from "@/modules/blog/comments";
+import { docFromText, tryCleanDoc, type Doc } from "@/modules/blog/rich-text";
 import { MediaError, removeBlogCover, uploadBlogCover } from "@/modules/media-management/client";
 import { refreshCatalog } from "@/modules/product-catalog/actions";
 
@@ -56,13 +60,15 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
   const [id, setId] = useState(postId);
   const [post, setPost] = useState<EditablePost | null>(null);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
-  const [form, setForm] = useState({ title: "", excerpt: "", body: "", category: "", tags: "", author: "Biqbaq", seoTitle: "", seoDescription: "" });
+  const [form, setForm] = useState({ title: "", excerpt: "", category: "", tags: "", author: "Biqbaq", seoTitle: "", seoDescription: "" });
   const [loaded, setLoaded] = useState(postId === null);
   const [working, setWorking] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [scheduleAt, setScheduleAt] = useState("");
   const [newCategory, setNewCategory] = useState<{ en: string; fr: string } | null>(null);
+  const [content, setContent] = useState<Doc>({ type: "doc", content: [] });
+  const [editorKey, setEditorKey] = useState(0);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async (postIdToLoad: string | null) => {
@@ -77,10 +83,11 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
     }
     const loadedPost = data as EditablePost;
     setPost(loadedPost);
+    setContent(tryCleanDoc(loadedPost.content) ?? docFromText(loadedPost.body));
+    setEditorKey((key) => key + 1);
     setForm({
       title: loadedPost.title,
       excerpt: loadedPost.excerpt,
-      body: loadedPost.body,
       category: loadedPost.category_slug ?? "",
       tags: loadedPost.tags.join(", "),
       author: loadedPost.author_name,
@@ -118,7 +125,7 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
     const parsed = postSchema.safeParse({
       title: form.title,
       excerpt: form.excerpt,
-      body: form.body,
+      body: "",
       category: form.category || null,
       tags: parseTags(form.tags),
       author: form.author,
@@ -132,7 +139,7 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
     setWorking(true);
     setFailure(null);
     setNotice(null);
-    const { data, error } = await savePost(getSupabaseBrowserClient(), id, parsed.data);
+    const { data, error } = await savePost(id, parsed.data, content);
     if (error) setFailure(blogErrorKey(error));
     else {
       const savedId = data as string;
@@ -210,9 +217,19 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
           <Field id="post-excerpt" label={t("fields.excerpt")} hint={t("hints.excerpt")}>
             <Textarea id="post-excerpt" value={form.excerpt} rows={2} maxLength={LIMITS.excerpt} onChange={set("excerpt")} />
           </Field>
-          <Field id="post-body" label={t("fields.body")} hint={t("hints.body")}>
-            <Textarea id="post-body" value={form.body} rows={14} maxLength={LIMITS.body} onChange={set("body")} />
-          </Field>
+          <div className="grid gap-1.5">
+            <span className="text-sm font-medium">{t("fields.body")}</span>
+            <RichTextEditor
+              key={editorKey}
+              id="post-body"
+              label={t("fields.body")}
+              initial={content}
+              postId={id}
+              disabled={archived}
+              onChange={setContent}
+              onError={(code) => setFailure(code)}
+            />
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field id="post-category" label={t("fields.category")}>
               <select id="post-category" value={form.category} onChange={set("category")} className="h-11 rounded-lg border border-input bg-card px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -403,6 +420,90 @@ function PostList({ onOpen }: { onOpen: (id: string | null) => void }) {
   );
 }
 
+const COMMENT_FILTERS = ["published", "hidden", "all"] as const;
+
+function CommentsPanel() {
+  const t = useTranslations("blogAdmin");
+  const format = useFormatter();
+  const [filter, setFilter] = useState<string>("published");
+  const [typed, setTyped] = useState("");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [rows, setRows] = useState<CommentForModeration[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  const load = useCallback(async () => {
+    const { data, error } = await listCommentsForModeration(getSupabaseBrowserClient(), filter, search, page, PAGE_SIZE);
+    if (error) {
+      setFailed(true);
+      return;
+    }
+    setFailed(false);
+    setRows(data as CommentForModeration[]);
+  }, [filter, search, page]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => void load(), 0);
+    return () => clearTimeout(timer);
+  }, [load]);
+
+  const total = rows?.[0]?.total ?? 0;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const supabase = getSupabaseBrowserClient();
+  return (
+    <div className="grid gap-4">
+      <div role="tablist" aria-label={t("comments.filterLabel")} className="flex flex-wrap gap-1.5">
+        {COMMENT_FILTERS.map((name) => (
+          <button key={name} type="button" role="tab" aria-selected={filter === name} onClick={() => { setFilter(name); setPage(1); }}
+            className={cn("rounded-full px-3 py-1.5 text-sm font-semibold", filter === name ? "bg-brand-navy text-white" : "bg-muted")}>
+            {t(`comments.filters.${name}`)}
+          </button>
+        ))}
+      </div>
+      <form role="search" onSubmit={(event) => { event.preventDefault(); setSearch(typed.trim()); setPage(1); }} className="flex gap-2">
+        <Label htmlFor="comment-search" className="sr-only">{t("comments.search")}</Label>
+        <Input id="comment-search" placeholder={t("comments.search")} value={typed} onChange={(event) => setTyped(event.target.value)} className="h-10" />
+        <button type="submit" className={secondaryButton}>{t("searchButton")}</button>
+      </form>
+      {failed && <Notice kind="error">{t("errors.loadFailed")}</Notice>}
+      {!rows && !failed && <Skeleton className="h-40 rounded-3xl" />}
+      {rows?.length === 0 && <p className="text-sm text-muted-foreground">{t("comments.empty")}</p>}
+      {rows && rows.length > 0 && (
+        <ul className="grid gap-2">
+          {rows.map((row) => (
+            <li key={row.id}>
+              <article aria-label={t("comments.on", { post: row.post_title })} className={cn(cardClass, "grid gap-2 p-4 sm:p-4")}>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    {row.author_name ?? row.author_email} · {row.post_title} · {format.dateTime(new Date(row.created_at), { dateStyle: "medium", timeStyle: "short" })}
+                  </p>
+                  <StatusPill tone={row.status === "published" ? "good" : "bad"}>{t(`comments.status.${row.status}`)}</StatusPill>
+                </div>
+                <p className="whitespace-pre-line break-words text-sm">{row.body}</p>
+                {row.hidden_reason && <p className="text-xs text-muted-foreground">{t("comments.hiddenBecause", { reason: row.hidden_reason })}</p>}
+                <div className="flex flex-wrap gap-2">
+                  {row.status === "published" ? (
+                    <ReasonAction id={`hide-${row.id}`} label={t("comments.hide")} destructive onConfirm={(reason) => setCommentHidden(supabase, row.id, true, reason)} onDone={load} />
+                  ) : (
+                    <ReasonAction id={`show-${row.id}`} label={t("comments.show")} onConfirm={(reason) => setCommentHidden(supabase, row.id, false, reason)} onDone={load} />
+                  )}
+                </div>
+              </article>
+            </li>
+          ))}
+        </ul>
+      )}
+      {pages > 1 && (
+        <nav aria-label={t("pagination")} className="flex items-center justify-center gap-3">
+          <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)} className={secondaryButton}>{t("previous")}</button>
+          <span className="text-sm">{t("page", { page, pages })}</span>
+          <button type="button" disabled={page >= pages} onClick={() => setPage(page + 1)} className={secondaryButton}>{t("next")}</button>
+        </nav>
+      )}
+    </div>
+  );
+}
+
 function useBlogAccess(userId: string | undefined) {
   const [allowed, setAllowed] = useState<boolean | null>(null);
   useEffect(() => {
@@ -430,6 +531,8 @@ export function BlogAdminScreen() {
   const user = useSessionUser();
   const allowed = useBlogAccess(user?.id);
   const [open, setOpen] = useState<{ id: string | null } | null>(null);
+  const [section, setSection] = useState<"posts" | "comments">("posts");
+  const tBlog = useTranslations("blogAdmin");
 
   if (user === undefined || (user && allowed === null)) return <Skeleton className="h-64 rounded-3xl" />;
   if (!user || !allowed) {
@@ -441,5 +544,18 @@ export function BlogAdminScreen() {
       </div>
     );
   }
-  return open ? <Editor key={open.id ?? "new"} postId={open.id} onClose={() => setOpen(null)} /> : <PostList onOpen={(id) => setOpen({ id })} />;
+  if (open) return <Editor key={open.id ?? "new"} postId={open.id} onClose={() => setOpen(null)} />;
+  return (
+    <div className="grid gap-4">
+      <div role="tablist" aria-label={tBlog("sections")} className="flex gap-1 border-b border-border">
+        {(["posts", "comments"] as const).map((name) => (
+          <button key={name} type="button" role="tab" aria-selected={section === name} onClick={() => setSection(name)}
+            className={cn("-mb-px border-b-2 px-4 py-2 text-sm font-semibold", section === name ? "border-brand-red" : "border-transparent text-muted-foreground")}>
+            {tBlog(`sectionNames.${name}`)}
+          </button>
+        ))}
+      </div>
+      {section === "posts" ? <PostList onOpen={(id) => setOpen({ id })} /> : <CommentsPanel />}
+    </div>
+  );
 }

@@ -778,6 +778,14 @@
       "reviewsPerHour": {
         "label": "Avis par personne",
         "help": "Le nombre maximal de nouveaux avis qu'une personne peut écrire en une heure."
+      },
+      "commentsEnabled": {
+        "label": "Commentaires du blogue",
+        "help": "Désactivé masque tous les commentaires et le formulaire. Les commentaires sont conservés."
+      },
+      "commentsPerHour": {
+        "label": "Commentaires par personne",
+        "help": "Le nombre maximal de commentaires qu'une personne peut publier en une heure."
       }
     },
     "history": {
@@ -867,7 +875,9 @@
       "blog_schedule": "A programmé un article de blogue",
       "blog_unpublish": "A remis un article en brouillon",
       "blog_archive": "A archivé un article de blogue",
-      "blog_category_create": "A ajouté une catégorie de blogue"
+      "blog_category_create": "A ajouté une catégorie de blogue",
+      "comment_hide": "A masqué un commentaire",
+      "comment_restore": "A réaffiché un commentaire"
     }
   },
   "moderation": {
@@ -1180,7 +1190,7 @@
     },
     "hints": {
       "excerpt": "Une ou deux phrases, affichées sur les cartes et en haut de l'article.",
-      "body": "Laissez une ligne vide entre les paragraphes. Le texte s'affiche tel quel.",
+      "body": "Utilisez la barre d'outils pour les titres, le gras, les listes, les liens et les photos.",
       "author": "Affiché sur l'article, comme Biqbaq ou le nom d'un auteur.",
       "tags": "Séparez les mots-clés par des virgules, jusqu'à 10.",
       "seoTitle": "Jusqu'à 70 caractères. Le titre est utilisé si ce champ est vide.",
@@ -1230,7 +1240,11 @@
       "changed": "Ceci a déjà changé. Voici la dernière version.",
       "generic": "Cela n'a pas fonctionné. Veuillez réessayer.",
       "loadFailed": "Les articles n'ont pas pu être chargés. Veuillez actualiser la page.",
-      "coverNeeded": "Un article en ligne ou programmé a besoin de sa photo de couverture. Remettez-le d'abord en brouillon."
+      "coverNeeded": "Un article en ligne ou programmé a besoin de sa photo de couverture. Remettez-le d'abord en brouillon.",
+      "contentInvalid": "Un élément de l'article ne peut pas être enregistré. Retirez ce qui a été collé d'ailleurs et réessayez.",
+      "imageNotUploaded": "Les photos doivent être ajoutées avec le bouton photo, pas collées d'autres sites.",
+      "imageLimit": "Cet article contient déjà le nombre maximal de photos.",
+      "linkInvalid": "Entrez une adresse web commençant par https://, ou une adresse courriel."
     },
     "photoErrors": {
       "FORMAT": "Choisissez une photo JPG, PNG ou WebP.",
@@ -1242,6 +1256,77 @@
       "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
     },
     "removeCover": "Retirer la photo de couverture",
-    "coverRemoved": "Photo de couverture retirée."
+    "coverRemoved": "Photo de couverture retirée.",
+    "editor": {
+      "toolbar": "Mise en forme",
+      "paragraph": "Texte normal",
+      "heading2": "Titre",
+      "heading3": "Sous-titre",
+      "bold": "Gras",
+      "italic": "Italique",
+      "underline": "Souligné",
+      "strike": "Barré",
+      "bulletList": "Liste à puces",
+      "orderedList": "Liste numérotée",
+      "quote": "Citation",
+      "divider": "Séparateur",
+      "link": "Ajouter un lien",
+      "unlink": "Retirer le lien",
+      "photo": "Ajouter une photo",
+      "undo": "Annuler",
+      "redo": "Rétablir",
+      "saveBeforePhotos": "Enregistrez le brouillon une fois pour ajouter des photos à l'article.",
+      "linkAddress": "Adresse du lien",
+      "applyLink": "Ajouter le lien",
+      "cancel": "Annuler",
+      "photoDescription": "Décrivez la photo",
+      "choosePhoto": "Choisir la photo",
+      "uploading": "Téléversement...",
+      "photoHint": "La description aide les personnes qui ne voient pas la photo. Les photos sont vérifiées comme les photos de couverture."
+    },
+    "comments": {
+      "filterLabel": "Afficher les commentaires",
+      "search": "Chercher dans les commentaires, articles et courriels",
+      "empty": "Aucun commentaire ici.",
+      "on": "Commentaire sur {post}",
+      "hide": "Masquer le commentaire",
+      "show": "Afficher le commentaire",
+      "hiddenBecause": "Masqué parce que : {reason}",
+      "filters": {
+        "published": "Affichés",
+        "hidden": "Masqués",
+        "all": "Tous"
+      },
+      "status": {
+        "published": "Affiché",
+        "hidden": "Masqué"
+      }
+    },
+    "sections": "Sections du blogue",
+    "sectionNames": {
+      "posts": "Articles",
+      "comments": "Commentaires"
+    }
+  },
+  "comments": {
+    "title": "Commentaires",
+    "empty": "Aucun commentaire pour le moment. Soyez le premier.",
+    "anonymous": "Un lecteur de Biqbaq",
+    "delete": "Supprimer mon commentaire",
+    "formLabel": "Ajouter un commentaire",
+    "yourComment": "Votre commentaire",
+    "publicHint": "Votre commentaire et votre nom d'affichage sont publics. Merci de rester courtois.",
+    "post": "Publier le commentaire",
+    "posting": "Publication...",
+    "signIn": "Connectez-vous",
+    "signInToComment": "pour participer à la conversation.",
+    "errors": {
+      "required": "Écrivez d'abord quelque chose.",
+      "tooLong": "Votre commentaire est trop long.",
+      "disabled": "Les commentaires sont désactivés pour le moment.",
+      "rateLimited": "Vous avez publié plusieurs commentaires récemment. Veuillez réessayer dans une heure.",
+      "unavailable": "Cet article n'est plus disponible.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
+    }
   }
 }
