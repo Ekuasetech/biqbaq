@@ -271,7 +271,6 @@
     "hidePassword": "Masquer : {field}",
     "googleRegister": "S'inscrire avec Google",
     "googleSignIn": "Se connecter avec Google",
-    "googleResult": "La connexion avec Google n'est pas activée dans cet aperçu : rien ne s'est produit.",
     "or": "ou",
     "agreement": "En continuant, vous acceptez les <conditions>Conditions d'utilisation</conditions> et l’<privacy>Avis de confidentialité</privacy> de Biqbaq.",
     "registerSubmit": "Créer le compte",
@@ -311,7 +310,8 @@
     "signOut": "Se déconnecter",
     "working": "Veuillez patienter…",
     "accountLabel": "Connecté : {name}",
-    "accountLink": "Votre compte"
+    "accountLink": "Votre compte",
+    "googleFailed": "La connexion avec Google n'a pas fonctionné. Veuillez réessayer, ou utiliser votre courriel et votre mot de passe."
   },
   "notFound": {
     "title": "Page introuvable",

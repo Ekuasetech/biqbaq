@@ -271,7 +271,6 @@
     "hidePassword": "Hide {field}",
     "googleRegister": "Sign up with Google",
     "googleSignIn": "Sign in with Google",
-    "googleResult": "Google sign-in isn't connected in this preview, so nothing happened.",
     "or": "or",
     "agreement": "By continuing, you agree to Biqbaq's <conditions>Conditions of Use</conditions> and <privacy>Privacy Notice</privacy>.",
     "registerSubmit": "Create account",
@@ -311,7 +310,8 @@
     "signOut": "Sign out",
     "working": "Please wait…",
     "accountLabel": "Signed in as {name}",
-    "accountLink": "Your account"
+    "accountLink": "Your account",
+    "googleFailed": "Google sign-in didn't work. Please try again, or use your email and password."
   },
   "notFound": {
     "title": "Page not found",

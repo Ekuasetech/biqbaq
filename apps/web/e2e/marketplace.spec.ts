@@ -294,18 +294,34 @@ test.describe("public marketplace", () => {
 
   });
 
-  test("Google sign-in appears on sign-up and sign-in, and is honest that it is not connected", async ({ page }) => {
-    for (const [path, name] of [["/register", "Sign up with Google"], ["/sign-in", "Sign in with Google"]] as const) {
+  test("Google sign-in sends people to Google, and explains when it does not finish", async ({ page }) => {
+    // Neither Supabase nor Google is visited in tests: the request to Supabase's Google
+    // sign-in is the proof. (Supabase forwarding it to Google was checked directly.)
+    const asked: string[] = [];
+    await page.route("**/auth/v1/authorize**", async (route) => {
+      asked.push(route.request().url());
+      await route.fulfill({ status: 200, contentType: "text/html", body: "<title>Google</title>" });
+    });
+    for (const [path, name, next] of [["/register?ref=ADA2026", "Sign up with Google", "/"], ["/fr/sign-in?next=%2Fproducts", "Se connecter avec Google", "/fr/products"]] as const) {
       await page.goto(path);
-      const url = page.url();
       await page.getByRole("button", { name }).click();
-      await expect(page.getByText("Google sign-in isn't connected")).toBeVisible();
-      expect(page.url()).toBe(url);
+      await expect.poll(() => asked.length, { timeout: 15000 }).toBeGreaterThan(0);
+      const sent = new URL(asked.pop()!);
+      expect(sent.searchParams.get("provider")).toBe("google");
+      // Back to Biqbaq's return route, then on to the page they came from, in their language.
+      const back = new URL(sent.searchParams.get("redirect_to")!);
+      expect(back.pathname).toBe("/api/v1/auth/callback");
+      expect(back.searchParams.get("via")).toBe("google");
+      expect(back.searchParams.get("next")).toBe(next);
     }
-    await page.goto("/forgot-password");
-    await expect(page.getByRole("button", { name: /Google/ })).toHaveCount(0);
-    await page.goto("/fr/register");
-    await expect(page.getByRole("button", { name: "S'inscrire avec Google" })).toBeVisible();
+    // Opening a referral link on the way remembers it for the Google sign-up.
+    expect((await page.context().cookies()).some((cookie) => cookie.name === "biqbaq_ref" && cookie.value.startsWith("ADA2026."))).toBe(true);
+
+    // Cancelling at Google, or anything failing, comes back with an explanation.
+    // The person was last on the French site, so it explains in French.
+    await page.goto("/api/v1/auth/callback?via=google&next=%2Ffr%2Fproducts");
+    await expect(page).toHaveURL(/\/fr\/sign-in\?google=failed$/);
+    await expect(page.getByRole("status").filter({ hasText: "La connexion avec Google n'a pas fonctionné" })).toBeVisible();
   });
 
   for (const path of ["/register", "/sign-in", "/forgot-password", "/reset-password", "/fr/register"]) {

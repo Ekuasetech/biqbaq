@@ -256,17 +256,50 @@ function AgreementNotice() {
   );
 }
 
+const noSubscribeGoogle = () => () => {};
+
 // Colours and layout follow Google's sign-in branding guidelines, which keep the
-// button light in both themes. Needs Google credentials before it can be connected.
+// button light in both themes. Signing in or up with Google is the same: Supabase makes
+// the account the first time, and joins it to an existing account with the same confirmed
+// email (Q-18: one account per person).
 function GoogleButton({ label }: { label: string }) {
   const t = useTranslations("auth");
-  const [clicked, setClicked] = useState(false);
+  const locale = useLocale();
+  const [working, setWorking] = useState(false);
+  const [failed, setFailed] = useState(false);
+  // Set by the return route when Google sign-in did not finish.
+  const returnedFailed = useSyncExternalStore(
+    noSubscribeGoogle,
+    () => new URLSearchParams(window.location.search).get("google") === "failed",
+    () => false,
+  );
+
+  async function start() {
+    if (working) return;
+    setWorking(true);
+    setFailed(false);
+    // A referral link opened on this page still counts for a Google sign-up (BD-11).
+    rememberReferralFrom(window.location.search);
+    const next = getPathname({ href: safeNext(new URLSearchParams(window.location.search).get("next")), locale });
+    const { error } = await getSupabaseBrowserClient().auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/api/v1/auth/callback?via=google&next=${encodeURIComponent(next)}` },
+    });
+    // On success the browser is already on its way to Google.
+    if (error) {
+      setWorking(false);
+      setFailed(true);
+    }
+  }
+
   return (
     <>
       <button
         type="button"
-        onClick={() => setClicked(true)}
-        className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#747775] bg-white text-sm font-semibold text-[#1f1f1f] transition-colors outline-none hover:bg-[#f2f2f2] focus-visible:ring-2 focus-visible:ring-ring"
+        disabled={working}
+        aria-busy={working}
+        onClick={() => void start()}
+        className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#747775] bg-white text-sm font-semibold text-[#1f1f1f] transition-colors outline-none hover:bg-[#f2f2f2] focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-70"
       >
         <svg aria-hidden viewBox="0 0 48 48" className="size-5 shrink-0">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -277,10 +310,10 @@ function GoogleButton({ label }: { label: string }) {
         {label}
       </button>
       <p role="status" className="text-sm empty:hidden">
-        {clicked && (
+        {(failed || returnedFailed) && (
           <span className="flex gap-2">
-            <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
-            {t("googleResult")}
+            <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
+            {t("googleFailed")}
           </span>
         )}
       </p>
