@@ -6,9 +6,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { FavouritesCard } from "@/components/account/favourites-card";
 import { StaffCard } from "@/components/account/staff-card";
-import { AdsLink } from "@/components/admin/ads-admin";
-import { BlogLink } from "@/components/admin/blog-admin";
-import { ModerationLink } from "@/components/admin/moderation";
 import { RecentApplications } from "@/components/admin/recent-applications";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -412,56 +409,7 @@ export function AccountDashboard() {
     <div className="grid items-start gap-4 lg:grid-cols-2">
       <div className="grid gap-4">
         <ProfileCard user={user} data={data} onSaved={reload} />
-        <div className="flex flex-wrap gap-2">
-          <Link href="/account/messages" className={cn(primaryButton, "w-fit")}>
-            {t("messagesLink")}
-          </Link>
-          <Link href="/account/notifications" className={cn(primaryButton, "w-fit")}>
-            {t("notificationsLink")}
-          </Link>
-          {data.roles.some((role) => (role.role_key === "marketer" || role.role_key === "seller") && role.status === "active") && (
-            <Link href="/account/referrals" className={cn(primaryButton, "w-fit")}>
-              {t("referralsLink")}
-            </Link>
-          )}
-        </div>
         <RolesCard roles={data.roles} />
-        {data.roles.some((role) => role.role_key === "seller" && role.status === "active") && (
-          <Link href="/account/shop" className={cn(primaryButton, "w-fit")}>
-            {t("shopLink")}
-          </Link>
-        )}
-        <ModerationLink className={cn(primaryButton, "w-fit")}>{t("moderationLink")}</ModerationLink>
-        <BlogLink className={cn(primaryButton, "w-fit")}>{t("blogLink")}</BlogLink>
-        <AdsLink className={cn(primaryButton, "w-fit")}>{t("adsLink")}</AdsLink>
-        {isSuperAdmin && (
-          <div className="flex flex-wrap gap-2">
-            <Link href="/admin/role-applications" className={cn(primaryButton, "w-fit")}>
-              {t("adminLink")}
-            </Link>
-            <Link href="/admin/verification" className={cn(primaryButton, "w-fit")}>
-              {t("verificationLink")}
-            </Link>
-            <Link href="/admin/people" className={cn(primaryButton, "w-fit")}>
-              {t("peopleLink")}
-            </Link>
-            <Link href="/admin/settings" className={cn(primaryButton, "w-fit")}>
-              {t("settingsLink")}
-            </Link>
-            <Link href="/admin/audit-log" className={cn(primaryButton, "w-fit")}>
-              {t("auditLogLink")}
-            </Link>
-            <Link href="/admin/messages" className={cn(primaryButton, "w-fit")}>
-              {t("adminMessagesLink")}
-            </Link>
-            <Link href="/admin/referrals" className={cn(primaryButton, "w-fit")}>
-              {t("adminReferralsLink")}
-            </Link>
-            <Link href="/admin/email-lists" className={cn(primaryButton, "w-fit")}>
-              {t("adminEmailListsLink")}
-            </Link>
-          </div>
-        )}
       </div>
       <div className="grid gap-4">
         {data.accountStatus === "active" ? (

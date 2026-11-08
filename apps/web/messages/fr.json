@@ -412,7 +412,8 @@
     "notificationsLink": "Notifications",
     "referralsLink": "Parrainages",
     "adminReferralsLink": "Parrainages",
-    "adminEmailListsLink": "Courriels aux clients"
+    "adminEmailListsLink": "Courriels aux clients",
+    "detailsTitle": "Les détails de votre compte"
   },
   "admin": {
     "section": "Administration",
@@ -2081,5 +2082,74 @@
       "notAllowed": "Vous n'avez pas la permission de faire ceci.",
       "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
     }
+  },
+  "dashboard": {
+    "navLabel": "Tableau de bord",
+    "adminHeading": "Administration",
+    "backToSite": "Retour à Biqbaq",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "welcome": "Bon retour, {name}",
+    "welcomeAnonymous": "Bienvenue sur Biqbaq",
+    "nav": {
+      "overview": "Aperçu",
+      "messages": "Messages",
+      "notifications": "Notifications",
+      "shop": "Ma boutique",
+      "referrals": "Parrainages",
+      "applications": "Demandes de rôle",
+      "verification": "Vérification des vendeurs",
+      "people": "Personnes et rôles",
+      "moderation": "Modération",
+      "blog": "Blogue",
+      "ads": "Publicités",
+      "customerEmails": "Courriels aux clients",
+      "adminReferrals": "Programmes de parrainage",
+      "conversations": "Conversations",
+      "settings": "Paramètres de la plateforme",
+      "auditLog": "Journal d'audit"
+    },
+    "overview": {
+      "today": "Aujourd'hui",
+      "figures": "Vos chiffres",
+      "action": "Action",
+      "see": "Voir",
+      "seeAll": "Tout voir",
+      "time": "Heure",
+      "conversation": "Conversation",
+      "notification": "Notification",
+      "recentMessages": "Messages récents",
+      "recentNotifications": "Notifications récentes",
+      "noMessages": "Aucun message pour le moment.",
+      "noNotifications": "Aucune notification pour le moment.",
+      "cards": {
+        "unreadMessages": "Messages non lus",
+        "unreadNotifications": "Notifications non lues",
+        "favourites": "Favoris",
+        "liveProducts": "Produits en ligne",
+        "productViews": "Vues des produits",
+        "clients": "Clients",
+        "invoicedMonth": "Facturé ce mois-ci",
+        "applications": "Demandes en attente",
+        "verifications": "Vérifications en attente",
+        "accounts": "Comptes actifs",
+        "shops": "Boutiques actives"
+      }
+    },
+    "newCount": ", {count} nouveau(x)",
+    "discover": {
+      "ads": "À la une",
+      "sponsored": "Pub",
+      "blog": "Du blogue Biqbaq",
+      "allPosts": "Tous les articles",
+      "minutes": "{count, plural, one {# minute de lecture} other {# minutes de lecture}}"
+    },
+    "groups": {
+      "people": "Personnes",
+      "content": "Contenu",
+      "communication": "Communication",
+      "records": "Registres"
+    },
+    "logOut": "Se déconnecter"
   }
 }

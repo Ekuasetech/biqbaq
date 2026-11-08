@@ -5,8 +5,6 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { notFound } from "next/navigation";
 import { REVEAL_BOOT_SCRIPT, RevealObserver } from "@/components/layout/reveal-observer";
 import { ReferralCapture } from "@/components/referrals/referral-capture";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
@@ -57,11 +55,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             <p className="bg-brand-navy px-4 py-2 text-center text-xs font-medium text-white">
               {t("previewNotice")}
             </p>
-            <SiteHeader />
-            <main id="main" className="flex-1">
-              {children}
-            </main>
-            <SiteFooter />
+            {/* The public site adds its header and footer; dashboards add their sidebar. */}
+            {children}
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

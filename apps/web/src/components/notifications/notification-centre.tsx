@@ -26,7 +26,7 @@ import {
 const secondaryButton =
   "inline-flex h-9 items-center justify-center rounded-lg border border-border bg-card px-3 text-sm font-semibold hover:bg-muted disabled:opacity-50";
 
-function useNotificationText() {
+export function useNotificationText() {
   const t = useTranslations("notifications");
   const tRoles = useTranslations("account.roles");
   return (notification: AppNotification) => {

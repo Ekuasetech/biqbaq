@@ -6,6 +6,13 @@ import { expect, test } from "@playwright/test";
 // Its script already ran on first load, so the theme is unaffected.
 const KNOWN_DEV_WARNING = "Encountered a script tag while rendering React component";
 
+/** Opens a group in the dashboard sidebar, if it is closed (Q-56). */
+async function openNavGroup(page: import("@playwright/test").Page, name: string) {
+  const button = page.getByRole("navigation", { name: "Dashboard" }).getByRole("button", { name });
+  await expect(button).toBeVisible({ timeout: 15000 });
+  if ((await button.getAttribute("aria-expanded")) === "false") await button.click();
+}
+
 test.describe("public marketplace", () => {
   test.beforeEach(({ page }) => {
     const problems: string[] = [];
@@ -787,6 +794,42 @@ test.describe("public marketplace", () => {
         await page.getByLabel("Tell us about your business").fill("Nigerian groceries");
       }
 
+      test("the dashboard has a sidebar, today's figures, and a phone menu", async ({ page, request }) => {
+        await confirmedAccount(page, request);
+        await page.goto("/account");
+        // The public header and footer give way to the dashboard's own top bar and sidebar.
+        await expect(page.getByRole("banner")).toContainText("Welcome back, Ada", { timeout: 15000 });
+        await expect(page.getByRole("contentinfo")).toHaveCount(0);
+        const nav = page.getByRole("navigation", { name: "Dashboard" });
+        await expect(nav.getByRole("link", { name: "Overview" })).toHaveAttribute("aria-current", "page");
+        await expect(nav.getByRole("link", { name: /^Messages/ })).toBeVisible();
+        await expect(nav.getByRole("link", { name: /^Notifications/ })).toBeVisible();
+        // A buyer sees no shop or administration.
+        await expect(nav).not.toContainText("Administration");
+        await expect(nav.getByRole("link", { name: /^My shop/ })).toHaveCount(0);
+        const figures = page.getByRole("region", { name: "Your figures" });
+        await expect(figures).toContainText("Unread messages");
+        await expect(figures).toContainText("Favourites");
+        await expect(figures).not.toContainText("Live products");
+        await expect(page.getByRole("region", { name: "Recent messages" })).toContainText("No messages yet.");
+        await nav.getByRole("link", { name: /^Notifications/ }).click();
+        await expect(page).toHaveURL(/\/account\/notifications$/);
+        await expect(nav.getByRole("link", { name: /^Notifications/ })).toHaveAttribute("aria-current", "page");
+
+        // On a phone, the sidebar is a menu that opens and closes.
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.goto("/account");
+        await expect(page.getByRole("navigation", { name: "Dashboard" })).toBeHidden();
+        await page.getByRole("button", { name: "Open the menu" }).click();
+        await expect(page.getByRole("navigation", { name: "Dashboard" })).toBeVisible();
+        await page.keyboard.press("Escape");
+        await expect(page.getByRole("navigation", { name: "Dashboard" })).toBeHidden();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+        // The public site keeps its own header and footer.
+        await page.goto("/products");
+        await expect(page.getByRole("contentinfo")).toBeVisible();
+      });
+
       test("signed-out visitors are asked to sign in", async ({ page }) => {
         await page.goto("/account");
         await expect(page.getByRole("heading", { name: "Please sign in" })).toBeVisible();
@@ -924,7 +967,7 @@ test.describe("public marketplace", () => {
             await cardFor(page, seller.email).getByRole("button", { name: "Approve" }).click();
             await expect(page.getByText("The application was approved")).toBeVisible();
             await seller.page.goto("/account");
-            await seller.page.getByRole("link", { name: "Manage my shop" }).click({ timeout: 15000 });
+            await seller.page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: /^My shop/ }).click({ timeout: 15000 });
             await expect(seller.page).toHaveURL(/\/account\/shop$/);
             await expect(seller.page.getByRole("heading", { name: "Ada's Shop" })).toBeVisible({ timeout: 15000 });
             return seller;
@@ -1291,7 +1334,7 @@ test.describe("public marketplace", () => {
               await shop.getByRole("list", { name: "Conversations" }).getByRole("link").first().click();
               const sellerThread = shop.getByRole("region", { name: /^Conversation with / });
               await expect(sellerThread.getByRole("list", { name: "Messages" })).toContainText("Is this still available?");
-              await expect(shop.getByRole("link", { name: "Messages", exact: true })).toBeVisible({ timeout: 15000 });
+              await expect(shop.getByRole("banner").getByRole("link", { name: "Messages", exact: true })).toBeVisible({ timeout: 15000 });
               // The buyer has read the question, as they sent it.
               await expect(buyerThread.getByRole("listitem").filter({ hasText: "Is this still available?" })).toContainText("Read", { timeout: 15000 });
               await sellerThread.getByLabel("Your reply").fill("Yes, it ships tomorrow.");
@@ -1826,6 +1869,7 @@ test.describe("public marketplace", () => {
             };
 
             await page.goto("/account");
+            await openNavGroup(page, "Content");
             await page.getByRole("link", { name: "Blog", exact: true }).click();
             await expect(page).toHaveURL(/\/admin\/blog$/);
             await page.getByRole("button", { name: "New post" }).click();
@@ -1991,6 +2035,7 @@ test.describe("public marketplace", () => {
             };
 
             await page.goto("/account");
+            await openNavGroup(page, "Content");
             await page.getByRole("link", { name: "Ads", exact: true }).click();
             await expect(page).toHaveURL(/\/admin\/ads$/);
             await page.getByRole("button", { name: "New ad" }).click();
@@ -2088,6 +2133,7 @@ test.describe("public marketplace", () => {
             await expect(visitor.getByRole("main")).toContainText(name);
 
             await page.goto("/account");
+            await openNavGroup(page, "Content");
             await page.getByRole("link", { name: "Moderation", exact: true }).click();
             await expect(page).toHaveURL(/\/admin\/moderation$/);
             const products = page.getByRole("region", { name: "Products" });
@@ -2318,7 +2364,7 @@ test.describe("public marketplace", () => {
 
               // Super Admin reaches the screen from their account.
               await page.goto("/account");
-              await page.getByRole("link", { name: "Review seller verification" }).click({ timeout: 15000 });
+              await page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: /^Seller verification/ }).click({ timeout: 15000 });
               await expect(page).toHaveURL(/\/admin\/verification$/);
               let card = await find(page, "Waiting for review", email);
               await expect(card).toContainText("My store is on Queen Street");
@@ -2420,7 +2466,7 @@ test.describe("public marketplace", () => {
               await expect(page.getByRole("article")).toHaveCount(0);
               await page.goto("/account");
               await expect(page.getByRole("region", { name: "Your roles" })).toBeVisible({ timeout: 15000 });
-              await expect(page.getByRole("link", { name: "Review seller verification" })).toHaveCount(0);
+              await expect(page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: /^Seller verification/ })).toHaveCount(0);
             });
           });
 
@@ -2647,7 +2693,7 @@ test.describe("public marketplace", () => {
             await expect(page.getByRole("heading", { name: "You don't have a shop yet" })).toBeVisible({ timeout: 15000 });
             await page.goto("/account");
             await expect(page.getByRole("region", { name: "Your roles" })).toBeVisible({ timeout: 15000 });
-            await expect(page.getByRole("link", { name: "Manage my shop" })).toHaveCount(0);
+            await expect(page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: /^My shop/ })).toHaveCount(0);
           });
         });
 
@@ -2674,7 +2720,7 @@ test.describe("public marketplace", () => {
           await expect(waiting.getByRole("button", { name: "Approve" })).toBeVisible();
           await expect(waiting.getByRole("button", { name: "Reject" })).toBeVisible();
           await expect(page.getByRole("button", { name: /Withdraw/ })).toHaveCount(0);
-          await expect(page.getByRole("link", { name: "Manage my shop" })).toHaveCount(0);
+          await expect(page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: /^My shop/ })).toHaveCount(0);
           await expect(apply(page).getByRole("button", { name: "Apply as Seller", exact: false }).first()).toBeVisible();
 
           // The verification screen points to where new applications are.
@@ -2688,7 +2734,7 @@ test.describe("public marketplace", () => {
           await expect(recent.getByText("The application was approved")).toBeVisible();
           await expect(waiting).toHaveCount(0);
           await applicant.page.reload();
-          await expect(applicant.page.getByRole("link", { name: "Manage my shop" })).toBeVisible({ timeout: 15000 });
+          await expect(applicant.page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: /^My shop/ })).toBeVisible({ timeout: 15000 });
 
           // Applicants keep their own list, with Withdraw.
           await expect(applications(applicant.page)).toContainText("Approved");
@@ -2703,7 +2749,42 @@ test.describe("public marketplace", () => {
           await expect(page.getByRole("article")).toHaveCount(0);
           await page.goto("/account");
           await expect(page.getByRole("region", { name: "Your roles" })).toBeVisible({ timeout: 15000 });
-          await expect(page.getByRole("link", { name: "Review role applications" })).toHaveCount(0);
+          await expect(page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: /^Role applications/ })).toHaveCount(0);
+        });
+
+        test("Super Admin's sidebar groups the admin links, remembers them, and ends with settings and log out", async ({ page, request }) => {
+          test.setTimeout(90000);
+          const owner = await confirmedAccount(page, request);
+          makeSuperAdmin(owner);
+          await page.goto("/account");
+          const nav = page.getByRole("navigation", { name: "Dashboard" });
+          // People is open; the other groups start closed, so the sidebar fits the screen.
+          await expect(nav.getByRole("button", { name: "People" })).toHaveAttribute("aria-expanded", "true", { timeout: 15000 });
+          await expect(nav.getByRole("link", { name: /^Role applications/ })).toBeVisible();
+          for (const group of ["Content", "Communication", "Records"]) {
+            await expect(nav.getByRole("button", { name: group })).toHaveAttribute("aria-expanded", "false");
+          }
+          await expect(nav.getByRole("link", { name: "Blog", exact: true })).toHaveCount(0);
+          await nav.getByRole("button", { name: "Content" }).click();
+          await expect(nav.getByRole("link", { name: "Blog", exact: true })).toBeVisible();
+          // Remembered in this browser.
+          await page.reload();
+          await expect(nav.getByRole("button", { name: "Content" })).toHaveAttribute("aria-expanded", "true", { timeout: 15000 });
+          // A page's own group always opens.
+          await openNavGroup(page, "Records");
+          await nav.getByRole("link", { name: "Audit log" }).click();
+          await expect(page).toHaveURL(/\/admin\/audit-log$/);
+          await expect(nav.getByRole("link", { name: "Audit log" })).toHaveAttribute("aria-current", "page");
+          await expect(nav.getByRole("button", { name: "Records" })).toBeDisabled();
+          // Ads and blog posts close the Overview (owner's decision, 2026-11-08).
+          await page.goto("/account");
+          await expect(page.getByRole("heading", { name: "From the Biqbaq blog" })).toBeVisible({ timeout: 15000 });
+          // Settings and logging out sit at the bottom.
+          await page.getByRole("link", { name: "Platform settings" }).click();
+          await expect(page).toHaveURL(/\/admin\/settings$/);
+          await page.getByRole("button", { name: "Log out" }).click();
+          await expect(page).toHaveURL(/\/$/);
+          await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toBeVisible({ timeout: 15000 });
         });
 
         test("reject with a reason, reapply, then approve: the full journey", async ({ page, browser, request }) => {
@@ -2719,7 +2800,7 @@ test.describe("public marketplace", () => {
 
           // The owner reaches the screen from their account, and finds the application.
           await page.goto("/account");
-          await page.getByRole("link", { name: "Review role applications" }).click({ timeout: 15000 });
+          await page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: /^Role applications/ }).click({ timeout: 15000 });
           await expect(page).toHaveURL(/\/admin\/role-applications$/);
           await page.getByLabel("Search", { exact: true }).fill(applicant.email);
           await page.getByRole("button", { name: "Search", exact: true }).click();

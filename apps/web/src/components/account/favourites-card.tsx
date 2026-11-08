@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { cardClass, headingClass } from "@/components/account/account-dashboard";
@@ -29,7 +30,7 @@ export function FavouritesCard() {
 
   if (items.length === 0) return null;
   return (
-    <section aria-labelledby="my-favourites" className={cardClass}>
+    <section id="favourites" aria-labelledby="my-favourites" className={cn(cardClass, "scroll-mt-24")}>
       <h2 id="my-favourites" className={headingClass}>{t("myFavourites")}</h2>
       <ul className="mt-3 grid gap-3">
         {items.map((item) => (

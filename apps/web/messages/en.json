@@ -412,7 +412,8 @@
     "notificationsLink": "Notifications",
     "referralsLink": "Referrals",
     "adminReferralsLink": "Referrals",
-    "adminEmailListsLink": "Customer emails"
+    "adminEmailListsLink": "Customer emails",
+    "detailsTitle": "Your account details"
   },
   "admin": {
     "section": "Administration",
@@ -2081,5 +2082,74 @@
       "notAllowed": "You don't have permission to do this.",
       "generic": "That didn't work. Please try again."
     }
+  },
+  "dashboard": {
+    "navLabel": "Dashboard",
+    "adminHeading": "Administration",
+    "backToSite": "Back to Biqbaq",
+    "openMenu": "Open the menu",
+    "closeMenu": "Close the menu",
+    "welcome": "Welcome back, {name}",
+    "welcomeAnonymous": "Welcome to Biqbaq",
+    "nav": {
+      "overview": "Overview",
+      "messages": "Messages",
+      "notifications": "Notifications",
+      "shop": "My shop",
+      "referrals": "Referrals",
+      "applications": "Role applications",
+      "verification": "Seller verification",
+      "people": "People and roles",
+      "moderation": "Moderation",
+      "blog": "Blog",
+      "ads": "Ads",
+      "customerEmails": "Customer emails",
+      "adminReferrals": "Referral programmes",
+      "conversations": "Conversations",
+      "settings": "Platform settings",
+      "auditLog": "Audit log"
+    },
+    "overview": {
+      "today": "Today",
+      "figures": "Your figures",
+      "action": "Action",
+      "see": "See",
+      "seeAll": "See all",
+      "time": "Time",
+      "conversation": "Conversation",
+      "notification": "Notification",
+      "recentMessages": "Recent messages",
+      "recentNotifications": "Recent notifications",
+      "noMessages": "No messages yet.",
+      "noNotifications": "No notifications yet.",
+      "cards": {
+        "unreadMessages": "Unread messages",
+        "unreadNotifications": "Unread notifications",
+        "favourites": "Favourites",
+        "liveProducts": "Live products",
+        "productViews": "Product views",
+        "clients": "Clients",
+        "invoicedMonth": "Invoiced this month",
+        "applications": "Applications waiting",
+        "verifications": "Verifications waiting",
+        "accounts": "Active accounts",
+        "shops": "Active shops"
+      }
+    },
+    "newCount": ", {count} new",
+    "discover": {
+      "ads": "Featured",
+      "sponsored": "Ad",
+      "blog": "From the Biqbaq blog",
+      "allPosts": "All posts",
+      "minutes": "{count, plural, one {# minute read} other {# minute read}}"
+    },
+    "groups": {
+      "people": "People",
+      "content": "Content",
+      "communication": "Communication",
+      "records": "Records"
+    },
+    "logOut": "Log out"
   }
 }
