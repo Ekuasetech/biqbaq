@@ -1,7 +1,7 @@
 "use client";
 
 import type { User } from "@supabase/supabase-js";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check, CheckCheck } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
@@ -42,6 +42,19 @@ function useTitle() {
   const t = useTranslations("messaging");
   return (conversation: Conversation) =>
     conversation.side === "buyer" ? conversation.shop_name : conversation.other_name || t("aCustomer");
+}
+
+/** Sent or read, for messages from the reader's own side. */
+function ReadMark({ read, className }: { read: boolean | null; className?: string }) {
+  const t = useTranslations("messaging");
+  if (read === null) return null;
+  const Icon = read ? CheckCheck : Check;
+  return (
+    <span className={cn("inline-flex items-center gap-0.5", className)}>
+      <Icon className="size-3.5" aria-hidden />
+      {t(read ? "read" : "sent")}
+    </span>
+  );
 }
 
 function ConversationList({
@@ -86,9 +99,12 @@ function ConversationList({
                 {conversation.listing_name ?? (conversation.side === "buyer" ? t("aboutShop") : null)}
               </span>
               <span className="flex items-center justify-between gap-2">
-                <span className="truncate text-muted-foreground">
-                  {conversation.last_from_me ? `${t("you")}: ` : ""}
-                  {conversation.last_body}
+                <span className="flex min-w-0 items-center gap-1 text-muted-foreground">
+                  <ReadMark read={conversation.last_read} className="shrink-0 text-xs" />
+                  <span className="truncate">
+                    {conversation.last_from_me ? `${t("you")}: ` : ""}
+                    {conversation.last_body}
+                  </span>
                 </span>
                 {conversation.unread > 0 && (
                   <span className="shrink-0 rounded-full bg-brand-red px-2 py-0.5 text-xs font-bold text-white">
@@ -267,6 +283,10 @@ function Thread({
                 </p>
                 {/* Text only (BD-04), shown as typed: nothing a person writes can become markup. */}
                 <p className="mt-0.5 whitespace-pre-wrap break-words">{message.body}</p>
+                <ReadMark
+                  read={message.read}
+                  className={cn("mt-1 flex justify-end text-xs", message.from_me ? "text-primary-foreground/80" : "text-muted-foreground")}
+                />
               </div>
             </li>
           ))}
@@ -312,6 +332,10 @@ export function Inbox() {
   const [conversations, setConversations] = useState<Conversation[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [version, setVersion] = useState(0);
+  const selectedRef = useRef(selected);
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
 
   useEffect(() => {
     const { data } = getSupabaseBrowserClient().auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
@@ -344,7 +368,11 @@ export function Inbox() {
         void load();
         setVersion((v) => v + 1);
       })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "conversations" }, () => void load())
+      // Includes the other side reading, which turns Sent into Read.
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "conversations" }, (payload) => {
+        void load();
+        if ((payload.new as { id?: string }).id === selectedRef.current) setVersion((v) => v + 1);
+      })
       .subscribe();
     return () => void supabase.removeChannel(channel);
   }, [user, load]);

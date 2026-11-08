@@ -18,7 +18,7 @@ describe("listingPath", () => {
 });
 
 describe("inReadingOrder", () => {
-  const message = (id: string, at: string): Message => ({ id, sender_side: "buyer", sender_name: "", from_me: true, body: id, created_at: at });
+  const message = (id: string, at: string): Message => ({ id, sender_side: "buyer", sender_name: "", from_me: true, body: id, created_at: at, read: null });
   it("puts pages of newest-first messages oldest first", () => {
     const latest = [message("c", "2026-11-08T10:03:00Z"), message("b", "2026-11-08T10:02:00Z")];
     const earlier = [message("a", "2026-11-08T10:01:00Z")];

@@ -1612,7 +1612,9 @@
       "notAllowed": "You don't have permission to do this.",
       "loadFailed": "Your messages couldn't be loaded. Please refresh the page.",
       "generic": "That didn't work. Please try again."
-    }
+    },
+    "read": "Read",
+    "sent": "Sent"
   },
   "messagesAdmin": {
     "title": "Conversations",

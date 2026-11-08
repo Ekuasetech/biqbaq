@@ -982,11 +982,15 @@ test.describe("public marketplace", () => {
               const sellerThread = shop.getByRole("region", { name: /^Conversation with / });
               await expect(sellerThread.getByRole("list", { name: "Messages" })).toContainText("Is this still available?");
               await expect(shop.getByRole("link", { name: "Messages", exact: true })).toBeVisible({ timeout: 15000 });
+              // The buyer has read the question, as they sent it.
+              await expect(buyerThread.getByRole("listitem").filter({ hasText: "Is this still available?" })).toContainText("Read", { timeout: 15000 });
               await sellerThread.getByLabel("Your reply").fill("Yes, it ships tomorrow.");
               await sellerThread.getByRole("button", { name: "Send" }).click();
 
               // The buyer sees the reply live, signed by the shop.
               await expect(buyerThread.getByRole("list", { name: "Messages" })).toContainText("Yes, it ships tomorrow.", { timeout: 15000 });
+              // The buyer has it open, so the seller's Sent turns to Read without a reload.
+              await expect(sellerThread.getByRole("listitem").filter({ hasText: "Yes, it ships tomorrow." })).toContainText("Read", { timeout: 15000 });
               await expect(buyerThread.getByRole("listitem").filter({ hasText: "Yes, it ships tomorrow." })).toContainText("Ada's Shop");
 
               // Closing stops both sides until one reopens it.

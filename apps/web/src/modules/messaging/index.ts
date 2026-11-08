@@ -23,6 +23,8 @@ export interface Conversation {
   last_from_me: boolean | null;
   unread: number;
   can_reply: boolean;
+  /** Whether the other side has read the latest message; null when it is theirs. */
+  last_read: boolean | null;
 }
 
 export interface Message {
@@ -32,6 +34,8 @@ export interface Message {
   from_me: boolean;
   body: string;
   created_at: string;
+  /** For messages from the caller's side, whether the other side has read it; otherwise null. */
+  read: boolean | null;
 }
 
 export interface AdminConversation {

@@ -124,6 +124,35 @@ select results_eq(
 );
 reset role;
 
+-- Read indicators: the sender sees whether the other side has read their messages.
+select pg_temp.act_as('00000000-0000-4000-8000-000000000802');
+set local role authenticated;
+select results_eq(
+  $$ select read from conversation_messages((select id from conv)) where sender_side = 'seller' order by created_at $$,
+  $$ values (true), (true) $$,
+  'the shop sees the buyer has read both replies, including the staff member''s'
+);
+select is((select count(*)::int from conversation_messages((select id from conv)) where sender_side = 'buyer' and read is not null), 0, 'the other side''s messages carry no indicator');
+select lives_ok($$ select send_message((select id from conv), 'Anything else?') $$, 'the seller writes again');
+select is((select last_read from my_conversations() where id = (select id from conv)), false, 'the list shows it is not read yet');
+reset role;
+select pg_temp.act_as('00000000-0000-4000-8000-000000000801');
+set local role authenticated;
+select is((select last_read from my_conversations() where id = (select id from conv)), null::boolean, 'the buyer sees no indicator on the shop''s message');
+select lives_ok($$ select mark_conversation_read((select id from conv)) $$, 'the buyer reads it');
+reset role;
+select pg_temp.act_as('00000000-0000-4000-8000-000000000802');
+set local role authenticated;
+select is((select last_read from my_conversations() where id = (select id from conv)), true, 'now the shop sees it was read');
+reset role;
+select is((select seller_read_at is not null and buyer_read_at is not null from conversations where id = (select id from conv)), true, 'each side''s read time is kept');
+create temp table before_read as select buyer_read_at from conversations where id = (select id from conv);
+select pg_temp.act_as('00000000-0000-4000-8000-000000000801');
+set local role authenticated;
+select lives_ok($$ select mark_conversation_read((select id from conv)) $$, 'reading again with nothing new');
+reset role;
+select is((select buyer_read_at from conversations where id = (select id from conv)), (select buyer_read_at from before_read), 'changes nothing, so no live update loops');
+
 -- Strangers.
 select pg_temp.act_as('00000000-0000-4000-8000-000000000805');
 set local role authenticated;
@@ -195,6 +224,7 @@ update platform_settings set value = '60' where key = 'messages.max_new_conversa
 select ok(not private.setting_value_is_valid('messages.max_per_hour', '2'), 'the message limit cannot be set uselessly low');
 
 -- Super Admin reads only with a reason, and it is audited (Q-36).
+create temp table seller_mark as select seller_read_at, buyer_read_at from conversations where id = (select id from conv);
 select pg_temp.act_as('00000000-0000-4000-8000-000000000807');
 set local role authenticated;
 select throws_ok($$ select * from admin_find_conversations() $$, '42501', null, 'an Admin cannot find conversations');
@@ -205,13 +235,15 @@ set local role authenticated;
 select is((select count(*)::int from admin_find_conversations('m-buyer@')), 2, 'Super Admin finds a buyer''s conversations');
 select is_empty($$ select 1 from information_schema.routines r join information_schema.parameters p on p.specific_name = r.specific_name where r.routine_name = 'admin_find_conversations' and p.parameter_name = 'body' $$, 'the search shows no message text');
 select throws_ok($$ select * from admin_read_conversation((select id from conv), ' ') $$, '23514', null, 'reading needs a reason');
-select is((select count(*)::int from admin_read_conversation((select id from conv), 'Fraud report from buyer')), 6, 'with one, Super Admin reads the whole conversation');
+select is((select count(*)::int from admin_read_conversation((select id from conv), 'Fraud report from buyer')), 7, 'with one, Super Admin reads the whole conversation');
 reset role;
 select results_eq(
   $$ select actor_id, reason from audit_logs where action = 'conversation.admin_read' and target_id = (select id::text from conv) $$,
   $$ values ('00000000-0000-4000-8000-000000000806'::uuid, 'Fraud report from buyer') $$,
   'the reading is in the audit log, with who and why'
 );
+
+select ok((select (c.seller_read_at, c.buyer_read_at) is not distinct from (m.seller_read_at, m.buyer_read_at) from conversations c, seller_mark m where c.id = (select id from conv)), 'and it never counts as read');
 
 select * from finish();
 rollback;

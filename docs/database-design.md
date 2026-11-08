@@ -63,7 +63,7 @@ Slugs must be unique, and real titles repeat (two 2021 Toyota Siennas), so a gen
 
 | Table | Key columns | Notes |
 | --- | --- | --- |
-| `conversations` | `buyer_id`, `seller_id`, `product_id`, `vehicle_listing_id`, `status` (open, closed: Q-35), `closed_by`, `closed_at`, `last_message_at` | At most one listing reference, enforced by `CHECK`; one per buyer, shop and listing (or the shop itself). Participants read it through RLS, which Realtime also uses; changes go through functions only |
+| `conversations` | `buyer_id`, `seller_id`, `product_id`, `vehicle_listing_id`, `status` (open, closed: Q-35), `closed_by`, `closed_at`, `last_message_at`, `buyer_read_at`, `seller_read_at` (read indicators: a side's mark moves only when there is something new, and Super Admin reading never moves it) | At most one listing reference, enforced by `CHECK`; one per buyer, shop and listing (or the shop itself). Participants read it through RLS, which Realtime also uses; changes go through functions only |
 | `conversation_reads` | `conversation_id`, `user_id`, `last_read_at`, `archived_at`, `last_emailed_at` | Per-user unread count, archive, and the one-email-an-hour pace (Q-34) |
 | `messages` | `conversation_id`, `sender_id` (who typed it, possibly staff), `sender_side`, `body` (1 to 2,000 characters, text only: BD-04), `created_at` | Indexed on (`conversation_id`, `created_at`) |
 | `contact_enquiries` | `product_id`, `seller_id`, `visitor_email_hash`, `ip_hash`, `status`, `provider_message_id`, `last_error` | Delivery log; the message itself is not stored |

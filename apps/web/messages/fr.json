@@ -1612,7 +1612,9 @@
       "notAllowed": "Vous n'avez pas la permission de faire ceci.",
       "loadFailed": "Vos messages n'ont pas pu être chargés. Veuillez actualiser la page.",
       "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
-    }
+    },
+    "read": "Lu",
+    "sent": "Envoyé"
   },
   "messagesAdmin": {
     "title": "Conversations",
