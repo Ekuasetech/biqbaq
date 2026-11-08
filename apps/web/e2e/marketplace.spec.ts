@@ -974,7 +974,10 @@ test.describe("public marketplace", () => {
           }
 
           async function addProduct(page: import("@playwright/test").Page, name: string, complete = true) {
-            await page.getByRole("button", { name: "Add a product" }).click();
+            // Products have their own page in My shop (Q-56).
+            const here = new URL(page.url());
+            if (!here.pathname.endsWith("/account/shop/products")) await page.goto(`/account/shop/products${here.searchParams.has("seller") ? here.search : ""}`);
+            await page.getByRole("button", { name: "Add a product" }).click({ timeout: 15000 });
             const form = page.getByRole("form", { name: "New product" });
             await form.getByLabel("Product name").fill(name);
             await form.getByLabel("Price (CAD)").fill("12.50");
@@ -1094,6 +1097,7 @@ test.describe("public marketplace", () => {
             const seller = await approvedSeller(page, browser, request);
             const shop = seller.page;
             const slug = sql(`select s.slug from public.sellers s join auth.users u on u.id = s.owner_user_id where u.email = '${seller.email}'`);
+            await shop.goto("/account/shop/clients");
             const list = shop.getByRole("region", { name: "Customer emails" });
             await expect(list).toContainText("Customer emails are off for this shop.", { timeout: 15000 });
             await expect(list.getByRole("form", { name: "Add clients" })).toHaveCount(0);
@@ -1113,10 +1117,11 @@ test.describe("public marketplace", () => {
             // A mailing address comes first (CASL).
             // The send area shows straight away, asking for the address the law requires.
             await expect(list).toContainText("Before your first email, add your mailing address.");
-            // And My shop has a way to it near the top.
+            // And the shop overview has a way to it at the top.
+            await shop.goto("/account/shop");
+            await expect(shop.getByRole("link", { name: "New invoice or receipt" }).first()).toHaveAttribute("href", /\/account\/invoices\/new\?seller=/, { timeout: 15000 });
             await shop.getByRole("link", { name: "Email your clients" }).click();
-            await expect(shop).toHaveURL(/#customer-emails$/);
-            await expect(shop.getByRole("link", { name: "New invoice or receipt" }).first()).toHaveAttribute("href", /\/account\/invoices\/new\?seller=/);
+            await expect(shop).toHaveURL(/\/account\/shop\/clients$/);
             await list.getByLabel("Mailing address shown in your emails").fill("12 King St W, Toronto ON M5H 1A1");
             await list.getByRole("button", { name: "Save address" }).click();
             await expect(list.getByRole("form", { name: "Email your clients" })).toBeVisible();
@@ -1212,7 +1217,7 @@ test.describe("public marketplace", () => {
             const sellerId = sql(`select s.id from public.sellers s join auth.users u on u.id = s.owner_user_id where u.email = '${seller.email}'`);
             // Switched on and given an address directly: the screens for those are tested above.
             sql(`insert into public.email_lists (owner_type, seller_id, enabled, mailing_address) values ('seller', '${sellerId}', true, '12 King St W, Toronto ON M5H 1A1')`);
-            await shop.reload();
+            await shop.goto("/account/shop/clients");
             const list = shop.getByRole("region", { name: "Customer emails" });
 
             // Two clients at once, neither asked to join bulk email: they're kept for invoices only.
@@ -1281,9 +1286,9 @@ test.describe("public marketplace", () => {
             expect(sql(`select total_minor from public.invoices where id = '${id}'`)).toBe("4800");
             expect(sql(`select count(*) from public.background_jobs where payload ->> 'template' = 'invoice' and payload ->> 'to' = '${client}'`)).toBe("1");
 
-            // Listed on My shop, to download or send again.
-            await shop.goto("/account/shop");
-            const documents = list.getByRole("list", { name: "Invoices and receipts" });
+            // Listed on the shop's Invoices page, to download or send again.
+            await shop.goto("/account/shop/invoices");
+            const documents = shop.getByRole("list", { name: "Invoices and receipts" });
             await expect(documents).toContainText("INV-0001", { timeout: 15000 });
             const href = await documents.getByRole("link", { name: "Download PDF" }).getAttribute("href");
             const download = await shop.context().request.get(href!);
@@ -1596,7 +1601,8 @@ test.describe("public marketplace", () => {
             const id = unique();
             const name = `Staff made ${id}`;
 
-            // The seller invites them and chooses what they can do.
+            // The seller invites them and chooses what they can do, on the shop's Staff page.
+            await shop.goto("/account/shop/staff");
             const staff = shop.getByRole("region", { name: "Staff", exact: true });
             await expect(staff).toContainText("You haven't added any staff yet.");
             await staff.getByRole("button", { name: "Invite staff" }).click();
@@ -1639,6 +1645,11 @@ test.describe("public marketplace", () => {
             await expect(person.page.getByRole("region", { name: "Shop details" })).toHaveCount(0);
             await expect(person.page.getByRole("region", { name: "Show your products on your own website" })).toHaveCount(0);
             await expect(person.page.getByRole("region", { name: "Staff", exact: true })).toHaveCount(0);
+            // Their shop's pages show as tabs, only those they may use.
+            const tabs = person.page.getByRole("navigation", { name: "Shop pages" });
+            await expect(tabs.getByRole("link", { name: "Products" })).toBeVisible();
+            await expect(tabs.getByRole("link", { name: "Shop settings" })).toHaveCount(0);
+            await expect(tabs.getByRole("link", { name: "Staff" })).toHaveCount(0);
 
             // They can create, but were not given publish or delete.
             await addProduct(person.page, name);
@@ -1647,8 +1658,9 @@ test.describe("public marketplace", () => {
             await expect(item(person.page, name).getByRole("button", { name: "Delete" })).toHaveCount(0);
 
             // The seller sees it, and gives publish too.
-            await shop.reload();
-            await expect(item(shop, name)).toBeVisible();
+            await shop.goto("/account/shop/products");
+            await expect(item(shop, name)).toBeVisible({ timeout: 15000 });
+            await shop.goto("/account/shop/staff");
             const member = shop.getByRole("region", { name: "Staff", exact: true }).getByRole("listitem", { name: person.email });
             await member.getByRole("button", { name: "Change what they can do" }).click();
             await member.getByLabel("Publish and unpublish products").check();
@@ -1675,8 +1687,8 @@ test.describe("public marketplace", () => {
             await expect(shop.getByRole("region", { name: "Staff", exact: true }).getByRole("listitem", { name: person.email })).toHaveCount(0);
             await person.page.reload();
             await expect(person.page.getByText("You don't have a shop yet")).toBeVisible();
-            await shop.reload();
-            await expect(item(shop, name)).toContainText("Published");
+            await shop.goto("/account/shop/products");
+            await expect(item(shop, name)).toContainText("Published", { timeout: 15000 });
           });
 
           test("a seller cannot see or reach another seller's staff or shop", async ({ page, browser, request }) => {
@@ -1689,7 +1701,8 @@ test.describe("public marketplace", () => {
             const outsider = await newApplicant(browser, request);
             await outsider.page.goto(`/account/shop?seller=${sellerId}`);
             await expect(outsider.page.getByText("You don't have a shop yet")).toBeVisible({ timeout: 15000 });
-            await expect(shop.getByRole("region", { name: "Staff", exact: true })).toBeVisible();
+            await shop.goto("/account/shop/staff");
+            await expect(shop.getByRole("region", { name: "Staff", exact: true })).toBeVisible({ timeout: 15000 });
           });
 
           test("a seller's own change shows in the public API", async ({ page, browser, request }) => {
@@ -1699,7 +1712,8 @@ test.describe("public marketplace", () => {
             const slug = (await shop.getByRole("link", { name: "View public page" }).getAttribute("href"))!.split("/").pop()!;
             const name = `API ${unique()}`;
 
-            // The seller finds their address on My shop, and it is the one that works.
+            // The seller finds their address in Shop settings, and it is the one that works.
+            await shop.goto("/account/shop/settings");
             const card = shop.getByRole("region", { name: "Show your products on your own website" });
             const shown = await card.getByLabel("Your shop's product address").inputValue();
             expect(new URL(shown).pathname).toBe(`/api/v1/sellers/${slug}/products`);
@@ -2218,6 +2232,8 @@ test.describe("public marketplace", () => {
             await expect(shop.getByRole("region", { name: "Ada's Shop" })).toBeVisible();
             const shopLink = await shop.getByRole("link", { name: "View public page" }).getAttribute("href");
 
+            // Shop details are in Shop settings (Q-56).
+            await shop.goto("/account/shop/settings");
             const details = shop.getByRole("region", { name: "Shop details" });
             await details.getByRole("button", { name: "Edit shop details" }).click();
             await details.getByLabel("Shop name").fill("   ");
@@ -2230,7 +2246,8 @@ test.describe("public marketplace", () => {
             await details.getByLabel("Contact information").fill(`PRIVATE-${id}`);
             await details.getByRole("button", { name: "Save" }).click();
             await expect(details.getByText("Your shop details were saved.")).toBeVisible();
-            await expect(shop.getByRole("heading", { name: `Renamed ${id}` })).toBeVisible();
+            await shop.goto("/account/shop");
+            await expect(shop.getByRole("heading", { name: `Renamed ${id}` })).toBeVisible({ timeout: 15000 });
 
             // It shows publicly at the same address, without the private details. This is usually
             // immediate, but a page being cached at that moment can lag by about a minute.
@@ -2244,7 +2261,7 @@ test.describe("public marketplace", () => {
             expect(await visitor.content()).not.toContain(`PRIVATE-${id}`);
 
             // The private details come back for the owner, after a reload.
-            await shop.reload();
+            await shop.goto("/account/shop/settings");
             await shop.getByRole("region", { name: "Shop details" }).getByRole("button", { name: "Edit shop details" }).click();
             await expect(shop.getByLabel("Contact information")).toHaveValue(`PRIVATE-${id}`);
           });
@@ -2316,7 +2333,8 @@ test.describe("public marketplace", () => {
           test("an incomplete draft saves, but cannot be published, and bad prices are refused", async ({ page, browser, request }) => {
             test.setTimeout(90000);
             const { page: shop } = await approvedSeller(page, browser, request);
-            await shop.getByRole("button", { name: "Add a product" }).click();
+            await shop.goto("/account/shop/products");
+            await shop.getByRole("button", { name: "Add a product" }).click({ timeout: 15000 });
             const form = shop.getByRole("form", { name: "New product" });
             await form.getByRole("button", { name: "Save" }).click();
             await expect(form).toContainText("This is required.");
@@ -2551,6 +2569,8 @@ test.describe("public marketplace", () => {
               test.setTimeout(150000);
               const seller = await approvedSeller(page, browser, request);
               const shop = seller.page;
+              // Cargo cars have their own page in My shop (Q-56).
+              await shop.goto("/account/shop/cargo-cars");
               const cars = shop.getByRole("region", { name: "Cargo cars" });
               // Unverified sellers are told why they can't list cars (Q-05).
               await expect(cars).toContainText("Cargo cars are for verified sellers.");

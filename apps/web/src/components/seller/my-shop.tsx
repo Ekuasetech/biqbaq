@@ -4,6 +4,7 @@ import { EmailListManager } from "@/components/email-lists/email-list-manager";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+import { Car, FileText, Mail, Package, Settings, Users, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
 import { ProductPhotos } from "@/components/seller/product-photos";
@@ -282,7 +283,26 @@ function ProductItem({
  * Reads and writes directly under the security rules, so the database decides what
  * this person can do. The screen only explains the outcome.
  */
-export function MyShop() {
+/** My shop's pages (owner's redesign, 2026-11-08, Q-56). */
+export const SHOP_SECTIONS = ["overview", "products", "cargo-cars", "clients", "invoices", "staff", "settings"] as const;
+export type ShopSection = (typeof SHOP_SECTIONS)[number];
+
+export const shopSectionPath = (section: ShopSection) => (section === "overview" ? "/account/shop" : `/account/shop/${section}`);
+
+const SECTION_ICONS: Record<Exclude<ShopSection, "overview">, LucideIcon> = {
+  products: Package,
+  "cargo-cars": Car,
+  clients: Mail,
+  invoices: FileText,
+  staff: Users,
+  settings: Settings,
+};
+
+/**
+ * One page of My shop. Every page loads the shop the same way, and shows only what this
+ * person may use there; the database checks each action again for itself.
+ */
+export function MyShop({ section = "overview" }: { section?: ShopSection }) {
   const t = useTranslations("shop");
   const tStaff = useTranslations("staff");
   const user = useSessionUser();
@@ -364,13 +384,71 @@ export function MyShop() {
   }
 
   const { shop, access, allowance, categories, products, photos, photoLimit, verificationRequest } = data;
-  const isOwner = Boolean(access?.is_owner);
+  // A person's own shop is theirs even while suspended, when the access check has no answer;
+  // they see its pages and notices, and the database still refuses changes.
+  const isOwner = staffSellerId ? Boolean(access?.is_owner) : true;
+  const active = shop.status === "active";
   const left = placesLeft(allowance);
   const supabase = getSupabaseBrowserClient();
   const reload = () => load(user.id);
+  // Staff keep the shop they opened as they move between its pages.
+  const href = (to: ShopSection) => `${shopSectionPath(to)}${staffSellerId ? `?seller=${staffSellerId}` : ""}`;
+  const allowed: Record<ShopSection, boolean> = {
+    overview: true,
+    products: isOwner || can(access, "products.create") || can(access, "products.edit") || can(access, "products.publish") || can(access, "products.delete"),
+    "cargo-cars": active && isOwner,
+    clients: active && isOwner,
+    invoices: active && isOwner,
+    staff: active && can(access, "staff.manage"),
+    settings: isOwner,
+  };
+  const pages = SHOP_SECTIONS.filter((name) => name !== "overview" && allowed[name]) as Exclude<ShopSection, "overview">[];
 
-  return (
-    <div className="grid gap-4">
+  const notices = (
+    <>
+      {shop.status === "suspended" && <Notice kind="error">{t("shopSuspended")}</Notice>}
+      {shop.publishing_suspended && <Notice kind="error">{t("publishingSuspended")}</Notice>}
+    </>
+  );
+
+  // Staff have no shop pages in the sidebar, so their shop's pages show as tabs.
+  const staffTabs = staffSellerId && (
+    <nav aria-label={t("sectionsLabel")} className="flex flex-wrap gap-2">
+      {(["overview", ...pages] as ShopSection[]).map((name) => (
+        <Link
+          key={name}
+          href={href(name)}
+          prefetch={false}
+          aria-current={name === section ? "page" : undefined}
+          className={cn(secondaryButton, name === section && "border-primary bg-primary text-primary-foreground hover:bg-primary")}
+        >
+          {t(`sections.${name}.title`)}
+        </Link>
+      ))}
+    </nav>
+  );
+
+  if (!allowed[section]) {
+    return (
+      <div className="grid gap-4">
+        {staffTabs}
+        <Notice kind="info">{t("sectionUnavailable")}</Notice>
+        <Link href={href("overview")} className={cn(primaryButton, "w-fit")}>{t("toOverview")}</Link>
+      </div>
+    );
+  }
+
+  const allowanceText =
+    left === null ? (
+      <p className="text-sm font-semibold">{t("noLimit")}</p>
+    ) : (
+      <>
+        <p className="text-sm font-semibold">{t("places", { left, allowance: allowance.allowance })}</p>
+        <p className="text-sm text-muted-foreground">{t("placesHelp")}</p>
+      </>
+    );
+
+  const summary = (
       <section aria-labelledby="shop-summary" className={cardClass}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -379,92 +457,123 @@ export function MyShop() {
             {!isOwner && <p className="mt-1 text-sm font-medium">{tStaff("workingAsStaff")}</p>}
           </div>
           <div className="flex flex-wrap gap-2">
-            {shop.status === "active" && isOwner && (
+            {active && isOwner && (
               <>
-                <a href="#customer-emails" className={secondaryButton}>{t("emailClients")}</a>
+                <Link href={href("clients")} className={secondaryButton}>{t("emailClients")}</Link>
                 <Link href={`/account/invoices/new?seller=${shop.id}`} className={secondaryButton}>{t("newInvoice")}</Link>
               </>
             )}
-            {shop.status === "active" && <Link href={`/sellers/${shop.slug}`} className={secondaryButton}>{t("viewPublic")}</Link>}
+            {active && <Link href={`/sellers/${shop.slug}`} className={secondaryButton}>{t("viewPublic")}</Link>}
           </div>
         </div>
         <div className="mt-4 grid gap-2">
-          {shop.status === "suspended" && <Notice kind="error">{t("shopSuspended")}</Notice>}
-          {shop.publishing_suspended && <Notice kind="error">{t("publishingSuspended")}</Notice>}
-          {left === null ? (
-            <p className="text-sm font-semibold">{t("noLimit")}</p>
-          ) : (
-            <>
-              <p className="text-sm font-semibold">{t("places", { left, allowance: allowance.allowance })}</p>
-              <p className="text-sm text-muted-foreground">{t("placesHelp")}</p>
-            </>
-          )}
+          {notices}
+          {allowanceText}
         </div>
       </section>
+  );
 
-      {shop.status === "active" && isOwner && (
-        <ShopProfile
-          shop={shop}
-          categorySlugs={categories.map((category) => category.slug)}
-          onSaved={async () => {
-            await refreshPublicPages();
-            await reload();
-          }}
-        />
+  return (
+    <div className="grid gap-4">
+      {staffTabs}
+
+      {section === "overview" && (
+        <>
+          {summary}
+
+          {/* Verification matters to what a shop can do, so its status is on the overview too. */}
+          {isOwner && <VerificationCard status={shop.verification_status} request={verificationRequest} shopActive={active} onChanged={reload} />}
+
+          {pages.length > 0 && (
+            <section aria-labelledby="shop-pages">
+              <h2 id="shop-pages" className="sr-only">{t("sectionsLabel")}</h2>
+              <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {pages.map((name) => {
+                  const Icon = SECTION_ICONS[name];
+                  return (
+                    <li key={name}>
+                      <Link href={href(name)} prefetch={false} className={cn(cardClass, "flex h-full items-start gap-4 transition-transform hover:-translate-y-0.5")}>
+                        <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                          <Icon className="size-5" aria-hidden />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block font-semibold">{t(`sections.${name}.title`)}</span>
+                          <span className="block text-sm text-muted-foreground">
+                            {name === "products" ? t("sections.products.count", { count: products.length }) : t(`sections.${name}.description`)}
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+
+          {active && isOwner && (
+            <section aria-labelledby="shop-referrals" className={cardClass}>
+              <h2 id="shop-referrals" className={headingClass}>{t("referralsTitle")}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t("referralsIntro")}</p>
+              <Link href="/account/referrals" className={cn(primaryButton, "mt-3 w-fit")}>{t("referralsLink")}</Link>
+            </section>
+          )}
+        </>
       )}
 
-      {shop.status === "active" && isOwner && <ShopApi slug={shop.slug} />}
+      {section === "settings" && (
+        <>
+          {notices}
+          {active && (
+            <ShopProfile
+              shop={shop}
+              categorySlugs={categories.map((category) => category.slug)}
+              onSaved={async () => {
+                await refreshPublicPages();
+                await reload();
+              }}
+            />
+          )}
+          <VerificationCard status={shop.verification_status} request={verificationRequest} shopActive={active} onChanged={reload} />
+          {active && <ShopApi slug={shop.slug} />}
+        </>
+      )}
 
-      {shop.status === "active" && isOwner && <EmailListManager seller={shop.id} title={t("customerEmailsTitle")} />}
+      {section === "clients" && <EmailListManager seller={shop.id} title={t("customerEmailsTitle")} view="emails" />}
 
-      {shop.status === "active" && isOwner && (
-        <section aria-labelledby="shop-referrals" className={cardClass}>
-          <h2 id="shop-referrals" className={headingClass}>{t("referralsTitle")}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{t("referralsIntro")}</p>
-          <Link href="/account/referrals" className={cn(primaryButton, "mt-3 w-fit")}>{t("referralsLink")}</Link>
+      {section === "invoices" && <EmailListManager seller={shop.id} title={t("sections.invoices.title")} view="invoices" />}
+
+      {section === "staff" && <ShopStaff sellerId={shop.id} available={access?.permissions ?? []} />}
+
+      {section === "products" && (
+        <section aria-labelledby="shop-products" className="grid gap-3">
+          {summary}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 id="shop-products" className={headingClass}>{t("productsTitle")}</h2>
+            {!adding && active && can(access, "products.create") && (
+              <button type="button" onClick={() => setAdding(true)} className={primaryButton}>{t("addProduct")}</button>
+            )}
+          </div>
+          {adding && (
+            <div className={cardClass}>
+              <ProductEditor
+                supabase={supabase}
+                sellerId={shop.id}
+                categories={categories}
+                onCancel={() => setAdding(false)}
+                onDone={() => void reload().then(() => setAdding(false))}
+              />
+            </div>
+          )}
+          {products.length === 0 && !adding && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
+          <ul className="grid gap-3">
+            {products.map((product) => (
+              <ProductItem key={product.id} supabase={supabase} sellerId={shop.id} access={access} product={product} categories={categories} photos={photos.filter((photo) => photo.entity_id === product.id)} photoLimit={photoLimit} onChanged={reload} />
+            ))}
+          </ul>
         </section>
       )}
 
-      {isOwner && (
-        <VerificationCard
-          status={shop.verification_status}
-          request={verificationRequest}
-          shopActive={shop.status === "active"}
-          onChanged={reload}
-        />
-      )}
-
-      {shop.status === "active" && can(access, "staff.manage") && (
-        <ShopStaff sellerId={shop.id} available={access?.permissions ?? []} />
-      )}
-
-      <section aria-labelledby="shop-products" className="grid gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 id="shop-products" className={headingClass}>{t("productsTitle")}</h2>
-          {!adding && shop.status === "active" && can(access, "products.create") && (
-            <button type="button" onClick={() => setAdding(true)} className={primaryButton}>{t("addProduct")}</button>
-          )}
-        </div>
-        {adding && (
-          <div className={cardClass}>
-            <ProductEditor
-              supabase={supabase}
-              sellerId={shop.id}
-              categories={categories}
-              onCancel={() => setAdding(false)}
-              onDone={() => void reload().then(() => setAdding(false))}
-            />
-          </div>
-        )}
-        {products.length === 0 && !adding && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
-        <ul className="grid gap-3">
-          {products.map((product) => (
-            <ProductItem key={product.id} supabase={supabase} sellerId={shop.id} access={access} product={product} categories={categories} photos={photos.filter((photo) => photo.entity_id === product.id)} photoLimit={photoLimit} onChanged={reload} />
-          ))}
-        </ul>
-      </section>
-
-      {shop.status === "active" && isOwner && (
+      {section === "cargo-cars" && (
         <ShopVehicles verified={shop.verification_status === "provider_verified" || shop.verification_status === "manually_verified"} photoLimit={photoLimit} />
       )}
     </div>

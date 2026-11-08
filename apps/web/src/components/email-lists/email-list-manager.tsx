@@ -551,7 +551,16 @@ function Documents({ seller, version }: { seller: string | null; version: number
  * A shop's customer list (seller set), or Biqbaq's own (null), and bulk email to it.
  * Only confirmed addresses are ever sent to (Q-42).
  */
-export function EmailListManager({ seller, title }: { seller: string | null; title: string }) {
+export function EmailListManager({
+  seller,
+  title,
+  view = "all",
+}: {
+  seller: string | null;
+  title: string;
+  /** My shop shows clients and emails on one page and invoices on another (Q-56); Biqbaq's list shows both. */
+  view?: "all" | "emails" | "invoices";
+}) {
   const t = useTranslations("emailLists");
   const [list, setList] = useState<EmailList | null>(null);
   const [failed, setFailed] = useState(false);
@@ -577,11 +586,22 @@ export function EmailListManager({ seller, title }: { seller: string | null; tit
     <section id="customer-emails" aria-labelledby="email-list-title" className={cn(cardClass, "grid scroll-mt-24 gap-5")}>
       <div>
         <h2 id="email-list-title" className={headingClass}>{title}</h2>
-        {list?.enabled && <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>}
+        {list?.enabled && <p className="mt-1 text-sm text-muted-foreground">{t(view === "invoices" ? "invoicesIntro" : "intro")}</p>}
       </div>
       {failed && <Notice kind="error">{t("errors.loadFailed")}</Notice>}
       {list && !list.enabled && (list.pause_reason ? <Notice kind="error">{t(`paused.${list.pause_reason}`)}</Notice> : <p className="text-sm text-muted-foreground">{t("off")}</p>)}
-      {list?.enabled && (
+      {list?.enabled && view === "invoices" && (
+        <>
+          {!list.mailing_address && (
+            <div className="grid gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-4">
+              <p className="text-sm">{t("invoicesNeedAddress")}</p>
+              <MailingAddress seller={seller} list={list} onSaved={load} />
+            </div>
+          )}
+          <Documents seller={seller} version={version} />
+        </>
+      )}
+      {list?.enabled && view !== "invoices" && (
         <>
           <dl className="grid grid-cols-3 gap-2">
             {(["clients", "confirmed", "unsubscribed"] as const).map((name) => (
@@ -603,7 +623,7 @@ export function EmailListManager({ seller, title }: { seller: string | null; tit
           )}
           {list.mailing_address && <MailingAddress seller={seller} list={list} onSaved={load} />}
           <Campaigns seller={seller} version={version} />
-          <Documents seller={seller} version={version} />
+          {view === "all" && <Documents seller={seller} version={version} />}
           <AddClients seller={seller} list={list} onAdded={load} />
           <Subscribers
             seller={seller}

@@ -575,7 +575,39 @@
     "referralsLink": "See your referral link",
     "customerEmailsTitle": "Customer emails",
     "emailClients": "Email your clients",
-    "newInvoice": "New invoice or receipt"
+    "newInvoice": "New invoice or receipt",
+    "sectionsLabel": "Shop pages",
+    "sectionUnavailable": "This part of the shop isn't available to you.",
+    "toOverview": "Go to the shop overview",
+    "sections": {
+      "overview": {
+        "title": "Shop overview"
+      },
+      "products": {
+        "title": "Products",
+        "count": "{count, plural, =0 {No products yet} one {# product} other {# products}}"
+      },
+      "cargo-cars": {
+        "title": "Cargo cars",
+        "description": "Cars you're sending to Nigeria with space for goods."
+      },
+      "clients": {
+        "title": "Clients & emails",
+        "description": "Your clients, and emails to one or all of them."
+      },
+      "invoices": {
+        "title": "Invoices",
+        "description": "Invoices and receipts, sent as PDFs."
+      },
+      "staff": {
+        "title": "Staff",
+        "description": "People who help run your shop."
+      },
+      "settings": {
+        "title": "Shop settings",
+        "description": "Shop details, verification and your public API."
+      }
+    }
   },
   "errorPage": {
     "title": "Something went wrong",
@@ -1963,7 +1995,9 @@
       "complaints": "Your customer emails paused themselves because someone reported them as spam. This protects every Biqbaq shop's email. Your clients and invoices are not affected, and Biqbaq will review it.",
       "unsubscribes": "Your customer emails paused themselves because many people unsubscribed in the last 30 days. This protects every Biqbaq shop's email. Your clients and invoices are not affected, and Biqbaq will review it.",
       "bounces": "Your customer emails paused themselves because many addresses didn't work in the last 30 days. Check your clients' addresses. Your clients and invoices are not affected, and Biqbaq will review it."
-    }
+    },
+    "invoicesIntro": "Invoices and receipts you've sent to your clients. Write a new one, download a PDF, or send one again.",
+    "invoicesNeedAddress": "Add your mailing address first: it appears on every invoice and receipt."
   },
   "emailListsAdmin": {
     "title": "Customer emails",

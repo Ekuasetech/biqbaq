@@ -56,7 +56,7 @@ export function InvoiceForm() {
   const params = useSearchParams();
   const rawSeller = params.get("seller");
   const seller = rawSeller && UUID.test(rawSeller) ? rawSeller : null;
-  const back = seller ? "/account/shop" : "/admin/email-lists";
+  const back = seller ? "/account/shop/invoices" : "/admin/email-lists";
 
   const [list, setList] = useState<EmailList | null | undefined>(undefined);
   const [clients, setClients] = useState<Subscriber[]>([]);

@@ -575,7 +575,39 @@
     "referralsLink": "Voir votre lien de parrainage",
     "customerEmailsTitle": "Courriels aux clients",
     "emailClients": "Écrire à vos clients",
-    "newInvoice": "Nouvelle facture ou nouveau reçu"
+    "newInvoice": "Nouvelle facture ou nouveau reçu",
+    "sectionsLabel": "Pages de la boutique",
+    "sectionUnavailable": "Cette partie de la boutique ne vous est pas accessible.",
+    "toOverview": "Aller à l'aperçu de la boutique",
+    "sections": {
+      "overview": {
+        "title": "Aperçu de la boutique"
+      },
+      "products": {
+        "title": "Produits",
+        "count": "{count, plural, =0 {Aucun produit pour le moment} one {# produit} other {# produits}}"
+      },
+      "cargo-cars": {
+        "title": "Voitures cargo",
+        "description": "Les voitures que vous envoyez au Nigeria avec de la place pour des marchandises."
+      },
+      "clients": {
+        "title": "Clients et courriels",
+        "description": "Vos clients, et des courriels à un ou à tous."
+      },
+      "invoices": {
+        "title": "Factures",
+        "description": "Factures et reçus, envoyés en PDF."
+      },
+      "staff": {
+        "title": "Personnel",
+        "description": "Les personnes qui vous aident à gérer votre boutique."
+      },
+      "settings": {
+        "title": "Paramètres de la boutique",
+        "description": "Détails de la boutique, vérification et votre API publique."
+      }
+    }
   },
   "errorPage": {
     "title": "Une erreur s’est produite",
@@ -1963,7 +1995,9 @@
       "complaints": "Vos courriels aux clients se sont suspendus parce que quelqu'un les a signalés comme pourriel. Cela protège les courriels de toutes les boutiques Biqbaq. Vos clients et vos factures ne sont pas touchés, et Biqbaq examinera la situation.",
       "unsubscribes": "Vos courriels aux clients se sont suspendus parce que beaucoup de personnes se sont désabonnées au cours des 30 derniers jours. Cela protège les courriels de toutes les boutiques Biqbaq. Vos clients et vos factures ne sont pas touchés, et Biqbaq examinera la situation.",
       "bounces": "Vos courriels aux clients se sont suspendus parce que beaucoup d'adresses n'ont pas fonctionné au cours des 30 derniers jours. Vérifiez les adresses de vos clients. Vos clients et vos factures ne sont pas touchés, et Biqbaq examinera la situation."
-    }
+    },
+    "invoicesIntro": "Les factures et reçus envoyés à vos clients. Rédigez-en un nouveau, téléchargez un PDF ou renvoyez-en un.",
+    "invoicesNeedAddress": "Ajoutez d'abord votre adresse postale : elle figure sur chaque facture et chaque reçu."
   },
   "emailListsAdmin": {
     "title": "Courriels aux clients",

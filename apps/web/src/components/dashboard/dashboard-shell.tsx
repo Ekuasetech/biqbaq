@@ -3,6 +3,8 @@
 import {
   ArrowLeft,
   Bell,
+  Car,
+  FileText,
   ChevronDown,
   BookOpen,
   ClipboardCheck,
@@ -15,6 +17,7 @@ import {
   Menu,
   MessageCircle,
   MessagesSquare,
+  Package,
   Settings,
   Share2,
   ShieldCheck,
@@ -87,6 +90,8 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   badge?: number;
+  /** Shown indented, under the item before it. */
+  sub?: boolean;
 }
 
 interface NavGroup {
@@ -98,14 +103,28 @@ interface NavGroup {
  * The sidebar shows only what this person can use. It only decides what is shown: each
  * screen and the database check access again for themselves.
  */
-function useNavigation(data: DashboardData | null) {
+function useNavigation(data: DashboardData | null, pathname: string) {
   const t = useTranslations("dashboard.nav");
+  const tShop = useTranslations("shop.sections");
   const main: NavItem[] = [
     { href: "/account", label: t("overview"), icon: LayoutDashboard },
     { href: "/account/messages", label: t("messages"), icon: MessageCircle, badge: data?.counts.unread_conversations },
     { href: "/account/notifications", label: t("notifications"), icon: Bell, badge: data?.counts.unread_notifications },
   ];
   if (data?.access.shop || (data?.access.staff_shops ?? 0) > 0) main.push({ href: "/account/shop", label: t("shop"), icon: Store });
+  // In their own shop, an owner sees its pages beneath it (Q-56). Staff get tabs on the page.
+  if (data?.access.shop && (pathname === "/account/shop" || pathname.startsWith("/account/shop/"))) {
+    for (const [section, icon] of [
+      ["products", Package],
+      ["cargo-cars", Car],
+      ["clients", Mail],
+      ["invoices", FileText],
+      ["staff", Users],
+      ["settings", Settings],
+    ] as const) {
+      main.push({ href: `/account/shop/${section}`, label: tShop(`${section}.title`), icon, sub: true });
+    }
+  }
   if (data?.access.referrals) main.push({ href: "/account/referrals", label: t("referrals"), icon: Share2 });
 
   // Administration, in small groups (owner's choice, 2026-11-08).
@@ -144,8 +163,8 @@ function useNavigation(data: DashboardData | null) {
 }
 
 const isCurrent = (href: string, pathname: string) =>
-  // Overview is only current on its own page; the others also on the pages beneath them.
-  href === "/account" ? pathname === "/account" : pathname === href || pathname.startsWith(`${href}/`);
+  // Overview and My shop are only current on their own page; the others also on the pages beneath them.
+  href === "/account" || href === "/account/shop" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
 const itemClass = (current: boolean) =>
   cn(
@@ -163,8 +182,14 @@ function NavLinks({ items, pathname, onNavigate }: { items: NavItem[]; pathname:
         const Icon = item.icon;
         return (
           <li key={item.href}>
-            <Link href={item.href} prefetch={false} onClick={onNavigate} aria-current={current ? "page" : undefined} className={itemClass(current)}>
-              <Icon className="size-5 shrink-0" aria-hidden />
+            <Link
+              href={item.href}
+              prefetch={false}
+              onClick={onNavigate}
+              aria-current={current ? "page" : undefined}
+              className={cn(itemClass(current), item.sub && "ml-5 border-l border-border pl-3 rounded-l-none")}
+            >
+              <Icon className={cn("shrink-0", item.sub ? "size-4" : "size-5")} aria-hidden />
               <span className="min-w-0 flex-1 truncate">{item.label}</span>
               {item.badge ? (
                 <>
@@ -265,7 +290,7 @@ function Sidebar({ data, onNavigate }: { data: DashboardData | null; onNavigate:
   const t = useTranslations("dashboard");
   const pathname = usePathname();
   const router = useRouter();
-  const { main, groups, settings } = useNavigation(data);
+  const { main, groups, settings } = useNavigation(data, pathname);
   const { state, set } = useGroupState();
   const anyCurrent = groups.some((group) => group.items.some((item) => isCurrent(item.href, pathname)));
   return (
