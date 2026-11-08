@@ -572,7 +572,9 @@
     "referralsTitle": "Referrals",
     "referralsIntro": "Your shop has its own referral link. People who sign up through it are counted for your shop.",
     "referralsLink": "See your referral link",
-    "customerEmailsTitle": "Customer emails"
+    "customerEmailsTitle": "Customer emails",
+    "emailClients": "Email your clients",
+    "newInvoice": "New invoice or receipt"
   },
   "errorPage": {
     "title": "Something went wrong",
@@ -1868,7 +1870,7 @@
       "stopLabel": "Stop updates for {name}"
     },
     "compose": {
-      "title": "Send an email",
+      "title": "Email your clients",
       "limits": "Today you can send {campaigns, plural, =0 {no more emails} one {# more email} other {# more emails}}, to up to {people} people.",
       "subject": "Subject",
       "body": "Message",
@@ -1880,7 +1882,8 @@
       "to": "Send to",
       "everyone": "All clients receiving updates ({count})",
       "singleLimits": "Today you can email {singles} more clients one at a time, and up to {people} people in all.",
-      "confirmOne": "Send this to {name}?"
+      "confirmOne": "Send this to {name}?",
+      "needsAddress": "Before your first email, add your mailing address. Canadian law requires it at the bottom of every email you send. The send form appears as soon as it's saved."
     },
     "history": {
       "title": "Sent emails",

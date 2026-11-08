@@ -378,7 +378,15 @@ export function MyShop() {
             <p className="text-sm text-muted-foreground">{shop.city}</p>
             {!isOwner && <p className="mt-1 text-sm font-medium">{tStaff("workingAsStaff")}</p>}
           </div>
-          {shop.status === "active" && <Link href={`/sellers/${shop.slug}`} className={secondaryButton}>{t("viewPublic")}</Link>}
+          <div className="flex flex-wrap gap-2">
+            {shop.status === "active" && isOwner && (
+              <>
+                <a href="#customer-emails" className={secondaryButton}>{t("emailClients")}</a>
+                <Link href={`/account/invoices/new?seller=${shop.id}`} className={secondaryButton}>{t("newInvoice")}</Link>
+              </>
+            )}
+            {shop.status === "active" && <Link href={`/sellers/${shop.slug}`} className={secondaryButton}>{t("viewPublic")}</Link>}
+          </div>
         </div>
         <div className="mt-4 grid gap-2">
           {shop.status === "suspended" && <Notice kind="error">{t("shopSuspended")}</Notice>}

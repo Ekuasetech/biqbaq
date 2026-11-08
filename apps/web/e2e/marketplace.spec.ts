@@ -1068,10 +1068,15 @@ test.describe("public marketplace", () => {
             await shop.reload();
             await expect(list).toContainText("one at a time or all together", { timeout: 15000 });
             // A mailing address comes first (CASL).
-            await expect(list).toContainText("Add your mailing address before sending.");
+            // The send area shows straight away, asking for the address the law requires.
+            await expect(list).toContainText("Before your first email, add your mailing address.");
+            // And My shop has a way to it near the top.
+            await shop.getByRole("link", { name: "Email your clients" }).click();
+            await expect(shop).toHaveURL(/#customer-emails$/);
+            await expect(shop.getByRole("link", { name: "New invoice or receipt" }).first()).toHaveAttribute("href", /\/account\/invoices\/new\?seller=/);
             await list.getByLabel("Mailing address shown in your emails").fill("12 King St W, Toronto ON M5H 1A1");
             await list.getByRole("button", { name: "Save address" }).click();
-            await expect(list.getByRole("form", { name: "Send an email" })).toBeVisible();
+            await expect(list.getByRole("form", { name: "Email your clients" })).toBeVisible();
 
             // Adding needs the seller's word that these people agreed (Q-42).
             const customer = newEmail("listed");
@@ -1096,7 +1101,7 @@ test.describe("public marketplace", () => {
             const token = sql(`select token from public.list_subscribers where email = '${customer}'`);
 
             // Email just that client, from their row.
-            const compose = list.getByRole("form", { name: "Send an email" });
+            const compose = list.getByRole("form", { name: "Email your clients" });
             await list.getByRole("button", { name: "Email Chidi Eze" }).click();
             await expect(compose.getByLabel("Send to")).toHaveValue(customer);
             await compose.getByLabel("Subject").fill("Your order");

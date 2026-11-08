@@ -1,5 +1,6 @@
 "use client";
 
+import { useClientNow } from "@/lib/use-client-now";
 import { getSubscription, setSubscription } from "@/modules/email-lists";
 import type { User } from "@supabase/supabase-js";
 import { useFormatter, useTranslations } from "next-intl";
@@ -144,6 +145,8 @@ function Preferences() {
 export function NotificationCentre() {
   const t = useTranslations("notifications");
   const format = useFormatter();
+  // Times like "5 minutes ago" are worked out from this, refreshed each minute.
+  const now = useClientNow();
   const router = useRouter();
   const text = useNotificationText();
   const [user, setUser] = useState<User | null | undefined>(undefined);
@@ -243,7 +246,7 @@ export function NotificationCentre() {
                   {/* Reasons were typed by people, and are shown as plain text. */}
                   {item.data.reason && <span className="break-words text-muted-foreground">{t("reason", { reason: item.data.reason })}</span>}
                   <time dateTime={item.created_at} className="text-xs text-muted-foreground">
-                    {format.relativeTime(new Date(item.created_at))}
+                    {now ? format.relativeTime(new Date(item.created_at), now) : format.dateTime(new Date(item.created_at), { dateStyle: "medium" })}
                   </time>
                 </button>
               </li>

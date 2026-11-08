@@ -1,5 +1,6 @@
 "use client";
 
+import { useClientNow } from "@/lib/use-client-now";
 import type { User } from "@supabase/supabase-js";
 import { ArrowLeft, Check, CheckCheck } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
@@ -68,6 +69,8 @@ function ConversationList({
 }) {
   const t = useTranslations("messaging");
   const format = useFormatter();
+  // Times like "5 minutes ago" are worked out from this, refreshed each minute.
+  const now = useClientNow();
   const title = useTitle();
   if (conversations.length === 0) {
     return <p className="p-2 text-sm text-muted-foreground">{t(archived ? "emptyArchive" : "empty")}</p>;
@@ -90,7 +93,7 @@ function ConversationList({
               <span className="flex items-center justify-between gap-2">
                 <span className={cn("truncate", conversation.unread > 0 ? "font-bold" : "font-semibold")}>{title(conversation)}</span>
                 <span className="shrink-0 text-xs text-muted-foreground">
-                  {format.relativeTime(new Date(conversation.last_message_at))}
+                  {now ? format.relativeTime(new Date(conversation.last_message_at), now) : null}
                 </span>
               </span>
               <span className="truncate text-xs text-muted-foreground">

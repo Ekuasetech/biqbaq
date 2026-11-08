@@ -574,7 +574,7 @@ export function EmailListManager({ seller, title }: { seller: string | null; tit
   }, [load]);
 
   return (
-    <section aria-labelledby="email-list-title" className={cn(cardClass, "grid gap-5")}>
+    <section id="customer-emails" aria-labelledby="email-list-title" className={cn(cardClass, "grid scroll-mt-24 gap-5")}>
       <div>
         <h2 id="email-list-title" className={headingClass}>{title}</h2>
         {list?.enabled && <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>}
@@ -591,12 +591,17 @@ export function EmailListManager({ seller, title }: { seller: string | null; tit
               </div>
             ))}
           </dl>
-          <MailingAddress seller={seller} list={list} onSaved={load} />
           {list.mailing_address ? (
             <Compose seller={seller} list={list} to={to} onTo={setTo} onSent={load} />
           ) : (
-            <Notice kind="info">{t("errors.addressRequired")}</Notice>
+            // The send form appears once the address the law requires is saved.
+            <div id="email-compose" className="grid gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-4">
+              <h3 className="font-semibold">{t("compose.title")}</h3>
+              <p className="text-sm">{t("compose.needsAddress")}</p>
+              <MailingAddress seller={seller} list={list} onSaved={load} />
+            </div>
           )}
+          {list.mailing_address && <MailingAddress seller={seller} list={list} onSaved={load} />}
           <Campaigns seller={seller} version={version} />
           <Documents seller={seller} version={version} />
           <AddClients seller={seller} list={list} onAdded={load} />

@@ -572,7 +572,9 @@
     "referralsTitle": "Parrainages",
     "referralsIntro": "Votre boutique a son propre lien de parrainage. Les personnes qui s'inscrivent par ce lien sont comptées pour votre boutique.",
     "referralsLink": "Voir votre lien de parrainage",
-    "customerEmailsTitle": "Courriels aux clients"
+    "customerEmailsTitle": "Courriels aux clients",
+    "emailClients": "Écrire à vos clients",
+    "newInvoice": "Nouvelle facture ou nouveau reçu"
   },
   "errorPage": {
     "title": "Une erreur s’est produite",
@@ -1868,7 +1870,7 @@
       "stopLabel": "Arrêter les nouvelles pour {name}"
     },
     "compose": {
-      "title": "Envoyer un courriel",
+      "title": "Écrire à vos clients",
       "limits": "Aujourd'hui, vous pouvez envoyer {campaigns, plural, =0 {aucun autre courriel} one {# courriel de plus} other {# courriels de plus}}, à {people} personnes au plus.",
       "subject": "Objet",
       "body": "Message",
@@ -1880,7 +1882,8 @@
       "to": "Envoyer à",
       "everyone": "Tous les clients qui reçoivent vos nouvelles ({count})",
       "singleLimits": "Aujourd'hui, vous pouvez encore écrire à {singles} clients un à la fois, et à {people} personnes au plus en tout.",
-      "confirmOne": "Envoyer ceci à {name} ?"
+      "confirmOne": "Envoyer ceci à {name} ?",
+      "needsAddress": "Avant votre premier courriel, ajoutez votre adresse postale. La loi canadienne l'exige au bas de chaque courriel envoyé. Le formulaire d'envoi apparaît dès qu'elle est enregistrée."
     },
     "history": {
       "title": "Courriels envoyés",
