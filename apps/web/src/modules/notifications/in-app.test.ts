@@ -18,7 +18,7 @@ describe("in-app notifications", () => {
   });
 
   it("cover every email except messages, in both languages", () => {
-    const templates = ["welcome", "application_received", "application_approved", "application_rejected", "verification_verified", "verification_rejected", "verification_suspended", "verification_restored", "verification_revoked", "product_suspended", "product_restored", "shop_suspended", "shop_restored", "publishing_suspended", "publishing_restored", "role_assigned", "role_suspended", "role_restored", "role_revoked", "staff_invitation", "staff_approved", "staff_suspended", "staff_restored", "staff_removed", ...MESSAGE_TEMPLATES];
+    const templates = ["welcome", "application_received", "application_approved", "application_rejected", "verification_verified", "verification_rejected", "verification_suspended", "verification_restored", "verification_revoked", "product_suspended", "product_restored", "shop_suspended", "shop_restored", "publishing_suspended", "publishing_restored", "role_assigned", "role_suspended", "role_restored", "role_revoked", "staff_invitation", "staff_approved", "staff_suspended", "staff_restored", "staff_removed", "bulk_email_enabled", "bulk_email_disabled", "bulk_email_paused", "bulk_email_paused_admin", ...MESSAGE_TEMPLATES];
     for (const template of templates) {
       expect(renderEmail(template, {}, { name: null, locale: "en" }, SITE), template).not.toBeNull();
       if (MESSAGE_TEMPLATES.includes(template)) continue;

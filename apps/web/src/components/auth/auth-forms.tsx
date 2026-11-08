@@ -1,5 +1,6 @@
 "use client";
 
+import { forgetReferral, rememberedReferral, rememberReferralFrom } from "@/modules/referrals";
 import { safeNext } from "@/lib/safe-next";
 import { Eye, EyeOff, Info, TriangleAlert } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -297,14 +298,23 @@ export function RegisterForm() {
   const locale = useLocale();
   const emailLink = useEmailLink();
   const { errors, status, formError, onSubmit } = useAuthForm(registerSchema, async (values) => {
+    // The referral link this browser last opened, if within 30 days (PRD §14.3, BD-11).
+    // The database checks the code itself, so nothing sent here can earn false credit.
+    rememberReferralFrom(window.location.search);
+    const referral = rememberedReferral();
     const { error } = await getSupabaseBrowserClient().auth.signUp({
       email: values.email,
       password: values.password,
       options: {
-        data: { full_name: values.name, locale },
+        data: {
+          full_name: values.name,
+          locale,
+          ...(referral && { referral_code: referral.code, referral_opened_at: referral.openedAt }),
+        },
         emailRedirectTo: emailLink("/"),
       },
     });
+    if (!error) forgetReferral();
     // Answers an email already in use exactly like a new one, so this form never
     // reveals who has an account.
     if (error?.code === "user_already_exists" || error?.code === "email_exists") return undefined;

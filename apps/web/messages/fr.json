@@ -52,9 +52,6 @@
     "banner1Eyebrow": "Pour commencer",
     "banner1Title": "Créez un compte gratuit",
     "banner1Cta": "S'inscrire",
-    "banner2Eyebrow": "Parrainage",
-    "banner2Title": "Obtenez un site Web gratuit après des parrainages",
-    "banner2Cta": "En savoir plus",
     "banner3Eyebrow": "Découvrir",
     "banner3Title": "Recherchez des vendeurs",
     "banner3Cta": "Lancer la recherche",
@@ -412,7 +409,10 @@
     "adsLink": "Publicités",
     "messagesLink": "Messages",
     "adminMessagesLink": "Conversations",
-    "notificationsLink": "Notifications"
+    "notificationsLink": "Notifications",
+    "referralsLink": "Parrainages",
+    "adminReferralsLink": "Parrainages",
+    "adminEmailListsLink": "Courriels aux clients"
   },
   "admin": {
     "section": "Administration",
@@ -568,7 +568,11 @@
       "contact": "Coordonnées",
       "contactHint": "Privé. Seuls vous et les administrateurs de Biqbaq pouvez voir ceci.",
       "publicHint": "Tout sauf vos coordonnées apparaît sur la page publique de votre boutique. L'adresse web de votre boutique reste la même."
-    }
+    },
+    "referralsTitle": "Parrainages",
+    "referralsIntro": "Votre boutique a son propre lien de parrainage. Les personnes qui s'inscrivent par ce lien sont comptées pour votre boutique.",
+    "referralsLink": "Voir votre lien de parrainage",
+    "customerEmailsTitle": "Courriels aux clients"
   },
   "errorPage": {
     "title": "Une erreur s’est produite",
@@ -721,6 +725,10 @@
       "messages": {
         "title": "Messages",
         "help": "Limites horaires qui empêchent le pourriel par les messages Biqbaq."
+      },
+      "bulkEmail": {
+        "title": "Courriels aux clients",
+        "help": "Limites des envois groupés de chaque boutique et de Biqbaq. Tous les courriels partagent un seul compte Resend, alors restez modéré."
       }
     },
     "items": {
@@ -811,6 +819,38 @@
       "conversationsPerHour": {
         "label": "Nouvelles conversations par personne",
         "help": "Nombre maximal de nouvelles conversations qu'une personne peut commencer en une heure."
+      },
+      "bulkRecipients": {
+        "label": "Personnes par jour",
+        "help": "Nombre maximal de personnes qu'une boutique (ou Biqbaq) peut joindre en une journée."
+      },
+      "bulkCampaigns": {
+        "label": "Courriels par jour",
+        "help": "Nombre maximal d'envois groupés qu'une boutique (ou Biqbaq) peut faire en une journée."
+      },
+      "bulkNewAddresses": {
+        "label": "Nouvelles adresses par jour",
+        "help": "Nombre maximal d'adresses qu'une liste peut ajouter en une journée. Chacune reçoit un courriel de confirmation."
+      },
+      "invoicesPerDay": {
+        "label": "Factures et reçus par jour",
+        "help": "Nombre maximal de factures et reçus qu'une boutique (ou Biqbaq) peut envoyer en une journée, renvois compris."
+      },
+      "bulkSingles": {
+        "label": "Courriels à un seul client par jour",
+        "help": "Nombre maximal de courriels qu'une boutique peut envoyer à un seul client à la fois en une journée."
+      },
+      "bulkComplaints": {
+        "label": "Plaintes avant la suspension",
+        "help": "Plaintes pour pourriel en 30 jours qui suspendent les envois groupés d'une boutique."
+      },
+      "bulkUnsubscribes": {
+        "label": "Désabonnements avant la suspension (%)",
+        "help": "Pourcentage des destinataires d'une boutique qui se désabonnent en 30 jours et qui suspend ses envois groupés."
+      },
+      "bulkBounces": {
+        "label": "Échecs avant la suspension (%)",
+        "help": "Pourcentage des courriels d'une boutique en échec en 30 jours qui suspend ses envois groupés. La limite de Resend est de 4 %."
       }
     },
     "history": {
@@ -918,7 +958,16 @@
       "vehicle_image_remove": "A retiré une photo de voiture cargo",
       "vehicle_suspend": "A suspendu une annonce de voiture cargo",
       "vehicle_restore": "A rétabli une annonce de voiture cargo",
-      "conversation_admin_read": "A lu une conversation privée"
+      "conversation_admin_read": "A lu une conversation privée",
+      "referral_code_change": "A changé un code de parrainage",
+      "email_list_add": "A ajouté des adresses à une liste de clients",
+      "email_campaign_send": "A fait un envoi groupé",
+      "bulk_email_enable": "A activé les courriels aux clients d'une boutique",
+      "bulk_email_disable": "A désactivé les courriels aux clients d'une boutique",
+      "invoice_send": "A envoyé une facture",
+      "receipt_send": "A envoyé un reçu",
+      "invoice_resend": "A renvoyé une facture ou un reçu",
+      "bulk_email_auto_pause": "A suspendu automatiquement les envois groupés d'une boutique"
     }
   },
   "moderation": {
@@ -1673,7 +1722,11 @@
         "label": "Courriels sur le personnel",
         "help": "Invitations, approbations et changements de votre accès de personnel."
       },
-      "saved": "Enregistré."
+      "saved": "Enregistré.",
+      "news": {
+        "label": "Nouvelles de Biqbaq",
+        "help": "Des courriels de temps en temps de Biqbaq sur les nouveautés et les offres."
+      }
     },
     "errors": {
       "loadFailed": "Vos notifications n'ont pas pu être chargées. Veuillez actualiser la page.",
@@ -1704,7 +1757,326 @@
       "staff_suspended": "Votre accès de personnel à {shop} a été suspendu.",
       "staff_restored": "Votre accès de personnel à {shop} a été rétabli.",
       "staff_removed": "Vous avez été retiré du personnel de {shop}.",
-      "other": "Un changement a eu lieu sur votre compte."
+      "other": "Un changement a eu lieu sur votre compte.",
+      "bulk_email_enabled": "Les courriels aux clients sont activés pour {shop}. Vous pouvez créer une liste et écrire à vos clients.",
+      "bulk_email_disabled": "Les courriels aux clients sont désactivés pour {shop}.",
+      "bulk_email_paused": "Les courriels aux clients de {shop} se sont suspendus pour protéger les courriels de Biqbaq. Biqbaq examinera la situation.",
+      "bulk_email_paused_admin": "Les envois groupés de {shop} se sont suspendus. Vérifiez avant de les réactiver."
+    }
+  },
+  "referrals": {
+    "title": "Parrainages",
+    "loading": "Chargement...",
+    "signedOut": "Connectez-vous pour voir vos parrainages.",
+    "signIn": "Se connecter",
+    "howItWorks": "Partagez votre lien. Quand une personne l'ouvre et crée un compte Biqbaq dans les 30 jours, elle compte comme votre parrainage une fois son adresse courriel confirmée. Si elle ouvre le lien de quelqu'un d'autre après le vôtre, le dernier lien obtient le crédit.",
+    "none": "Vous n'avez pas de programme de parrainage. Les marketeurs en reçoivent un lorsque le Super administrateur les approuve, et chaque boutique a le sien.",
+    "toAccount": "Accéder à votre compte",
+    "marketerTitle": "Parrainages de marketeur",
+    "marketerIntro": "Inscriptions par votre lien de marketeur.",
+    "shopTitle": "Parrainages de la boutique : {shop}",
+    "shopIntro": "Inscriptions par le lien de votre boutique, présentées séparément des parrainages de marketeur.",
+    "code": "Code de parrainage",
+    "link": "Lien de parrainage",
+    "copy": "Copier le lien",
+    "copied": "Copié",
+    "statsLabel": "Inscriptions confirmées",
+    "total": "Total",
+    "today": "Aujourd'hui",
+    "thisWeek": "Cette semaine",
+    "thisMonth": "Ce mois-ci",
+    "waitingCount": "{count, plural, =0 {Personne n'attend de confirmer son adresse courriel.} one {# autre personne s'est inscrite et n'a pas encore confirmé son adresse courriel.} other {# autres personnes se sont inscrites et n'ont pas encore confirmé leur adresse courriel.}}",
+    "historyTitle": "Historique des inscriptions",
+    "historyLabel": "Inscriptions",
+    "noSignups": "Aucune inscription pour le moment.",
+    "signedUpOn": "Inscription le {date}",
+    "confirmed": "Confirmée",
+    "waiting": "En attente du courriel",
+    "earlier": "Afficher les plus anciennes",
+    "errors": {
+      "loadFailed": "Vos parrainages n'ont pas pu être chargés. Veuillez actualiser la page."
+    }
+  },
+  "referralsAdmin": {
+    "title": "Parrainages",
+    "intro": "Le code de parrainage de chaque marketeur et de chaque boutique, avec les inscriptions confirmées. Changer un code désactive l'ancien lien; le crédit déjà accordé est conservé.",
+    "typeLabel": "Quels programmes",
+    "types": {
+      "all": "Tous",
+      "marketer": "Marketeurs",
+      "seller": "Boutiques"
+    },
+    "search": "Rechercher",
+    "searchPlaceholder": "Code, nom, courriel ou boutique",
+    "searchButton": "Rechercher",
+    "empty": "Aucun code de parrainage trouvé.",
+    "figures": "{total} confirmées · {month} ce mois-ci · {waiting} en attente",
+    "active": "Actif",
+    "inactive": "Ne rapporte pas",
+    "change": "Changer le code",
+    "newCode": "Nouveau code",
+    "changeHint": "De 3 à 20 lettres et chiffres. Inscrit au journal d'audit.",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {page} sur {pages}",
+    "errors": {
+      "codeInvalid": "Utilisez de 3 à 20 lettres et chiffres, sans espaces.",
+      "codeTaken": "Ce code est déjà utilisé.",
+      "notAllowed": "Seul le Super administrateur peut voir les programmes de parrainage.",
+      "loadFailed": "Les codes de parrainage n'ont pas pu être chargés. Veuillez actualiser la page.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
+    }
+  },
+  "emailLists": {
+    "intro": "Gardez les coordonnées de vos clients, envoyez-leur des factures et des reçus, et écrivez aux clients qui reçoivent vos nouvelles, un à la fois ou tous ensemble. Chaque courriel permet de se désabonner en un clic.",
+    "off": "Les courriels aux clients sont désactivés pour cette boutique. Biqbaq peut les activer pour vous : écrivez-nous si vous le souhaitez.",
+    "saved": "Enregistré.",
+    "working": "Veuillez patienter...",
+    "cancel": "Annuler",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {page} sur {pages}",
+    "address": {
+      "label": "Adresse postale affichée dans vos courriels",
+      "hint": "La loi canadienne (LCAP) exige une adresse postale dans chaque envoi groupé. Elle est imprimée en bas.",
+      "save": "Enregistrer l'adresse"
+    },
+    "people": {
+      "title": "Votre liste",
+      "filter": "Afficher",
+      "empty": "Personne pour le moment.",
+      "statuses": {
+        "all": "Tous",
+        "confirmed": "Reçoit vos nouvelles",
+        "client": "Factures seulement",
+        "pending": "En attente",
+        "unsubscribed": "Désabonné",
+        "bounced": "Adresse en échec"
+      },
+      "source": {
+        "added": "Ajoutée par vous",
+        "self": "Inscrite depuis votre page"
+      },
+      "remove": "Retirer",
+      "removeLabel": "Retirer {email}",
+      "invoice": "Facture ou reçu",
+      "email": "Écrire",
+      "emailLabel": "Écrire à {name}",
+      "stop": "Arrêter les nouvelles",
+      "stopLabel": "Arrêter les nouvelles pour {name}"
+    },
+    "compose": {
+      "title": "Envoyer un courriel",
+      "limits": "Aujourd'hui, vous pouvez envoyer {campaigns, plural, =0 {aucun autre courriel} one {# courriel de plus} other {# courriels de plus}}, à {people} personnes au plus.",
+      "subject": "Objet",
+      "body": "Message",
+      "footerNote": "Biqbaq ajoute un pied de page indiquant qu'il vient de {sender}, pourquoi la personne le reçoit, votre adresse postale et un lien de désabonnement.",
+      "review": "Vérifier et envoyer",
+      "confirm": "Envoyer ceci à {count, plural, one {# personne confirmée} other {# personnes confirmées}} ? Ce n'est pas réversible.",
+      "confirmButton": "Oui, l'envoyer",
+      "sent": "Envoyé à {count, plural, one {# personne} other {# personnes}}. Les courriels partent dans les prochaines minutes.",
+      "to": "Envoyer à",
+      "everyone": "Tous les clients qui reçoivent vos nouvelles ({count})",
+      "singleLimits": "Aujourd'hui, vous pouvez encore écrire à {singles} clients un à la fois, et à {people} personnes au plus en tout.",
+      "confirmOne": "Envoyer ceci à {name} ?"
+    },
+    "history": {
+      "title": "Courriels envoyés",
+      "line": "{count, plural, one {# personne} other {# personnes}} · {date}",
+      "single": "À {email} · {date}"
+    },
+    "getUpdates": {
+      "start": "Recevoir des nouvelles",
+      "stop": "Ne plus recevoir",
+      "hint": "Recevez des courriels de temps en temps de cette boutique. Elle verra votre adresse courriel, et vous pouvez arrêter à tout moment.",
+      "subscribedHint": "Vous recevrez les courriels de cette boutique. Vous pouvez arrêter à tout moment.",
+      "failed": "Cela n'a pas fonctionné. Veuillez réessayer."
+    },
+    "errors": {
+      "disabled": "Les courriels aux clients sont désactivés pour cette boutique.",
+      "consentRequired": "Cochez la case pour confirmer que ces clients sont vos clients existants.",
+      "noAddresses": "Entrez au moins une adresse courriel.",
+      "addressLimit": "C'est plus que ce que vous pouvez ajouter aujourd'hui. Essayez avec moins d'adresses, ou demain.",
+      "addressInvalid": "Entrez votre adresse postale complète.",
+      "addressRequired": "Ajoutez votre adresse postale avant d'envoyer.",
+      "detailsInvalid": "Écrivez un objet et un message.",
+      "emailOff": "Biqbaq a suspendu tous les courriels pour le moment. Veuillez réessayer plus tard.",
+      "noSubscribers": "Aucun client ne reçoit encore vos nouvelles. Cochez d'abord « Envoyer des nouvelles » pour un client.",
+      "campaignLimit": "Vous avez envoyé le courriel d'aujourd'hui. Vous pourrez en envoyer un autre demain.",
+      "recipientLimit": "Votre liste dépasse la limite d'envoi d'aujourd'hui. Demandez à Biqbaq de l'augmenter.",
+      "listNotFound": "Cette boutique n'accepte pas d'inscriptions pour le moment.",
+      "emailUnconfirmed": "Confirmez d'abord votre propre adresse courriel.",
+      "notAllowed": "Vous n'avez pas la permission de faire ceci.",
+      "loadFailed": "Votre liste n'a pas pu être chargée. Veuillez actualiser la page.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer.",
+      "emailInvalid": "Entrez une adresse courriel valide.",
+      "nameRequired": "Entrez le nom du client.",
+      "phoneInvalid": "Entrez un numéro d'au moins 7 chiffres, ou laissez vide.",
+      "emailRepeated": "Le même courriel apparaît deux fois dans le tableau.",
+      "noClients": "Remplissez au moins un client.",
+      "clientNotReceiving": "Ce client ne reçoit pas vos nouvelles.",
+      "singleLimit": "Vous avez atteint la limite d'aujourd'hui pour les courriels à un seul client. Réessayez demain."
+    },
+    "add": {
+      "title": "Ajouter des clients",
+      "hint": "Le nom et le courriel sont requis; le téléphone est facultatif. Personne ne reçoit de courriel quand vous enregistrez. Cochez « Envoyer des nouvelles » pour les clients qui doivent recevoir vos courriels. Un client déjà sur votre liste est mis à jour.",
+      "name": "Nom",
+      "email": "Courriel",
+      "phone": "Téléphone",
+      "invite": "Envoyer des nouvelles",
+      "actions": "Actions",
+      "fieldLabel": "{field}, client {row}",
+      "remove": "Retirer",
+      "removeRow": "Retirer le client {row}",
+      "addRow": "Ajouter un autre client",
+      "inviteHint": "Vous pouvez ajouter encore {left} personnes à vos nouvelles aujourd'hui.",
+      "consent": "Les clients cochés sont mes clients existants : ils m'ont acheté quelque chose au cours des deux dernières années, ou se sont renseignés sur mes produits au cours des six derniers mois. (La loi canadienne anti-pourriel permet de leur écrire sur cette base, et chaque courriel permet de se désabonner.)",
+      "button": "Enregistrer les clients",
+      "rowProblem": "Client {row} : {problem}",
+      "result": "{added} ajoutés, {updated} mis à jour. {invited} reçoivent maintenant vos nouvelles{unsubscribed, plural, =0 {.} other {; # désabonnés auparavant n'ont pas été rajoutés.}}"
+    },
+    "documents": {
+      "title": "Factures et reçus",
+      "new": "Nouvelle facture ou nouveau reçu",
+      "empty": "Aucun envoi pour le moment.",
+      "kind": {
+        "invoice": "Facture",
+        "receipt": "Reçu"
+      },
+      "download": "Télécharger le PDF",
+      "resend": "Renvoyer",
+      "resent": "Renvoyé.",
+      "sentTimes": "envoyé {count} fois"
+    },
+    "stats": {
+      "clients": "Clients",
+      "confirmed": "Reçoivent vos nouvelles",
+      "unsubscribed": "Désabonnés ou en échec"
+    },
+    "paused": {
+      "complaints": "Vos courriels aux clients se sont suspendus parce que quelqu'un les a signalés comme pourriel. Cela protège les courriels de toutes les boutiques Biqbaq. Vos clients et vos factures ne sont pas touchés, et Biqbaq examinera la situation.",
+      "unsubscribes": "Vos courriels aux clients se sont suspendus parce que beaucoup de personnes se sont désabonnées au cours des 30 derniers jours. Cela protège les courriels de toutes les boutiques Biqbaq. Vos clients et vos factures ne sont pas touchés, et Biqbaq examinera la situation.",
+      "bounces": "Vos courriels aux clients se sont suspendus parce que beaucoup d'adresses n'ont pas fonctionné au cours des 30 derniers jours. Vérifiez les adresses de vos clients. Vos clients et vos factures ne sont pas touchés, et Biqbaq examinera la situation."
+    }
+  },
+  "emailListsAdmin": {
+    "title": "Courriels aux clients",
+    "biqbaqTitle": "Liste de Biqbaq",
+    "shopsTitle": "Boutiques",
+    "shopsIntro": "Les courriels aux clients sont désactivés pour chaque boutique jusqu'à ce que vous les activiez. Les désactiver conserve la liste de la boutique mais arrête les envois. La boutique est prévenue dans les deux cas.",
+    "search": "Rechercher des boutiques",
+    "searchButton": "Rechercher",
+    "figures": "{confirmed} confirmées · {pending} en attente",
+    "lastSent": "dernier envoi le {date}",
+    "on": "Activés",
+    "off": "Désactivés",
+    "turnOn": "Activer",
+    "turnOff": "Désactiver",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {page} sur {pages}",
+    "loadFailed": "Les boutiques n'ont pas pu être chargées. Veuillez actualiser la page.",
+    "paused": {
+      "complaints": "Suspendu : plainte pour pourriel",
+      "unsubscribes": "Suspendu : désabonnements",
+      "bounces": "Suspendu : échecs"
+    }
+  },
+  "emailLink": {
+    "loading": "Chargement...",
+    "invalid": "Ce lien n'est pas valide. Il a peut-être été copié en partie seulement.",
+    "failed": "Cela n'a pas fonctionné. Veuillez réessayer.",
+    "home": "Aller sur Biqbaq",
+    "confirm": {
+      "title": "Confirmez votre abonnement",
+      "question": "Voulez-vous recevoir des courriels de {sender} par Biqbaq ?",
+      "button": "Oui, envoyez-moi leurs courriels",
+      "done": "Merci. Vous recevrez les courriels de {sender}, et pourrez vous désabonner depuis n'importe lequel.",
+      "unsubscribed": "Vous vous êtes désabonné de {sender}, donc ce lien ne vous ajoute plus."
+    },
+    "unsubscribe": {
+      "title": "Se désabonner",
+      "question": "Ne plus recevoir de courriels de {sender} ?",
+      "button": "Se désabonner",
+      "done": "Vous êtes désabonné. Vous ne recevrez plus de courriels de {sender}."
+    }
+  },
+  "invoices": {
+    "title": "Nouvelle facture ou nouveau reçu",
+    "loading": "Chargement...",
+    "back": "Retour à vos clients",
+    "formLabel": "Facture ou reçu",
+    "details": "Détails",
+    "kindLabel": "Document",
+    "kind": {
+      "invoice": "Facture",
+      "receipt": "Reçu"
+    },
+    "kindHelp": {
+      "invoice": "Une facture demande au client de payer.",
+      "receipt": "Un reçu confirme que le client a payé."
+    },
+    "client": "Client",
+    "chooseClient": "Choisissez un client",
+    "noClients": "Ajoutez d'abord des clients à votre liste.",
+    "issueDate": "Date",
+    "dueDate": "Échéance (facultatif)",
+    "paidDate": "Date du paiement",
+    "paymentMethod": "Mode de paiement (facultatif)",
+    "paymentMethodExample": "Par exemple, virement ou comptant",
+    "items": "Articles",
+    "description": "Description",
+    "quantity": "Quantité",
+    "unitPrice": "Prix unitaire (CAD)",
+    "amount": "Montant",
+    "actions": "Actions",
+    "fieldLabel": "{field}, ligne {row}",
+    "remove": "Retirer",
+    "removeItem": "Retirer la ligne {row}",
+    "addItem": "Ajouter une ligne",
+    "taxes": "Taxes",
+    "taxesHelp": "Ajoutez des taxes seulement si vous êtes inscrit pour les percevoir. Biqbaq calcule les montants, mais ne choisit pas les taux pour vous.",
+    "taxName": "Nom de la taxe",
+    "taxRate": "Taux (%)",
+    "removeTax": "Retirer la taxe {row}",
+    "addTax": "Ajouter une taxe",
+    "taxNumber": "Votre numéro de TPS/TVH (facultatif)",
+    "totals": "Total",
+    "subtotal": "Sous-total",
+    "total": "Total (CAD)",
+    "totalPaid": "Total payé (CAD)",
+    "notes": "Notes pour le client (facultatif)",
+    "preview": "Aperçu PDF",
+    "openPreview": "Ouvrir l'aperçu (PDF)",
+    "sendInvoice": "Envoyer la facture",
+    "sendReceipt": "Envoyer le reçu",
+    "working": "Veuillez patienter...",
+    "sendHelp": "Il est envoyé au client par courriel en PDF, avec le nom et l'adresse postale de votre boutique. Il ne peut plus être modifié une fois envoyé.",
+    "sent": "{label} de {total} a été envoyé à {client}.",
+    "errors": {
+      "disabled": "Les factures et reçus sont réservés aux boutiques dont les courriels aux clients sont activés. Demandez à Biqbaq de les activer.",
+      "addressRequired": "Ajoutez d'abord votre adresse postale sur votre liste de clients : elle figure sur chaque document.",
+      "clientRequired": "Choisissez un client.",
+      "clientNotFound": "Ce client n'est pas sur votre liste.",
+      "itemDescription": "Ligne {row} : décrivez ce qui a été vendu.",
+      "itemQuantity": "Ligne {row} : entrez une quantité supérieure à 0, avec deux décimales au plus.",
+      "itemPrice": "Ligne {row} : entrez un prix, comme 12,99.",
+      "taxLabel": "Taxe {row} : donnez-lui un nom, comme TVH.",
+      "taxRate": "Taxe {row} : entrez un taux de 0 à 30, comme 13 ou 9,975.",
+      "dueBeforeIssue": "L'échéance ne peut pas précéder la date de la facture.",
+      "paidDateRequired": "Entrez la date du paiement.",
+      "detailsInvalid": "Un élément n'est pas correct. Vérifiez chaque champ.",
+      "itemsInvalid": "Vérifiez les articles : chacun a besoin d'une description, d'une quantité et d'un prix.",
+      "taxesInvalid": "Vérifiez les taxes.",
+      "invoiceLimit": "Vous avez atteint la limite de factures et reçus pour aujourd'hui. Réessayez demain.",
+      "resendLimit": "Ce document a déjà été envoyé trois fois.",
+      "emailOff": "Biqbaq a suspendu tous les courriels pour le moment. Veuillez réessayer plus tard.",
+      "previewFailed": "L'aperçu n'a pas pu être créé. Veuillez réessayer.",
+      "notFound": "Ce document est introuvable.",
+      "notAllowed": "Vous n'avez pas la permission de faire ceci.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
     }
   }
 }

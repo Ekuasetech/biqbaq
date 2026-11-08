@@ -56,8 +56,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const [spotlight, ...spotlightRest] = products.slice(6);
 
   const banners = [
-    { key: "banner1", href: "/register", image: photo("banner1", 500), className: "bg-brand-navy text-white md:col-span-7", size: "lg" },
-    { key: "banner2", href: "/register", image: photo("referrals", 500), className: "bg-brand-red text-brand-red-foreground md:col-span-5", size: "lg" },
+    // The "free website after referrals" tile was removed, as no website is offered (Q-17).
+    { key: "banner1", href: "/register", image: photo("banner1", 500), className: "bg-brand-navy text-white md:col-span-12", size: "lg" },
     { key: "banner3", href: "/products", image: photo("banner3", 500), className: "bg-card text-foreground shadow-sm md:col-span-6", size: "sm" },
     { key: "banner4", href: "/cargo-cars", image: "/hero/sienna-cargo.jpg", className: "bg-[oklch(0.2_0.07_262)] text-white md:col-span-6", size: "sm" },
   ] as const;

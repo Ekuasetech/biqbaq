@@ -46,7 +46,14 @@ export const EmailService = {
   async send(
     to: string,
     email: RenderedEmail,
-    options: { idempotencyKey: string; replyTo?: string; timeoutMs?: number; useLocalInbox?: boolean },
+    options: {
+      idempotencyKey: string;
+      replyTo?: string;
+      timeoutMs?: number;
+      useLocalInbox?: boolean;
+      headers?: Record<string, string>;
+      attachments?: { filename: string; content: Uint8Array }[];
+    },
   ): Promise<SendResult> {
     const env = readEnv();
     const timeoutMs = options.timeoutMs ?? 15_000;
@@ -75,6 +82,10 @@ export const EmailService = {
           text: note ? `${note}\n\n${email.text}` : email.text,
           html: note ? `<p><em>${escapeHtml(note)}</em></p>${email.html}` : email.html,
           ...(options.replyTo ? { reply_to: options.replyTo } : {}),
+          ...(options.headers ? { headers: options.headers } : {}),
+          ...(options.attachments
+            ? { attachments: options.attachments.map((file) => ({ filename: file.filename, content: Buffer.from(file.content).toString("base64") })) }
+            : {}),
         }),
         signal: AbortSignal.timeout(timeoutMs),
       });

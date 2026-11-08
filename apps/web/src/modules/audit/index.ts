@@ -70,6 +70,15 @@ export const AUDIT_ACTIONS = [
   "vehicle.suspend",
   "vehicle.restore",
   "conversation.admin_read",
+  "referral.code_change",
+  "email_list.add",
+  "email_campaign.send",
+  "bulk_email.enable",
+  "bulk_email.disable",
+  "bulk_email.auto_pause",
+  "invoice.send",
+  "receipt.send",
+  "invoice.resend",
   "setting.update",
 ] as const;
 

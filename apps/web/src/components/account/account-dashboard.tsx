@@ -419,6 +419,11 @@ export function AccountDashboard() {
           <Link href="/account/notifications" className={cn(primaryButton, "w-fit")}>
             {t("notificationsLink")}
           </Link>
+          {data.roles.some((role) => (role.role_key === "marketer" || role.role_key === "seller") && role.status === "active") && (
+            <Link href="/account/referrals" className={cn(primaryButton, "w-fit")}>
+              {t("referralsLink")}
+            </Link>
+          )}
         </div>
         <RolesCard roles={data.roles} />
         {data.roles.some((role) => role.role_key === "seller" && role.status === "active") && (
@@ -448,6 +453,12 @@ export function AccountDashboard() {
             </Link>
             <Link href="/admin/messages" className={cn(primaryButton, "w-fit")}>
               {t("adminMessagesLink")}
+            </Link>
+            <Link href="/admin/referrals" className={cn(primaryButton, "w-fit")}>
+              {t("adminReferralsLink")}
+            </Link>
+            <Link href="/admin/email-lists" className={cn(primaryButton, "w-fit")}>
+              {t("adminEmailListsLink")}
             </Link>
           </div>
         )}

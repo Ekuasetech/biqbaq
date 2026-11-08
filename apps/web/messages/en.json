@@ -52,9 +52,6 @@
     "banner1Eyebrow": "Get started",
     "banner1Title": "Create a Free Account",
     "banner1Cta": "Sign up",
-    "banner2Eyebrow": "Referrals",
-    "banner2Title": "Get a free website After Referrals",
-    "banner2Cta": "Learn more",
     "banner3Eyebrow": "Discover",
     "banner3Title": "Search for Sellers",
     "banner3Cta": "Start searching",
@@ -412,7 +409,10 @@
     "adsLink": "Ads",
     "messagesLink": "Messages",
     "adminMessagesLink": "Conversations",
-    "notificationsLink": "Notifications"
+    "notificationsLink": "Notifications",
+    "referralsLink": "Referrals",
+    "adminReferralsLink": "Referrals",
+    "adminEmailListsLink": "Customer emails"
   },
   "admin": {
     "section": "Administration",
@@ -568,7 +568,11 @@
       "contact": "Contact information",
       "contactHint": "Private. Only you and Biqbaq administrators can see this.",
       "publicHint": "Everything except your contact information shows on your public shop page. Your shop's web address stays the same."
-    }
+    },
+    "referralsTitle": "Referrals",
+    "referralsIntro": "Your shop has its own referral link. People who sign up through it are counted for your shop.",
+    "referralsLink": "See your referral link",
+    "customerEmailsTitle": "Customer emails"
   },
   "errorPage": {
     "title": "Something went wrong",
@@ -721,6 +725,10 @@
       "messages": {
         "title": "Messages",
         "help": "Hourly limits that stop spam through Biqbaq messages."
+      },
+      "bulkEmail": {
+        "title": "Customer emails",
+        "help": "Limits on bulk email from each shop and from Biqbaq. Every email shares one Resend account, so keep these modest."
       }
     },
     "items": {
@@ -811,6 +819,38 @@
       "conversationsPerHour": {
         "label": "New conversations per person",
         "help": "Most new conversations one person can start in an hour."
+      },
+      "bulkRecipients": {
+        "label": "People per day",
+        "help": "Most people one shop (or Biqbaq) can email in a day."
+      },
+      "bulkCampaigns": {
+        "label": "Emails per day",
+        "help": "Most bulk emails one shop (or Biqbaq) can send in a day."
+      },
+      "bulkNewAddresses": {
+        "label": "New addresses per day",
+        "help": "Most addresses a list can add in a day. Each is sent a confirmation email."
+      },
+      "invoicesPerDay": {
+        "label": "Invoices and receipts per day",
+        "help": "Most invoices and receipts one shop (or Biqbaq) can send in a day, including sending one again."
+      },
+      "bulkSingles": {
+        "label": "Emails to one client per day",
+        "help": "Most emails a shop can send to one client at a time in a day."
+      },
+      "bulkComplaints": {
+        "label": "Spam complaints before pausing",
+        "help": "Spam complaints in 30 days that pause a shop's bulk email."
+      },
+      "bulkUnsubscribes": {
+        "label": "Unsubscribes before pausing (%)",
+        "help": "Percent of a shop's recipients unsubscribing in 30 days that pauses its bulk email."
+      },
+      "bulkBounces": {
+        "label": "Bounces before pausing (%)",
+        "help": "Percent of a shop's emails bouncing in 30 days that pauses its bulk email. Resend's own limit is 4%."
       }
     },
     "history": {
@@ -918,7 +958,16 @@
       "vehicle_image_remove": "Removed a cargo car photo",
       "vehicle_suspend": "Suspended a cargo car listing",
       "vehicle_restore": "Restored a cargo car listing",
-      "conversation_admin_read": "Read a private conversation"
+      "conversation_admin_read": "Read a private conversation",
+      "referral_code_change": "Changed a referral code",
+      "email_list_add": "Added addresses to a customer list",
+      "email_campaign_send": "Sent a bulk email",
+      "bulk_email_enable": "Turned on customer emails for a shop",
+      "bulk_email_disable": "Turned off customer emails for a shop",
+      "invoice_send": "Sent an invoice",
+      "receipt_send": "Sent a receipt",
+      "invoice_resend": "Sent an invoice or receipt again",
+      "bulk_email_auto_pause": "Paused a shop's bulk email automatically"
     }
   },
   "moderation": {
@@ -1673,7 +1722,11 @@
         "label": "Emails about staff",
         "help": "Invitations, approvals and changes to your staff access."
       },
-      "saved": "Saved."
+      "saved": "Saved.",
+      "news": {
+        "label": "Biqbaq news",
+        "help": "Occasional emails from Biqbaq about new features and offers."
+      }
     },
     "errors": {
       "loadFailed": "Your notifications couldn't be loaded. Please refresh the page.",
@@ -1704,7 +1757,326 @@
       "staff_suspended": "Your staff access to {shop} was suspended.",
       "staff_restored": "Your staff access to {shop} was restored.",
       "staff_removed": "You were removed from {shop}'s staff.",
-      "other": "Something changed on your account."
+      "other": "Something changed on your account.",
+      "bulk_email_enabled": "Customer emails are on for {shop}. You can build a list and send updates.",
+      "bulk_email_disabled": "Customer emails are off for {shop}.",
+      "bulk_email_paused": "Customer emails for {shop} paused themselves to protect Biqbaq's email. Biqbaq will review it.",
+      "bulk_email_paused_admin": "Bulk email for {shop} paused itself. Review it before turning it back on."
+    }
+  },
+  "referrals": {
+    "title": "Referrals",
+    "loading": "Loading...",
+    "signedOut": "Sign in to see your referrals.",
+    "signIn": "Sign in",
+    "howItWorks": "Share your link. When someone opens it and creates a Biqbaq account within 30 days, they count as your referral once they confirm their email. If they open someone else's link after yours, the latest link gets the credit.",
+    "none": "You don't have a referral programme. Marketers get one when Super Admin approves them, and every shop has its own.",
+    "toAccount": "Go to your account",
+    "marketerTitle": "Marketer referrals",
+    "marketerIntro": "Sign-ups from your marketer link.",
+    "shopTitle": "Shop referrals: {shop}",
+    "shopIntro": "Sign-ups from your shop's link, reported separately from any marketer referrals.",
+    "code": "Referral code",
+    "link": "Referral link",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "statsLabel": "Confirmed sign-ups",
+    "total": "Total",
+    "today": "Today",
+    "thisWeek": "This week",
+    "thisMonth": "This month",
+    "waitingCount": "{count, plural, =0 {Nobody is waiting to confirm their email.} one {# more person signed up and hasn't confirmed their email yet.} other {# more people signed up and haven't confirmed their email yet.}}",
+    "historyTitle": "Sign-up history",
+    "historyLabel": "Sign-ups",
+    "noSignups": "No sign-ups yet.",
+    "signedUpOn": "Signed up {date}",
+    "confirmed": "Confirmed",
+    "waiting": "Waiting for email",
+    "earlier": "Show older",
+    "errors": {
+      "loadFailed": "Your referrals couldn't be loaded. Please refresh the page."
+    }
+  },
+  "referralsAdmin": {
+    "title": "Referrals",
+    "intro": "Every marketer's and shop's referral code, with confirmed sign-ups. Changing a code stops the old link working; credit already given stays.",
+    "typeLabel": "Which programmes",
+    "types": {
+      "all": "All",
+      "marketer": "Marketers",
+      "seller": "Shops"
+    },
+    "search": "Search",
+    "searchPlaceholder": "Code, name, email or shop",
+    "searchButton": "Search",
+    "empty": "No referral codes found.",
+    "figures": "{total} confirmed · {month} this month · {waiting} waiting",
+    "active": "Active",
+    "inactive": "Not earning",
+    "change": "Change code",
+    "newCode": "New code",
+    "changeHint": "3 to 20 letters and numbers. Recorded in the audit log.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "errors": {
+      "codeInvalid": "Use 3 to 20 letters and numbers, with no spaces.",
+      "codeTaken": "That code is already used.",
+      "notAllowed": "Only Super Admin can see referral programmes.",
+      "loadFailed": "Referral codes couldn't be loaded. Please refresh the page.",
+      "generic": "That didn't work. Please try again."
+    }
+  },
+  "emailLists": {
+    "intro": "Keep your clients' details, send them invoices and receipts, and email the clients who receive your updates, one at a time or all together. Every email lets them unsubscribe in one click.",
+    "off": "Customer emails are off for this shop. Biqbaq can turn them on for you: send us a message if you'd like them.",
+    "saved": "Saved.",
+    "working": "Please wait...",
+    "cancel": "Cancel",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "address": {
+      "label": "Mailing address shown in your emails",
+      "hint": "Canadian law (CASL) requires a mailing address in every bulk email. It is printed at the bottom.",
+      "save": "Save address"
+    },
+    "people": {
+      "title": "Your list",
+      "filter": "Show",
+      "empty": "Nobody here yet.",
+      "statuses": {
+        "all": "All",
+        "confirmed": "Receiving updates",
+        "client": "Invoices only",
+        "pending": "Waiting to confirm",
+        "unsubscribed": "Unsubscribed",
+        "bounced": "Email bounced"
+      },
+      "source": {
+        "added": "Added by you",
+        "self": "Joined from your shop page"
+      },
+      "remove": "Remove",
+      "removeLabel": "Remove {email}",
+      "invoice": "Invoice or receipt",
+      "email": "Email",
+      "emailLabel": "Email {name}",
+      "stop": "Stop updates",
+      "stopLabel": "Stop updates for {name}"
+    },
+    "compose": {
+      "title": "Send an email",
+      "limits": "Today you can send {campaigns, plural, =0 {no more emails} one {# more email} other {# more emails}}, to up to {people} people.",
+      "subject": "Subject",
+      "body": "Message",
+      "footerNote": "Biqbaq adds a footer saying it's from {sender}, why they're receiving it, your mailing address and an unsubscribe link.",
+      "review": "Review and send",
+      "confirm": "Send this to {count, plural, one {# confirmed person} other {# confirmed people}}? It can't be undone.",
+      "confirmButton": "Yes, send it",
+      "sent": "Sent to {count, plural, one {# person} other {# people}}. Emails go out over the next few minutes.",
+      "to": "Send to",
+      "everyone": "All clients receiving updates ({count})",
+      "singleLimits": "Today you can email {singles} more clients one at a time, and up to {people} people in all.",
+      "confirmOne": "Send this to {name}?"
+    },
+    "history": {
+      "title": "Sent emails",
+      "line": "{count, plural, one {# person} other {# people}} · {date}",
+      "single": "To {email} · {date}"
+    },
+    "getUpdates": {
+      "start": "Get updates",
+      "stop": "Stop updates",
+      "hint": "Get occasional emails from this shop. They'll see your email address, and you can stop any time.",
+      "subscribedHint": "You'll get this shop's emails. You can stop any time.",
+      "failed": "That didn't work. Please try again."
+    },
+    "errors": {
+      "disabled": "Customer emails are off for this shop.",
+      "consentRequired": "Tick the box to confirm these clients are your existing customers.",
+      "noAddresses": "Enter at least one email address.",
+      "addressLimit": "That's more than you can add today. Try fewer addresses, or try again tomorrow.",
+      "addressInvalid": "Enter your full mailing address.",
+      "addressRequired": "Add your mailing address before sending.",
+      "detailsInvalid": "Write a subject and a message.",
+      "emailOff": "Biqbaq has paused all email for now. Please try again later.",
+      "noSubscribers": "No clients receive your updates yet. Tick “Send updates” for a client first.",
+      "campaignLimit": "You've sent today's email. You can send again tomorrow.",
+      "recipientLimit": "Your list is bigger than today's sending limit. Ask Biqbaq to raise it.",
+      "listNotFound": "This shop isn't taking sign-ups right now.",
+      "emailUnconfirmed": "Confirm your own email address first.",
+      "notAllowed": "You don't have permission to do this.",
+      "loadFailed": "Your list couldn't be loaded. Please refresh the page.",
+      "generic": "That didn't work. Please try again.",
+      "emailInvalid": "Enter a valid email address.",
+      "nameRequired": "Enter the client's name.",
+      "phoneInvalid": "Enter a phone number with at least 7 digits, or leave it empty.",
+      "emailRepeated": "The same email is in the table twice.",
+      "noClients": "Fill in at least one client.",
+      "clientNotReceiving": "That client isn't receiving your updates.",
+      "singleLimit": "You've reached today's limit for emails to one client. Try again tomorrow."
+    },
+    "add": {
+      "title": "Add clients",
+      "hint": "Name and email are needed; a phone is optional. Nobody is emailed when you save. Tick “Send updates” for clients who should receive your emails. A client already on your list is updated.",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "invite": "Send updates",
+      "actions": "Actions",
+      "fieldLabel": "{field}, client {row}",
+      "remove": "Remove",
+      "removeRow": "Remove client {row}",
+      "addRow": "Add another client",
+      "inviteHint": "You can add {left} more people to your updates today.",
+      "consent": "The clients I ticked are my existing customers: they bought from me in the last two years, or asked about my products in the last six months. (Canada's anti-spam law allows emailing them on this basis, and every email lets them unsubscribe.)",
+      "button": "Save clients",
+      "rowProblem": "Client {row}: {problem}",
+      "result": "{added} added, {updated} updated. {invited} now receive your updates{unsubscribed, plural, =0 {.} other {; # unsubscribed earlier and weren't added back.}}"
+    },
+    "documents": {
+      "title": "Invoices and receipts",
+      "new": "New invoice or receipt",
+      "empty": "None sent yet.",
+      "kind": {
+        "invoice": "Invoice",
+        "receipt": "Receipt"
+      },
+      "download": "Download PDF",
+      "resend": "Send again",
+      "resent": "Sent again.",
+      "sentTimes": "sent {count} times"
+    },
+    "stats": {
+      "clients": "Clients",
+      "confirmed": "Receiving updates",
+      "unsubscribed": "Unsubscribed or bounced"
+    },
+    "paused": {
+      "complaints": "Your customer emails paused themselves because someone reported them as spam. This protects every Biqbaq shop's email. Your clients and invoices are not affected, and Biqbaq will review it.",
+      "unsubscribes": "Your customer emails paused themselves because many people unsubscribed in the last 30 days. This protects every Biqbaq shop's email. Your clients and invoices are not affected, and Biqbaq will review it.",
+      "bounces": "Your customer emails paused themselves because many addresses didn't work in the last 30 days. Check your clients' addresses. Your clients and invoices are not affected, and Biqbaq will review it."
+    }
+  },
+  "emailListsAdmin": {
+    "title": "Customer emails",
+    "biqbaqTitle": "Biqbaq's list",
+    "shopsTitle": "Shops",
+    "shopsIntro": "Customer emails are off for every shop until you turn them on. Turning them off keeps the shop's list but stops it sending. The shop is told either way.",
+    "search": "Search shops",
+    "searchButton": "Search",
+    "figures": "{confirmed} confirmed · {pending} waiting",
+    "lastSent": "last sent {date}",
+    "on": "On",
+    "off": "Off",
+    "turnOn": "Turn on",
+    "turnOff": "Turn off",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "loadFailed": "Shops couldn't be loaded. Please refresh the page.",
+    "paused": {
+      "complaints": "Paused: spam complaint",
+      "unsubscribes": "Paused: unsubscribes",
+      "bounces": "Paused: bounces"
+    }
+  },
+  "emailLink": {
+    "loading": "Loading...",
+    "invalid": "This link isn't valid. It may have been copied incompletely.",
+    "failed": "That didn't work. Please try again.",
+    "home": "Go to Biqbaq",
+    "confirm": {
+      "title": "Confirm your subscription",
+      "question": "Do you want to receive emails from {sender} through Biqbaq?",
+      "button": "Yes, send me their emails",
+      "done": "Thank you. You'll receive emails from {sender}, and can unsubscribe from any of them.",
+      "unsubscribed": "You unsubscribed from {sender}, so this link no longer adds you."
+    },
+    "unsubscribe": {
+      "title": "Unsubscribe",
+      "question": "Stop receiving emails from {sender}?",
+      "button": "Unsubscribe",
+      "done": "You're unsubscribed. You won't receive more emails from {sender}."
+    }
+  },
+  "invoices": {
+    "title": "New invoice or receipt",
+    "loading": "Loading...",
+    "back": "Back to your clients",
+    "formLabel": "Invoice or receipt",
+    "details": "Details",
+    "kindLabel": "Document",
+    "kind": {
+      "invoice": "Invoice",
+      "receipt": "Receipt"
+    },
+    "kindHelp": {
+      "invoice": "An invoice asks the client to pay.",
+      "receipt": "A receipt confirms the client has paid."
+    },
+    "client": "Client",
+    "chooseClient": "Choose a client",
+    "noClients": "Add clients on your list first.",
+    "issueDate": "Date",
+    "dueDate": "Due date (optional)",
+    "paidDate": "Date paid",
+    "paymentMethod": "Payment method (optional)",
+    "paymentMethodExample": "For example, e-transfer or cash",
+    "items": "Items",
+    "description": "Description",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price (CAD)",
+    "amount": "Amount",
+    "actions": "Actions",
+    "fieldLabel": "{field}, line {row}",
+    "remove": "Remove",
+    "removeItem": "Remove line {row}",
+    "addItem": "Add a line",
+    "taxes": "Tax",
+    "taxesHelp": "Add tax only if you are registered to charge it. Biqbaq works out the amounts, but doesn't choose rates for you.",
+    "taxName": "Tax name",
+    "taxRate": "Rate (%)",
+    "removeTax": "Remove tax {row}",
+    "addTax": "Add a tax",
+    "taxNumber": "Your GST/HST number (optional)",
+    "totals": "Total",
+    "subtotal": "Subtotal",
+    "total": "Total (CAD)",
+    "totalPaid": "Total paid (CAD)",
+    "notes": "Notes for the client (optional)",
+    "preview": "Preview PDF",
+    "openPreview": "Open the preview (PDF)",
+    "sendInvoice": "Send invoice",
+    "sendReceipt": "Send receipt",
+    "working": "Please wait...",
+    "sendHelp": "It is emailed to the client as a PDF, with your shop's name and mailing address. It can't be changed once sent.",
+    "sent": "{label} for {total} was sent to {client}.",
+    "errors": {
+      "disabled": "Invoices and receipts are for shops with customer emails turned on. Ask Biqbaq to turn them on.",
+      "addressRequired": "Add your mailing address on your client list first: it appears on every document.",
+      "clientRequired": "Choose a client.",
+      "clientNotFound": "That client isn't on your list.",
+      "itemDescription": "Line {row}: describe what was sold.",
+      "itemQuantity": "Line {row}: enter a quantity above 0, with up to two decimals.",
+      "itemPrice": "Line {row}: enter a price, like 12.99.",
+      "taxLabel": "Tax {row}: give it a name, like HST.",
+      "taxRate": "Tax {row}: enter a rate from 0 to 30, like 13 or 9.975.",
+      "dueBeforeIssue": "The due date can't be before the invoice date.",
+      "paidDateRequired": "Enter the date it was paid.",
+      "detailsInvalid": "Something isn't right. Check each field.",
+      "itemsInvalid": "Check the items: each needs a description, quantity and price.",
+      "taxesInvalid": "Check the tax lines.",
+      "invoiceLimit": "You've reached today's limit for invoices and receipts. Try again tomorrow.",
+      "resendLimit": "This has already been sent three times.",
+      "emailOff": "Biqbaq has paused all email for now. Please try again later.",
+      "previewFailed": "The preview couldn't be made. Please try again.",
+      "notFound": "This document wasn't found.",
+      "notAllowed": "You don't have permission to do this.",
+      "generic": "That didn't work. Please try again."
     }
   }
 }

@@ -4,6 +4,7 @@ import { getMessages, getTranslations, setRequestLocale } from "next-intl/server
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { notFound } from "next/navigation";
 import { REVEAL_BOOT_SCRIPT, RevealObserver } from "@/components/layout/reveal-observer";
+import { ReferralCapture } from "@/components/referrals/referral-capture";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -45,6 +46,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <RevealObserver />
+          <ReferralCapture />
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <a
               href="#main"

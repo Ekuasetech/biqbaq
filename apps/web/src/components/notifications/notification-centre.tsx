@@ -1,5 +1,6 @@
 "use client";
 
+import { getSubscription, setSubscription } from "@/modules/email-lists";
 import type { User } from "@supabase/supabase-js";
 import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
@@ -36,6 +37,42 @@ function useNotificationText() {
     };
     return t.has(`types.${notification.type}`) ? t(`types.${notification.type}`, values) : t("types.other");
   };
+}
+
+/** Joining Biqbaq's own list is the person's choice (Q-46). */
+function BiqbaqNews({ onSaved }: { onSaved: () => void }) {
+  const t = useTranslations("notifications");
+  const [subscribed, setSubscribed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      const { data } = await getSubscription(getSupabaseBrowserClient(), null);
+      setSubscribed(((data ?? []) as { subscribed: boolean }[])[0]?.subscribed ?? false);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (subscribed === null) return null;
+  return (
+    <label className="flex items-start gap-3 text-sm">
+      <input
+        type="checkbox"
+        checked={subscribed}
+        onChange={async (event) => {
+          const next = event.target.checked;
+          setSubscribed(next);
+          const { error } = await setSubscription(getSupabaseBrowserClient(), null, next);
+          if (error) setSubscribed(!next);
+          else onSaved();
+        }}
+        className="mt-0.5 size-4 accent-primary"
+      />
+      <span>
+        <span className="font-semibold">{t("preferences.news.label")}</span>
+        <span className="block text-muted-foreground">{t("preferences.news.help")}</span>
+      </span>
+    </label>
+  );
 }
 
 function Preferences() {
@@ -96,6 +133,7 @@ function Preferences() {
           })}
         </ul>
       )}
+      <BiqbaqNews onSaved={() => setSaved(true)} />
       {saved && <p role="status" className="text-sm text-muted-foreground">{t("preferences.saved")}</p>}
       {failed && <Notice kind="error">{t("errors.generic")}</Notice>}
     </section>

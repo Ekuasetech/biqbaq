@@ -57,6 +57,19 @@ export const SETTING_GROUPS: { id: string; settings: SettingDefinition[] }[] = [
     ],
   },
   {
+    id: "bulkEmail",
+    settings: [
+      { key: "bulk_email.max_recipients_per_day", id: "bulkRecipients", kind: "number", min: 1, max: 100000 },
+      { key: "bulk_email.max_campaigns_per_day", id: "bulkCampaigns", kind: "number", min: 1, max: 20 },
+      { key: "bulk_email.max_new_addresses_per_day", id: "bulkNewAddresses", kind: "number", min: 1, max: 10000 },
+      { key: "bulk_email.max_single_per_day", id: "bulkSingles", kind: "number", min: 1, max: 1000 },
+      { key: "bulk_email.max_complaints_30d", id: "bulkComplaints", kind: "number", min: 1, max: 100 },
+      { key: "bulk_email.max_unsubscribe_percent", id: "bulkUnsubscribes", kind: "number", min: 1, max: 50 },
+      { key: "bulk_email.max_bounce_percent", id: "bulkBounces", kind: "number", min: 1, max: 20 },
+      { key: "invoices.max_per_day", id: "invoicesPerDay", kind: "number", min: 1, max: 1000 },
+    ],
+  },
+  {
     id: "ads",
     settings: [{ key: "ads.max_per_section", id: "adsPerSection", kind: "number", min: 1, max: 6 }],
   },

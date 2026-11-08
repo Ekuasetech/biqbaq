@@ -46,6 +46,10 @@ export const NOTIFICATION_PATHS: Record<string, string> = {
   staff_suspended: "/account",
   staff_restored: "/account",
   staff_removed: "/account",
+  bulk_email_enabled: "/account/shop",
+  bulk_email_disabled: "/account/shop",
+  bulk_email_paused: "/account/shop",
+  bulk_email_paused_admin: "/admin/email-lists",
 };
 
 export const notificationPath = (type: string) => NOTIFICATION_PATHS[type] ?? "/account";

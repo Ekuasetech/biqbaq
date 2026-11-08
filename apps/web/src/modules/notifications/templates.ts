@@ -201,6 +201,62 @@ const TEMPLATES: Record<string, Record<EmailLocale, Build>> = {
       path: "/account/messages",
     }),
   },
+  bulk_email_enabled: {
+    en: () => ({
+      subject: "Customer emails are on for your shop",
+      body: "Biqbaq has turned on customer emails for your shop. You can now build a list of customers who agree to hear from you, and send them updates from My shop.",
+      action: "Go to My shop",
+      path: "/account/shop",
+    }),
+    fr: () => ({
+      subject: "Les courriels aux clients sont activés pour votre boutique",
+      body: "Biqbaq a activé les courriels aux clients pour votre boutique. Vous pouvez maintenant créer une liste de clients qui acceptent d'avoir de vos nouvelles, et leur écrire depuis Ma boutique.",
+      action: "Accéder à ma boutique",
+      path: "/account/shop",
+    }),
+  },
+  bulk_email_disabled: {
+    en: () => ({
+      subject: "Customer emails are off for your shop",
+      body: "Biqbaq has turned off customer emails for your shop. Your list is kept, but nothing can be sent to it for now.",
+      action: "Go to My shop",
+      path: "/account/shop",
+    }),
+    fr: () => ({
+      subject: "Les courriels aux clients sont désactivés pour votre boutique",
+      body: "Biqbaq a désactivé les courriels aux clients pour votre boutique. Votre liste est conservée, mais rien ne peut y être envoyé pour le moment.",
+      action: "Accéder à ma boutique",
+      path: "/account/shop",
+    }),
+  },
+  bulk_email_paused: {
+    en: (shop) => ({
+      subject: "Customer emails are paused for your shop",
+      body: `Bulk email for ${shop} has paused itself, because recipients reported it as spam, or many unsubscribed or their addresses bounced. This protects every Biqbaq shop's email. Your clients and invoices are not affected. Biqbaq will review it and can turn it back on.`,
+      action: "Go to My shop",
+      path: "/account/shop",
+    }),
+    fr: (shop) => ({
+      subject: "Les courriels aux clients sont suspendus pour votre boutique",
+      body: `Les envois groupés de ${shop} se sont suspendus d'eux-mêmes, parce que des destinataires les ont signalés comme pourriel, ou que beaucoup se sont désabonnés ou que leurs adresses ont échoué. Cela protège les courriels de toutes les boutiques Biqbaq. Vos clients et vos factures ne sont pas touchés. Biqbaq examinera la situation et pourra les réactiver.`,
+      action: "Accéder à ma boutique",
+      path: "/account/shop",
+    }),
+  },
+  bulk_email_paused_admin: {
+    en: (shop) => ({
+      subject: "A shop's bulk email paused itself",
+      body: `Bulk email for ${shop} paused itself after spam complaints, unsubscribes or bounces passed the limits in Settings. Review it before turning it back on.`,
+      action: "Review customer emails",
+      path: "/admin/email-lists",
+    }),
+    fr: (shop) => ({
+      subject: "Les envois groupés d'une boutique se sont suspendus",
+      body: `Les envois groupés de ${shop} se sont suspendus après que les plaintes pour pourriel, les désabonnements ou les échecs ont dépassé les limites des paramètres. Vérifiez avant de les réactiver.`,
+      action: "Examiner les courriels aux clients",
+      path: "/admin/email-lists",
+    }),
+  },
   product_restored: {
     en: (product) => ({
       subject: "Your product's suspension was lifted",

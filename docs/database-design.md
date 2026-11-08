@@ -92,8 +92,22 @@ Slugs must be unique, and real titles repeat (two 2021 Toyota Siennas), so a gen
 
 | Table | Key columns | Notes |
 | --- | --- | --- |
-| `referral_codes` | `code` (unique), `owner_type` (marketer / seller), `owner_user_id`, `seller_id`, `active` | |
-| `referral_attributions` | `referred_user_id` (**unique**), `referral_code_id`, `referrer_user_id`, `status`, `registered_at`, `completed_at` | The unique constraint enforces one attribution per signup; `CHECK` blocks referrer = referred. Written only by a trigger or function |
+| `referral_codes` | `code` (unique, 3 to 20 capitals and digits), `owner_type` (marketer / seller), `owner_user_id`, `seller_id` | Made by triggers when a marketer role becomes active or a shop is created (Q-41). A code earns credit only while its marketer role or shop is active, worked out each time rather than stored |
+| `referral_attributions` | `referred_user_id` (**unique**), `referral_code_id`, `referrer_user_id`, `owner_type`, `seller_id`, `code` (as used), `registered_at`, `completed_at` (email confirmed: Q-07) | The unique constraint enforces one attribution per signup; `CHECK` blocks referrer = referred. Written only by a trigger or function |
+
+## Customer email lists (owner's addition, 2026-11-08)
+
+| Table | Key columns | Notes |
+| --- | --- | --- |
+| `email_lists` | `owner_type` (seller / platform), `seller_id` (unique), `enabled`, `mailing_address` | One per shop, made when Super Admin turns it on (Q-43), and one for Biqbaq |
+| `list_subscribers` | `list_id`, `email` (unique per list), `user_id`, `status` (pending, confirmed, unsubscribed), `source` (added, self), `added_by`, `token`, `confirmed_at`, `unsubscribed_at` | The consent record CASL asks for. The token lets the person confirm or unsubscribe from an email link |
+| `email_campaigns` | `list_id`, `subject`, `body`, `recipients`, `created_by` | Each send; the emails themselves go through `background_jobs` |
+
+| `invoices` | `list_id`, `kind` (invoice / receipt), `number` (unique per list and kind), the client's and sender's details as they were, `issue_date`, `due_date`, `paid_date`, `payment_method`, `items`, `taxes`, `tax_number`, `notes`, `subtotal_minor`, `tax_minor`, `total_minor`, `currency` (CAD), `send_count` | Totals worked out by `create_invoice`, never taken from the page (Q-50, Q-51) |
+
+`list_subscribers` also keeps each client's `name` and `phone` (Q-48), the status `client` for people kept for invoices only (Q-49) or `bounced`, how they agreed (`consent_basis`: implied or express, Q-53), and `complained_at` and `bounced_at` from Resend's reports. `email_lists` keeps `paused_at` and `pause_reason` (Q-55), and `email_campaigns.single_email` marks an email to one client (Q-54).
+
+All of these are reached only through functions; the email-link and email-worker ones are for the server only.
 
 ## Platform
 

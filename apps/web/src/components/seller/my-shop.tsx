@@ -1,5 +1,6 @@
 "use client";
 
+import { EmailListManager } from "@/components/email-lists/email-list-manager";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -405,6 +406,16 @@ export function MyShop() {
       )}
 
       {shop.status === "active" && isOwner && <ShopApi slug={shop.slug} />}
+
+      {shop.status === "active" && isOwner && <EmailListManager seller={shop.id} title={t("customerEmailsTitle")} />}
+
+      {shop.status === "active" && isOwner && (
+        <section aria-labelledby="shop-referrals" className={cardClass}>
+          <h2 id="shop-referrals" className={headingClass}>{t("referralsTitle")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("referralsIntro")}</p>
+          <Link href="/account/referrals" className={cn(primaryButton, "mt-3 w-fit")}>{t("referralsLink")}</Link>
+        </section>
+      )}
 
       {isOwner && (
         <VerificationCard

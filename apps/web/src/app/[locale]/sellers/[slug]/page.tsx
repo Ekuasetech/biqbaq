@@ -1,4 +1,5 @@
 import { Eye, MapPin, Package } from "lucide-react";
+import { GetUpdates } from "@/components/email-lists/get-updates";
 import { MessageSeller } from "@/components/messaging/message-seller";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -54,6 +55,7 @@ export default async function SellerPage({ params }: Props) {
             <SellerBadge verified={seller.verified} className="mt-1" />
             <p className="mt-2 max-w-2xl text-muted-foreground">{seller.description}</p>
             <MessageSeller shop={seller.slug} className="mt-3" />
+            <GetUpdates shop={seller.slug} className="mt-3" />
             <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm">
               <li className="inline-flex items-center gap-1.5">
                 <MapPin className="size-4 text-muted-foreground" aria-hidden />

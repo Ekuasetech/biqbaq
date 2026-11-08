@@ -160,9 +160,10 @@ test.describe("public marketplace", () => {
   test("get-started tiles sit below the ads and lead to the right pages", async ({ page }) => {
     await page.goto("/");
     const section = page.getByRole("region", { name: "Get started on Biqbaq" });
+    // No website is offered, so the tile promising one is gone (Q-17).
+    await expect(section).not.toContainText("free website");
     for (const [name, url] of [
       ["Create a Free Account", /\/register$/],
-      ["Get a free website After Referrals", /\/register$/],
       ["Search for Sellers", /\/products$/],
       ["Send goods home with cargo cars", /\/cargo-cars$/],
     ] as const) {
@@ -978,8 +979,272 @@ test.describe("public marketplace", () => {
             await expect(preferences.getByRole("status")).toHaveText("Saved.");
             await shop.reload();
             await expect(shop.getByRole("region", { name: "Email preferences" }).getByRole("checkbox", { name: /Emails about new messages/ })).not.toBeChecked({ timeout: 15000 });
-            await expect(shop.getByRole("region", { name: "Email preferences" }).getByRole("checkbox")).toHaveCount(2);
+            // Messages, staff, and the Biqbaq news list (Q-46).
+            await expect(shop.getByRole("region", { name: "Email preferences" }).getByRole("checkbox")).toHaveCount(3);
             expect(sql(`select email_enabled from public.notification_preferences where user_id = '${userId}' and category = 'messages'`)).toBe("f");
+          });
+
+          test("referral links credit the latest marketer or shop, once the email is confirmed", async ({ page, browser, request }) => {
+            test.setTimeout(150000);
+            const seller = await approvedSeller(page, browser, request);
+            const shop = seller.page;
+            const userId = sql(`select id from auth.users where email = '${seller.email}'`);
+            // Every shop has a link of its own (§14.5).
+            await shop.getByRole("link", { name: "See your referral link" }).click();
+            await expect(shop).toHaveURL(/\/account\/referrals$/);
+            await expect(shop.getByRole("region", { name: "Shop referrals: Ada's Shop" })).toBeVisible({ timeout: 15000 });
+            await expect(shop.getByRole("region", { name: "Marketer referrals" })).toHaveCount(0);
+
+            // Super Admin makes them a marketer too; that programme is reported separately.
+            sql(`insert into public.user_roles (user_id, role_key, granted_by) values ('${userId}', 'marketer', null)`);
+            const marketerCode = sql(`select code from public.referral_codes where owner_user_id = '${userId}' and owner_type = 'marketer'`);
+            const shopCode = sql(`select code from public.referral_codes where owner_user_id = '${userId}' and owner_type = 'seller'`);
+            expect(marketerCode).toMatch(/^ADA20\d\d(\d{4})?$/);
+            await shop.reload();
+            const marketer = shop.getByRole("region", { name: "Marketer referrals" });
+            await expect(marketer).toContainText(marketerCode, { timeout: 15000 });
+            await expect(marketer).toContainText(`/register?ref=${marketerCode}`);
+            await expect(marketer).toContainText("No sign-ups yet.");
+
+            // A visitor opens the shop's link, then the marketer's: the latest gets the credit.
+            const visitor = await (await browser.newContext()).newPage();
+            await visitor.goto(`/products?ref=${shopCode}`);
+            await visitor.goto(`/?ref=${marketerCode.toLowerCase()}`);
+            const email = newEmail("referred");
+            await register(visitor, email);
+            expect(sql(`select owner_type || ':' || (completed_at is null) from public.referral_attributions where referred_user_id = (select id from auth.users where email = '${email}')`)).toBe("marketer:true");
+            await shop.reload();
+            await expect(marketer).toContainText("1 more person signed up and hasn't confirmed their email yet.", { timeout: 15000 });
+            await expect(marketer.getByRole("list", { name: "Sign-ups" })).toContainText("Waiting for email");
+
+            // Confirming counts it.
+            await visitor.goto(await emailLink(request, email));
+            await shop.reload();
+            const stats = marketer.getByRole("definition");
+            await expect(marketer.getByRole("list", { name: "Sign-ups" })).toContainText("Confirmed", { timeout: 15000 });
+            await expect(stats.first()).toBeVisible();
+            await expect(marketer).toContainText("Nobody is waiting to confirm their email.");
+            await expect(shop.getByRole("region", { name: "Shop referrals: Ada's Shop" })).toContainText("No sign-ups yet.");
+
+            // Super Admin sees it, and can change the code; the old link stops earning.
+            await page.goto("/admin/referrals");
+            await page.getByLabel("Search", { exact: true }).fill(marketerCode);
+            await page.getByRole("button", { name: "Search", exact: true }).click();
+            const card = page.getByRole("article").filter({ hasText: marketerCode });
+            await expect(card).toContainText("1 confirmed", { timeout: 15000 });
+            const newCode = `ADA${Date.now().toString().slice(-8)}`;
+            await card.getByRole("button", { name: "Change code" }).click();
+            await card.getByLabel("New code").fill("no spaces");
+            await card.getByRole("button", { name: "Save" }).click();
+            await expect(card).toContainText("Use 3 to 20 letters and numbers");
+            await card.getByLabel("New code").fill(newCode.toLowerCase());
+            await card.getByRole("button", { name: "Save" }).click();
+            await expect(card).toHaveCount(0, { timeout: 15000 });
+            await page.getByLabel("Search", { exact: true }).fill(newCode);
+            await page.getByRole("button", { name: "Search", exact: true }).click();
+            await expect(page.getByRole("article").filter({ hasText: newCode })).toContainText("1 confirmed", { timeout: 15000 });
+            expect(sql(`select metadata ->> 'to' from public.audit_logs where action = 'referral.code_change' and metadata ->> 'from' = '${marketerCode}'`)).toBe(newCode);
+          });
+
+          test("customer emails: off until Super Admin turns them on, then to one client or all who receive updates", async ({ page, browser, request }) => {
+            test.setTimeout(150000);
+            const seller = await approvedSeller(page, browser, request);
+            const shop = seller.page;
+            const slug = sql(`select s.slug from public.sellers s join auth.users u on u.id = s.owner_user_id where u.email = '${seller.email}'`);
+            const list = shop.getByRole("region", { name: "Customer emails" });
+            await expect(list).toContainText("Customer emails are off for this shop.", { timeout: 15000 });
+            await expect(list.getByRole("form", { name: "Add clients" })).toHaveCount(0);
+
+            // Super Admin turns them on for this shop only (Q-43).
+            await page.goto("/admin/email-lists");
+            await page.getByLabel("Search shops").fill(slug);
+            await page.getByRole("button", { name: "Search", exact: true }).click();
+            // Tests running together all have an "Ada's Shop", so this finds this test's by its address.
+            const row = page.getByRole("article").filter({ has: page.getByText(`/sellers/${slug}`, { exact: true }) });
+            await expect(row).toContainText("Off", { timeout: 15000 });
+            await row.getByRole("button", { name: "Turn on" }).click();
+            await expect(row).toContainText("On");
+
+            await shop.reload();
+            await expect(list).toContainText("one at a time or all together", { timeout: 15000 });
+            // A mailing address comes first (CASL).
+            await expect(list).toContainText("Add your mailing address before sending.");
+            await list.getByLabel("Mailing address shown in your emails").fill("12 King St W, Toronto ON M5H 1A1");
+            await list.getByRole("button", { name: "Save address" }).click();
+            await expect(list.getByRole("form", { name: "Send an email" })).toBeVisible();
+
+            // Adding needs the seller's word that these people agreed (Q-42).
+            const customer = newEmail("listed");
+            const form = list.getByRole("form", { name: "Add clients" });
+            await form.getByLabel("Name, client 1").fill("Chidi Eze");
+            await form.getByLabel("Email, client 1").fill("not-an-email");
+            await form.getByLabel("Phone, client 1").fill("416-555-0199");
+            await form.getByLabel("Send updates, client 1").check();
+            await form.getByRole("button", { name: "Save clients" }).click();
+            await expect(form).toContainText("Client 1: Enter a valid email address.");
+            await form.getByLabel("Email, client 1").fill(customer);
+            await form.getByRole("button", { name: "Save clients" }).click();
+            await expect(form).toContainText("Tick the box to confirm");
+            await form.getByRole("checkbox", { name: /The clients I ticked are my existing customers/ }).check();
+            await form.getByRole("button", { name: "Save clients" }).click();
+            await expect(form.getByRole("status")).toContainText("1 added, 0 updated. 1 now receive your updates.");
+            await expect(list.getByRole("list", { name: "Your list" })).toContainText("Chidi Eze");
+            await expect(list.getByRole("list", { name: "Your list" })).toContainText("416-555-0199");
+            await expect(list.getByRole("list", { name: "Your list" })).toContainText("Receiving updates");
+            // Nobody is emailed for being added (Q-53).
+            expect(sql(`select count(*) from public.background_jobs where payload ->> 'to' = '${customer}'`)).toBe("0");
+            const token = sql(`select token from public.list_subscribers where email = '${customer}'`);
+
+            // Email just that client, from their row.
+            const compose = list.getByRole("form", { name: "Send an email" });
+            await list.getByRole("button", { name: "Email Chidi Eze" }).click();
+            await expect(compose.getByLabel("Send to")).toHaveValue(customer);
+            await compose.getByLabel("Subject").fill("Your order");
+            await compose.getByLabel("Message").fill("Your order is ready for pickup.");
+            await compose.getByRole("button", { name: "Review and send" }).click();
+            await expect(compose).toContainText("Send this to Chidi Eze?");
+            await compose.getByRole("button", { name: "Yes, send it" }).click();
+            await expect(compose.getByRole("status")).toContainText("Sent to 1 person.");
+            await expect(list.getByRole("list", { name: "Sent emails" })).toContainText(`To ${customer}`);
+
+            // And everyone receiving updates.
+            await compose.getByLabel("Send to").selectOption("");
+            await compose.getByLabel("Subject").fill("New prints");
+            await compose.getByLabel("Message").fill("Our new Adire prints are in.");
+            await compose.getByRole("button", { name: "Review and send" }).click();
+            await expect(compose).toContainText("Send this to 1 confirmed person?");
+            await compose.getByRole("button", { name: "Yes, send it" }).click();
+            await expect(compose.getByRole("status")).toContainText("Sent to 1 person.");
+            await expect(list.getByRole("list", { name: "Sent emails" })).toContainText("New prints");
+            expect(sql(`select payload -> 'data' ->> 'address' from public.background_jobs where payload ->> 'template' = 'bulk_email' and payload -> 'data' ->> 'subject' = 'New prints' and payload ->> 'to' = '${customer}'`)).toBe("12 King St W, Toronto ON M5H 1A1");
+            expect(sql(`select payload -> 'data' ->> 'source' from public.background_jobs where payload -> 'data' ->> 'subject' = 'New prints' and payload ->> 'to' = '${customer}'`)).toBe("customer");
+
+            // One email to all a day (Q-44).
+            await compose.getByLabel("Subject").fill("Again");
+            await compose.getByLabel("Message").fill("Again");
+            await compose.getByRole("button", { name: "Review and send" }).click();
+            await compose.getByRole("button", { name: "Yes, send it" }).click();
+            await expect(compose).toContainText("You've sent today's email.");
+
+            // An older link still opens its page, without changing anything.
+            const visitor = await (await browser.newContext()).newPage();
+            await visitor.goto(`/email/confirm?t=${token}`);
+            await expect(visitor.getByRole("status")).toContainText("Thank you.");
+
+            // Unsubscribing works from the page, and from mail apps' one-click button.
+            await visitor.goto(`/email/unsubscribe?t=${token}`);
+            await visitor.getByRole("button", { name: "Unsubscribe" }).click();
+            await expect(visitor.getByRole("status")).toContainText("You're unsubscribed.");
+            expect((await request.post(`/api/v1/email/unsubscribe?t=${token}`, { form: { "List-Unsubscribe": "One-Click" } })).status()).toBe(200);
+            expect((await request.post("/api/v1/email/unsubscribe?t=nonsense")).status()).toBe(404);
+            // Spam and bounce reports are only taken with Resend's signature (or refused until it is set up).
+            const forged = await request.post("/api/v1/email/events", { data: { type: "email.complained", data: { email_id: "x" } } });
+            expect([401, 503]).toContain(forged.status());
+            await shop.reload();
+            await expect(list.getByRole("list", { name: "Your list" })).toContainText("Unsubscribed", { timeout: 15000 });
+
+            // A signed-in buyer can join from the shop page themselves.
+            const buyer = await newApplicant(browser, request);
+            await buyer.page.goto(`/sellers/${slug}`);
+            await buyer.page.getByRole("button", { name: "Get updates" }).click({ timeout: 15000 });
+            await expect(buyer.page.getByRole("button", { name: "Stop updates" })).toHaveAttribute("aria-pressed", "true");
+            expect(sql(`select status || ':' || source from public.list_subscribers where email = '${buyer.email}'`)).toBe("confirmed:self");
+
+            // And choose Biqbaq news.
+            await buyer.page.goto("/account/notifications");
+            await buyer.page.getByRole("checkbox", { name: /Biqbaq news/ }).check({ timeout: 15000 });
+            await expect(buyer.page.getByRole("checkbox", { name: /Biqbaq news/ })).toBeChecked();
+            await buyer.context.close();
+          });
+
+          test("a seller sends a client an invoice as a PDF, and the tables work on a phone", async ({ page, browser, request }) => {
+            test.setTimeout(150000);
+            const seller = await approvedSeller(page, browser, request);
+            const shop = seller.page;
+            const sellerId = sql(`select s.id from public.sellers s join auth.users u on u.id = s.owner_user_id where u.email = '${seller.email}'`);
+            // Switched on and given an address directly: the screens for those are tested above.
+            sql(`insert into public.email_lists (owner_type, seller_id, enabled, mailing_address) values ('seller', '${sellerId}', true, '12 King St W, Toronto ON M5H 1A1')`);
+            await shop.reload();
+            const list = shop.getByRole("region", { name: "Customer emails" });
+
+            // Two clients at once, neither asked to join bulk email: they're kept for invoices only.
+            const client = newEmail("client");
+            const form = list.getByRole("form", { name: "Add clients" });
+            await form.getByLabel("Name, client 1").fill("Chidi Eze", { timeout: 15000 });
+            await form.getByLabel("Email, client 1").fill(client);
+            await form.getByRole("button", { name: "Add another client" }).click();
+            await form.getByLabel("Name, client 2").fill("Bisi Ade");
+            await form.getByLabel("Email, client 2").fill(newEmail("client"));
+            await form.getByLabel("Phone, client 2").fill("call me");
+            await form.getByRole("button", { name: "Save clients" }).click();
+            await expect(form).toContainText("Client 2: Enter a phone number with at least 7 digits");
+            await form.getByLabel("Phone, client 2").fill("+1 613 555 0101");
+            await form.getByRole("button", { name: "Save clients" }).click();
+            await expect(form.getByRole("status")).toContainText("2 added, 0 updated. 0 now receive your updates.");
+            const row = list.getByRole("list", { name: "Your list" }).getByRole("listitem").filter({ hasText: client });
+            await expect(row).toContainText("Invoices only");
+            expect(sql(`select count(*) from public.background_jobs where payload ->> 'to' = '${client}'`)).toBe("0");
+
+            // On a phone, the client table becomes cards, with no sideways scrolling.
+            await shop.setViewportSize({ width: 375, height: 800 });
+            await expect(form.getByLabel("Name, client 1")).toBeVisible();
+            expect(await shop.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+            await shop.setViewportSize({ width: 1280, height: 800 });
+
+            // The invoice page opens with the client chosen.
+            await row.getByRole("link", { name: "Invoice or receipt" }).click();
+            await expect(shop).toHaveURL(/\/account\/invoices\/new\?client=/);
+            const invoice = shop.getByRole("form", { name: "Invoice or receipt" });
+            await expect(invoice.getByLabel("Client", { exact: true })).toHaveValue(client, { timeout: 15000 });
+            await invoice.getByLabel("Description, line 1").fill("Ankara fabric (yards)");
+            await invoice.getByLabel("Quantity, line 1").fill("2.5");
+            await invoice.getByLabel("Unit price (CAD), line 1").fill("abc");
+            await invoice.getByRole("button", { name: "Send invoice" }).click();
+            await expect(invoice).toContainText("Line 1: enter a price, like 12.99.");
+            await invoice.getByLabel("Unit price (CAD), line 1").fill("12.99");
+            await invoice.getByRole("button", { name: "Add a line" }).click();
+            await invoice.getByLabel("Description, line 2").fill("Delivery");
+            await invoice.getByLabel("Unit price (CAD), line 2").fill("10");
+            await invoice.getByRole("button", { name: "Add a tax" }).click();
+            await invoice.getByLabel("Tax name, line 1").fill("HST");
+            await invoice.getByLabel("Rate (%), line 1").fill("13");
+            // The same total the database works out.
+            await expect(invoice.getByRole("region", { name: "Total" })).toContainText("$48.00");
+
+            // On a phone, the items table becomes cards too, and nothing is wider than the screen.
+            await shop.setViewportSize({ width: 375, height: 800 });
+            const tooWide = await shop.evaluate(() =>
+              [...document.querySelectorAll("main *")].filter((el) => el.getBoundingClientRect().right > window.innerWidth + 1).map((el) => el.tagName + (el.id ? `#${el.id}` : "")).slice(0, 5),
+            );
+            expect(tooWide).toEqual([]);
+            expect(await shop.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+            await shop.setViewportSize({ width: 1280, height: 800 });
+
+            const previewResponse = shop.waitForResponse((response) => response.url().endsWith("/api/v1/invoices/preview"));
+            await invoice.getByRole("button", { name: "Preview PDF" }).click();
+            const preview = await previewResponse;
+            expect(preview.status()).toBe(200);
+            expect(preview.headers()["content-type"]).toBe("application/pdf");
+            await expect(invoice.getByRole("link", { name: "Open the preview (PDF)" })).toBeVisible();
+
+            await invoice.getByRole("button", { name: "Send invoice" }).click();
+            await expect(invoice.getByRole("status")).toContainText("INV-0001 for $48.00 was sent to Chidi Eze.", { timeout: 15000 });
+            const id = sql(`select id from public.invoices where client_email = '${client}'`);
+            expect(sql(`select total_minor from public.invoices where id = '${id}'`)).toBe("4800");
+            expect(sql(`select count(*) from public.background_jobs where payload ->> 'template' = 'invoice' and payload ->> 'to' = '${client}'`)).toBe("1");
+
+            // Listed on My shop, to download or send again.
+            await shop.goto("/account/shop");
+            const documents = list.getByRole("list", { name: "Invoices and receipts" });
+            await expect(documents).toContainText("INV-0001", { timeout: 15000 });
+            const href = await documents.getByRole("link", { name: "Download PDF" }).getAttribute("href");
+            const download = await shop.context().request.get(href!);
+            expect(download.headers()["content-type"]).toBe("application/pdf");
+            expect((await download.body()).subarray(0, 5).toString()).toBe("%PDF-");
+            // Nobody else can download it.
+            expect((await request.get(href!)).status()).toBe(404);
+            await documents.getByRole("button", { name: "Send again" }).click();
+            await expect(documents).toContainText("Sent again.");
           });
 
           test.describe("messaging", () => {
@@ -1304,7 +1569,7 @@ test.describe("public marketplace", () => {
             const mine = person.page.getByRole("region", { name: "Shops you work for" });
             await expect(mine).toContainText("Ada's Shop has invited you to join their staff");
             await mine.getByRole("button", { name: "Accept" }).click();
-            await expect(mine).toContainText("Waiting for the shop's approval");
+            await expect(mine).toContainText("Waiting for the shop's approval", { timeout: 15000 });
             await expect(mine.getByRole("link", { name: "Open shop" })).toHaveCount(0);
             const waitingUrl = `/account/shop?seller=${sql(`select m.seller_id from public.seller_staff_memberships m join auth.users p on p.id = m.user_id where p.email = '${person.email}'`)}`;
             await person.page.goto(waitingUrl);
