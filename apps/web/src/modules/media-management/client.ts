@@ -81,6 +81,23 @@ export async function uploadProductPhoto(productId: string, file: File): Promise
   await postJson("/api/v1/media/complete", { productId, publicId: fields.public_id });
 }
 
+export async function uploadBlogCover(postId: string, file: File): Promise<void> {
+  if (!ACCEPTED_TYPES.includes(file.type)) throw new MediaError("FORMAT");
+  const { uploadUrl, fields, limits } = await postJson<{
+    uploadUrl: string;
+    fields: Record<string, string | number>;
+    limits: MediaLimits;
+  }>("/api/v1/media/blog-cover/sign", { postId });
+  const form = new FormData();
+  for (const [key, value] of Object.entries(fields)) form.append(key, String(value));
+  form.append("file", await prepareImage(file, limits), "cover.jpg");
+  const upload = await fetch(uploadUrl, { method: "POST", body: form });
+  if (!upload.ok) throw new MediaError("UPLOAD_FAILED");
+  await postJson("/api/v1/media/blog-cover/complete", { postId, publicId: fields.public_id });
+}
+
+export const removeBlogCover = (postId: string) => postJson<void>("/api/v1/media/blog-cover/remove", { postId });
+
 export const removeProductPhoto = (id: string) => api<void>(`/api/v1/media/${id}`, { method: "DELETE" });
 
 export async function makeMainPhoto(supabase: SupabaseClient, id: string) {

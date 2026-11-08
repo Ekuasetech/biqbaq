@@ -44,6 +44,14 @@ export const AUDIT_ACTIONS = [
   "staff.leave",
   "review.hide",
   "review.restore",
+  "blog.create",
+  "blog.edit",
+  "blog.cover",
+  "blog.publish",
+  "blog.schedule",
+  "blog.unpublish",
+  "blog.archive",
+  "blog.category_create",
   "setting.update",
 ] as const;
 

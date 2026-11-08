@@ -1,28 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { getBlogPostBySlug, listBlogPostSlugs, listPopularBlogPosts } from "./index";
+import { toBlogPost, toParagraphs } from "./index";
 
-describe("blog posts", () => {
-  it("gives every post a unique, URL-safe slug that finds it", async () => {
-    const slugs = await listBlogPostSlugs();
-    expect(new Set(slugs).size).toBe(slugs.length);
-    expect(slugs.every((slug) => /^[a-z0-9-]+$/.test(slug))).toBe(true);
-    for (const slug of slugs) expect((await getBlogPostBySlug(slug))?.slug).toBe(slug);
-    expect(await getBlogPostBySlug("does-not-exist")).toBeNull();
+describe("toParagraphs", () => {
+  it("splits on blank lines, keeps single line breaks, and drops empty ones", () => {
+    expect(toParagraphs("One\n\nTwo\nstill two\r\n\r\n\n  \nThree  ")).toEqual(["One", "Two\nstill two", "Three"]);
+    expect(toParagraphs("   ")).toEqual([]);
   });
-
-  it("lists the most read first", async () => {
-    const readers = (await listPopularBlogPosts()).map((post) => post.readers);
-    expect(readers).toEqual([...readers].sort((a, b) => b - a));
+  it("keeps markup as plain text", () => {
+    expect(toParagraphs("<script>x</script>")).toEqual(["<script>x</script>"]);
   });
+});
 
-  it("can leave out the article being read", async () => {
-    const [top] = await listPopularBlogPosts(1);
-    const others = await listPopularBlogPosts(5, top?.slug);
-    expect(others).toHaveLength(4);
-    expect(others.map((post) => post.slug)).not.toContain(top?.slug);
-  });
-
-  it("gives every post a body to read", async () => {
-    for (const post of await listPopularBlogPosts()) expect(post.body.length).toBeGreaterThan(0);
+describe("toBlogPost", () => {
+  it("builds what the pages need", () => {
+    const post = toBlogPost({
+      id: "1", slug: "a", title: "A", excerpt: "E", body: "P1\n\nP2", cover_url: null, author_name: "Biqbaq",
+      seo_title: "", seo_description: "", published_at: "2026-11-07T00:00:00Z", updated_at: "2026-11-07T00:00:00Z",
+      category_slug: "cargo", category_name_en: "Cargo", category_name_fr: null, readers: 12, read_minutes: 3, tags: null,
+    });
+    expect(post.body).toEqual(["P1", "P2"]);
+    expect(post.imageUrl).toBe("");
+    expect(post.topicNames).toEqual({ en: "Cargo", fr: "Cargo" });
+    expect(post.tags).toEqual([]);
+    expect(post.readers).toBe(12);
   });
 });

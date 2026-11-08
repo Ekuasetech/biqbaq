@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { PostStats, WriterAvatar } from "@/components/blog/blog-post-card";
 import { PageTransition } from "@/components/layout/page-transition";
 import { SiteExtras } from "@/components/layout/site-extras";
+import { RecordView } from "@/components/product/record-view";
 import { ShareButtons } from "@/components/product/share-buttons";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -17,14 +18,16 @@ export const instant = false;
 
 export async function generateStaticParams() {
   const slugs = await listBlogPostSlugs();
-  return routing.locales.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
+  // The framework refuses to build a route with no pages, as on a new, empty blog.
+  const paths = slugs.length > 0 ? slugs : ["__none__"];
+  return routing.locales.flatMap((locale) => paths.map((slug) => ({ locale, slug })));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);
   if (!post) return {};
-  return { title: post.title, description: post.excerpt };
+  return { title: post.seoTitle || post.title, description: post.seoDescription || post.excerpt };
 }
 
 export default async function BlogPostPage({ params }: Props) {
@@ -49,7 +52,7 @@ export default async function BlogPostPage({ params }: Props) {
             </Link>
           </nav>
           <p className="text-xs font-bold tracking-wide text-brand-red uppercase dark:text-red-400">
-            {t(`topics.${post.topic}`)}
+            {locale === "fr" ? post.topicNames.fr : post.topicNames.en}
           </p>
           <h1 className="mt-2 font-heading text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl">
             {post.title}
@@ -66,11 +69,17 @@ export default async function BlogPostPage({ params }: Props) {
             <Image src={post.imageUrl} alt="" fill preload sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
           </div>
           <p className="mt-6 text-lg font-medium">{post.excerpt}</p>
-          {post.body.map((paragraph) => (
-            <p key={paragraph} className="mt-4 leading-relaxed">
+          {post.body.map((paragraph, index) => (
+            <p key={index} className="mt-4 whitespace-pre-line break-words leading-relaxed">
               {paragraph}
             </p>
           ))}
+          {post.tags.length > 0 && (
+            <ul aria-label={t("tags")} className="mt-6 flex flex-wrap gap-2">
+              {post.tags.map((tag) => <li key={tag.slug} className="rounded-full bg-muted px-3 py-1 text-xs font-medium">{tag.name}</li>)}
+            </ul>
+          )}
+          <RecordView path={`/api/v1/blog/${post.id}/read`} />
           <div className="mt-8">
             <ShareButtons title={post.title} />
           </div>

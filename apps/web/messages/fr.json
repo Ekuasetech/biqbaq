@@ -218,7 +218,8 @@
     "breadcrumbLabel": "Fil d'Ariane",
     "notFoundTitle": "Article introuvable",
     "notFoundBody": "Cet article a peut-être été retiré ou n'est plus disponible.",
-    "backToBlog": "Retour au blogue"
+    "backToBlog": "Retour au blogue",
+    "tags": "Mots-clés"
   },
   "cargoCars": {
     "title": "Voitures cargo",
@@ -406,7 +407,8 @@
     "settingsLink": "Paramètres de la plateforme",
     "auditLogLink": "Journal d'audit",
     "moderationLink": "Modération",
-    "peopleLink": "Personnes et rôles"
+    "peopleLink": "Personnes et rôles",
+    "blogLink": "Blogue"
   },
   "admin": {
     "section": "Administration",
@@ -463,7 +465,8 @@
       "reasonRequired": "Entrez un motif de refus.",
       "generic": "Une erreur s'est produite. Veuillez réessayer."
     },
-    "noModerationAccess": "Cet espace est réservé aux personnes ayant une permission de modération."
+    "noModerationAccess": "Cet espace est réservé aux personnes ayant une permission de modération.",
+    "noBlogAccess": "Cet espace est réservé au Super Admin et aux co-administrateurs ayant la permission du blogue."
   },
   "shop": {
     "title": "Ma boutique",
@@ -856,7 +859,15 @@
       "staff_leave": "A quitté le personnel d'une boutique",
       "staff_approve": "A approuvé un membre du personnel",
       "review_hide": "A masqué un avis",
-      "review_restore": "A réaffiché un avis"
+      "review_restore": "A réaffiché un avis",
+      "blog_create": "A créé un article de blogue",
+      "blog_edit": "A modifié un article de blogue",
+      "blog_cover": "A changé une photo de couverture",
+      "blog_publish": "A publié un article de blogue",
+      "blog_schedule": "A programmé un article de blogue",
+      "blog_unpublish": "A remis un article en brouillon",
+      "blog_archive": "A archivé un article de blogue",
+      "blog_category_create": "A ajouté une catégorie de blogue"
     }
   },
   "moderation": {
@@ -1122,5 +1133,115 @@
       "unavailable": "Ce produit n'est plus disponible.",
       "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
     }
+  },
+  "blogAdmin": {
+    "title": "Blogue",
+    "newPost": "Nouvel article",
+    "newTitle": "Nouvel article",
+    "editTitle": "Modifier l'article",
+    "backToList": "Retour à tous les articles",
+    "postForm": "Article",
+    "filterLabel": "Afficher les articles",
+    "search": "Chercher dans les titres et le texte",
+    "searchButton": "Chercher",
+    "empty": "Aucun article ici pour le moment.",
+    "edit": "Modifier",
+    "readers": "{count, plural, one {# lecteur} other {# lecteurs}}",
+    "updated": "Mis à jour le {date}",
+    "goesLive": "En ligne le {date}",
+    "pagination": "Pages",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {page} sur {pages}",
+    "filters": {
+      "all": "Tous",
+      "draft": "Brouillons",
+      "scheduled": "Programmés",
+      "published": "Publiés",
+      "archived": "Archivés"
+    },
+    "state": {
+      "draft": "Brouillon",
+      "scheduled": "Programmé",
+      "published": "Publié",
+      "archived": "Archivé"
+    },
+    "fields": {
+      "title": "Titre",
+      "excerpt": "Résumé",
+      "body": "Article",
+      "category": "Catégorie",
+      "author": "Nom de l'auteur",
+      "tags": "Mots-clés",
+      "seoTitle": "Titre pour les moteurs de recherche",
+      "seoDescription": "Description pour les moteurs de recherche",
+      "categoryEn": "Nouvelle catégorie, en anglais",
+      "categoryFr": "En français"
+    },
+    "hints": {
+      "excerpt": "Une ou deux phrases, affichées sur les cartes et en haut de l'article.",
+      "body": "Laissez une ligne vide entre les paragraphes. Le texte s'affiche tel quel.",
+      "author": "Affiché sur l'article, comme Biqbaq ou le nom d'un auteur.",
+      "tags": "Séparez les mots-clés par des virgules, jusqu'à 10.",
+      "seoTitle": "Jusqu'à 70 caractères. Le titre est utilisé si ce champ est vide.",
+      "seoDescription": "Jusqu'à 160 caractères. Le résumé est utilisé si ce champ est vide.",
+      "publish": "Pour publier, il faut un résumé, un article, une catégorie et une photo de couverture."
+    },
+    "chooseCategory": "Choisir une catégorie",
+    "newCategory": "Ajouter une catégorie",
+    "addCategory": "Ajouter",
+    "cancel": "Annuler",
+    "seo": "Moteurs de recherche (facultatif)",
+    "save": "Enregistrer",
+    "saveDraft": "Enregistrer le brouillon",
+    "working": "Enregistrement...",
+    "saved": "Enregistré.",
+    "categoryAdded": "Catégorie ajoutée.",
+    "cover": "Photo de couverture",
+    "noCover": "Pas encore de photo de couverture.",
+    "coverAlt": "La photo de couverture actuelle",
+    "chooseCover": "Choisir une photo de couverture",
+    "replaceCover": "Remplacer la photo de couverture",
+    "coverSaved": "Photo de couverture enregistrée.",
+    "publishing": "Publication",
+    "publishNow": "Publier maintenant",
+    "scheduleFor": "Ou publier le",
+    "schedule": "Programmer",
+    "unpublish": "Remettre en brouillon",
+    "archive": "Archiver",
+    "unarchive": "Restaurer en brouillon",
+    "viewPost": "Voir l'article",
+    "published": "Publié. Il apparaît sur le site d'ici une minute.",
+    "scheduled": "Programmé. Il sera en ligne à cette heure.",
+    "unpublished": "Remis en brouillon et retiré du site.",
+    "archived": "Archivé et retiré du site.",
+    "unarchived": "Restauré en brouillon.",
+    "archivedNote": "Cet article est archivé. Restaurez-le en brouillon pour le modifier.",
+    "errors": {
+      "titleRequired": "Entrez un titre.",
+      "tooLong": "Un champ est trop long. Vérifiez les limites sous chaque champ.",
+      "tooManyTags": "Utilisez jusqu'à 10 mots-clés.",
+      "incomplete": "Pour publier, ajoutez un résumé, un article, une catégorie et une photo de couverture.",
+      "pastDate": "Choisissez une heure future, ou publiez maintenant.",
+      "categoryExists": "Une catégorie porte déjà ce nom.",
+      "categoryInvalid": "Entrez un nom de catégorie en anglais, avec des lettres ou des chiffres.",
+      "archived": "Cet article est archivé. Restaurez-le d'abord en brouillon.",
+      "notAllowed": "Vous n'avez pas la permission de faire ceci.",
+      "changed": "Ceci a déjà changé. Voici la dernière version.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer.",
+      "loadFailed": "Les articles n'ont pas pu être chargés. Veuillez actualiser la page.",
+      "coverNeeded": "Un article en ligne ou programmé a besoin de sa photo de couverture. Remettez-le d'abord en brouillon."
+    },
+    "photoErrors": {
+      "FORMAT": "Choisissez une photo JPG, PNG ou WebP.",
+      "TOO_LARGE": "Cette photo n'a pas pu être assez réduite. Essayez-en une autre.",
+      "UNREADABLE": "Cette photo n'a pas pu être ouverte. Essayez-en une autre.",
+      "UPLOAD_FAILED": "Le téléversement n'a pas abouti. Veuillez réessayer.",
+      "IMAGE_REJECTED": "Cette photo n'est pas permise. Essayez-en une autre.",
+      "MEDIA_NOT_CONFIGURED": "Le téléversement de photos n'est pas encore configuré.",
+      "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
+    },
+    "removeCover": "Retirer la photo de couverture",
+    "coverRemoved": "Photo de couverture retirée."
   }
 }

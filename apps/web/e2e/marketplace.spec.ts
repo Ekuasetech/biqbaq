@@ -121,7 +121,7 @@ test.describe("public marketplace", () => {
     const lead = section.getByRole("article").first();
     await expect(lead).toContainText("Most read");
     await expect(lead).toContainText("Amara N. (sample)");
-    await expect(lead).toContainText("3,420 readers");
+    await expect(lead).toContainText(/[\d,]+ readers?/);
     await expect(section.locator("article img")).toHaveCount(5);
     await section.getByRole("link", { name: /sending cargo home/ }).click();
     await expect(page).toHaveURL(/\/blog\/what-to-know-before-sending-cargo-home-to-nigeria$/);
@@ -510,8 +510,9 @@ test.describe("public marketplace", () => {
       const main = page.getByRole("main");
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Styling Ankara for a Canadian winter");
       await expect(main).toContainText("Ngozi E. (sample)");
-      await expect(main).toContainText("1,185 readers");
-      await expect(main).toContainText("4 min read");
+      await expect(main).toContainText(/[\d,]+ readers?/);
+      // Reading time is worked out from the post's real length now.
+      await expect(main).toContainText(/\d+ min read/);
       await expect(main).toContainText("October 2, 2026");
       await expect(main).toContainText("This is sample text");
       await expect(page.getByRole("link", { name: "Share on WhatsApp" })).toBeVisible();
@@ -1348,6 +1349,112 @@ test.describe("public marketplace", () => {
               await reader.goto(`/products/${slug}`);
               await expect(reader.getByRole("main")).toContainText(/[23] views/, { timeout: 2000 });
             }).toPass({ timeout: 90000 });
+          });
+
+          test("Super Admin writes, schedules, publishes and takes down a blog post, with a real cover", async ({ page, request, browser }) => {
+            test.setTimeout(180000);
+            const owner = await confirmedAccount(page, request);
+            makeSuperAdmin(owner);
+            const title = `Field notes ${unique()}`;
+            const crc = (buffer: Buffer) => {
+              let c = ~0;
+              for (const byte of buffer) {
+                c ^= byte;
+                for (let k = 0; k < 8; k += 1) c = (c >>> 1) ^ (0xedb88320 & -(c & 1));
+              }
+              return ~c >>> 0;
+            };
+            const chunk = (type: string, data: Buffer) => {
+              const head = Buffer.alloc(8);
+              head.writeUInt32BE(data.length);
+              head.write(type, 4);
+              const tail = Buffer.alloc(4);
+              tail.writeUInt32BE(crc(Buffer.concat([head.subarray(4), data])));
+              return Buffer.concat([head, data, tail]);
+            };
+            const png = (width: number, height: number) => {
+              const header = Buffer.alloc(13);
+              header.writeUInt32BE(width, 0);
+              header.writeUInt32BE(height, 4);
+              header.set([8, 2, 0, 0, 0], 8);
+              const row = Buffer.concat([Buffer.from([0]), Buffer.alloc(width * 3, 120)]);
+              return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", header), chunk("IDAT", deflateSync(Buffer.concat(Array.from({ length: height }, () => row)))), chunk("IEND", Buffer.alloc(0))]);
+            };
+
+            await page.goto("/account");
+            await page.getByRole("link", { name: "Blog", exact: true }).click();
+            await expect(page).toHaveURL(/\/admin\/blog$/);
+            await page.getByRole("button", { name: "New post" }).click();
+            const editor = page.getByRole("region", { name: "New post" });
+            await editor.getByRole("button", { name: "Save draft" }).click();
+            await expect(editor.getByText("Enter a title.")).toBeVisible();
+            await editor.getByLabel("Title", { exact: true }).fill(title);
+            await editor.getByLabel("Summary").fill("A short summary.");
+            await editor.getByLabel("Article").fill("First paragraph <b>with tags</b>.\n\nSecond paragraph.");
+            await editor.getByLabel("Category").selectOption("cargo");
+            await editor.getByLabel("Tags").fill("Cargo, Lagos, cargo");
+            await editor.getByRole("button", { name: "Save draft" }).click();
+            const post = page.getByRole("region", { name: "Edit post" });
+            await expect(post.getByText("Saved.")).toBeVisible();
+
+            // Publishing waits for a cover, which goes through the real Cloudinary checks.
+            await post.getByRole("button", { name: "Publish now" }).click();
+            await expect(post.getByText("To publish, add a summary, an article, a category and a cover photo.")).toBeVisible();
+            ignoreExpectedFailures(page); // The browser logs the refused publish as an error.
+            await post.getByLabel("Choose a cover photo").setInputFiles({ name: "cover.png", mimeType: "image/png", buffer: png(1200, 675) });
+            await expect(post.getByText("Cover photo saved.")).toBeVisible({ timeout: 30000 });
+            const slug = sql(`select slug from public.blog_posts where title = '${title}'`);
+            expect(sql(`select cover_url from public.blog_posts where slug = '${slug}'`)).toMatch(/^https:\/\/res\.cloudinary\.com\/.+\/biqbaq-local\/blog\//);
+
+            // Scheduled for tomorrow, it stays hidden.
+            const tomorrow = new Date(Date.now() + 86400000);
+            const local = new Date(tomorrow.getTime() - tomorrow.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            await post.getByLabel("Or publish at").fill(local);
+            await post.getByRole("button", { name: "Schedule" }).click();
+            await expect(post.getByText("Scheduled. It goes live at that time.")).toBeVisible();
+            const reader = await (await browser.newContext()).newPage();
+            await reader.goto(`/blog/${slug}`);
+            await expect(reader.getByRole("heading", { name: "Product not found" }).or(reader.getByText("could not be found", { exact: false })).or(reader.getByRole("heading", { level: 1 }).filter({ hasNotText: title }))).toBeVisible();
+            await expect(reader.getByRole("heading", { name: title })).toHaveCount(0);
+
+            // Published now, it shows, with its text kept as text.
+            await post.getByRole("button", { name: "Publish now" }).click();
+            await expect(post.getByText("Published. It shows on the site within a minute.")).toBeVisible();
+            await expect(async () => {
+              await reader.goto(`/blog/${slug}`);
+              await expect(reader.getByRole("heading", { name: title })).toBeVisible({ timeout: 2000 });
+            }).toPass({ timeout: 90000 });
+            await expect(reader.getByText("First paragraph <b>with tags</b>.")).toBeVisible();
+            await expect(reader.getByRole("list", { name: "Tags" })).toContainText("Lagos");
+            expect(await reader.locator("article b").count()).toBe(0);
+            await expect.poll(() => Number(sql(`select coalesce((select readers from public.blog_read_totals t join public.blog_posts b on b.id = t.post_id where b.slug = '${slug}'), 0)`))).toBe(1);
+
+            // Taken back to draft, it leaves, and its cover can then be removed from Cloudinary.
+            await expect(post.getByRole("button", { name: "Remove cover photo" })).toHaveCount(0);
+            await post.getByRole("button", { name: "Back to draft" }).click();
+            await expect(post.getByText("Back to draft, and no longer on the site.")).toBeVisible();
+            await post.getByRole("button", { name: "Remove cover photo" }).click();
+            await expect(post.getByText("Cover photo removed.")).toBeVisible();
+            expect(sql(`select coalesce(cover_url, 'none') from public.blog_posts where slug = '${slug}'`)).toBe("none");
+            await expect(async () => {
+              await reader.goto(`/blog/${slug}`);
+              await expect(reader.getByRole("heading", { name: title })).toHaveCount(0, { timeout: 2000 });
+            }).toPass({ timeout: 90000 });
+            (reader as unknown as { problems?: string[] }).problems = [];
+          });
+
+          test("only Super Admin and permitted Co-admins can open the blog screen", async ({ page, request }) => {
+            const email = await confirmedAccount(page, request);
+            await page.goto("/admin/blog");
+            await expect(page.getByText("You don't have access")).toBeVisible();
+            sql(`insert into public.user_roles (user_id, role_key) select id, 'admin' from auth.users where email = '${email}'`);
+            sql(`insert into public.user_role_permissions (user_role_id, permission_key) select r.id, 'blog.manage' from public.user_roles r join auth.users u on u.id = r.user_id where u.email = '${email}' and r.role_key = 'admin'`);
+            await page.reload();
+            await expect(page.getByText("You don't have access")).toBeVisible();
+            sql(`insert into public.user_roles (user_id, role_key) select id, 'co_admin' from auth.users where email = '${email}'`);
+            sql(`insert into public.user_role_permissions (user_role_id, permission_key) select r.id, 'blog.manage' from public.user_roles r join auth.users u on u.id = r.user_id where u.email = '${email}' and r.role_key = 'co_admin'`);
+            await page.reload();
+            await expect(page.getByRole("button", { name: "New post" })).toBeVisible();
           });
 
           test("only Super Admin can open People and roles", async ({ page, request }) => {

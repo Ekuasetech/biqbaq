@@ -1,5 +1,5 @@
 import { BookOpen, Clock, Flame } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,11 @@ export function WriterAvatar({ name, className }: { name: string; className?: st
       {name.charAt(0)}
     </span>
   );
+}
+
+/** The category's name in the page's language. */
+export function useTopicName(post: BlogPost) {
+  return useLocale() === "fr" ? post.topicNames.fr : post.topicNames.en;
 }
 
 export function PostStats({ post }: { post: BlogPost }) {
@@ -39,6 +44,7 @@ export function PostStats({ post }: { post: BlogPost }) {
 /** The large lead article, with its text over the photo. */
 export function BlogFeaturedCard({ post }: { post: BlogPost }) {
   const t = useTranslations("blog");
+  const topicName = useTopicName(post);
   const format = useFormatter();
 
   return (
@@ -55,7 +61,7 @@ export function BlogFeaturedCard({ post }: { post: BlogPost }) {
         <Flame className="size-3.5" aria-hidden />
         {t("mostRead")}
       </span>
-      <p className="text-xs font-bold tracking-widest uppercase">{t(`topics.${post.topic}`)}</p>
+      <p className="text-xs font-bold tracking-widest uppercase">{topicName}</p>
       <h3 className="mt-2 font-heading text-2xl leading-tight font-extrabold text-balance sm:text-3xl">
         {/* The link covers the whole card through the ::after overlay. */}
         <Link href={`/blog/${post.slug}`} className="outline-none after:absolute after:inset-0">
@@ -77,7 +83,7 @@ export function BlogFeaturedCard({ post }: { post: BlogPost }) {
 
 /** A compact topic row: thumbnail on the left, details on the right. */
 export function BlogListItem({ post }: { post: BlogPost }) {
-  const t = useTranslations("blog");
+  const topicName = useTopicName(post);
 
   return (
     <article className="group relative flex h-full items-center gap-3 rounded-2xl bg-card p-3 shadow-sm transition-shadow focus-within:ring-2 focus-within:ring-ring hover:shadow-md">
@@ -91,7 +97,7 @@ export function BlogListItem({ post }: { post: BlogPost }) {
         />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold tracking-wide text-brand-red uppercase dark:text-red-400">{t(`topics.${post.topic}`)}</p>
+        <p className="text-xs font-bold tracking-wide text-brand-red uppercase dark:text-red-400">{topicName}</p>
         <h3 className="mt-0.5 line-clamp-2 text-sm leading-snug font-semibold">
           <Link href={`/blog/${post.slug}`} className="outline-none after:absolute after:inset-0">
             {post.title}

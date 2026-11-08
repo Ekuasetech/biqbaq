@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { productFolder, type AssetFacts, type MediaLimits } from "./rules";
+import { blogFolder, productFolder, type AssetFacts, type MediaLimits } from "./rules";
 import { signParams } from "./signature";
 
 // The only code that uses the Cloudinary secret. It never leaves the server.
@@ -18,14 +18,14 @@ export const mediaRoot = () => config()?.root ?? "biqbaq";
 
 const now = () => Math.floor(Date.now() / 1000);
 
-/** Permission for one upload, to one new file name, in the allowed formats. */
-export function signProductUpload(productId: string, limits: MediaLimits) {
+/** Permission for one upload, to one new file name in one folder, in the allowed formats. */
+function signUpload(folder: (root: string) => string, limits: MediaLimits) {
   const c = config();
   if (!c) throw new Error("Cloudinary is not configured");
   const params = {
     allowed_formats: limits.formats.join(","),
     overwrite: "false",
-    public_id: `${productFolder(c.root, productId)}/${randomUUID()}`,
+    public_id: `${folder(c.root)}/${randomUUID()}`,
     timestamp: now(),
   };
   return {
@@ -33,6 +33,9 @@ export function signProductUpload(productId: string, limits: MediaLimits) {
     fields: { ...params, api_key: c.apiKey, signature: signParams(params, c.apiSecret) },
   };
 }
+
+export const signProductUpload = (productId: string, limits: MediaLimits) => signUpload((root) => productFolder(root, productId), limits);
+export const signBlogCoverUpload = (postId: string, limits: MediaLimits) => signUpload((root) => blogFolder(root, postId), limits);
 
 export interface CloudinaryAsset extends AssetFacts {
   secure_url: string;

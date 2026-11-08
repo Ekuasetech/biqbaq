@@ -19,7 +19,8 @@ describe("AUDIT_ACTIONS", () => {
     const sql = readdirSync(migrations).map((file) => readFileSync(new URL(file, migrations), "utf8")).join("\n");
     const written = new Set<string>();
     for (const match of sql.matchAll(/write_audit\(\s*'([a-z_]+\.[a-z_]+)'/g)) written.add(match[1]);
-    for (const match of sql.matchAll(/values \([^,]+, '([a-z_]+\.[a-z_]+)'/g)) written.add(match[1]);
+    // An audit insert names its action straight after the actor. Table names are not actions.
+    for (const match of sql.matchAll(/values \([^,]+, '([a-z_]+\.[a-z_]+)'/g)) if (!/^(public|private)\./.test(match[1])) written.add(match[1]);
     expect(written.size).toBeGreaterThan(10);
     for (const action of written) expect(AUDIT_ACTIONS, action).toContain(action);
   });

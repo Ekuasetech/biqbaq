@@ -23,6 +23,13 @@ export function assetProblem(asset: AssetFacts, limits: MediaLimits): "size" | "
 }
 
 export const productFolder = (root: string, productId: string) => `${root}/products/${productId}`;
+export const blogFolder = (root: string, postId: string) => `${root}/blog/${postId}`;
+
+/** True only for a file this server would have named for this blog post's cover. */
+export function isOwnBlogCover(publicId: string, root: string, postId: string): boolean {
+  const prefix = `${blogFolder(root, postId)}/`;
+  return publicId.startsWith(prefix) && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(publicId.slice(prefix.length));
+}
 
 /** True only for a file this server would have named for this product. */
 export function isOwnPublicId(publicId: string, root: string, productId: string): boolean {

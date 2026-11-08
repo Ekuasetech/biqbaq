@@ -97,7 +97,7 @@ export default async function ProductPage({ params }: Props) {
             <p className="mt-3 text-3xl font-bold">{formatPrice(product.price, locale)}</p>
             <p className="mt-1 text-sm font-medium">{t(`availability.${product.availability}`)}</p>
             <ViewCount count={product.views} className="mt-1" />
-            <RecordView productId={product.id} />
+            <RecordView path={`/api/v1/products/${product.id}/view`} />
           </div>
 
           <div className="rounded-2xl bg-card p-4 shadow-sm">
