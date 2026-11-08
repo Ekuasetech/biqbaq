@@ -53,7 +53,7 @@ export function CargoVehicleCard({ vehicle, delay = 0 }: { vehicle: CargoVehicle
         </p>
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Package className="size-3.5 shrink-0" aria-hidden />
-          {t("space", { percent: vehicle.availableSpacePercent })}
+          {t("space", { kg: vehicle.availableKg })}
         </p>
         <div className="mt-auto pt-1 text-xs text-muted-foreground">
           <p className="truncate">{vehicle.dealer.name}</p>

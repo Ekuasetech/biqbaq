@@ -226,7 +226,7 @@
     "sectionTitle": "Cargo cars going to Nigeria",
     "to": "to",
     "departs": "Departs around {date}",
-    "space": "About {percent}% of space available",
+    "space": "{kg} kg of space available",
     "body": "Find cars going from Canada to Nigeria with space for your goods, and send your cargo home.",
     "listLabel": "Cars going to Nigeria",
     "count": "{count, plural, one {# car} other {# cars}}",
@@ -893,7 +893,16 @@
       "ad_image": "Changed an ad's photo",
       "ad_activate": "Turned an ad on",
       "ad_deactivate": "Turned an ad off",
-      "ad_delete": "Deleted an ad"
+      "ad_delete": "Deleted an ad",
+      "vehicle_create": "Created a cargo car listing",
+      "vehicle_edit": "Edited a cargo car listing",
+      "vehicle_publish": "Published a cargo car listing",
+      "vehicle_unpublish": "Unpublished a cargo car listing",
+      "vehicle_delete": "Deleted a cargo car listing",
+      "vehicle_image_add": "Added a cargo car photo",
+      "vehicle_image_remove": "Removed a cargo car photo",
+      "vehicle_suspend": "Suspended a cargo car listing",
+      "vehicle_restore": "Restored a cargo car listing"
     }
   },
   "moderation": {
@@ -976,6 +985,23 @@
       "status": {
         "published": "Showing",
         "hidden": "Hidden"
+      }
+    },
+    "vehicles": {
+      "title": "Cargo cars",
+      "suspend": "Suspend listing",
+      "restore": "Lift suspension",
+      "restoreHint": "The listing comes back as not public, and the seller chooses when to publish it again.",
+      "filters": {
+        "published": "Live listings",
+        "suspended": "Suspended",
+        "unpublished": "Not public",
+        "all": "All listings"
+      },
+      "status": {
+        "published": "Live",
+        "unpublished": "Not public",
+        "suspended": "Suspended"
       }
     }
   },
@@ -1439,6 +1465,75 @@
       "IMAGE_REJECTED": "This photo isn't allowed. Try another.",
       "MEDIA_NOT_CONFIGURED": "Photo uploads aren't set up yet.",
       "GENERIC": "That didn't work. Please try again."
+    }
+  },
+  "shopVehicles": {
+    "title": "Cargo cars",
+    "add": "Add a cargo car",
+    "intro": "List cars you are sending to Nigeria with room for other people's goods. Each one needs a photo before it can go live, and leaves the site once its departure date has passed.",
+    "needsVerification": "Cargo cars are for verified sellers. Ask for verification above, and you can list cars once it is approved.",
+    "newTitle": "New cargo car",
+    "editTitle": "Edit cargo car",
+    "departs": "Departs {date}",
+    "space": "{kg} kg free",
+    "view": "View",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Yes, delete it",
+    "keep": "Keep it",
+    "deleteWarning": "Delete {name}? It leaves the site and can't be brought back.",
+    "save": "Save",
+    "working": "Saving...",
+    "cancel": "Cancel",
+    "hiddenHelp": "Published, but not on the site right now: its departure date has passed, or your shop is not verified.",
+    "suspendedHelp": "Biqbaq has suspended this listing. It can't be published, edited or deleted.",
+    "fields": {
+      "make": "Make",
+      "model": "Model",
+      "year": "Year",
+      "origin": "Leaving from",
+      "destination": "Going to",
+      "departure": "Estimated departure",
+      "availableKg": "Weight it can still take (kg)",
+      "cargoStatus": "Taking cargo?",
+      "restrictions": "Cargo restrictions"
+    },
+    "hints": {
+      "origin": "A city in Canada.",
+      "destination": "A city in Nigeria.",
+      "availableKg": "A whole number of kilograms.",
+      "restrictions": "One per line, up to 10. For example: no perishable food."
+    },
+    "cargoStatus": {
+      "accepting_cargo": "Accepting cargo",
+      "full": "Full"
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Live",
+      "unpublished": "Not public",
+      "archived": "Archived",
+      "suspended": "Suspended by Biqbaq",
+      "hidden": "Not showing"
+    },
+    "errors": {
+      "required": "Fill in the make, model, cities and departure.",
+      "tooLong": "Something is too long.",
+      "yearInvalid": "Enter a year from 1980 to next year.",
+      "kgInvalid": "Enter a whole number of kilograms, from 0 to 100,000.",
+      "departureInvalid": "Choose a departure date from today on.",
+      "tooManyRestrictions": "Use up to 10 restrictions.",
+      "invalid": "Something isn't allowed. Check each field.",
+      "verificationRequired": "Cargo cars are for verified sellers.",
+      "needsPhoto": "Add at least one photo before publishing.",
+      "publishingSuspended": "Publishing is suspended for your shop.",
+      "notEditable": "This listing can't be changed right now.",
+      "lastPhoto": "A live listing needs at least one photo. Add another before removing this one.",
+      "notAllowed": "You don't have permission to do this.",
+      "changed": "This has already changed. Showing the latest.",
+      "generic": "That didn't work. Please try again."
     }
   }
 }

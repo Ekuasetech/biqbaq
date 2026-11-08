@@ -13,9 +13,9 @@ type FieldErrors = Partial<Record<"name" | "email" | "subject" | "message", stri
 
 type Outcome = "preview" | "sent" | "rateLimited" | "unavailable" | "failed";
 
-// With no product, as on a cargo car while those are sample data, this only validates
-// and tells the visitor plainly that nothing was sent.
-export function ContactForm({ productId }: { productId?: string }) {
+// Sends to a product's or a cargo car's seller. With no endpoint, it only validates and
+// tells the visitor plainly that nothing was sent.
+export function ContactForm({ endpoint }: { endpoint?: string }) {
   const t = useTranslations("contact");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [outcome, setOutcome] = useState<Outcome | null>(null);
@@ -29,14 +29,14 @@ export function ContactForm({ productId }: { productId?: string }) {
     const result = contactEnquirySchema.safeParse(fields);
     if (result.success) {
       setErrors({});
-      if (!productId) {
+      if (!endpoint) {
         setOutcome("preview");
         return;
       }
       setWorking(true);
       setOutcome(null);
       try {
-        const response = await fetch(`/api/v1/products/${productId}/contact`, {
+        const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(website ? { ...result.data, website } : result.data),

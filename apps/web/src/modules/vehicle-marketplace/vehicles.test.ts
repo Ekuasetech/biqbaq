@@ -1,50 +1,35 @@
 import { describe, expect, it } from "vitest";
-import {
-  filterCargoVehicles,
-  getCargoVehicleBySlug,
-  parseCargoFilters,
-  listCargoVehicles,
-  listCargoVehicleSlugs,
-  listRelatedCargoVehicles,
-} from "./index";
+import { filterCargoVehicles, parseCargoFilters, relatedCargoVehicles, toCargoVehicle, type CargoVehicle } from "./index";
+
+const car = (id: string, origin: string, destination: string, date: string): CargoVehicle => ({
+  id, slug: id, year: 2020, make: "Toyota", model: id, images: [], origin, destination, estimatedDeparture: date,
+  availableKg: 100, restrictions: [], status: "accepting_cargo", views: 0, dealer: { name: "D", slug: "d", verified: true },
+});
+const cars = [car("a", "Toronto", "Lagos", "2027-01-02"), car("b", "Calgary", "Abuja", "2027-01-01"), car("c", "Toronto", "Abuja", "2027-01-03")];
 
 describe("cargo vehicles", () => {
-  it("gives every car a unique slug that finds it", async () => {
-    const slugs = await listCargoVehicleSlugs();
-    expect(new Set(slugs).size).toBe(slugs.length);
-    expect(slugs.every((slug) => /^[a-z0-9-]+$/.test(slug))).toBe(true);
-    expect((await getCargoVehicleBySlug("2021-toyota-sienna"))?.model).toBe("Sienna");
-    expect(await getCargoVehicleBySlug("does-not-exist")).toBeNull();
+  it("builds a car from its database row", () => {
+    const built = toCargoVehicle({
+      id: "1", slug: "2021-toyota-sienna", make: "Toyota", model: "Sienna", year: 2021, origin_city: "Toronto", destination_city: "Lagos",
+      departure_date: "2026-12-05", available_kg: 200, restrictions: ["No food"], cargo_status: "full", view_count: 12, images: null,
+      seller_slug: "maple", seller_name: "Maple", seller_verified: true,
+    });
+    expect(built).toMatchObject({ availableKg: 200, status: "full", views: 12, images: [], dealer: { slug: "maple", verified: true } });
   });
 
-  it("lists the soonest departures first", async () => {
-    const dates = (await listCargoVehicles()).map((vehicle) => vehicle.estimatedDeparture);
-    expect(dates).toEqual([...dates].sort());
-    expect(await listCargoVehicles(4)).toHaveLength(4);
+  it("filters by departure city and destination", () => {
+    expect(filterCargoVehicles(cars, { to: "Abuja" }).map((c) => c.id)).toEqual(["b", "c"]);
+    expect(filterCargoVehicles(cars, { from: "Calgary", to: "Lagos" })).toEqual([]);
+    expect(filterCargoVehicles(cars, {})).toHaveLength(3);
   });
 
-  it("filters by departure city and destination", async () => {
-    const all = await listCargoVehicles();
-    const toAbuja = filterCargoVehicles(all, { to: "Abuja" });
-    expect(toAbuja.length).toBeGreaterThan(0);
-    expect(toAbuja.every((vehicle) => vehicle.destination === "Abuja")).toBe(true);
-    expect(filterCargoVehicles(all, { from: "Calgary" }).map((vehicle) => vehicle.model)).toEqual(["Pilot"]);
-    expect(filterCargoVehicles(all, { from: "Calgary", to: "Abuja" })).toEqual([]);
-    expect(filterCargoVehicles(all, {})).toHaveLength(all.length);
+  it("ignores filter values that are not real options", () => {
+    expect(parseCargoFilters({ from: "Calgary", to: "Abuja" }, cars)).toEqual({ from: "Calgary", to: "Abuja" });
+    expect(parseCargoFilters({ from: "<script>", to: ["Lagos", "Abuja"] }, cars)).toEqual({ from: undefined, to: "Lagos" });
   });
 
-  it("ignores filter values that are not real options", async () => {
-    const all = await listCargoVehicles();
-    expect(parseCargoFilters({ from: "Calgary", to: "Abuja" }, all)).toEqual({ from: "Calgary", to: "Abuja" });
-    expect(parseCargoFilters({ from: "<script>", to: ["Lagos", "Abuja"] }, all)).toEqual({ from: undefined, to: "Lagos" });
-  });
-
-  it("relates other cars, with the same destination first", async () => {
-    const vehicle = await getCargoVehicleBySlug("2020-lexus-rx-350");
-    if (!vehicle) throw new Error("missing sample vehicle");
-    const related = await listRelatedCargoVehicles(vehicle, 4);
-    expect(related.map((other) => other.id)).not.toContain(vehicle.id);
-    expect(related[0]?.destination).toBe("Abuja");
-    expect(related).toHaveLength(4);
+  it("relates other cars, with the same destination first", () => {
+    const related = relatedCargoVehicles(cars, cars[1], 4);
+    expect(related.map((c) => c.id)).toEqual(["c", "a"]);
   });
 });

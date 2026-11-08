@@ -92,19 +92,20 @@ test.describe("public marketplace", () => {
     expect(headings[newProducts + 1]).toContain("Cargo cars going to Nigeria");
     const section = page.getByRole("region", { name: "Cargo cars going to Nigeria" });
     await expect(section.getByRole("article")).toHaveCount(4);
-    await expect(section.getByText("Unverified Seller")).toBeVisible();
+    // Only verified dealers' cars are public (Q-05).
+    await expect(section.getByText("Verified Seller").first()).toBeVisible();
+    await expect(section.getByText("Unverified Seller")).toHaveCount(0);
     await section.getByRole("link", { name: "2021 Toyota Sienna" }).click();
     await expect(page).toHaveURL(/\/cargo-cars\/2021-toyota-sienna$/);
   });
 
-  // Product views are real counts now (see "views count once per visitor"), so they vary.
-  // Cargo cars are still sample data, with sample numbers.
+  // Views are real counts (see "views count once per visitor"), so they vary.
   test("view counts appear on products and cargo cars", async ({ page }) => {
     await page.goto("/");
     const products = page.getByRole("region", { name: "New on Biqbaq" });
     await expect(products.getByRole("article").filter({ hasText: "Ankara Tote Bag" })).toContainText(/\d+ views?/);
     const cargo = page.getByRole("region", { name: "Cargo cars going to Nigeria" });
-    await expect(cargo.getByRole("article").first()).toContainText("1,876 views");
+    await expect(cargo.getByRole("article").first()).toContainText(/[\d,]+ views?/);
     await page.goto("/products");
     await expect(page.getByRole("article").first()).toContainText(/\d+ views?/);
     await page.goto("/products/ankara-tote-bag");
@@ -193,9 +194,9 @@ test.describe("public marketplace", () => {
     await expect(main).toContainText("Calgary");
     await expect(main).toContainText("Lagos, Nigeria");
     await expect(main).toContainText("December 12, 2026");
-    await expect(main).toContainText("About 65% of space available");
+    await expect(main).toContainText("325 kg of space available");
     await expect(main).toContainText("Accepting cargo");
-    await expect(main).toContainText("942 views");
+    await expect(main).toContainText(/[\d,]+ views?/);
     await expect(main).toContainText("Prairie Motors (sample)");
     await expect(page.getByRole("heading", { name: "Cargo restrictions" })).toBeVisible();
 
@@ -235,10 +236,10 @@ test.describe("public marketplace", () => {
     await page.goto("/cargo-cars?from=Calgary&to=Abuja");
     await expect(page.getByRole("heading", { name: "No cars found" })).toBeVisible();
     await page.getByRole("link", { name: "Clear filters" }).click();
-    await expect(page.getByText("12 cars")).toBeVisible();
+    await expect(page.getByText("9 cars")).toBeVisible();
 
     await page.goto("/cargo-cars?from=Nowhere");
-    await expect(page.getByText("12 cars")).toBeVisible();
+    await expect(page.getByText("9 cars")).toBeVisible();
   });
 
   test("a product page always shows a full row of related products", async ({ page }) => {
@@ -2060,6 +2061,68 @@ test.describe("public marketplace", () => {
               sql(`update public.products set status = 'archived', deleted_at = now() where name = '${name}'`);
             });
 
+            test("a verified seller lists a cargo car, and the public sees it", async ({ page, browser, request }) => {
+              test.setTimeout(150000);
+              const seller = await approvedSeller(page, browser, request);
+              const shop = seller.page;
+              const cars = shop.getByRole("region", { name: "Cargo cars" });
+              // Unverified sellers are told why they can't list cars (Q-05).
+              await expect(cars).toContainText("Cargo cars are for verified sellers.");
+              await expect(cars.getByRole("button", { name: "Add a cargo car" })).toHaveCount(0);
+
+              sql(`update public.sellers set verification_status = 'manually_verified' where owner_user_id = (select id from auth.users where email = '${seller.email}')`);
+              await shop.reload();
+              const model = `Sedona ${unique()}`;
+              const name = `2015 Kia ${model}`;
+              const departure = new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10);
+              await cars.getByRole("button", { name: "Add a cargo car" }).click({ timeout: 15000 });
+              const form = shop.getByRole("form", { name: "New cargo car" });
+              await form.getByLabel("Make").fill("Kia");
+              await form.getByLabel("Model").fill(model);
+              await form.getByLabel("Year").fill("2015");
+              await form.getByLabel("Leaving from").fill("Toronto");
+              await form.getByLabel("Going to").fill("Lagos");
+              await form.getByLabel("Estimated departure").fill(departure);
+              await form.getByLabel("Weight it can still take (kg)").fill("abc");
+              await form.getByRole("button", { name: "Save" }).click();
+              await expect(form).toContainText("Enter a whole number of kilograms");
+              await form.getByLabel("Weight it can still take (kg)").fill("180");
+              await form.getByLabel("Cargo restrictions").fill("No perishable food\n\nNo liquids");
+              await form.getByRole("button", { name: "Save" }).click();
+              await expect(item(shop, name)).toContainText("Draft", { timeout: 15000 });
+
+              // A photo is needed first.
+              await item(shop, name).getByRole("button", { name: "Publish" }).click();
+              await expect(item(shop, name)).toContainText("Add at least one photo before publishing.");
+              await photoInput(shop, name).setInputFiles({ name: "car.png", mimeType: "image/png", buffer: png(800, 600) });
+              await expect(item(shop, name)).toContainText("1 of 5 photos", { timeout: 30000 });
+              const id = sql(`select id from public.vehicle_listings where model = '${model}'`);
+              expect(sql(`select secure_url from public.media_assets where entity_type = 'vehicle' and entity_id = '${id}'`)).toMatch(/\/biqbaq-local\/vehicles\//);
+              await item(shop, name).getByRole("button", { name: "Publish" }).click();
+              await expect(item(shop, name)).toContainText("Live");
+
+              // Not counted towards the publication allowance (Q-04).
+              expect(sql(`select count(*) from public.product_publication_ledger where seller_id = (select seller_id from public.vehicle_listings where id = '${id}')`)).toBe("0");
+
+              const visitor = await (await browser.newContext()).newPage();
+              await visitor.goto(`/cargo-cars/${sql(`select slug from public.vehicle_listings where id = '${id}'`)}`);
+              await expect(visitor.getByRole("heading", { level: 1 })).toHaveText(name);
+              await expect(visitor.getByRole("main")).toContainText("180 kg of space available");
+              await expect(visitor.getByRole("main")).toContainText("No liquids");
+              await expect(visitor.getByRole("main")).toContainText("Ada's Shop");
+              // The seller's publish refreshes the public list too, rather than within minutes.
+              await visitor.goto("/cargo-cars");
+              await expect(visitor.getByRole("list", { name: "Cars going to Nigeria" })).toContainText(name);
+
+              // Unpublishing takes it off the site; deleting removes it from the list.
+              await item(shop, name).getByRole("button", { name: "Unpublish" }).click();
+              await expect(item(shop, name)).toContainText("Not public");
+              await item(shop, name).getByRole("button", { name: "Delete" }).click();
+              await item(shop, name).getByRole("button", { name: "Yes, delete it" }).click();
+              await expect(item(shop, name)).toHaveCount(0);
+              expect(sql(`select count(*) from public.audit_logs where target_id = '${id}' and action like 'vehicle.%'`)).toBe("5");
+            });
+
             test("a file that is not an image is refused, with an explanation", async ({ page, browser, request }) => {
               test.setTimeout(90000);
               const { page: shop } = await approvedSeller(page, browser, request);
@@ -2427,9 +2490,9 @@ test.describe("public marketplace", () => {
   test("the Cargo Cars page lists every car, soonest departure first", async ({ page }) => {
     await page.goto("/cargo-cars");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cargo Cars");
-    await expect(page.getByText("12 cars")).toBeVisible();
+    await expect(page.getByText("9 cars")).toBeVisible();
     const cars = page.getByRole("list", { name: "Cars going to Nigeria" }).getByRole("article");
-    await expect(cars).toHaveCount(12);
+    await expect(cars).toHaveCount(9);
     await expect(cars.first()).toContainText("2021 Toyota Sienna");
     await expect(cars.last()).toContainText("2017 Mercedes-Benz GLE");
     await page.goto("/");
@@ -2529,14 +2592,17 @@ test.describe("public marketplace", () => {
     expect(await page.content()).not.toContain("adire-studio@");
   });
 
-  test("a cargo car's form stays honest that nothing is sent, until cars are real", async ({ page }) => {
+  test("a cargo car's form sends the visitor's message to the dealer, through Biqbaq", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-forwarded-for": `10.2.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}` });
     await page.goto("/cargo-cars/2021-toyota-sienna");
+    // The dealer's own email and phone are never shown (Q-33).
+    await expect(page.getByRole("main")).not.toContainText("@example.com");
     await page.getByLabel("Your name").fill("Ada");
-    await page.getByLabel("Your email").fill("ada@example.com");
+    await page.getByLabel("Your email").fill(`visitor-${Date.now()}@example.com`);
     await page.getByLabel("Subject").fill("Hello");
     await page.getByLabel("Message").fill("Is there room?");
     await page.getByRole("button", { name: "Send message" }).click();
-    await expect(page.getByText("it was not sent")).toBeVisible();
+    await expect(page.getByText("Your message was sent to the seller.")).toBeVisible({ timeout: 15000 });
   });
 
   test("gallery and share links work", async ({ page }) => {

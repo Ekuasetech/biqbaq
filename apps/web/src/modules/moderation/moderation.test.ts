@@ -7,6 +7,7 @@ describe("hasAnyAccess", () => {
     expect(hasAnyAccess({ ...NO_ACCESS, products: true })).toBe(true);
     expect(hasAnyAccess({ ...NO_ACCESS, shops: true })).toBe(true);
     expect(hasAnyAccess({ ...NO_ACCESS, publishing: true })).toBe(true);
+    expect(hasAnyAccess({ ...NO_ACCESS, vehicles: true })).toBe(true);
   });
 });
 

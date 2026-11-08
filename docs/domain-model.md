@@ -20,7 +20,7 @@ Seller
  '- has a ReferralCode
 
 Product -> ProductImages, PublicationLedger entry, Reviews, Favourites
-VehicleListing -> CargoOpportunity, images
+VehicleListing (with its cargo space in kg, restrictions and status, Q-33) -> images, enquiries
 Conversation -> Buyer + Seller, optional Product or VehicleListing -> Messages
 Order -> Product(s), Seller, Buyer -> PaymentTransactions
 ```
@@ -83,6 +83,15 @@ any except draft -> suspended (moderators only)
 suspended -> unpublished (moderators only)
 ```
 No admin approval is needed before publishing (BD-10).
+
+**Cargo car listing** (Q-04, Q-05)
+```
+draft -> published (verified seller, at least one photo, departure not passed)
+published <-> unpublished
+published | unpublished -> suspended (moderators only) -> unpublished
+any except suspended -> deleted (kept, marked deleted)
+```
+Only verified sellers create, edit or publish them, and they never use the publication allowance. The public sees a published listing only while its seller is active and verified and its departure date has not passed.
 
 **Blog post** (§11.3)
 ```

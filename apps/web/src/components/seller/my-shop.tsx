@@ -9,6 +9,7 @@ import { ProductPhotos } from "@/components/seller/product-photos";
 import { ShopApi } from "@/components/seller/shop-api";
 import { ShopProfile } from "@/components/seller/shop-profile";
 import { ShopStaff } from "@/components/seller/shop-staff";
+import { ShopVehicles } from "@/components/seller/shop-vehicles";
 import { VerificationCard } from "@/components/seller/verification-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -443,6 +444,10 @@ export function MyShop() {
           ))}
         </ul>
       </section>
+
+      {shop.status === "active" && isOwner && (
+        <ShopVehicles verified={shop.verification_status === "provider_verified" || shop.verification_status === "manually_verified"} photoLimit={photoLimit} />
+      )}
     </div>
   );
 }

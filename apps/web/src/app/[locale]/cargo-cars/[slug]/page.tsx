@@ -8,6 +8,7 @@ import { ContactForm } from "@/components/product/contact-form";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { SellerBadge } from "@/components/product/seller-badge";
 import { ShareButtons } from "@/components/product/share-buttons";
+import { RecordView } from "@/components/product/record-view";
 import { ViewCount } from "@/components/product/view-count";
 import { CargoVehicleCard } from "@/components/vehicle/cargo-vehicle-card";
 import { Link } from "@/i18n/navigation";
@@ -26,7 +27,9 @@ export const instant = false;
 
 export async function generateStaticParams() {
   const slugs = await listCargoVehicleSlugs();
-  return routing.locales.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
+  // The framework refuses to build a route with no pages, as when no trip is listed.
+  const paths = slugs.length > 0 ? slugs : ["__none__"];
+  return routing.locales.flatMap((locale) => paths.map((slug) => ({ locale, slug })));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -83,6 +86,7 @@ export default async function CargoVehiclePage({ params }: Props) {
             </p>
             <p className="mt-2 text-sm font-medium">{t(`cargoCars.status.${vehicle.status}`)}</p>
             <ViewCount count={vehicle.views} className="mt-1" />
+            <RecordView path={`/api/v1/vehicles/${vehicle.id}/view`} />
           </div>
 
           <div className="rounded-2xl bg-card p-4 shadow-sm">
@@ -106,10 +110,7 @@ export default async function CargoVehiclePage({ params }: Props) {
                 <Package className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
                 <div className="flex-1">
                   <dt className="text-xs text-muted-foreground">{t("cargoCars.spaceLabel")}</dt>
-                  <dd className="text-sm font-medium">{t("cargoCars.space", { percent: vehicle.availableSpacePercent })}</dd>
-                  <div aria-hidden className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-brand-red" style={{ width: `${vehicle.availableSpacePercent}%` }} />
-                  </div>
+                  <dd className="text-sm font-medium">{t("cargoCars.space", { kg: vehicle.availableKg })}</dd>
                 </div>
               </div>
             </dl>
@@ -118,7 +119,9 @@ export default async function CargoVehiclePage({ params }: Props) {
 
           <div className="rounded-2xl bg-card p-4 shadow-sm">
             <p className="text-xs text-muted-foreground">{t("cargoCars.dealer")}</p>
-            <p className="font-semibold">{vehicle.dealer.name}</p>
+            <p className="font-semibold">
+              <Link href={`/sellers/${vehicle.dealer.slug}`} className="underline-offset-4 hover:underline">{vehicle.dealer.name}</Link>
+            </p>
             <SellerBadge verified={vehicle.dealer.verified} className="mt-1" />
           </div>
 
@@ -132,7 +135,7 @@ export default async function CargoVehiclePage({ params }: Props) {
             {t("cargoCars.contactTitle")}
           </h2>
           <p className="mt-1 mb-4 text-sm text-muted-foreground">{t("cargoCars.contactIntro")}</p>
-          <ContactForm />
+          <ContactForm endpoint={`/api/v1/vehicles/${vehicle.id}/contact`} />
         </section>
 
         <section aria-labelledby="restrictions-title">

@@ -134,7 +134,7 @@ export default async function ProductPage({ params }: Props) {
         <section aria-labelledby="contact-title">
           <h2 id="contact-title" className="font-heading text-2xl font-bold tracking-tight">{t("contact.title")}</h2>
           <p className="mt-1 mb-4 text-sm text-muted-foreground">{t("contact.intro")}</p>
-          <ContactForm productId={product.id} />
+          <ContactForm endpoint={`/api/v1/products/${product.id}/contact`} />
         </section>
 
         {features.reviews && (

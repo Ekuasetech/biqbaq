@@ -226,7 +226,7 @@
     "sectionTitle": "Voitures cargo en partance pour le Nigeria",
     "to": "vers",
     "departs": "Départ vers le {date}",
-    "space": "Environ {percent} % de l'espace disponible",
+    "space": "{kg} kg d’espace disponible",
     "body": "Trouvez des voitures allant du Canada au Nigeria avec de l'espace pour vos marchandises, et envoyez vos colis au pays.",
     "listLabel": "Voitures en partance pour le Nigeria",
     "count": "{count, plural, one {# voiture} other {# voitures}}",
@@ -893,7 +893,16 @@
       "ad_image": "A changé la photo d'une publicité",
       "ad_activate": "A activé une publicité",
       "ad_deactivate": "A désactivé une publicité",
-      "ad_delete": "A supprimé une publicité"
+      "ad_delete": "A supprimé une publicité",
+      "vehicle_create": "A créé une annonce de voiture cargo",
+      "vehicle_edit": "A modifié une annonce de voiture cargo",
+      "vehicle_publish": "A publié une annonce de voiture cargo",
+      "vehicle_unpublish": "A dépublié une annonce de voiture cargo",
+      "vehicle_delete": "A supprimé une annonce de voiture cargo",
+      "vehicle_image_add": "A ajouté une photo de voiture cargo",
+      "vehicle_image_remove": "A retiré une photo de voiture cargo",
+      "vehicle_suspend": "A suspendu une annonce de voiture cargo",
+      "vehicle_restore": "A rétabli une annonce de voiture cargo"
     }
   },
   "moderation": {
@@ -976,6 +985,23 @@
       "status": {
         "published": "Affiché",
         "hidden": "Masqué"
+      }
+    },
+    "vehicles": {
+      "title": "Voitures cargo",
+      "suspend": "Suspendre l'annonce",
+      "restore": "Lever la suspension",
+      "restoreHint": "L'annonce revient non publique, et le vendeur choisit quand la republier.",
+      "filters": {
+        "published": "Annonces en ligne",
+        "suspended": "Suspendues",
+        "unpublished": "Non publiques",
+        "all": "Toutes les annonces"
+      },
+      "status": {
+        "published": "En ligne",
+        "unpublished": "Non publique",
+        "suspended": "Suspendue"
       }
     }
   },
@@ -1439,6 +1465,75 @@
       "IMAGE_REJECTED": "Cette photo n'est pas permise. Essayez-en une autre.",
       "MEDIA_NOT_CONFIGURED": "Le téléversement de photos n'est pas encore configuré.",
       "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
+    }
+  },
+  "shopVehicles": {
+    "title": "Voitures cargo",
+    "add": "Ajouter une voiture cargo",
+    "intro": "Annoncez les voitures que vous envoyez au Nigeria avec de la place pour les marchandises d'autres personnes. Chacune a besoin d'une photo avant d'être en ligne, et quitte le site après sa date de départ.",
+    "needsVerification": "Les voitures cargo sont réservées aux vendeurs vérifiés. Demandez la vérification ci-dessus, et vous pourrez annoncer des voitures une fois approuvée.",
+    "newTitle": "Nouvelle voiture cargo",
+    "editTitle": "Modifier la voiture cargo",
+    "departs": "Départ le {date}",
+    "space": "{kg} kg disponibles",
+    "view": "Voir",
+    "publish": "Publier",
+    "unpublish": "Dépublier",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "confirmDelete": "Oui, la supprimer",
+    "keep": "La garder",
+    "deleteWarning": "Supprimer {name} ? Elle quitte le site et ne peut pas être rétablie.",
+    "save": "Enregistrer",
+    "working": "Enregistrement...",
+    "cancel": "Annuler",
+    "hiddenHelp": "Publiée, mais pas sur le site pour le moment : sa date de départ est passée, ou votre boutique n'est pas vérifiée.",
+    "suspendedHelp": "Biqbaq a suspendu cette annonce. Elle ne peut pas être publiée, modifiée ou supprimée.",
+    "fields": {
+      "make": "Marque",
+      "model": "Modèle",
+      "year": "Année",
+      "origin": "Départ de",
+      "destination": "Destination",
+      "departure": "Départ estimé",
+      "availableKg": "Poids encore disponible (kg)",
+      "cargoStatus": "Accepte du cargo ?",
+      "restrictions": "Restrictions de cargo"
+    },
+    "hints": {
+      "origin": "Une ville au Canada.",
+      "destination": "Une ville au Nigeria.",
+      "availableKg": "Un nombre entier de kilogrammes.",
+      "restrictions": "Une par ligne, jusqu'à 10. Par exemple : pas d'aliments périssables."
+    },
+    "cargoStatus": {
+      "accepting_cargo": "Accepte du cargo",
+      "full": "Complète"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "published": "En ligne",
+      "unpublished": "Non publique",
+      "archived": "Archivée",
+      "suspended": "Suspendue par Biqbaq",
+      "hidden": "Non affichée"
+    },
+    "errors": {
+      "required": "Remplissez la marque, le modèle, les villes et le départ.",
+      "tooLong": "Un champ est trop long.",
+      "yearInvalid": "Entrez une année de 1980 à l'an prochain.",
+      "kgInvalid": "Entrez un nombre entier de kilogrammes, de 0 à 100 000.",
+      "departureInvalid": "Choisissez une date de départ à partir d'aujourd'hui.",
+      "tooManyRestrictions": "Utilisez jusqu'à 10 restrictions.",
+      "invalid": "Un élément n'est pas permis. Vérifiez chaque champ.",
+      "verificationRequired": "Les voitures cargo sont réservées aux vendeurs vérifiés.",
+      "needsPhoto": "Ajoutez au moins une photo avant de publier.",
+      "publishingSuspended": "La publication est suspendue pour votre boutique.",
+      "notEditable": "Cette annonce ne peut pas être modifiée pour le moment.",
+      "lastPhoto": "Une annonce en ligne a besoin d'au moins une photo. Ajoutez-en une autre avant de retirer celle-ci.",
+      "notAllowed": "Vous n'avez pas la permission de faire ceci.",
+      "changed": "Ceci a déjà changé. Voici la dernière version.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
     }
   }
 }

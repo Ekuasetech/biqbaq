@@ -56,7 +56,7 @@ Slugs must be unique, and real titles repeat (two 2021 Toyota Siennas), so a gen
 
 | Table | Key columns |
 | --- | --- |
-| `vehicle_listings` | `seller_id`, `slug` (unique), `make`, `model`, `year`, `origin_city`, `destination_city`, `estimated_departure`, `status`, `view_count`, `created_by` |
+| `vehicle_listings` | `seller_id`, `slug` (unique), `make`, `model`, `year`, `origin_city`, `destination_city`, `departure_date`, `available_kg` (Q-33), `restrictions` text[], `cargo_status`, `status`, `created_by`. One table: the cargo opportunity is part of the listing |
 | `cargo_opportunities` | `vehicle_listing_id`, `available_capacity` (unit pending), `restrictions` text[], `status` |
 
 ## Communication

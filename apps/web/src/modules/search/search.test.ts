@@ -18,6 +18,22 @@ const catalogue = [
 ];
 const contains = (texts: string[], needle: string) => texts.some((text) => text.toLowerCase().includes(needle.toLowerCase()));
 
+vi.mock("@/modules/vehicle-marketplace", () => {
+  const car = (id: string, year: number, make: string, model: string, origin: string, destination: string) => ({
+    id, slug: `${year}-${make}-${model}`.toLowerCase().replace(/\s+/g, "-"), year, make, model, origin, destination,
+    images: [{ url: `https://example.com/${id}.jpg`, alt: "" }], estimatedDeparture: "2027-01-01", availableKg: 100,
+    restrictions: [], status: "accepting_cargo", views: 0, dealer: { name: "Dealer", slug: "dealer", verified: true },
+  });
+  return {
+    listCargoVehicles: async () => [
+      car("c1", 2021, "Toyota", "Sienna", "Toronto", "Lagos"),
+      car("c2", 2019, "Honda", "Pilot", "Calgary", "Abuja"),
+      car("c3", 2020, "Lexus", "RX 350", "Toronto", "Abuja"),
+      car("c4", 2018, "Ford", "Explorer", "Ottawa", "Abuja"),
+    ],
+  };
+});
+
 vi.mock("@/modules/product-catalog", () => ({
   listProducts: async ({ q }: { q: string }) => ({
     data: catalogue.filter((p) => contains([p.name, p.seller.name, p.seller.city], q)),

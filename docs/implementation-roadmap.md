@@ -95,7 +95,7 @@ As PRD §26. These need answers first:
 | 6 | Blog, advertising | **Built** on the local copy (2026-11-07): the blog with the Tiptap editor and comments, and ads, managed by Super Admin and permitted Co-admins. Ads offer the two places the site has (home page, every other page); header, sidebar, product listing and mobile spots wait for somewhere to appear. The frequency control is a per-section limit; per-visitor caps would need visitor tracking |
 | 7 | Payments | BD-02, BD-03, BD-12 |
 | 8 | Marketers, referrals | BD-11, Q-07 |
-| 9 | Vehicles and cargo | BD-01, Q-04, Q-05 |
+| 9 | Vehicles and cargo | **Built** on the local copy (2026-11-07): verified sellers list cargo cars with photos, weight capacity and restrictions; the public sees trips that have not left, from verified sellers; Contact Seller goes to the dealer; views count; moderators suspend with `vehicle_listings.moderate`. Sale listings (BD-01) are not built |
 | 10 | Integrations | BD-06, BD-07, BD-13; terms checks for each source |
 | 11 | Mobile app | Web features established |
 | 12 | Hardening and launch | Q-11 |

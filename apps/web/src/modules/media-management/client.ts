@@ -128,6 +128,23 @@ export async function uploadAdImage(adId: string, file: File): Promise<void> {
   await postJson("/api/v1/media/ad-image/complete", { adId, publicId: fields.public_id });
 }
 
+export async function uploadVehiclePhoto(listingId: string, file: File): Promise<void> {
+  if (!ACCEPTED_TYPES.includes(file.type)) throw new MediaError("FORMAT");
+  const { uploadUrl, fields, limits } = await postJson<{
+    uploadUrl: string;
+    fields: Record<string, string | number>;
+    limits: MediaLimits;
+  }>("/api/v1/media/vehicle-image/sign", { listingId });
+  const form = new FormData();
+  for (const [key, value] of Object.entries(fields)) form.append(key, String(value));
+  form.append("file", await prepareImage(file, limits), "car.jpg");
+  const upload = await fetch(uploadUrl, { method: "POST", body: form });
+  if (!upload.ok) throw new MediaError("UPLOAD_FAILED");
+  await postJson("/api/v1/media/vehicle-image/complete", { listingId, publicId: fields.public_id });
+}
+
+export const removeVehiclePhoto = (id: string) => api<void>(`/api/v1/media/vehicle-image/${id}`, { method: "DELETE" });
+
 export const removeBlogCover = (postId: string) => postJson<void>("/api/v1/media/blog-cover/remove", { postId });
 
 export const removeProductPhoto = (id: string) => api<void>(`/api/v1/media/${id}`, { method: "DELETE" });

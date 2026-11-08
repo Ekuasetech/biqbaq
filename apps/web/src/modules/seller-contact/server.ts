@@ -38,13 +38,14 @@ const COPY: Record<EmailLocale, { intro: string; from: string; product: string; 
 
 export function renderEnquiryEmail(
   enquiry: ContactEnquiry,
-  product: { name: string; slug: string },
+  product: { name: string; slug: string; kind?: "product" | "vehicle" },
   sellerLocale: string,
   siteUrl: string,
 ): RenderedEmail {
   const locale: EmailLocale = sellerLocale === "fr" ? "fr" : "en";
   const copy = COPY[locale];
-  const link = `${siteUrl.replace(/\/$/, "")}${locale === "fr" ? "/fr" : ""}/products/${encodeURIComponent(product.slug)}`;
+  const section = product.kind === "vehicle" ? "cargo-cars" : "products";
+  const link = `${siteUrl.replace(/\/$/, "")}${locale === "fr" ? "/fr" : ""}/${section}/${encodeURIComponent(product.slug)}`;
   const text = [
     copy.intro,
     `${copy.product}: ${product.name}\n${copy.view}: ${link}`,

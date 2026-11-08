@@ -14,6 +14,9 @@ import { useSessionUser } from "@/lib/supabase/use-session-user";
 import { cn } from "@/lib/utils";
 import {
   getModerationAccess,
+  listVehicles,
+  setVehicleSuspended,
+  type ModerationVehicle,
   hasAnyAccess,
   listProducts,
   listShops,
@@ -361,6 +364,78 @@ function ShopsPanel({ access }: { access: ModerationAccess }) {
   );
 }
 
+const VEHICLE_FILTERS = ["published", "suspended", "unpublished", "all"] as const;
+
+function VehiclesPanel() {
+  const t = useTranslations("moderation");
+  const [filter, setFilter] = useState<string>("published");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [rows, setRows] = useState<ModerationVehicle[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  const load = useCallback(async () => {
+    const { data, error } = await listVehicles(getSupabaseBrowserClient(), filter, search, page);
+    if (error) {
+      setFailed(true);
+      return;
+    }
+    setFailed(false);
+    setRows(data as ModerationVehicle[]);
+  }, [filter, search, page]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => void load(), 0);
+    return () => clearTimeout(timer);
+  }, [load]);
+
+  const supabase = getSupabaseBrowserClient();
+  return (
+    <section aria-labelledby="moderation-vehicles" className="grid gap-3">
+      <h2 id="moderation-vehicles" className={headingClass}>{t("vehicles.title")}</h2>
+      <div className={cardClass}>
+        <SearchBar
+          id="vehicles"
+          filters={VEHICLE_FILTERS}
+          filter={filter}
+          label={(name) => t(`vehicles.filters.${name}`)}
+          onFilter={(next) => { setFilter(next); setPage(1); }}
+          onSearch={(next) => { setSearch(next); setPage(1); }}
+        />
+      </div>
+      {failed && <Notice kind="error">{t("errors.loadFailed")}</Notice>}
+      {rows?.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
+      {rows && rows.length > 0 && (
+        <ul className="grid gap-3">
+          {rows.map((vehicle) => (
+            <li key={vehicle.id}>
+              <article aria-label={vehicle.name} className={cardClass}>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="break-words font-semibold">
+                      {vehicle.is_public ? <Link href={`/cargo-cars/${vehicle.slug}`} prefetch={false} className="underline underline-offset-4">{vehicle.name}</Link> : vehicle.name}
+                    </h3>
+                    <p className="break-words text-sm text-muted-foreground">{vehicle.seller_name} · {vehicle.origin_city} → {vehicle.destination_city}</p>
+                  </div>
+                  <StatusPill tone={vehicle.status === "published" ? "good" : vehicle.status === "suspended" ? "bad" : "neutral"}>{t(`vehicles.status.${vehicle.status}`)}</StatusPill>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {vehicle.status === "suspended" ? (
+                    <ReasonAction id={`vrestore-${vehicle.id}`} label={t("vehicles.restore")} hint={t("vehicles.restoreHint")} onConfirm={(reason) => setVehicleSuspended(supabase, vehicle.id, false, reason)} onDone={load} />
+                  ) : (
+                    <ReasonAction id={`vsuspend-${vehicle.id}`} label={t("vehicles.suspend")} destructive onConfirm={(reason) => setVehicleSuspended(supabase, vehicle.id, true, reason)} onDone={load} />
+                  )}
+                </div>
+              </article>
+            </li>
+          ))}
+        </ul>
+      )}
+      {rows && rows.length > 0 && <Pager page={page} total={rows[0].total} onPage={setPage} />}
+    </section>
+  );
+}
+
 const REVIEW_FILTERS = ["published", "hidden", "all"] as const;
 
 function ReviewsPanel() {
@@ -491,6 +566,7 @@ export function ModerationScreen() {
     <div className="grid gap-8">
       {access.products && <ProductsPanel />}
       {access.products && <ReviewsPanel />}
+      {access.vehicles && <VehiclesPanel />}
       {(access.shops || access.publishing) && <ShopsPanel access={access} />}
     </div>
   );

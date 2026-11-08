@@ -50,14 +50,14 @@ reset role;
 
 select pg_temp.act_as('00000000-0000-4000-8000-000000000e03');
 set local role authenticated;
-select results_eq($$ select * from my_moderation_access() $$, $$ values (false, false, false) $$, 'a buyer has no access');
+select results_eq($$ select * from my_moderation_access() $$, $$ values (false, false, false, false) $$, 'a buyer has no access');
 select throws_ok($$ select * from admin_list_moderation_products() $$, '42501', null, 'a buyer cannot list products');
 select throws_ok($$ select * from admin_list_moderation_sellers() $$, '42501', null, 'a buyer cannot list shops');
 reset role;
 
 select pg_temp.act_as('00000000-0000-4000-8000-000000000e04');
 set local role authenticated;
-select results_eq($$ select * from my_moderation_access() $$, $$ values (false, false, false) $$, 'an Admin with no permissions has no access');
+select results_eq($$ select * from my_moderation_access() $$, $$ values (false, false, false, false) $$, 'an Admin with no permissions has no access');
 select throws_ok($$ select * from admin_list_moderation_products() $$, '42501', null, 'and cannot list products');
 select throws_ok($$ select set_seller_status((select shop from ids), 'suspended', 'x') $$, '42501', null, 'or suspend a shop');
 reset role;
@@ -73,7 +73,7 @@ reset role;
 -- Each permission reaches only its own actions.
 select pg_temp.act_as('00000000-0000-4000-8000-000000000e05');
 set local role authenticated;
-select results_eq($$ select * from my_moderation_access() $$, $$ values (true, false, false) $$, 'a product moderator has product access only');
+select results_eq($$ select * from my_moderation_access() $$, $$ values (true, false, false, false) $$, 'a product moderator has product access only');
 select throws_ok($$ select * from admin_list_moderation_sellers() $$, '42501', null, 'and cannot list shops');
 select throws_ok($$ select set_seller_status((select shop from ids), 'suspended', 'x') $$, '42501', null, 'or suspend a shop');
 select throws_ok($$ select set_seller_publishing((select shop from ids), true, 'x') $$, '42501', null, 'or a shop''s publishing');
@@ -107,7 +107,7 @@ select is((select count(*)::int from background_jobs where payload ->> 'template
 -- Publishing permission: shops are visible, but not the owner's private address.
 select pg_temp.act_as('00000000-0000-4000-8000-000000000e06');
 set local role authenticated;
-select results_eq($$ select * from my_moderation_access() $$, $$ values (false, false, true) $$, 'a publishing moderator has publishing access only');
+select results_eq($$ select * from my_moderation_access() $$, $$ values (false, false, true, false) $$, 'a publishing moderator has publishing access only');
 select results_eq(
   $$ select name, owner_email from admin_list_moderation_sellers(null, 'E Mod Shop') $$,
   $$ values ('E Mod Shop', null::text) $$,
@@ -131,7 +131,7 @@ select set_eq(
 -- Shop permission.
 select pg_temp.act_as('00000000-0000-4000-8000-000000000e07');
 set local role authenticated;
-select results_eq($$ select * from my_moderation_access() $$, $$ values (false, true, false) $$, 'a shop manager has shop access only');
+select results_eq($$ select * from my_moderation_access() $$, $$ values (false, true, false, false) $$, 'a shop manager has shop access only');
 select is((select owner_email from admin_list_moderation_sellers(null, 'seller-e@')), 'seller-e@example.com', 'they can see and search the owner''s email');
 select throws_ok($$ select set_seller_publishing((select shop from ids), true, 'x') $$, '42501', null, 'they cannot suspend publishing');
 select throws_ok($$ select set_seller_status((select shop from ids), 'closed', 'x') $$, '23514', 'INVALID_STATUS', 'an unknown status is refused');
@@ -146,7 +146,7 @@ select is((select payload -> 'data' ->> 'reason' from background_jobs where payl
 -- Super Admin can do all of it.
 select pg_temp.act_as('00000000-0000-4000-8000-000000000e01');
 set local role authenticated;
-select results_eq($$ select * from my_moderation_access() $$, $$ values (true, true, true) $$, 'Super Admin has all access');
+select results_eq($$ select * from my_moderation_access() $$, $$ values (true, true, true, true) $$, 'Super Admin has all access');
 select is((select status from admin_list_moderation_sellers('suspended', 'E Mod')), 'suspended', 'filtering finds a suspended shop');
 select lives_ok($$ select set_seller_status((select shop from ids), 'active', 'Cleared') $$, 'Super Admin restores the shop');
 select is_empty($$ select 1 from admin_list_moderation_products('published', '%') $$, 'a percent sign is not a wildcard');

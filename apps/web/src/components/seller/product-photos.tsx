@@ -24,6 +24,7 @@ export function ProductPhotos({
   limit,
   readOnly,
   onChanged,
+  actions,
 }: {
   productId: string;
   productName: string;
@@ -31,6 +32,8 @@ export function ProductPhotos({
   limit: number;
   readOnly: boolean;
   onChanged: () => Promise<void>;
+  /** For photos of something other than a product, such as a cargo car. */
+  actions?: { upload: (file: File) => Promise<void>; remove: (id: string) => Promise<void>; makeMain: (id: string) => Promise<void> };
 }) {
   const t = useTranslations("shop.photos");
   const input = useRef<HTMLInputElement>(null);
@@ -53,10 +56,11 @@ export function ProductPhotos({
     const file = event.target.files?.[0];
     // Clearing it lets someone choose the same file again after a failure.
     event.target.value = "";
-    if (file) void run("uploading", () => uploadProductPhoto(productId, file));
+    if (file) void run("uploading", () => (actions ? actions.upload(file) : uploadProductPhoto(productId, file)));
   }
 
   async function makeMain(id: string) {
+    if (actions) return actions.makeMain(id);
     const { error } = await makeMainPhoto(getSupabaseBrowserClient(), id);
     if (error) throw new Error(error.message);
   }
@@ -79,7 +83,7 @@ export function ProductPhotos({
                       {t("makeMain")}
                     </button>
                   )}
-                  <button type="button" disabled={busy !== null} onClick={() => void run("changing", () => removeProductPhoto(photo.id))} className={smallButton}>
+                  <button type="button" disabled={busy !== null} onClick={() => void run("changing", () => (actions ? actions.remove(photo.id) : removeProductPhoto(photo.id)))} className={smallButton}>
                     {t("remove")}
                   </button>
                 </>

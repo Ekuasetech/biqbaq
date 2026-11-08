@@ -37,6 +37,7 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 | Q-30 | **Should sellers be emailed about moderation, with the reason?** | **Decided by the owner (2026-11-07):** yes, so moderators write reasons for the seller to read | Decided |
 | Q-31 | **Should suspending a seller also suspend their shop?** | **Decided by the owner (2026-11-07):** yes, automatically. As working assumptions, removing the Seller role does the same; restoring the role brings back only a shop the role took down, so one suspended separately stays suspended; and a shop cannot be reopened while its owner's role is suspended or removed | Decided |
 | Q-32 | **Who approves seller staff?** PRD §3.6 required Super Admin approval. | **Decided by the owner (2026-11-07):** the seller, as staff are between a seller and their people. The flow is invite, accept, approve. Super Admin no longer approves them, but can still suspend or remove the role, and a seller cannot override that | Decided |
+| Q-33 | **How is cargo capacity measured, and how do people reach a dealer?** | **Decided by the owner (2026-11-07):** the weight still free, in kilograms; and only through Biqbaq (Contact Seller, then messaging), with no public phone number | Decided |
 | Q-25 | **Who checks the French emails?** The emails go out in the person's chosen language. The French text has not had a native review. | Reviewed along with the rest of the French text | Before launch |
 
 ## PRD §27 decisions, and how much the design depends on them

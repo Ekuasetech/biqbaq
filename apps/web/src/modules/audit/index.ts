@@ -60,6 +60,15 @@ export const AUDIT_ACTIONS = [
   "ad.activate",
   "ad.deactivate",
   "ad.delete",
+  "vehicle.create",
+  "vehicle.edit",
+  "vehicle.publish",
+  "vehicle.unpublish",
+  "vehicle.delete",
+  "vehicle.image_add",
+  "vehicle.image_remove",
+  "vehicle.suspend",
+  "vehicle.restore",
   "setting.update",
 ] as const;
 

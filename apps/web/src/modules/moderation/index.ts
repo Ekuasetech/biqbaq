@@ -9,9 +9,10 @@ export interface ModerationAccess {
   products: boolean;
   shops: boolean;
   publishing: boolean;
+  vehicles: boolean;
 }
 
-export const NO_ACCESS: ModerationAccess = { products: false, shops: false, publishing: false };
+export const NO_ACCESS: ModerationAccess = { products: false, shops: false, publishing: false, vehicles: false };
 
 export interface ModerationProduct {
   id: string;
@@ -46,7 +47,30 @@ export async function getModerationAccess(supabase: SupabaseClient): Promise<Mod
   return error ? NO_ACCESS : ((data as ModerationAccess[])[0] ?? NO_ACCESS);
 }
 
-export const hasAnyAccess = (access: ModerationAccess) => access.products || access.shops || access.publishing;
+export const hasAnyAccess = (access: ModerationAccess) => access.products || access.shops || access.publishing || access.vehicles;
+
+export interface ModerationVehicle {
+  id: string;
+  slug: string;
+  name: string;
+  status: "published" | "unpublished" | "suspended";
+  origin_city: string;
+  destination_city: string;
+  departure_date: string;
+  seller_name: string;
+  is_public: boolean;
+  total: number;
+}
+
+export const listVehicles = (supabase: SupabaseClient, filter: string, search: string, page: number) =>
+  supabase.rpc("admin_list_moderation_vehicles", {
+    p_status: filter === "all" ? null : filter,
+    p_search: search || null,
+    p_limit: MODERATION_PAGE_SIZE,
+    p_offset: (page - 1) * MODERATION_PAGE_SIZE,
+  });
+export const setVehicleSuspended = (supabase: SupabaseClient, id: string, suspended: boolean, reason: string) =>
+  supabase.rpc("set_vehicle_listing_suspended", { p_id: id, p_suspended: suspended, p_reason: reason });
 
 export const listProducts = (supabase: SupabaseClient, filter: string, search: string, page: number) =>
   supabase.rpc("admin_list_moderation_products", {

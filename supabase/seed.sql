@@ -104,3 +104,100 @@ insert into public.advertisements (id, slug, title, description, advertiser_name
   ('30000000-0000-4000-8000-000000000005', 'finished-ad-never-shown', 'Finished ad: never shown', 'Never shown.', 'Past Advertiser (sample)', 'https://picsum.photos/seed/biqbaq-ad-5/900/600', '/products', array['homepage', 'global'], 98, true, '2026-01-01T00:00:00.000Z', '2026-01-02T00:00:00.000Z'),
   ('30000000-0000-4000-8000-000000000006', 'future-ad-not-shown-yet', 'Future ad: not shown yet', 'Not shown yet.', 'Future Advertiser (sample)', 'https://picsum.photos/seed/biqbaq-ad-6/900/600', '/products', array['homepage', 'global'], 97, true, '2030-01-01T00:00:00.000Z', '2031-01-01T00:00:00.000Z')
 on conflict (id) do nothing;
+
+-- Sample cargo cars and their dealers, for local use, moved from the preview's sample data.
+-- Space was a percentage there; it is weight now (owner's decision, 2026-11-07), at 5 kg a percent.
+-- An unverified dealer's trips are hidden, as only verified sellers' trips show (Q-05).
+insert into auth.users (id, email, email_confirmed_at) values
+  ('40000000-0000-4000-8000-000000000001', 'maple-auto-export@example.com', now()),
+  ('40000000-0000-4000-8000-000000000002', 'prairie-motors@example.com', now()),
+  ('40000000-0000-4000-8000-000000000003', 'laurent-autos@example.com', now()),
+  ('40000000-0000-4000-8000-000000000004', 'northgate-exports@example.com', now()),
+  ('40000000-0000-4000-8000-000000000005', 'capital-auto-traders@example.com', now()),
+  ('40000000-0000-4000-8000-000000000006', 'red-river-exports@example.com', now()),
+  ('40000000-0000-4000-8000-000000000007', 'pacific-gate-motors@example.com', now()),
+  ('40000000-0000-4000-8000-000000000008', 'atlantic-auto-shippers@example.com', now()),
+  ('40000000-0000-4000-8000-000000000009', 'lakeshore-exports@example.com', now()),
+  ('40000000-0000-4000-8000-000000000010', 'peel-motors@example.com', now())
+on conflict (id) do nothing;
+insert into public.user_roles (user_id, role_key)
+select id, 'seller' from auth.users where id::text like '40000000-%'
+on conflict (user_id, role_key) do nothing;
+insert into public.sellers (id, owner_user_id, slug, name, city, verification_status, description, category) values
+  ('41000000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000001', 'maple-auto-export', 'Maple Auto Export (sample)', 'Toronto', 'manually_verified', 'Sample dealer: cars going to Nigeria with room for goods.', 'home'),
+  ('41000000-0000-4000-8000-000000000002', '40000000-0000-4000-8000-000000000002', 'prairie-motors', 'Prairie Motors (sample)', 'Toronto', 'manually_verified', 'Sample dealer: cars going to Nigeria with room for goods.', 'home'),
+  ('41000000-0000-4000-8000-000000000003', '40000000-0000-4000-8000-000000000003', 'laurent-autos', 'Laurent Autos (sample)', 'Toronto', 'unverified', 'Sample dealer: cars going to Nigeria with room for goods.', 'home'),
+  ('41000000-0000-4000-8000-000000000004', '40000000-0000-4000-8000-000000000004', 'northgate-exports', 'Northgate Exports (sample)', 'Toronto', 'manually_verified', 'Sample dealer: cars going to Nigeria with room for goods.', 'home'),
+  ('41000000-0000-4000-8000-000000000005', '40000000-0000-4000-8000-000000000005', 'capital-auto-traders', 'Capital Auto Traders (sample)', 'Toronto', 'manually_verified', 'Sample dealer: cars going to Nigeria with room for goods.', 'home'),
+  ('41000000-0000-4000-8000-000000000006', '40000000-0000-4000-8000-000000000006', 'red-river-exports', 'Red River Exports (sample)', 'Toronto', 'manually_verified', 'Sample dealer: cars going to Nigeria with room for goods.', 'home'),
+  ('41000000-0000-4000-8000-000000000007', '40000000-0000-4000-8000-000000000007', 'pacific-gate-motors', 'Pacific Gate Motors (sample)', 'Toronto', 'unverified', 'Sample dealer: cars going to Nigeria with room for goods.', 'home'),
+  ('41000000-0000-4000-8000-000000000008', '40000000-0000-4000-8000-000000000008', 'atlantic-auto-shippers', 'Atlantic Auto Shippers (sample)', 'Toronto', 'manually_verified', 'Sample dealer: cars going to Nigeria with room for goods.', 'home'),
+  ('41000000-0000-4000-8000-000000000009', '40000000-0000-4000-8000-000000000009', 'lakeshore-exports', 'Lakeshore Exports (sample)', 'Toronto', 'manually_verified', 'Sample dealer: cars going to Nigeria with room for goods.', 'home'),
+  ('41000000-0000-4000-8000-000000000010', '40000000-0000-4000-8000-000000000010', 'peel-motors', 'Peel Motors (sample)', 'Toronto', 'unverified', 'Sample dealer: cars going to Nigeria with room for goods.', 'home')
+on conflict (id) do nothing;
+insert into public.vehicle_listings (id, seller_id, slug, make, model, year, origin_city, destination_city, departure_date, available_kg, restrictions, cargo_status, status, first_published_at) values
+  ('10000000-0000-4000-8000-000000000001', '41000000-0000-4000-8000-000000000001', '2021-toyota-sienna', 'Toyota', 'Sienna', 2021, 'Toronto', 'Lagos', '2026-12-05', 200, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now()),
+  ('10000000-0000-4000-8000-000000000002', '41000000-0000-4000-8000-000000000002', '2019-honda-pilot', 'Honda', 'Pilot', 2019, 'Calgary', 'Lagos', '2026-12-12', 325, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now()),
+  ('10000000-0000-4000-8000-000000000003', '41000000-0000-4000-8000-000000000003', '2018-toyota-highlander', 'Toyota', 'Highlander', 2018, 'Montreal', 'Port Harcourt', '2026-12-20', 125, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now()),
+  ('10000000-0000-4000-8000-000000000004', '41000000-0000-4000-8000-000000000004', '2020-lexus-rx-350', 'Lexus', 'RX 350', 2020, 'Edmonton', 'Abuja', '2027-01-08', 250, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now()),
+  ('10000000-0000-4000-8000-000000000005', '41000000-0000-4000-8000-000000000005', '2017-toyota-camry', 'Toyota', 'Camry', 2017, 'Ottawa', 'Lagos', '2027-01-12', 275, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now()),
+  ('10000000-0000-4000-8000-000000000006', '41000000-0000-4000-8000-000000000006', '2022-toyota-rav4', 'Toyota', 'RAV4', 2022, 'Winnipeg', 'Lagos', '2027-01-15', 150, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now()),
+  ('10000000-0000-4000-8000-000000000007', '41000000-0000-4000-8000-000000000007', '2016-honda-accord', 'Honda', 'Accord', 2016, 'Vancouver', 'Port Harcourt', '2027-01-20', 350, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now()),
+  ('10000000-0000-4000-8000-000000000008', '41000000-0000-4000-8000-000000000001', '2019-ford-explorer', 'Ford', 'Explorer', 2019, 'Mississauga', 'Lagos', '2027-01-24', 225, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now()),
+  ('10000000-0000-4000-8000-000000000009', '41000000-0000-4000-8000-000000000008', '2018-hyundai-santa-fe', 'Hyundai', 'Santa Fe', 2018, 'Halifax', 'Abuja', '2027-02-02', 300, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now()),
+  ('10000000-0000-4000-8000-000000000010', '41000000-0000-4000-8000-000000000009', '2020-toyota-corolla', 'Toyota', 'Corolla', 2020, 'Toronto', 'Lagos', '2027-02-06', 100, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now()),
+  ('10000000-0000-4000-8000-000000000011', '41000000-0000-4000-8000-000000000010', '2021-kia-sorento', 'Kia', 'Sorento', 2021, 'Brampton', 'Port Harcourt', '2027-02-14', 175, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now()),
+  ('10000000-0000-4000-8000-000000000012', '41000000-0000-4000-8000-000000000002', '2017-mercedes-benz-gle', 'Mercedes-Benz', 'GLE', 2017, 'Saskatoon', 'Abuja', '2027-02-20', 250, array['Sample: no hazardous or flammable items', 'Sample: no perishable food', 'Sample: boxes must be sealed and labelled']::text[], 'accepting_cargo', 'published', now())
+on conflict (id) do nothing;
+insert into public.media_assets (entity_type, entity_id, cloudinary_public_id, secure_url, alt_text, display_order, is_primary) values
+  ('vehicle', '10000000-0000-4000-8000-000000000001', 'sample/vehicle/2021-toyota-sienna-0', 'https://picsum.photos/seed/biqbaq-cargo-2021-toyota-sienna-1/600/600', 'A silver Toyota Sienna packed with luggage and boxes, being loaded into a shipping container', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000001', 'sample/vehicle/2021-toyota-sienna-1', 'https://picsum.photos/seed/biqbaq-cargo-2021-toyota-sienna-2/600/600', '2021 Toyota Sienna, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000001', 'sample/vehicle/2021-toyota-sienna-2', 'https://picsum.photos/seed/biqbaq-cargo-2021-toyota-sienna-3/600/600', '2021 Toyota Sienna, placeholder image 3', 2, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000002', 'sample/vehicle/2019-honda-pilot-0', 'https://picsum.photos/seed/biqbaq-cargo-2019-honda-pilot-1/600/600', '2019 Honda Pilot, placeholder image 1', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000002', 'sample/vehicle/2019-honda-pilot-1', 'https://picsum.photos/seed/biqbaq-cargo-2019-honda-pilot-2/600/600', '2019 Honda Pilot, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000002', 'sample/vehicle/2019-honda-pilot-2', 'https://picsum.photos/seed/biqbaq-cargo-2019-honda-pilot-3/600/600', '2019 Honda Pilot, placeholder image 3', 2, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000003', 'sample/vehicle/2018-toyota-highlander-0', 'https://picsum.photos/seed/biqbaq-cargo-2018-toyota-highlander-1/600/600', '2018 Toyota Highlander, placeholder image 1', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000003', 'sample/vehicle/2018-toyota-highlander-1', 'https://picsum.photos/seed/biqbaq-cargo-2018-toyota-highlander-2/600/600', '2018 Toyota Highlander, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000003', 'sample/vehicle/2018-toyota-highlander-2', 'https://picsum.photos/seed/biqbaq-cargo-2018-toyota-highlander-3/600/600', '2018 Toyota Highlander, placeholder image 3', 2, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000004', 'sample/vehicle/2020-lexus-rx-350-0', 'https://picsum.photos/seed/biqbaq-cargo-2020-lexus-rx-350-1/600/600', '2020 Lexus RX 350, placeholder image 1', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000004', 'sample/vehicle/2020-lexus-rx-350-1', 'https://picsum.photos/seed/biqbaq-cargo-2020-lexus-rx-350-2/600/600', '2020 Lexus RX 350, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000004', 'sample/vehicle/2020-lexus-rx-350-2', 'https://picsum.photos/seed/biqbaq-cargo-2020-lexus-rx-350-3/600/600', '2020 Lexus RX 350, placeholder image 3', 2, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000005', 'sample/vehicle/2017-toyota-camry-0', 'https://picsum.photos/seed/biqbaq-cargo-2017-toyota-camry-1/600/600', '2017 Toyota Camry, placeholder image 1', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000005', 'sample/vehicle/2017-toyota-camry-1', 'https://picsum.photos/seed/biqbaq-cargo-2017-toyota-camry-2/600/600', '2017 Toyota Camry, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000005', 'sample/vehicle/2017-toyota-camry-2', 'https://picsum.photos/seed/biqbaq-cargo-2017-toyota-camry-3/600/600', '2017 Toyota Camry, placeholder image 3', 2, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000006', 'sample/vehicle/2022-toyota-rav4-0', 'https://picsum.photos/seed/biqbaq-cargo-2022-toyota-rav4-1/600/600', '2022 Toyota RAV4, placeholder image 1', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000006', 'sample/vehicle/2022-toyota-rav4-1', 'https://picsum.photos/seed/biqbaq-cargo-2022-toyota-rav4-2/600/600', '2022 Toyota RAV4, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000006', 'sample/vehicle/2022-toyota-rav4-2', 'https://picsum.photos/seed/biqbaq-cargo-2022-toyota-rav4-3/600/600', '2022 Toyota RAV4, placeholder image 3', 2, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000007', 'sample/vehicle/2016-honda-accord-0', 'https://picsum.photos/seed/biqbaq-cargo-2016-honda-accord-1/600/600', '2016 Honda Accord, placeholder image 1', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000007', 'sample/vehicle/2016-honda-accord-1', 'https://picsum.photos/seed/biqbaq-cargo-2016-honda-accord-2/600/600', '2016 Honda Accord, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000007', 'sample/vehicle/2016-honda-accord-2', 'https://picsum.photos/seed/biqbaq-cargo-2016-honda-accord-3/600/600', '2016 Honda Accord, placeholder image 3', 2, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000008', 'sample/vehicle/2019-ford-explorer-0', 'https://picsum.photos/seed/biqbaq-cargo-2019-ford-explorer-1/600/600', '2019 Ford Explorer, placeholder image 1', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000008', 'sample/vehicle/2019-ford-explorer-1', 'https://picsum.photos/seed/biqbaq-cargo-2019-ford-explorer-2/600/600', '2019 Ford Explorer, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000008', 'sample/vehicle/2019-ford-explorer-2', 'https://picsum.photos/seed/biqbaq-cargo-2019-ford-explorer-3/600/600', '2019 Ford Explorer, placeholder image 3', 2, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000009', 'sample/vehicle/2018-hyundai-santa-fe-0', 'https://picsum.photos/seed/biqbaq-cargo-2018-hyundai-santa-fe-1/600/600', '2018 Hyundai Santa Fe, placeholder image 1', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000009', 'sample/vehicle/2018-hyundai-santa-fe-1', 'https://picsum.photos/seed/biqbaq-cargo-2018-hyundai-santa-fe-2/600/600', '2018 Hyundai Santa Fe, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000009', 'sample/vehicle/2018-hyundai-santa-fe-2', 'https://picsum.photos/seed/biqbaq-cargo-2018-hyundai-santa-fe-3/600/600', '2018 Hyundai Santa Fe, placeholder image 3', 2, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000010', 'sample/vehicle/2020-toyota-corolla-0', 'https://picsum.photos/seed/biqbaq-cargo-2020-toyota-corolla-1/600/600', '2020 Toyota Corolla, placeholder image 1', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000010', 'sample/vehicle/2020-toyota-corolla-1', 'https://picsum.photos/seed/biqbaq-cargo-2020-toyota-corolla-2/600/600', '2020 Toyota Corolla, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000010', 'sample/vehicle/2020-toyota-corolla-2', 'https://picsum.photos/seed/biqbaq-cargo-2020-toyota-corolla-3/600/600', '2020 Toyota Corolla, placeholder image 3', 2, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000011', 'sample/vehicle/2021-kia-sorento-0', 'https://picsum.photos/seed/biqbaq-cargo-2021-kia-sorento-1/600/600', '2021 Kia Sorento, placeholder image 1', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000011', 'sample/vehicle/2021-kia-sorento-1', 'https://picsum.photos/seed/biqbaq-cargo-2021-kia-sorento-2/600/600', '2021 Kia Sorento, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000011', 'sample/vehicle/2021-kia-sorento-2', 'https://picsum.photos/seed/biqbaq-cargo-2021-kia-sorento-3/600/600', '2021 Kia Sorento, placeholder image 3', 2, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000012', 'sample/vehicle/2017-mercedes-benz-gle-0', 'https://picsum.photos/seed/biqbaq-cargo-2017-mercedes-benz-gle-1/600/600', '2017 Mercedes-Benz GLE, placeholder image 1', 0, true),
+  ('vehicle', '10000000-0000-4000-8000-000000000012', 'sample/vehicle/2017-mercedes-benz-gle-1', 'https://picsum.photos/seed/biqbaq-cargo-2017-mercedes-benz-gle-2/600/600', '2017 Mercedes-Benz GLE, placeholder image 2', 1, false),
+  ('vehicle', '10000000-0000-4000-8000-000000000012', 'sample/vehicle/2017-mercedes-benz-gle-2', 'https://picsum.photos/seed/biqbaq-cargo-2017-mercedes-benz-gle-3/600/600', '2017 Mercedes-Benz GLE, placeholder image 3', 2, false)
+on conflict do nothing;
+insert into public.vehicle_view_totals (vehicle_listing_id, views) values
+  ('10000000-0000-4000-8000-000000000001', 1876),
+  ('10000000-0000-4000-8000-000000000002', 942),
+  ('10000000-0000-4000-8000-000000000003', 531),
+  ('10000000-0000-4000-8000-000000000004', 1208),
+  ('10000000-0000-4000-8000-000000000005', 640),
+  ('10000000-0000-4000-8000-000000000006', 1543),
+  ('10000000-0000-4000-8000-000000000007', 487),
+  ('10000000-0000-4000-8000-000000000008', 1102),
+  ('10000000-0000-4000-8000-000000000009', 318),
+  ('10000000-0000-4000-8000-000000000010', 1689),
+  ('10000000-0000-4000-8000-000000000011', 729),
+  ('10000000-0000-4000-8000-000000000012', 256)
+on conflict (vehicle_listing_id) do nothing;
