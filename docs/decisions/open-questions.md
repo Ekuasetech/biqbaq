@@ -42,6 +42,9 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 | Q-35 | **What is a conversation's status?** | **Decided by the owner (2026-11-08):** open or closed. Either side can close it, which stops new messages until either reopens it. Archiving is separate and personal, and a new message brings an archived conversation back | Decided |
 | Q-36 | **Who can read private messages for the platform?** (§9.1: restricted and audited) | **Decided by the owner (2026-11-08):** Super Admin only. Finding conversations shows who wrote to which shop, never the text; reading one needs a reason, and each reading is in the audit log | Decided |
 | Q-37 | **Who starts a conversation, and from where?** | **Decided by the owner (2026-11-08):** signed-in people, from a product, a cargo car or a shop page. Sellers reply but cannot write to people first | Decided |
+| Q-38 | **What appears under the bell?** | **Decided by the owner (2026-11-08):** every event that sends an email, including staff invitations to people with an account, but not new messages, which keep their own count | Decided |
+| Q-39 | **Which emails can people turn off?** | **Decided by the owner (2026-11-08):** only message and staff emails. Decisions about their account, shop, listings and roles always email; sign-up and password emails are never optional. Everything still reaches the bell | Decided |
+| Q-40 | **How long are notifications kept?** | **Decided by the owner (2026-11-08):** 90 days, read or not; the audit log is the lasting record. Old ones are deleted as new ones arrive, as there is no scheduler yet (Q-11) | Decided |
 | Q-25 | **Who checks the French emails?** The emails go out in the person's chosen language. The French text has not had a native review. | Reviewed along with the rest of the French text | Before launch |
 
 ## PRD §27 decisions, and how much the design depends on them

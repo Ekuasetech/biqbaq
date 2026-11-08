@@ -411,7 +411,8 @@
     "blogLink": "Blog",
     "adsLink": "Ads",
     "messagesLink": "Messages",
-    "adminMessagesLink": "Conversations"
+    "adminMessagesLink": "Conversations",
+    "notificationsLink": "Notifications"
   },
   "admin": {
     "section": "Administration",
@@ -1646,6 +1647,64 @@
     "errors": {
       "notAllowed": "Only Super Admin can see conversations.",
       "loadFailed": "Conversations couldn't be loaded. Please refresh the page."
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "listTitle": "Recent",
+    "loading": "Loading...",
+    "empty": "No notifications yet. Decisions about your account, shop and listings will appear here.",
+    "markAllRead": "Mark all as read",
+    "unreadLabel": "Unread:",
+    "earlier": "Show older",
+    "reason": "Reason: {reason}",
+    "keptFor": "Notifications are kept for 90 days.",
+    "headerUnread": "Notifications, {count} unread",
+    "signedOut": "Sign in to see your notifications.",
+    "signIn": "Sign in",
+    "preferences": {
+      "title": "Email preferences",
+      "intro": "Everything still appears here. Emails about decisions on your account, shop, listings and roles always go out, as you may need to act on them.",
+      "messages": {
+        "label": "Emails about new messages",
+        "help": "At most one an hour for each conversation."
+      },
+      "staff": {
+        "label": "Emails about staff",
+        "help": "Invitations, approvals and changes to your staff access."
+      },
+      "saved": "Saved."
+    },
+    "errors": {
+      "loadFailed": "Your notifications couldn't be loaded. Please refresh the page.",
+      "generic": "That didn't work. Please try again."
+    },
+    "types": {
+      "welcome": "Welcome to Biqbaq. Your account is ready.",
+      "application_received": "A new role application is waiting for your review.",
+      "application_approved": "Your application for the {role} role was approved.",
+      "application_rejected": "Your application for the {role} role was not approved.",
+      "verification_verified": "Your shop is now verified.",
+      "verification_rejected": "Your verification request was not approved.",
+      "verification_suspended": "Your shop's verification was suspended.",
+      "verification_restored": "Your shop's verification was restored.",
+      "verification_revoked": "Your shop's verification was removed.",
+      "product_suspended": "Biqbaq suspended your listing “{product}”.",
+      "product_restored": "Biqbaq lifted the suspension on “{product}”. You can publish it again.",
+      "shop_suspended": "Your shop was suspended.",
+      "shop_restored": "Your shop is active again.",
+      "publishing_suspended": "Publishing was suspended for your shop.",
+      "publishing_restored": "You can publish in your shop again.",
+      "role_assigned": "You were given the {role} role.",
+      "role_suspended": "Your {role} role was suspended.",
+      "role_restored": "Your {role} role was restored.",
+      "role_revoked": "Your {role} role was removed.",
+      "staff_invitation": "{shop} invited you to join their staff.",
+      "staff_approved": "{shop} approved you as staff.",
+      "staff_suspended": "Your staff access to {shop} was suspended.",
+      "staff_restored": "Your staff access to {shop} was restored.",
+      "staff_removed": "You were removed from {shop}'s staff.",
+      "other": "Something changed on your account."
     }
   }
 }

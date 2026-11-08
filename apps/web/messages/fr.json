@@ -411,7 +411,8 @@
     "blogLink": "Blogue",
     "adsLink": "Publicités",
     "messagesLink": "Messages",
-    "adminMessagesLink": "Conversations"
+    "adminMessagesLink": "Conversations",
+    "notificationsLink": "Notifications"
   },
   "admin": {
     "section": "Administration",
@@ -1646,6 +1647,64 @@
     "errors": {
       "notAllowed": "Seul le Super administrateur peut voir les conversations.",
       "loadFailed": "Les conversations n'ont pas pu être chargées. Veuillez actualiser la page."
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "listTitle": "Récentes",
+    "loading": "Chargement...",
+    "empty": "Aucune notification pour le moment. Les décisions concernant votre compte, votre boutique et vos annonces apparaîtront ici.",
+    "markAllRead": "Tout marquer comme lu",
+    "unreadLabel": "Non lue :",
+    "earlier": "Afficher les plus anciennes",
+    "reason": "Motif : {reason}",
+    "keptFor": "Les notifications sont conservées 90 jours.",
+    "headerUnread": "Notifications, {count} non lues",
+    "signedOut": "Connectez-vous pour voir vos notifications.",
+    "signIn": "Se connecter",
+    "preferences": {
+      "title": "Préférences de courriel",
+      "intro": "Tout apparaît toujours ici. Les courriels sur les décisions concernant votre compte, votre boutique, vos annonces et vos rôles sont toujours envoyés, car vous pourriez devoir agir.",
+      "messages": {
+        "label": "Courriels sur les nouveaux messages",
+        "help": "Au plus un par heure pour chaque conversation."
+      },
+      "staff": {
+        "label": "Courriels sur le personnel",
+        "help": "Invitations, approbations et changements de votre accès de personnel."
+      },
+      "saved": "Enregistré."
+    },
+    "errors": {
+      "loadFailed": "Vos notifications n'ont pas pu être chargées. Veuillez actualiser la page.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
+    },
+    "types": {
+      "welcome": "Bienvenue sur Biqbaq. Votre compte est prêt.",
+      "application_received": "Une nouvelle demande de rôle attend votre examen.",
+      "application_approved": "Votre demande pour le rôle {role} a été approuvée.",
+      "application_rejected": "Votre demande pour le rôle {role} n'a pas été approuvée.",
+      "verification_verified": "Votre boutique est maintenant vérifiée.",
+      "verification_rejected": "Votre demande de vérification n'a pas été approuvée.",
+      "verification_suspended": "La vérification de votre boutique a été suspendue.",
+      "verification_restored": "La vérification de votre boutique a été rétablie.",
+      "verification_revoked": "La vérification de votre boutique a été retirée.",
+      "product_suspended": "Biqbaq a suspendu votre annonce « {product} ».",
+      "product_restored": "Biqbaq a levé la suspension de « {product} ». Vous pouvez la republier.",
+      "shop_suspended": "Votre boutique a été suspendue.",
+      "shop_restored": "Votre boutique est de nouveau active.",
+      "publishing_suspended": "La publication a été suspendue pour votre boutique.",
+      "publishing_restored": "Vous pouvez de nouveau publier dans votre boutique.",
+      "role_assigned": "Le rôle {role} vous a été attribué.",
+      "role_suspended": "Votre rôle {role} a été suspendu.",
+      "role_restored": "Votre rôle {role} a été rétabli.",
+      "role_revoked": "Votre rôle {role} a été retiré.",
+      "staff_invitation": "{shop} vous a invité à rejoindre son personnel.",
+      "staff_approved": "{shop} vous a approuvé comme membre du personnel.",
+      "staff_suspended": "Votre accès de personnel à {shop} a été suspendu.",
+      "staff_restored": "Votre accès de personnel à {shop} a été rétabli.",
+      "staff_removed": "Vous avez été retiré du personnel de {shop}.",
+      "other": "Un changement a eu lieu sur votre compte."
     }
   }
 }

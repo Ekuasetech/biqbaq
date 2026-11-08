@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { UNREAD_CHANGED, unreadCount } from "@/modules/messaging";
 
 /** The header's way into the inbox, with how many conversations have something unread. */
@@ -82,6 +83,7 @@ export function AccountMenu() {
 
   return (
     <div className="flex items-center gap-2">
+      <NotificationBell user={user} />
       <MessagesLink user={user} />
       <Link
         href="/account"

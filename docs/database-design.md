@@ -102,8 +102,8 @@ Slugs must be unique, and real titles repeat (two 2021 Toyota Siennas), so a gen
 | `platform_settings` | `key`, `value` jsonb, `updated_by` | Typed and validated per key |
 | `platform_settings_history` | `key`, `old_value`, `new_value`, `actor_id`, `reason`, `created_at` | Written in the same transaction |
 | `audit_logs` | `actor_id`, `action`, `target_type`, `target_id`, `on_behalf_of_seller_id`, `reason`, `metadata`, `created_at` | Append-only; a trigger rejects `UPDATE` and `DELETE` |
-| `notifications` | `user_id`, `type`, `payload`, `read_at`, delivery status | |
-| `notification_preferences` | `user_id`, `channel`, `type`, `enabled` | |
+| `notifications` | `user_id`, `type` (the email template's name), `data`, `read_at`, `created_at`, `idempotency_key` (unique) | Written by `private.enqueue_email`, so the bell and the email describe the same event. Owners read their own through RLS, which Realtime also uses. Kept 90 days (Q-40) |
+| `notification_preferences` | `user_id`, `category` (messages, staff: Q-39), `email_enabled` | Applied by a trigger on `background_jobs`, so every way of queuing an email respects it. No row means on |
 | `background_jobs` | `type`, `user_id`, `payload`, `status`, `attempts`, `max_attempts`, `run_at`, `locked_until`, `last_error`, `provider_message_id`, `idempotency_key` (unique) | ADR-0002. Stores who an email is for, never the address, which is looked up when sending |
 | `view_events` | `entity_type`, `entity_id`, `visitor_hash`, `day` | Unique per listing, visitor and day (Q-16). A job rolls them up into `view_count` and `reader_count`, then prunes them, so public pages never write to listings |
 | `rate_limit_counters` | `bucket`, `window_start`, `count` | Pruned by a job |

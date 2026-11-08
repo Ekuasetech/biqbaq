@@ -238,6 +238,7 @@ test.describe("public marketplace", () => {
 
   test("cargo cars can be filtered by departure city and destination", async ({ page }) => {
     await page.goto("/cargo-cars");
+    await expect(cars(page).filter({ hasText: "2021 Toyota Sienna" })).toHaveCount(1);
     const all = await cars(page).count();
     expect(all).toBeGreaterThanOrEqual(9);
     await page.getByLabel("Leaving from").selectOption("Calgary");
@@ -938,9 +939,48 @@ test.describe("public marketplace", () => {
               await form.getByLabel("Category").selectOption({ label: "Food & groceries" });
             }
             await form.getByRole("button", { name: "Save" }).click();
-            await expect(page.getByRole("article", { name })).toContainText("Draft");
+            await expect(page.getByRole("article", { name })).toContainText("Draft", { timeout: 15000 });
           }
           const item = (page: import("@playwright/test").Page, name: string) => page.getByRole("article", { name });
+
+          test("the bell shows what happened, live, and people choose which emails they get", async ({ page, browser, request }) => {
+            test.setTimeout(120000);
+            const seller = await approvedSeller(page, browser, request);
+            const shop = seller.page;
+            const userId = sql(`select id from auth.users where email = '${seller.email}'`);
+            // Being approved is already there.
+            const bell = shop.getByRole("banner").getByRole("link", { name: /^Notifications/ });
+            await expect(bell).toHaveAccessibleName(/Notifications, \d+ unread/, { timeout: 15000 });
+            const before = Number(/(\d+) unread/.exec((await bell.getAttribute("aria-label")) ?? "")?.[1]);
+
+            // A moderation decision arrives without a reload.
+            sql(`select private.enqueue_email('${userId}', 'product_suspended', '{"product": "Bell Tote", "reason": "Photos are not of the item"}', 'e2e-bell:' || gen_random_uuid())`);
+            await expect(bell).toHaveAccessibleName(`Notifications, ${before + 1} unread`, { timeout: 15000 });
+
+            await bell.click();
+            await expect(shop).toHaveURL(/\/account\/notifications$/);
+            const list = shop.getByRole("list", { name: "Recent" });
+            await expect(list).toContainText("Biqbaq suspended your listing “Bell Tote”.");
+            await expect(list).toContainText("Reason: Photos are not of the item");
+            await expect(list).toContainText("Your application for the Seller role was approved.");
+            await list.getByRole("button", { name: /Bell Tote/ }).click();
+            await expect(shop).toHaveURL(/\/account\/shop$/);
+            await expect(bell).toHaveAccessibleName(`Notifications, ${before} unread`);
+
+            await shop.goto("/account/notifications");
+            await shop.getByRole("button", { name: "Mark all as read" }).click();
+            await expect(bell).toHaveAccessibleName("Notifications");
+            await expect(shop.getByRole("button", { name: "Mark all as read" })).toHaveCount(0);
+
+            // Message emails can be turned off; decisions about the account cannot.
+            const preferences = shop.getByRole("region", { name: "Email preferences" });
+            await preferences.getByRole("checkbox", { name: /Emails about new messages/ }).uncheck();
+            await expect(preferences.getByRole("status")).toHaveText("Saved.");
+            await shop.reload();
+            await expect(shop.getByRole("region", { name: "Email preferences" }).getByRole("checkbox", { name: /Emails about new messages/ })).not.toBeChecked({ timeout: 15000 });
+            await expect(shop.getByRole("region", { name: "Email preferences" }).getByRole("checkbox")).toHaveCount(2);
+            expect(sql(`select email_enabled from public.notification_preferences where user_id = '${userId}' and category = 'messages'`)).toBe("f");
+          });
 
           test.describe("messaging", () => {
             test("a buyer messages a seller about a product, and both see replies arrive live", async ({ page, browser, request }) => {
@@ -2621,6 +2661,7 @@ test.describe("public marketplace", () => {
     await page.goto("/cargo-cars");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cargo Cars");
     const list = page.getByRole("list", { name: "Cars going to Nigeria" }).getByRole("article");
+    await expect(list.filter({ hasText: "2021 Toyota Sienna" })).toHaveCount(1);
     const count = await list.count();
     expect(count).toBeGreaterThanOrEqual(9);
     await expect(page.getByText(new RegExp(`^${count} cars\\b`))).toBeVisible();

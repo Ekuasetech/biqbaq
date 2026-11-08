@@ -412,9 +412,14 @@ export function AccountDashboard() {
     <div className="grid items-start gap-4 lg:grid-cols-2">
       <div className="grid gap-4">
         <ProfileCard user={user} data={data} onSaved={reload} />
-        <Link href="/account/messages" className={cn(primaryButton, "w-fit")}>
-          {t("messagesLink")}
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/account/messages" className={cn(primaryButton, "w-fit")}>
+            {t("messagesLink")}
+          </Link>
+          <Link href="/account/notifications" className={cn(primaryButton, "w-fit")}>
+            {t("notificationsLink")}
+          </Link>
+        </div>
         <RolesCard roles={data.roles} />
         {data.roles.some((role) => role.role_key === "seller" && role.status === "active") && (
           <Link href="/account/shop" className={cn(primaryButton, "w-fit")}>
