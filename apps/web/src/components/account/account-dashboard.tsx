@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { FavouritesCard } from "@/components/account/favourites-card";
 import { StaffCard } from "@/components/account/staff-card";
+import { AdsLink } from "@/components/admin/ads-admin";
 import { BlogLink } from "@/components/admin/blog-admin";
 import { ModerationLink } from "@/components/admin/moderation";
 import { RecentApplications } from "@/components/admin/recent-applications";
@@ -419,6 +420,7 @@ export function AccountDashboard() {
         )}
         <ModerationLink className={cn(primaryButton, "w-fit")}>{t("moderationLink")}</ModerationLink>
         <BlogLink className={cn(primaryButton, "w-fit")}>{t("blogLink")}</BlogLink>
+        <AdsLink className={cn(primaryButton, "w-fit")}>{t("adsLink")}</AdsLink>
         {isSuperAdmin && (
           <div className="flex flex-wrap gap-2">
             <Link href="/admin/role-applications" className={cn(primaryButton, "w-fit")}>

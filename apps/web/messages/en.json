@@ -408,7 +408,8 @@
     "auditLogLink": "Audit log",
     "moderationLink": "Moderation",
     "peopleLink": "People and roles",
-    "blogLink": "Blog"
+    "blogLink": "Blog",
+    "adsLink": "Ads"
   },
   "admin": {
     "section": "Administration",
@@ -466,7 +467,8 @@
       "generic": "Something went wrong. Please try again."
     },
     "noModerationAccess": "This area is for people with a moderation permission.",
-    "noBlogAccess": "This area is for Super Admin and Co-admins given the blog permission."
+    "noBlogAccess": "This area is for Super Admin and Co-admins given the blog permission.",
+    "noAdsAccess": "This area is for Super Admin and Co-admins given the ads permission."
   },
   "shop": {
     "title": "My shop",
@@ -708,6 +710,10 @@
       "features": {
         "title": "Features",
         "help": "Switch parts of the site on or off for everyone."
+      },
+      "ads": {
+        "title": "Ads",
+        "help": "How many ads each Sponsored section shows. The highest priority ads show first, and an ad never shows twice on one page."
       }
     },
     "items": {
@@ -786,6 +792,10 @@
       "commentsPerHour": {
         "label": "Comments per person",
         "help": "Most comments one person can post in an hour."
+      },
+      "adsPerSection": {
+        "label": "Ads per section",
+        "help": "From 1 to 6."
       }
     },
     "history": {
@@ -877,7 +887,13 @@
       "blog_archive": "Archived a blog post",
       "blog_category_create": "Added a blog category",
       "comment_hide": "Hid a comment",
-      "comment_restore": "Showed a hidden comment"
+      "comment_restore": "Showed a hidden comment",
+      "ad_create": "Created an ad",
+      "ad_edit": "Edited an ad",
+      "ad_image": "Changed an ad's photo",
+      "ad_activate": "Turned an ad on",
+      "ad_deactivate": "Turned an ad off",
+      "ad_delete": "Deleted an ad"
     }
   },
   "moderation": {
@@ -1327,6 +1343,102 @@
       "rateLimited": "You've posted several comments recently. Please try again in an hour.",
       "unavailable": "This post is no longer available.",
       "generic": "That didn't work. Please try again."
+    }
+  },
+  "adsAdmin": {
+    "title": "Ads",
+    "newAd": "New ad",
+    "newTitle": "New ad",
+    "editTitle": "Edit ad",
+    "backToList": "Back to all ads",
+    "adForm": "Ad",
+    "filterLabel": "Show ads",
+    "search": "Search titles and advertisers",
+    "searchButton": "Search",
+    "empty": "No ads here yet.",
+    "edit": "Edit",
+    "priorityShort": "Priority {priority}",
+    "dates": "{from} to {to}",
+    "pagination": "Pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "filters": {
+      "all": "All",
+      "live": "Live",
+      "scheduled": "Scheduled",
+      "off": "Off",
+      "ended": "Ended"
+    },
+    "state": {
+      "live": "Live",
+      "scheduled": "Scheduled",
+      "off": "Off",
+      "ended": "Ended"
+    },
+    "placements": {
+      "homepage": "Home page",
+      "global": "Every other page"
+    },
+    "fields": {
+      "title": "Title",
+      "advertiser": "Advertiser",
+      "description": "Details on the ad's page",
+      "destination": "Where the button goes",
+      "placements": "Where it shows",
+      "priority": "Priority",
+      "startsAt": "Starts",
+      "endsAt": "Ends"
+    },
+    "hints": {
+      "description": "Shown on the ad's own page, which every ad opens first.",
+      "destination": "A Biqbaq page, such as /products, or a secure address starting with https://.",
+      "placements": "Each section shows the highest priority ads first, up to the number set in Platform settings.",
+      "priority": "0 to 1000. Higher shows first.",
+      "activate": "An ad shows only while it is on, between its start and end, and once it has a photo."
+    },
+    "preview": "Preview",
+    "previewTitle": "Your ad's title",
+    "previewAdvertiser": "Advertiser",
+    "chooseImage": "Choose a photo",
+    "replaceImage": "Replace the photo",
+    "saveBeforeImage": "Save the ad once to add its photo.",
+    "imageSaved": "Photo saved.",
+    "save": "Save changes",
+    "create": "Create ad",
+    "working": "Saving...",
+    "saved": "Saved.",
+    "turnOn": "Turn on",
+    "turnOff": "Turn off",
+    "turnedOn": "Turned on. It shows between its start and end.",
+    "turnedOff": "Turned off, and no longer shown.",
+    "viewAd": "View the ad",
+    "delete": "Delete ad",
+    "deleteWarning": "This removes the ad and its photo for good.",
+    "confirmDelete": "Yes, delete it",
+    "cancel": "Cancel",
+    "errors": {
+      "required": "Enter a title and an advertiser.",
+      "tooLong": "Something is too long.",
+      "destinationInvalid": "Enter a Biqbaq page such as /products, or an address starting with https://.",
+      "placementRequired": "Choose at least one place for it to show.",
+      "priorityInvalid": "Enter a whole number from 0 to 1000.",
+      "datesInvalid": "Choose an end after the start.",
+      "invalid": "Something in the ad isn't allowed. Check each field.",
+      "needsImage": "Add a photo before turning it on.",
+      "notAllowed": "You don't have permission to do this.",
+      "changed": "This has already changed. Showing the latest.",
+      "generic": "That didn't work. Please try again.",
+      "loadFailed": "Ads couldn't be loaded. Please refresh the page."
+    },
+    "photoErrors": {
+      "FORMAT": "Choose a JPG, PNG or WebP photo.",
+      "TOO_LARGE": "This photo couldn't be made small enough. Try another.",
+      "UNREADABLE": "This photo couldn't be opened. Try another.",
+      "UPLOAD_FAILED": "The upload didn't finish. Please try again.",
+      "IMAGE_REJECTED": "This photo isn't allowed. Try another.",
+      "MEDIA_NOT_CONFIGURED": "Photo uploads aren't set up yet.",
+      "GENERIC": "That didn't work. Please try again."
     }
   }
 }

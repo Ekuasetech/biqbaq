@@ -499,7 +499,8 @@ test.describe("public marketplace", () => {
     test("the list shows every article, and each one opens", async ({ page }) => {
       await page.goto("/blog");
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Biqbaq blog");
-      await expect(page.getByRole("list", { name: "All articles" }).getByRole("article")).toHaveCount(4);
+      // At least the four sample articles after the lead one. Another test may be publishing a post meanwhile.
+      expect(await page.getByRole("list", { name: "All articles" }).getByRole("article").count()).toBeGreaterThanOrEqual(4);
       await expect(page.getByRole("region", { name: "Sponsored" }).getByRole("article")).toHaveCount(3);
       // The large lead article opens its own page too.
       // Found by its address, which never changes, rather than its title, which an editor can change.
@@ -1489,7 +1490,8 @@ test.describe("public marketplace", () => {
             await hide.getByRole("button", { name: "Hide comment" }).click();
             await hide.getByLabel("Reason").fill("Off topic");
             await hide.getByRole("button", { name: "Confirm: Hide comment" }).click();
-            await expect(page.getByText("No comments here.")).toBeVisible();
+            // Real comments may exist too, so this checks that this one has left the list.
+            await expect(hide).toHaveCount(0);
             await commenter.page.reload();
             await expect(commenter.page.getByRole("region", { name: /^Comments/ })).toContainText("No comments yet.");
             await page.getByRole("tab", { name: "Posts" }).click();
@@ -1515,6 +1517,100 @@ test.describe("public marketplace", () => {
               await expect(reader.getByRole("heading", { name: title })).toHaveCount(0, { timeout: 2000 });
             }).toPass({ timeout: 90000 });
             (reader as unknown as { problems?: string[] }).problems = [];
+          });
+
+          test("Super Admin creates, previews, turns on, edits and deletes an ad, with a real photo", async ({ page, request, browser }) => {
+            test.setTimeout(150000);
+            const owner = await confirmedAccount(page, request);
+            makeSuperAdmin(owner);
+            const title = `Season sale ${unique()}`;
+            const png = (width: number, height: number) => {
+              const crc = (buffer: Buffer) => {
+                let c = ~0;
+                for (const byte of buffer) {
+                  c ^= byte;
+                  for (let k = 0; k < 8; k += 1) c = (c >>> 1) ^ (0xedb88320 & -(c & 1));
+                }
+                return ~c >>> 0;
+              };
+              const chunk = (type: string, data: Buffer) => {
+                const head = Buffer.alloc(8);
+                head.writeUInt32BE(data.length);
+                head.write(type, 4);
+                const tail = Buffer.alloc(4);
+                tail.writeUInt32BE(crc(Buffer.concat([head.subarray(4), data])));
+                return Buffer.concat([head, data, tail]);
+              };
+              const header = Buffer.alloc(13);
+              header.writeUInt32BE(width, 0);
+              header.writeUInt32BE(height, 4);
+              header.set([8, 2, 0, 0, 0], 8);
+              const row = Buffer.concat([Buffer.from([0]), Buffer.alloc(width * 3, 90)]);
+              return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", header), chunk("IDAT", deflateSync(Buffer.concat(Array.from({ length: height }, () => row)))), chunk("IEND", Buffer.alloc(0))]);
+            };
+
+            await page.goto("/account");
+            await page.getByRole("link", { name: "Ads", exact: true }).click();
+            await expect(page).toHaveURL(/\/admin\/ads$/);
+            await page.getByRole("button", { name: "New ad" }).click();
+            const editor = page.getByRole("region", { name: "New ad" });
+            await editor.getByLabel("Title").fill(title);
+            await editor.getByLabel("Advertiser").fill("Maple Freight");
+            await editor.getByLabel("Details on the ad's page").fill("Space available in cars going to Lagos.");
+            await editor.getByLabel("Where the button goes").fill("javascript:alert(1)");
+            await editor.getByRole("button", { name: "Create ad" }).click();
+            await expect(editor.getByText("Enter a Biqbaq page such as /products, or an address starting with https://.")).toBeVisible();
+            await editor.getByLabel("Where the button goes").fill("/cargo-cars");
+            await editor.getByLabel("Priority").fill("1000");
+            await editor.getByRole("button", { name: "Create ad" }).click();
+            const ad = page.getByRole("region", { name: "Edit ad" });
+            await expect(ad.getByText("Saved.")).toBeVisible();
+            await expect(ad.getByRole("group", { name: "Preview" })).toContainText(title);
+
+            // It cannot go on without a photo, which goes through the real Cloudinary checks.
+            await ad.getByRole("button", { name: "Turn on" }).click();
+            await expect(ad.getByText("Add a photo before turning it on.")).toBeVisible();
+            ignoreExpectedFailures(page); // The browser logs the refusal as an error.
+            await ad.getByLabel("Choose a photo").setInputFiles({ name: "ad.png", mimeType: "image/png", buffer: png(900, 600) });
+            await expect(ad.getByText("Photo saved.")).toBeVisible({ timeout: 30000 });
+            const slug = sql(`select slug from public.advertisements where title = '${title}'`);
+            expect(sql(`select image_url from public.advertisements where slug = '${slug}'`)).toMatch(/^https:\/\/res\.cloudinary\.com\/.+\/biqbaq-local\/ads\//);
+            await ad.getByRole("button", { name: "Turn on" }).click();
+            await expect(ad.getByText("Turned on. It shows between its start and end.")).toBeVisible();
+
+            // With the highest priority, it leads the Sponsored section and opens its own page.
+            const visitor = await (await browser.newContext()).newPage();
+            await expect(async () => {
+              await visitor.goto("/");
+              await expect(visitor.getByRole("region", { name: "Sponsored" }).getByRole("article").first()).toContainText(title, { timeout: 2000 });
+            }).toPass({ timeout: 90000 });
+            await visitor.getByRole("region", { name: "Sponsored" }).getByRole("link", { name: title }).click();
+            await expect(visitor).toHaveURL(new RegExp(`/ads/${slug}$`));
+            await expect(visitor.getByRole("heading", { level: 1 })).toHaveText(title);
+            await expect(visitor.getByRole("main")).toContainText("Space available in cars going to Lagos.");
+            await expect(visitor.getByRole("link", { name: "Visit" }).first()).toHaveAttribute("href", "/cargo-cars");
+
+            // Turned off, it leaves at once; then it is deleted, with its photo.
+            await ad.getByRole("button", { name: "Turn off" }).click();
+            await expect(ad.getByText("Turned off, and no longer shown.")).toBeVisible();
+            await expect(async () => {
+              await visitor.goto("/");
+              await expect(visitor.getByRole("main")).not.toContainText(title, { timeout: 2000 });
+            }).toPass({ timeout: 90000 });
+            await ad.getByRole("button", { name: "Delete ad" }).click();
+            await ad.getByRole("button", { name: "Yes, delete it" }).click();
+            await expect(page.getByRole("button", { name: "New ad" })).toBeVisible();
+            expect(sql(`select count(*) from public.advertisements where slug = '${slug}'`)).toBe("0");
+          });
+
+          test("only Super Admin and permitted Co-admins can open the ads screen", async ({ page, request }) => {
+            const email = await confirmedAccount(page, request);
+            await page.goto("/admin/ads");
+            await expect(page.getByText("You don't have access")).toBeVisible();
+            sql(`insert into public.user_roles (user_id, role_key) select id, 'co_admin' from auth.users where email = '${email}'`);
+            sql(`insert into public.user_role_permissions (user_role_id, permission_key) select r.id, 'ads.manage' from public.user_roles r join auth.users u on u.id = r.user_id where u.email = '${email}' and r.role_key = 'co_admin'`);
+            await page.reload();
+            await expect(page.getByRole("button", { name: "New ad" })).toBeVisible();
           });
 
           test("only Super Admin and permitted Co-admins can open the blog screen", async ({ page, request }) => {

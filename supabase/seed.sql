@@ -93,3 +93,14 @@ insert into public.blog_read_totals (post_id, readers) values
   ('20000000-0000-4000-8000-000000000004', 1540),
   ('20000000-0000-4000-8000-000000000005', 1185)
 on conflict (post_id) do nothing;
+
+-- Sample ads for local use, moved from the preview's sample data. Three are deliberately not
+-- eligible (off, finished, not started), to exercise the rules. supabase db push does not load this file.
+insert into public.advertisements (id, slug, title, description, advertiser_name, image_url, destination_url, placements, priority, active, starts_at, ends_at) values
+  ('30000000-0000-4000-8000-000000000001', 'send-your-goods-home-this-season', 'Send your goods home this season', 'Sample ad: compare cars going from Canada to Nigeria, and find space for your goods.', 'Maple Freight (sample)', 'https://picsum.photos/seed/biqbaq-ad-1/900/600', '/cargo-cars', array['homepage', 'global'], 30, true, '2026-01-01T00:00:00.000Z', '2030-01-01T00:00:00.000Z'),
+  ('30000000-0000-4000-8000-000000000002', 'stock-up-on-your-favourite-nigerian-staples', 'Stock up on your favourite Nigerian staples', 'Sample ad: rice, spices and pantry essentials from sellers across Canada.', 'Naija Foods Canada (sample)', 'https://picsum.photos/seed/biqbaq-ad-2/900/600', '/products?category=food', array['homepage', 'global'], 20, true, '2026-01-01T00:00:00.000Z', '2030-01-01T00:00:00.000Z'),
+  ('30000000-0000-4000-8000-000000000003', 'fresh-prints-for-every-occasion', 'Fresh prints for every occasion', 'Sample ad: bold Ankara styles for work, weekends and special events.', 'Ankara House (sample)', 'https://picsum.photos/seed/biqbaq-ad-3/900/600', '/products?category=fashion', array['homepage', 'global'], 10, true, '2026-01-01T00:00:00.000Z', '2030-01-01T00:00:00.000Z'),
+  ('30000000-0000-4000-8000-000000000004', 'inactive-ad-never-shown', 'Inactive ad: never shown', 'Never shown.', 'Hidden Advertiser (sample)', 'https://picsum.photos/seed/biqbaq-ad-4/900/600', '/products', array['homepage', 'global'], 99, false, '2026-01-01T00:00:00.000Z', '2030-01-01T00:00:00.000Z'),
+  ('30000000-0000-4000-8000-000000000005', 'finished-ad-never-shown', 'Finished ad: never shown', 'Never shown.', 'Past Advertiser (sample)', 'https://picsum.photos/seed/biqbaq-ad-5/900/600', '/products', array['homepage', 'global'], 98, true, '2026-01-01T00:00:00.000Z', '2026-01-02T00:00:00.000Z'),
+  ('30000000-0000-4000-8000-000000000006', 'future-ad-not-shown-yet', 'Future ad: not shown yet', 'Not shown yet.', 'Future Advertiser (sample)', 'https://picsum.photos/seed/biqbaq-ad-6/900/600', '/products', array['homepage', 'global'], 97, true, '2030-01-01T00:00:00.000Z', '2031-01-01T00:00:00.000Z')
+on conflict (id) do nothing;

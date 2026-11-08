@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { SAMPLE_ADS } from "./sample-data";
 import { destinationKind, isLive, selectAds, type Advertisement } from "./select";
 
 const now = new Date("2026-11-05T12:00:00.000Z");
@@ -61,9 +60,14 @@ describe("selectAds", () => {
     expect(ads[0]?.id).toBe("low");
   });
 
-  it("leaves out the deliberately ineligible sample ads", () => {
-    const titles = selectAds(SAMPLE_ADS, "homepage", now).map((ad) => ad.title);
-    expect(titles).toHaveLength(3);
-    expect(titles.join()).not.toMatch(/never shown|not shown/);
+  it("shows the highest priority first, and leaves out ads that are off, finished or not started", () => {
+    const ads: Advertisement[] = [
+      { ...base, slug: "low", title: "Low", priority: 1 },
+      { ...base, slug: "high", title: "High", priority: 30 },
+      { ...base, slug: "off", title: "Off", priority: 99, active: false },
+      { ...base, slug: "done", title: "Done", priority: 98, endsAt: "2026-11-02T00:00:00.000Z" },
+      { ...base, slug: "later", title: "Later", priority: 97, startsAt: "2030-01-01T00:00:00.000Z", endsAt: "2031-01-01T00:00:00.000Z" },
+    ];
+    expect(selectAds(ads, "homepage", now).map((ad) => ad.title)).toEqual(["High", "Low"]);
   });
 });

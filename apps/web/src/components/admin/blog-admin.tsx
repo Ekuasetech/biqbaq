@@ -192,6 +192,12 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
     setWorking(false);
   }
 
+  // Any code without its own message gets the general one, never the message's name.
+  const messageFor = (code: string) => {
+    const key = code.startsWith("photo.") ? `photoErrors.${code.slice(6)}` : `errors.${code}`;
+    return t.has(key) ? t(key) : t("errors.generic");
+  };
+
   if (!loaded) return <Skeleton className="h-96 rounded-3xl" />;
   const state = post ? postState(post.status, post.publish_at) : "draft";
   const archived = state === "archived";
@@ -205,7 +211,7 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
         </div>
         <button type="button" onClick={onClose} className={secondaryButton}>{t("backToList")}</button>
       </div>
-      {failure && <Notice kind="error">{failure.startsWith("photo.") ? t(`photoErrors.${failure.slice(6)}`) : t(`errors.${failure}`)}</Notice>}
+      {failure && <Notice kind="error">{messageFor(failure)}</Notice>}
       {notice && <Notice kind="info">{notice}</Notice>}
       {archived && <Notice kind="info">{t("archivedNote")}</Notice>}
 

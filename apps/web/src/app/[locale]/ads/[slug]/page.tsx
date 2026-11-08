@@ -19,7 +19,9 @@ export const instant = false;
 
 export async function generateStaticParams() {
   const slugs = await listAdSlugs();
-  return routing.locales.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
+  // The framework refuses to build a route with no pages, as when no ad is live.
+  const paths = slugs.length > 0 ? slugs : ["__none__"];
+  return routing.locales.flatMap((locale) => paths.map((slug) => ({ locale, slug })));
 }
 
 // A generic title, so a finished or unpublished ad's title can never appear here.
@@ -56,7 +58,7 @@ async function AdContent({ locale, slug }: { locale: string; slug: string }) {
           <h1 className="mt-1 font-heading text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl">
             {ad.title}
           </h1>
-          <p className="mt-3 leading-relaxed text-muted-foreground">{ad.description}</p>
+          <p className="mt-3 whitespace-pre-line break-words leading-relaxed text-muted-foreground">{ad.description}</p>
           {kind === "internal" && (
             <Link href={ad.destinationUrl} className={ctaClass}>
               {t("visit")}

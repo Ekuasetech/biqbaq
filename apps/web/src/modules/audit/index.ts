@@ -54,6 +54,12 @@ export const AUDIT_ACTIONS = [
   "blog.category_create",
   "comment.hide",
   "comment.restore",
+  "ad.create",
+  "ad.edit",
+  "ad.image",
+  "ad.activate",
+  "ad.deactivate",
+  "ad.delete",
   "setting.update",
 ] as const;
 

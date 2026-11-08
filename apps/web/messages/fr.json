@@ -408,7 +408,8 @@
     "auditLogLink": "Journal d'audit",
     "moderationLink": "Modération",
     "peopleLink": "Personnes et rôles",
-    "blogLink": "Blogue"
+    "blogLink": "Blogue",
+    "adsLink": "Publicités"
   },
   "admin": {
     "section": "Administration",
@@ -466,7 +467,8 @@
       "generic": "Une erreur s'est produite. Veuillez réessayer."
     },
     "noModerationAccess": "Cet espace est réservé aux personnes ayant une permission de modération.",
-    "noBlogAccess": "Cet espace est réservé au Super Admin et aux co-administrateurs ayant la permission du blogue."
+    "noBlogAccess": "Cet espace est réservé au Super Admin et aux co-administrateurs ayant la permission du blogue.",
+    "noAdsAccess": "Cet espace est réservé au Super Admin et aux co-administrateurs ayant la permission des publicités."
   },
   "shop": {
     "title": "Ma boutique",
@@ -708,6 +710,10 @@
       "features": {
         "title": "Fonctionnalités",
         "help": "Activez ou désactivez des parties du site pour tout le monde."
+      },
+      "ads": {
+        "title": "Publicités",
+        "help": "Le nombre de publicités affichées par section Commandité. Les plus prioritaires s'affichent d'abord, et une publicité ne s'affiche jamais deux fois sur une page."
       }
     },
     "items": {
@@ -786,6 +792,10 @@
       "commentsPerHour": {
         "label": "Commentaires par personne",
         "help": "Le nombre maximal de commentaires qu'une personne peut publier en une heure."
+      },
+      "adsPerSection": {
+        "label": "Publicités par section",
+        "help": "De 1 à 6."
       }
     },
     "history": {
@@ -877,7 +887,13 @@
       "blog_archive": "A archivé un article de blogue",
       "blog_category_create": "A ajouté une catégorie de blogue",
       "comment_hide": "A masqué un commentaire",
-      "comment_restore": "A réaffiché un commentaire"
+      "comment_restore": "A réaffiché un commentaire",
+      "ad_create": "A créé une publicité",
+      "ad_edit": "A modifié une publicité",
+      "ad_image": "A changé la photo d'une publicité",
+      "ad_activate": "A activé une publicité",
+      "ad_deactivate": "A désactivé une publicité",
+      "ad_delete": "A supprimé une publicité"
     }
   },
   "moderation": {
@@ -1327,6 +1343,102 @@
       "rateLimited": "Vous avez publié plusieurs commentaires récemment. Veuillez réessayer dans une heure.",
       "unavailable": "Cet article n'est plus disponible.",
       "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
+    }
+  },
+  "adsAdmin": {
+    "title": "Publicités",
+    "newAd": "Nouvelle publicité",
+    "newTitle": "Nouvelle publicité",
+    "editTitle": "Modifier la publicité",
+    "backToList": "Retour à toutes les publicités",
+    "adForm": "Publicité",
+    "filterLabel": "Afficher les publicités",
+    "search": "Chercher dans les titres et annonceurs",
+    "searchButton": "Chercher",
+    "empty": "Aucune publicité ici pour le moment.",
+    "edit": "Modifier",
+    "priorityShort": "Priorité {priority}",
+    "dates": "Du {from} au {to}",
+    "pagination": "Pages",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {page} sur {pages}",
+    "filters": {
+      "all": "Toutes",
+      "live": "En ligne",
+      "scheduled": "Programmées",
+      "off": "Désactivées",
+      "ended": "Terminées"
+    },
+    "state": {
+      "live": "En ligne",
+      "scheduled": "Programmée",
+      "off": "Désactivée",
+      "ended": "Terminée"
+    },
+    "placements": {
+      "homepage": "Page d'accueil",
+      "global": "Toutes les autres pages"
+    },
+    "fields": {
+      "title": "Titre",
+      "advertiser": "Annonceur",
+      "description": "Détails sur la page de la publicité",
+      "destination": "Destination du bouton",
+      "placements": "Où elle s'affiche",
+      "priority": "Priorité",
+      "startsAt": "Début",
+      "endsAt": "Fin"
+    },
+    "hints": {
+      "description": "Affichés sur la page propre à la publicité, que chaque publicité ouvre d'abord.",
+      "destination": "Une page Biqbaq, comme /products, ou une adresse sécurisée commençant par https://.",
+      "placements": "Chaque section affiche d'abord les publicités prioritaires, jusqu'au nombre fixé dans les paramètres.",
+      "priority": "De 0 à 1000. Les plus élevées s'affichent d'abord.",
+      "activate": "Une publicité s'affiche seulement si elle est activée, entre son début et sa fin, et une fois qu'elle a une photo."
+    },
+    "preview": "Aperçu",
+    "previewTitle": "Le titre de votre publicité",
+    "previewAdvertiser": "Annonceur",
+    "chooseImage": "Choisir une photo",
+    "replaceImage": "Remplacer la photo",
+    "saveBeforeImage": "Enregistrez la publicité une fois pour ajouter sa photo.",
+    "imageSaved": "Photo enregistrée.",
+    "save": "Enregistrer",
+    "create": "Créer la publicité",
+    "working": "Enregistrement...",
+    "saved": "Enregistré.",
+    "turnOn": "Activer",
+    "turnOff": "Désactiver",
+    "turnedOn": "Activée. Elle s'affiche entre son début et sa fin.",
+    "turnedOff": "Désactivée et retirée du site.",
+    "viewAd": "Voir la publicité",
+    "delete": "Supprimer la publicité",
+    "deleteWarning": "Ceci supprime définitivement la publicité et sa photo.",
+    "confirmDelete": "Oui, la supprimer",
+    "cancel": "Annuler",
+    "errors": {
+      "required": "Entrez un titre et un annonceur.",
+      "tooLong": "Un champ est trop long.",
+      "destinationInvalid": "Entrez une page Biqbaq comme /products, ou une adresse commençant par https://.",
+      "placementRequired": "Choisissez au moins un endroit où l'afficher.",
+      "priorityInvalid": "Entrez un nombre entier de 0 à 1000.",
+      "datesInvalid": "Choisissez une fin après le début.",
+      "invalid": "Un élément de la publicité n'est pas permis. Vérifiez chaque champ.",
+      "needsImage": "Ajoutez une photo avant de l'activer.",
+      "notAllowed": "Vous n'avez pas la permission de faire ceci.",
+      "changed": "Ceci a déjà changé. Voici la dernière version.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer.",
+      "loadFailed": "Les publicités n'ont pas pu être chargées. Veuillez actualiser la page."
+    },
+    "photoErrors": {
+      "FORMAT": "Choisissez une photo JPG, PNG ou WebP.",
+      "TOO_LARGE": "Cette photo n'a pas pu être assez réduite. Essayez-en une autre.",
+      "UNREADABLE": "Cette photo n'a pas pu être ouverte. Essayez-en une autre.",
+      "UPLOAD_FAILED": "Le téléversement n'a pas abouti. Veuillez réessayer.",
+      "IMAGE_REJECTED": "Cette photo n'est pas permise. Essayez-en une autre.",
+      "MEDIA_NOT_CONFIGURED": "Le téléversement de photos n'est pas encore configuré.",
+      "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
     }
   }
 }
