@@ -409,7 +409,9 @@
     "moderationLink": "Moderation",
     "peopleLink": "People and roles",
     "blogLink": "Blog",
-    "adsLink": "Ads"
+    "adsLink": "Ads",
+    "messagesLink": "Messages",
+    "adminMessagesLink": "Conversations"
   },
   "admin": {
     "section": "Administration",
@@ -714,6 +716,10 @@
       "ads": {
         "title": "Ads",
         "help": "How many ads each Sponsored section shows. The highest priority ads show first, and an ad never shows twice on one page."
+      },
+      "messages": {
+        "title": "Messages",
+        "help": "Hourly limits that stop spam through Biqbaq messages."
       }
     },
     "items": {
@@ -796,6 +802,14 @@
       "adsPerSection": {
         "label": "Ads per section",
         "help": "From 1 to 6."
+      },
+      "messagesPerHour": {
+        "label": "Messages per person",
+        "help": "Most messages one person can send in an hour."
+      },
+      "conversationsPerHour": {
+        "label": "New conversations per person",
+        "help": "Most new conversations one person can start in an hour."
       }
     },
     "history": {
@@ -902,7 +916,8 @@
       "vehicle_image_add": "Added a cargo car photo",
       "vehicle_image_remove": "Removed a cargo car photo",
       "vehicle_suspend": "Suspended a cargo car listing",
-      "vehicle_restore": "Restored a cargo car listing"
+      "vehicle_restore": "Restored a cargo car listing",
+      "conversation_admin_read": "Read a private conversation"
     }
   },
   "moderation": {
@@ -1100,7 +1115,9 @@
       "products_edit": "Edit products and photos",
       "products_publish": "Publish and unpublish products",
       "products_delete": "Delete products",
-      "staff_manage": "Manage other staff"
+      "staff_manage": "Manage other staff",
+      "messages_view": "See customer messages",
+      "messages_respond": "Reply to customers"
     },
     "memberStatus": {
       "active": "Active",
@@ -1534,6 +1551,99 @@
       "notAllowed": "You don't have permission to do this.",
       "changed": "This has already changed. Showing the latest.",
       "generic": "That didn't work. Please try again."
+    }
+  },
+  "messaging": {
+    "title": "Messages",
+    "loading": "Loading...",
+    "listLabel": "Conversations",
+    "boxes": "Which conversations",
+    "box": {
+      "inbox": "Inbox",
+      "archived": "Archived"
+    },
+    "empty": "No conversations yet. Message a seller from any product, cargo car or shop page.",
+    "emptyArchive": "Nothing archived.",
+    "choose": "Choose a conversation.",
+    "back": "All conversations",
+    "aCustomer": "A Biqbaq customer",
+    "theShop": "The shop",
+    "you": "You",
+    "toShop": "For {shop}",
+    "aboutShop": "About the shop",
+    "aboutProduct": "About {name}",
+    "aboutVehicle": "About the cargo car {name}",
+    "unread": "{count, plural, one {# unread message} other {# unread messages}}",
+    "headerUnread": "Messages, {count, plural, one {# conversation} other {# conversations}} with unread messages",
+    "threadLabel": "Conversation with {name}",
+    "messagesLabel": "Messages",
+    "earlier": "Show earlier messages",
+    "close": "Close conversation",
+    "reopen": "Reopen conversation",
+    "archive": "Archive",
+    "unarchive": "Move to inbox",
+    "closedPill": "Closed",
+    "closedHelp": "This conversation is closed, so nobody can write in it. Reopen it to continue.",
+    "closedNoReply": "This conversation is closed.",
+    "viewOnly": "You can read this shop's conversations, but not reply. The shop owner can give you permission to respond.",
+    "reply": "Your reply",
+    "textOnly": "Text only. Press Ctrl+Enter or ⌘+Enter to send.",
+    "send": "Send",
+    "sending": "Sending...",
+    "cancel": "Cancel",
+    "signedOut": "Sign in to see your messages.",
+    "signIn": "Sign in",
+    "signInToMessage": "Sign in to message the seller",
+    "signInToMessageWhy": "on Biqbaq and keep the conversation in your inbox. Or email them below without an account.",
+    "messageSeller": "Message the seller",
+    "messageShop": "Message this shop",
+    "startLabel": "Message the seller",
+    "yourMessage": "Your message",
+    "startHint": "The seller replies in your Biqbaq inbox. Your email address is not shared.",
+    "errors": {
+      "required": "Write a message first.",
+      "tooLong": "Your message is too long. The limit is 2,000 characters.",
+      "ownShop": "This is your own shop.",
+      "unavailable": "This seller can't receive messages right now.",
+      "notFound": "This conversation isn't available.",
+      "closed": "This conversation is closed. Reopen it to write again.",
+      "rateLimited": "You've sent a lot of messages in the last hour. Please try again later.",
+      "reasonRequired": "Give a reason first.",
+      "notAllowed": "You don't have permission to do this.",
+      "loadFailed": "Your messages couldn't be loaded. Please refresh the page.",
+      "generic": "That didn't work. Please try again."
+    }
+  },
+  "messagesAdmin": {
+    "title": "Conversations",
+    "intro": "Find conversations by a buyer's name or email, or a shop's name. The list never shows what was written. Reading a conversation needs a reason, and each reading is recorded in the audit log with your name.",
+    "search": "Search",
+    "searchPlaceholder": "Buyer name or email, or shop name",
+    "searchButton": "Search",
+    "empty": "No conversations found.",
+    "between": "{buyer} and {shop}",
+    "aboutShop": "About the shop",
+    "count": "{count, plural, one {# message} other {# messages}}",
+    "status": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "read": "Read conversation",
+    "reason": "Why are you reading this conversation?",
+    "reasonHint": "For example, a report of fraud. This goes in the audit log.",
+    "confirmRead": "Read it",
+    "cancel": "Cancel",
+    "recorded": "Recorded in the audit log.",
+    "messagesLabel": "Messages",
+    "fromBuyer": "{name} (buyer)",
+    "fromShop": "{name}",
+    "hide": "Hide messages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "errors": {
+      "notAllowed": "Only Super Admin can see conversations.",
+      "loadFailed": "Conversations couldn't be loaded. Please refresh the page."
     }
   }
 }

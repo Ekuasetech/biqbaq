@@ -187,7 +187,8 @@ test.describe("public marketplace", () => {
     await page.goto("/cargo-cars");
     const list = page.getByRole("list", { name: "Cars going to Nigeria" });
     // Clicks straight away, so this also covers a photo that is still animating in.
-    await list.getByRole("article").nth(1).locator('[data-rv="fade"]').click();
+    // Found by name, as real cars listed on the local copy change the order.
+    await list.getByRole("article").filter({ hasText: "2019 Honda Pilot" }).locator('[data-rv="fade"]').click();
     await expect(page).toHaveURL(/\/cargo-cars\/2019-honda-pilot$/);
     const main = page.getByRole("main");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("2019 Honda Pilot");
@@ -208,8 +209,10 @@ test.describe("public marketplace", () => {
 
     const related = page.getByRole("region", { name: "More cars going to Nigeria" }).getByRole("article");
     await expect(related).toHaveCount(4);
+    await expect(related.filter({ hasText: "2019 Honda Pilot" })).toHaveCount(0);
     await related.first().getByRole("link").click();
-    await expect(page).toHaveURL(/\/cargo-cars\/2021-toyota-sienna$/);
+    await expect(page).toHaveURL(/\/cargo-cars\/[a-z0-9-]+$/);
+    await expect(page).not.toHaveURL(/2019-honda-pilot$/);
 
     await page.goto("/fr/cargo-cars/2021-toyota-sienna");
     await expect(page.getByRole("main")).toContainText("Détails du trajet");
@@ -221,25 +224,42 @@ test.describe("public marketplace", () => {
     await expect(page).toHaveURL(/\/products\/[a-z0-9-]+$/);
   });
 
+  // Real cars listed on the local copy add to the sample ones, so counts are read from the page.
+  const cars = (page: import("@playwright/test").Page) => page.getByRole("list", { name: "Cars going to Nigeria" }).getByRole("article");
+  // Retries, as the list may still be changing just after a filter is applied.
+  async function expectCountShown(page: import("@playwright/test").Page) {
+    let count = 0;
+    await expect(async () => {
+      count = await cars(page).count();
+      await expect(page.getByText(new RegExp(`^${count} cars?\\b`))).toBeVisible({ timeout: 1000 });
+    }).toPass({ timeout: 10000 });
+    return count;
+  }
+
   test("cargo cars can be filtered by departure city and destination", async ({ page }) => {
     await page.goto("/cargo-cars");
+    const all = await cars(page).count();
+    expect(all).toBeGreaterThanOrEqual(9);
     await page.getByLabel("Leaving from").selectOption("Calgary");
     await page.getByRole("button", { name: "Apply" }).click();
     await expect(page).toHaveURL(/from=Calgary/);
-    await expect(page.getByText("1 car ·")).toBeVisible();
-    await expect(page.getByRole("list", { name: "Cars going to Nigeria" }).getByRole("article")).toContainText("2019 Honda Pilot");
+    await expect(cars(page).filter({ hasText: "2019 Honda Pilot" })).toHaveCount(1);
+    await expectCountShown(page);
+    for (const car of await cars(page).all()) await expect(car).toContainText("Calgary");
 
     await page.goto("/cargo-cars?to=Abuja");
     await expect(page.getByLabel("Going to", { exact: true })).toHaveValue("Abuja");
-    await expect(page.getByText("3 cars ·")).toBeVisible();
+    expect(await expectCountShown(page)).toBeGreaterThanOrEqual(3);
+    for (const car of await cars(page).all()) await expect(car).toContainText("Abuja");
 
     await page.goto("/cargo-cars?from=Calgary&to=Abuja");
     await expect(page.getByRole("heading", { name: "No cars found" })).toBeVisible();
     await page.getByRole("link", { name: "Clear filters" }).click();
-    await expect(page.getByText("9 cars")).toBeVisible();
+    await expect(cars(page)).toHaveCount(all);
+    await expectCountShown(page);
 
     await page.goto("/cargo-cars?from=Nowhere");
-    await expect(page.getByText("9 cars")).toBeVisible();
+    await expect(cars(page)).toHaveCount(all);
   });
 
   test("a product page always shows a full row of related products", async ({ page }) => {
@@ -922,6 +942,109 @@ test.describe("public marketplace", () => {
           }
           const item = (page: import("@playwright/test").Page, name: string) => page.getByRole("article", { name });
 
+          test.describe("messaging", () => {
+            test("a buyer messages a seller about a product, and both see replies arrive live", async ({ page, browser, request }) => {
+              test.setTimeout(150000);
+              const seller = await approvedSeller(page, browser, request);
+              const shop = seller.page;
+              const name = `Message ${unique()}`;
+              await addProduct(shop, name);
+              await item(shop, name).getByRole("button", { name: "Publish" }).click();
+              await expect(item(shop, name)).toContainText("Published");
+              const slug = sql(`select slug from public.products where name = '${name}'`);
+
+              // A seller cannot message their own shop.
+              await shop.goto(`/products/${slug}`);
+              await shop.getByRole("button", { name: "Message the seller" }).click({ timeout: 15000 });
+              await shop.getByLabel("Your message").fill("Hello me");
+              await shop.getByRole("form", { name: "Message the seller" }).getByRole("button", { name: "Send" }).click();
+              await expect(shop.getByText("This is your own shop.")).toBeVisible();
+
+              await shop.goto("/account/messages");
+              await expect(shop.getByText("No conversations yet.")).toBeVisible({ timeout: 15000 });
+
+              const buyer = await newApplicant(browser, request);
+              await buyer.page.goto(`/products/${slug}`);
+              await buyer.page.getByRole("button", { name: "Message the seller" }).click({ timeout: 15000 });
+              await buyer.page.getByRole("form", { name: "Message the seller" }).getByRole("button", { name: "Send" }).click();
+              await expect(buyer.page.getByText("Write a message first.")).toBeVisible();
+              await buyer.page.getByLabel("Your message").fill("Is this still available?");
+              await buyer.page.getByRole("form", { name: "Message the seller" }).getByRole("button", { name: "Send" }).click();
+              await expect(buyer.page).toHaveURL(/\/account\/messages\?c=/, { timeout: 15000 });
+              const buyerThread = buyer.page.getByRole("region", { name: "Conversation with Ada's Shop" });
+              await expect(buyerThread).toContainText(`About ${name}`);
+              await expect(buyerThread.getByRole("list", { name: "Messages" })).toContainText("Is this still available?");
+
+              // It reaches the seller without a reload, with the header's count.
+              await expect(shop.getByRole("list", { name: "Conversations" })).toContainText(name, { timeout: 15000 });
+              await expect(shop.getByRole("link", { name: /1 conversation with unread messages/ })).toBeVisible({ timeout: 15000 });
+              await shop.getByRole("list", { name: "Conversations" }).getByRole("link").first().click();
+              const sellerThread = shop.getByRole("region", { name: /^Conversation with / });
+              await expect(sellerThread.getByRole("list", { name: "Messages" })).toContainText("Is this still available?");
+              await expect(shop.getByRole("link", { name: "Messages", exact: true })).toBeVisible({ timeout: 15000 });
+              await sellerThread.getByLabel("Your reply").fill("Yes, it ships tomorrow.");
+              await sellerThread.getByRole("button", { name: "Send" }).click();
+
+              // The buyer sees the reply live, signed by the shop.
+              await expect(buyerThread.getByRole("list", { name: "Messages" })).toContainText("Yes, it ships tomorrow.", { timeout: 15000 });
+              await expect(buyerThread.getByRole("listitem").filter({ hasText: "Yes, it ships tomorrow." })).toContainText("Ada's Shop");
+
+              // Closing stops both sides until one reopens it.
+              await sellerThread.getByRole("button", { name: "Close conversation" }).click();
+              await expect(buyerThread).toContainText("This conversation is closed", { timeout: 15000 });
+              await buyerThread.getByRole("button", { name: "Reopen conversation" }).click();
+              await buyerThread.getByLabel("Your reply").fill("Great, thanks!");
+              await buyerThread.getByRole("button", { name: "Send" }).click();
+              await expect(sellerThread.getByRole("list", { name: "Messages" })).toContainText("Great, thanks!", { timeout: 15000 });
+
+              // Archiving is personal: the seller still has it.
+              await buyerThread.getByRole("button", { name: "Archive" }).click();
+              await expect(buyer.page).toHaveURL(/box=archived/);
+              await buyer.page.getByRole("tab", { name: "Inbox" }).click();
+              await expect(buyer.page.getByText("No conversations yet.")).toBeVisible();
+              await shop.reload();
+              await expect(shop.getByRole("list", { name: "Conversations" })).toContainText(name, { timeout: 15000 });
+
+              // One email each way within the hour, and never the message.
+              const sellerId = sql(`select id from auth.users where email = '${seller.email}'`);
+              expect(sql(`select count(*) from public.background_jobs where user_id = '${sellerId}' and payload ->> 'template' = 'message_to_seller'`)).toBe("1");
+              expect(sql(`select count(*) from public.background_jobs where payload::text like '%still available%'`)).toBe("0");
+
+              // Super Admin reads it only with a reason, which is audited (Q-36).
+              await page.goto("/admin/messages");
+              await page.getByLabel("Search", { exact: true }).fill(buyer.email);
+              await page.getByRole("button", { name: "Search", exact: true }).click();
+              const card = page.getByRole("article").filter({ hasText: buyer.email });
+              await expect(card).toContainText("3 messages", { timeout: 15000 });
+              await expect(card).not.toContainText("still available");
+              await card.getByRole("button", { name: "Read conversation" }).click();
+              await card.getByRole("button", { name: "Read it" }).click();
+              await expect(card).toContainText("Give a reason first.");
+              await card.getByLabel("Why are you reading this conversation?").fill("Checking a fraud report");
+              await card.getByRole("button", { name: "Read it" }).click();
+              await expect(card.getByRole("list", { name: "Messages" })).toContainText("Is this still available?");
+              const conversation = sql(`select id from public.conversations where buyer_id = (select id from auth.users where email = '${buyer.email}')`);
+              expect(sql(`select reason from public.audit_logs where action = 'conversation.admin_read' and target_id = '${conversation}'`)).toBe("Checking a fraud report");
+              await buyer.context.close();
+            });
+
+            test("signed-out visitors are offered sign-in, which brings them back to the product", async ({ page, request }) => {
+              test.setTimeout(90000);
+              const email = await confirmedAccount(page, request);
+              await page.context().clearCookies();
+              await page.goto("/products/ankara-tote-bag");
+              await page.getByRole("link", { name: "Sign in to message the seller" }).click();
+              await expect(page).toHaveURL(/\/sign-in\?next=%2Fproducts%2Fankara-tote-bag$/);
+              await page.getByLabel("Email", { exact: true }).fill(email);
+              await page.getByLabel("Password", { exact: true }).fill(password);
+              await page.getByRole("button", { name: "Sign in", exact: true }).click();
+              await expect(page).toHaveURL(/\/products\/ankara-tote-bag$/, { timeout: 15000 });
+              await expect(page.getByRole("button", { name: "Message the seller" })).toBeVisible({ timeout: 15000 });
+              // The email form is still there for people without an account.
+              await expect(page.getByRole("button", { name: "Send message" })).toBeVisible();
+            });
+          });
+
           test("Super Admin changes a setting, sees why and who, and finds it in the audit log", async ({ page, browser, request }) => {
             test.setTimeout(120000);
             const owner = await confirmedAccount(page, request);
@@ -1201,11 +1324,14 @@ test.describe("public marketplace", () => {
 
           test("a seller cannot see or reach another seller's staff or shop", async ({ page, browser, request }) => {
             test.setTimeout(120000);
-            const { page: shop } = await approvedSeller(page, browser, request);
-            const sellerId = sql(`select id from public.sellers order by created_at desc limit 1`);
+            const seller = await approvedSeller(page, browser, request);
+            const shop = seller.page;
+            // This test's own shop, not the newest one, which may be another test's.
+            const sellerId = sql(`select s.id from public.sellers s join auth.users u on u.id = s.owner_user_id where u.email = '${seller.email}'`);
+            expect(sellerId).not.toBe("");
             const outsider = await newApplicant(browser, request);
             await outsider.page.goto(`/account/shop?seller=${sellerId}`);
-            await expect(outsider.page.getByText("You don't have a shop yet")).toBeVisible();
+            await expect(outsider.page.getByText("You don't have a shop yet")).toBeVisible({ timeout: 15000 });
             await expect(shop.getByRole("region", { name: "Staff", exact: true })).toBeVisible();
           });
 
@@ -2490,11 +2616,16 @@ test.describe("public marketplace", () => {
   test("the Cargo Cars page lists every car, soonest departure first", async ({ page }) => {
     await page.goto("/cargo-cars");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cargo Cars");
-    await expect(page.getByText("9 cars")).toBeVisible();
-    const cars = page.getByRole("list", { name: "Cars going to Nigeria" }).getByRole("article");
-    await expect(cars).toHaveCount(9);
-    await expect(cars.first()).toContainText("2021 Toyota Sienna");
-    await expect(cars.last()).toContainText("2017 Mercedes-Benz GLE");
+    const list = page.getByRole("list", { name: "Cars going to Nigeria" }).getByRole("article");
+    const count = await list.count();
+    expect(count).toBeGreaterThanOrEqual(9);
+    await expect(page.getByText(new RegExp(`^${count} cars\\b`))).toBeVisible();
+    // The sample cars keep their order among any real ones: soonest departure first.
+    const texts = await list.allTextContents();
+    const position = (car: string) => texts.findIndex((text) => text.includes(car));
+    expect(position("2021 Toyota Sienna")).toBeLessThan(position("2019 Honda Pilot"));
+    expect(position("2020 Toyota Corolla")).toBeLessThan(position("2017 Mercedes-Benz GLE"));
+    expect(position("2021 Toyota Sienna")).toBeGreaterThanOrEqual(0);
     await page.goto("/");
     await expect(page.getByRole("region", { name: "Cargo cars going to Nigeria" }).getByRole("article")).toHaveCount(4);
   });

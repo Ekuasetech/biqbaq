@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { carPhotoName, PageTransition } from "@/components/layout/page-transition";
 import { SiteExtras } from "@/components/layout/site-extras";
+import { MessageSeller } from "@/components/messaging/message-seller";
 import { ContactForm } from "@/components/product/contact-form";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { SellerBadge } from "@/components/product/seller-badge";
@@ -134,7 +135,8 @@ export default async function CargoVehiclePage({ params }: Props) {
           <h2 id="contact-title" className="font-heading text-2xl font-bold tracking-tight">
             {t("cargoCars.contactTitle")}
           </h2>
-          <p className="mt-1 mb-4 text-sm text-muted-foreground">{t("cargoCars.contactIntro")}</p>
+          <MessageSeller shop={vehicle.dealer.slug} vehicle={vehicle.id} className="mt-3" />
+          <p className="mt-4 mb-4 text-sm text-muted-foreground">{t("cargoCars.contactIntro")}</p>
           <ContactForm endpoint={`/api/v1/vehicles/${vehicle.id}/contact`} />
         </section>
 

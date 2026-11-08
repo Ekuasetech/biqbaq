@@ -69,6 +69,7 @@ export const AUDIT_ACTIONS = [
   "vehicle.image_remove",
   "vehicle.suspend",
   "vehicle.restore",
+  "conversation.admin_read",
   "setting.update",
 ] as const;
 

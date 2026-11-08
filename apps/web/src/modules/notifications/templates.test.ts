@@ -14,6 +14,8 @@ const TEMPLATES = [
   "role_revoked",
   "product_suspended",
   "product_restored",
+  "message_to_seller",
+  "message_to_buyer",
   "shop_suspended",
   "shop_restored",
   "publishing_suspended",
@@ -41,6 +43,12 @@ describe("renderEmail", () => {
         expect(email?.text).not.toContain("undefined");
       }
     }
+  });
+
+  it("names the shop in message emails, without any message text", () => {
+    const email = renderEmail("message_to_buyer", { shop: "Adire Studio" }, person, SITE);
+    expect(email?.text).toContain("Adire Studio sent you a message");
+    expect(email?.text).toContain("https://biqbaq.test/account/messages");
   });
 
   it("uses the role's name, not its key", () => {

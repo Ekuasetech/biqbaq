@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { productPhotoName, PageTransition } from "@/components/layout/page-transition";
 import { SiteExtras } from "@/components/layout/site-extras";
+import { MessageSeller } from "@/components/messaging/message-seller";
 import { ContactForm } from "@/components/product/contact-form";
 import { ProductGrid } from "@/components/product/product-card";
 import { FavouriteButton, ReviewForm } from "@/components/product/product-engagement";
@@ -133,7 +134,8 @@ export default async function ProductPage({ params }: Props) {
       <div className="mt-12 grid gap-10 lg:grid-cols-2">
         <section aria-labelledby="contact-title">
           <h2 id="contact-title" className="font-heading text-2xl font-bold tracking-tight">{t("contact.title")}</h2>
-          <p className="mt-1 mb-4 text-sm text-muted-foreground">{t("contact.intro")}</p>
+          <MessageSeller shop={product.seller.slug} product={product.id} className="mt-3" />
+          <p className="mt-4 mb-4 text-sm text-muted-foreground">{t("contact.intro")}</p>
           <ContactForm endpoint={`/api/v1/products/${product.id}/contact`} />
         </section>
 

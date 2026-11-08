@@ -101,6 +101,12 @@ changes_requested -> pending_review
 ```
 Admin posts skip review. A seller's significant edit to a published post creates a revision for review while the approved version stays live (BD-15).
 
+**Conversation** (Q-35)
+```
+open <-> closed (either side; staff need messages.respond)
+```
+Archiving is each person's own, and a new message un-archives it for everyone else.
+
 **Payment account** (§13.3): `disabled`, `onboarding_incomplete`, `verification_pending`, `restricted`, `enabled`, `suspended`. `enabled` is set only from a provider's confirmation.
 
 **Background job:** `queued -> running -> succeeded | failed -> queued (retry) | dead`.

@@ -2,7 +2,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 // Only what works today. Conversations, orders and analytics join when those features exist.
-export const STAFF_PERMISSIONS = ["products.create", "products.edit", "products.publish", "products.delete", "staff.manage"] as const;
+export const STAFF_PERMISSIONS = [
+  "products.create",
+  "products.edit",
+  "products.publish",
+  "products.delete",
+  "messages.view",
+  "messages.respond",
+  "staff.manage",
+] as const;
 
 /** Message keys cannot contain dots. */
 export const permissionMessageKey = (key: string) => key.replaceAll(".", "_");

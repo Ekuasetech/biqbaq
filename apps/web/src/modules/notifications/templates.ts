@@ -172,6 +172,35 @@ const TEMPLATES: Record<string, Record<EmailLocale, Build>> = {
       path: "/account/shop",
     }),
   },
+  // Never the message itself, which stays on Biqbaq (Q-34).
+  message_to_seller: {
+    en: (shop) => ({
+      subject: "New message for your shop",
+      body: `A customer sent ${shop} a message on Biqbaq. Read and reply in your inbox. You'll get at most one email an hour for each conversation.`,
+      action: "Open your messages",
+      path: "/account/messages",
+    }),
+    fr: (shop) => ({
+      subject: "Nouveau message pour votre boutique",
+      body: `Un client a envoyé un message à ${shop} sur Biqbaq. Lisez-le et répondez dans votre boîte de réception. Vous recevrez au plus un courriel par heure pour chaque conversation.`,
+      action: "Ouvrir vos messages",
+      path: "/account/messages",
+    }),
+  },
+  message_to_buyer: {
+    en: (shop) => ({
+      subject: "New message on Biqbaq",
+      body: `${shop} sent you a message on Biqbaq. Read and reply in your inbox. You'll get at most one email an hour for each conversation.`,
+      action: "Open your messages",
+      path: "/account/messages",
+    }),
+    fr: (shop) => ({
+      subject: "Nouveau message sur Biqbaq",
+      body: `${shop} vous a envoyé un message sur Biqbaq. Lisez-le et répondez dans votre boîte de réception. Vous recevrez au plus un courriel par heure pour chaque conversation.`,
+      action: "Ouvrir vos messages",
+      path: "/account/messages",
+    }),
+  },
   product_restored: {
     en: (product) => ({
       subject: "Your product's suspension was lifted",

@@ -409,7 +409,9 @@
     "moderationLink": "Modération",
     "peopleLink": "Personnes et rôles",
     "blogLink": "Blogue",
-    "adsLink": "Publicités"
+    "adsLink": "Publicités",
+    "messagesLink": "Messages",
+    "adminMessagesLink": "Conversations"
   },
   "admin": {
     "section": "Administration",
@@ -714,6 +716,10 @@
       "ads": {
         "title": "Publicités",
         "help": "Le nombre de publicités affichées par section Commandité. Les plus prioritaires s'affichent d'abord, et une publicité ne s'affiche jamais deux fois sur une page."
+      },
+      "messages": {
+        "title": "Messages",
+        "help": "Limites horaires qui empêchent le pourriel par les messages Biqbaq."
       }
     },
     "items": {
@@ -796,6 +802,14 @@
       "adsPerSection": {
         "label": "Publicités par section",
         "help": "De 1 à 6."
+      },
+      "messagesPerHour": {
+        "label": "Messages par personne",
+        "help": "Nombre maximal de messages qu'une personne peut envoyer en une heure."
+      },
+      "conversationsPerHour": {
+        "label": "Nouvelles conversations par personne",
+        "help": "Nombre maximal de nouvelles conversations qu'une personne peut commencer en une heure."
       }
     },
     "history": {
@@ -902,7 +916,8 @@
       "vehicle_image_add": "A ajouté une photo de voiture cargo",
       "vehicle_image_remove": "A retiré une photo de voiture cargo",
       "vehicle_suspend": "A suspendu une annonce de voiture cargo",
-      "vehicle_restore": "A rétabli une annonce de voiture cargo"
+      "vehicle_restore": "A rétabli une annonce de voiture cargo",
+      "conversation_admin_read": "A lu une conversation privée"
     }
   },
   "moderation": {
@@ -1100,7 +1115,9 @@
       "products_edit": "Modifier les produits et les photos",
       "products_publish": "Publier et dépublier des produits",
       "products_delete": "Supprimer des produits",
-      "staff_manage": "Gérer le reste du personnel"
+      "staff_manage": "Gérer le reste du personnel",
+      "messages_view": "Voir les messages des clients",
+      "messages_respond": "Répondre aux clients"
     },
     "memberStatus": {
       "active": "Actif",
@@ -1534,6 +1551,99 @@
       "notAllowed": "Vous n'avez pas la permission de faire ceci.",
       "changed": "Ceci a déjà changé. Voici la dernière version.",
       "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
+    }
+  },
+  "messaging": {
+    "title": "Messages",
+    "loading": "Chargement...",
+    "listLabel": "Conversations",
+    "boxes": "Quelles conversations",
+    "box": {
+      "inbox": "Boîte de réception",
+      "archived": "Archivées"
+    },
+    "empty": "Aucune conversation pour le moment. Écrivez à un vendeur depuis la page d'un produit, d'une voiture cargo ou d'une boutique.",
+    "emptyArchive": "Rien d'archivé.",
+    "choose": "Choisissez une conversation.",
+    "back": "Toutes les conversations",
+    "aCustomer": "Un client Biqbaq",
+    "theShop": "La boutique",
+    "you": "Vous",
+    "toShop": "Pour {shop}",
+    "aboutShop": "À propos de la boutique",
+    "aboutProduct": "À propos de {name}",
+    "aboutVehicle": "À propos de la voiture cargo {name}",
+    "unread": "{count, plural, one {# message non lu} other {# messages non lus}}",
+    "headerUnread": "Messages, {count, plural, one {# conversation} other {# conversations}} avec des messages non lus",
+    "threadLabel": "Conversation avec {name}",
+    "messagesLabel": "Messages",
+    "earlier": "Afficher les messages précédents",
+    "close": "Fermer la conversation",
+    "reopen": "Rouvrir la conversation",
+    "archive": "Archiver",
+    "unarchive": "Remettre dans la boîte",
+    "closedPill": "Fermée",
+    "closedHelp": "Cette conversation est fermée, donc personne ne peut y écrire. Rouvrez-la pour continuer.",
+    "closedNoReply": "Cette conversation est fermée.",
+    "viewOnly": "Vous pouvez lire les conversations de cette boutique, mais pas y répondre. Le propriétaire peut vous en donner la permission.",
+    "reply": "Votre réponse",
+    "textOnly": "Texte seulement. Appuyez sur Ctrl+Entrée ou ⌘+Entrée pour envoyer.",
+    "send": "Envoyer",
+    "sending": "Envoi...",
+    "cancel": "Annuler",
+    "signedOut": "Connectez-vous pour voir vos messages.",
+    "signIn": "Se connecter",
+    "signInToMessage": "Connectez-vous pour écrire au vendeur",
+    "signInToMessageWhy": "sur Biqbaq et garder la conversation dans votre boîte. Ou envoyez-lui un courriel ci-dessous sans compte.",
+    "messageSeller": "Écrire au vendeur",
+    "messageShop": "Écrire à cette boutique",
+    "startLabel": "Écrire au vendeur",
+    "yourMessage": "Votre message",
+    "startHint": "Le vendeur répond dans votre boîte Biqbaq. Votre adresse courriel n'est pas partagée.",
+    "errors": {
+      "required": "Écrivez d'abord un message.",
+      "tooLong": "Votre message est trop long. La limite est de 2 000 caractères.",
+      "ownShop": "C'est votre propre boutique.",
+      "unavailable": "Ce vendeur ne peut pas recevoir de messages pour le moment.",
+      "notFound": "Cette conversation n'est pas disponible.",
+      "closed": "Cette conversation est fermée. Rouvrez-la pour écrire de nouveau.",
+      "rateLimited": "Vous avez envoyé beaucoup de messages dans la dernière heure. Veuillez réessayer plus tard.",
+      "reasonRequired": "Indiquez d'abord un motif.",
+      "notAllowed": "Vous n'avez pas la permission de faire ceci.",
+      "loadFailed": "Vos messages n'ont pas pu être chargés. Veuillez actualiser la page.",
+      "generic": "Cela n'a pas fonctionné. Veuillez réessayer."
+    }
+  },
+  "messagesAdmin": {
+    "title": "Conversations",
+    "intro": "Trouvez des conversations par le nom ou le courriel d'un acheteur, ou le nom d'une boutique. La liste ne montre jamais ce qui a été écrit. Lire une conversation exige un motif, et chaque lecture est inscrite au journal d'audit avec votre nom.",
+    "search": "Rechercher",
+    "searchPlaceholder": "Nom ou courriel de l'acheteur, ou nom de la boutique",
+    "searchButton": "Rechercher",
+    "empty": "Aucune conversation trouvée.",
+    "between": "{buyer} et {shop}",
+    "aboutShop": "À propos de la boutique",
+    "count": "{count, plural, one {# message} other {# messages}}",
+    "status": {
+      "open": "Ouverte",
+      "closed": "Fermée"
+    },
+    "read": "Lire la conversation",
+    "reason": "Pourquoi lisez-vous cette conversation ?",
+    "reasonHint": "Par exemple, un signalement de fraude. Ceci est inscrit au journal d'audit.",
+    "confirmRead": "La lire",
+    "cancel": "Annuler",
+    "recorded": "Inscrit au journal d'audit.",
+    "messagesLabel": "Messages",
+    "fromBuyer": "{name} (acheteur)",
+    "fromShop": "{name}",
+    "hide": "Masquer les messages",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {page} sur {pages}",
+    "errors": {
+      "notAllowed": "Seul le Super administrateur peut voir les conversations.",
+      "loadFailed": "Les conversations n'ont pas pu être chargées. Veuillez actualiser la page."
     }
   }
 }

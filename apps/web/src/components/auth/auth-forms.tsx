@@ -1,5 +1,6 @@
 "use client";
 
+import { safeNext } from "@/lib/safe-next";
 import { Eye, EyeOff, Info, TriangleAlert } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
@@ -345,7 +346,7 @@ export function SignInForm() {
   const { errors, status, formError, onSubmit } = useAuthForm(signInSchema, async (values) => {
     const { error } = await getSupabaseBrowserClient().auth.signInWithPassword(values);
     if (error) return errorKey(error);
-    router.push("/");
+    router.push(safeNext(new URLSearchParams(window.location.search).get("next")));
     return undefined;
   });
 

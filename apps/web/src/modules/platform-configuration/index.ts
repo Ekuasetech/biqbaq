@@ -50,6 +50,13 @@ export const SETTING_GROUPS: { id: string; settings: SettingDefinition[] }[] = [
     ],
   },
   {
+    id: "messages",
+    settings: [
+      { key: "messages.max_per_hour", id: "messagesPerHour", kind: "number", min: 5, max: 1000 },
+      { key: "messages.max_new_conversations_per_hour", id: "conversationsPerHour", kind: "number", min: 1, max: 100 },
+    ],
+  },
+  {
     id: "ads",
     settings: [{ key: "ads.max_per_section", id: "adsPerSection", kind: "number", min: 1, max: 6 }],
   },
