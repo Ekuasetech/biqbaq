@@ -7,7 +7,13 @@
     "skipToContent": "Aller au contenu",
     "views": "{count, plural, one {# vue} other {# vues}}",
     "previewNotice": "Aperçu : ce site est encore en construction et contient des données d’exemple.",
-    "home": "Accueil"
+    "home": "Accueil",
+    "pager": {
+      "pagination": "Pages",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "page": "Page {page} sur {pages}"
+    }
   },
   "nav": {
     "products": "Produits",
@@ -771,7 +777,7 @@
       },
       "payments": {
         "title": "Paiements en ligne",
-        "help": "« Acheter » et les frais de Biqbaq. Chaque boutique s'active séparément, dans l'écran Paiements."
+        "help": "Achat immédiat pour les acheteurs. Les frais de service de Biqbaq et les paiements de chaque boutique se règlent sur l'écran Paiements."
       }
     },
     "items": {
@@ -898,10 +904,6 @@
       "paymentsEnabled": {
         "label": "Paiements en ligne",
         "help": "Si les acheteurs peuvent payer en ligne. Désactivé, « Acheter » disparaît partout."
-      },
-      "paymentsFee": {
-        "label": "Frais de Biqbaq par commande (cents)",
-        "help": "100 correspond à 1 $ CA. Conservés en cas de remboursement."
       },
       "paymentsMaxQuantity": {
         "label": "Quantité maximale par commande",
@@ -2270,7 +2272,7 @@
         "enabled": "Les acheteurs peuvent payer vos produits sur Biqbaq. L'argent arrive sur votre compte Stripe, qui le verse à votre banque.",
         "suspended": "Biqbaq a suspendu les paiements en ligne pour cette boutique. Les acheteurs peuvent toujours vous écrire."
       },
-      "fees": "Biqbaq prend {fee} par commande, et Stripe prend ses propres frais de carte. Les frais de Biqbaq sont conservés si vous remboursez une commande.",
+      "fees": "Les acheteurs paient les frais de service de Biqbaq de {fee} en plus de votre prix : vous recevez votre prix complet, moins les frais de carte de Stripe. Les frais de service ne sont pas remboursés si vous remboursez une commande.",
       "start": "Configurer les paiements avec Stripe",
       "continue": "Continuer avec Stripe",
       "check": "Vérifier l'état",
@@ -2284,7 +2286,9 @@
       "button": "Acheter",
       "working": "Ouverture du paiement...",
       "hint": "Vous paierez sur la page sécurisée de Stripe. Le vendeur organise la livraison ou le retrait avec vous par les messages Biqbaq.",
-      "cancelled": "Vous avez quitté le paiement, donc rien n'a été prélevé."
+      "cancelled": "Vous avez quitté le paiement, donc rien n'a été prélevé.",
+      "fee": "Plus les frais de service de Biqbaq de {fee} par commande, indiqués au paiement.",
+      "feeLine": "Frais de service Biqbaq"
     },
     "errors": {
       "QUANTITY_INVALID": "Choisissez une quantité permise par la boutique.",
@@ -2321,7 +2325,7 @@
       "notDelivered": "Indiquer non livrée",
       "refund": "Rembourser",
       "refundAmount": "Montant à rembourser (jusqu'à {left})",
-      "refundHint": "Le remboursement vient de votre solde Stripe. Biqbaq conserve ses frais de {fee}.",
+      "refundHint": "Le remboursement vient de votre solde Stripe, jusqu'au prix du produit. Les frais de service de l'acheteur ne sont pas remboursés.",
       "confirmRefund": "Rembourser",
       "working": "Veuillez patienter...",
       "cancel": "Annuler",
@@ -2345,7 +2349,8 @@
       "empty": "Aucune commande pour le moment.",
       "confirming": "Confirmation du paiement",
       "paid": "Payée",
-      "help": "La livraison s'organise avec chaque vendeur par les messages Biqbaq. Pour un remboursement, contactez le vendeur."
+      "help": "La livraison s'organise avec chaque vendeur par les messages Biqbaq. Pour un remboursement, contactez le vendeur.",
+      "serviceFee": "dont {fee} de frais de service"
     }
   },
   "paymentsAdmin": {
@@ -2370,6 +2375,22 @@
       "pending": "En attente de paiement",
       "failed": "Paiement refusé",
       "expired": "Non terminée"
+    },
+    "shopsPages": "Pages des boutiques",
+    "ordersPages": "Pages des commandes",
+    "serviceFee": {
+      "title": "Frais de service",
+      "intro": "Les acheteurs les paient en plus du prix, une fois par commande, pour toutes les boutiques. Biqbaq les conserve, y compris quand une commande est remboursée.",
+      "current": "Actuellement : {fee}.",
+      "amount": "Frais (CAD)",
+      "reason": "Raison du changement",
+      "save": "Enregistrer les frais",
+      "saving": "Enregistrement...",
+      "help": "S'applique aux paiements commencés après l'enregistrement. Mettez 0 pour ne prendre aucuns frais. Le changement est noté dans le journal d'audit.",
+      "invalid": "Entrez un montant de 0,00 $ à {max}.",
+      "reasonNeeded": "Indiquez la raison du changement.",
+      "failed": "Les frais n'ont pas pu être enregistrés. Veuillez réessayer.",
+      "saved": "Enregistré. Les nouveaux paiements ajoutent {fee}."
     }
   }
 }

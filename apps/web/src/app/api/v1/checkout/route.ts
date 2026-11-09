@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -11,7 +12,8 @@ const KNOWN = new Set(["QUANTITY_INVALID", "PRODUCT_NOT_FOUND", "OUT_OF_STOCK", 
 
 /**
  * Starts paying for a product (BD-03). The database checks and prices the order; then
- * Stripe's checkout opens on the seller's account, with Biqbaq's fee (BD-02).
+ * Stripe's checkout opens on the seller's account, with Biqbaq's service fee as its own
+ * line, paid by the buyer (BD-02).
  */
 export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
       unitPriceMinor: order.unit_price_minor,
       quantity: order.quantity,
       applicationFeeMinor: order.application_fee_minor,
+      serviceFeeLabel: (await getTranslations({ locale: parsed.data.locale, namespace: "payments.buy" }))("feeLine"),
       buyerEmail: order.buyer_email,
       locale: parsed.data.locale,
       // Shows the buyer it went through; the order is marked paid only by Stripe's notice.

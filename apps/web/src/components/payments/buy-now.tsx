@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Link, usePathname } from "@/i18n/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { paymentErrorKey } from "@/modules/payment-management";
+import { formatMoney } from "@/modules/invoicing";
+import { getServiceFee, paymentErrorKey } from "@/modules/payment-management";
 
 const QUANTITIES = Array.from({ length: 10 }, (_, index) => index + 1);
 
@@ -27,6 +28,7 @@ export function BuyNow({ productId, className }: { productId: string; className?
   const [working, setWorking] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [cancelled, setCancelled] = useState(false);
+  const [serviceFee, setServiceFee] = useState<number | null>(null);
 
   useEffect(() => {
     let supabase;
@@ -36,6 +38,9 @@ export function BuyNow({ productId, className }: { productId: string; className?
       return;
     }
     const { data } = supabase.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
+    // Read here rather than with the cached page, so a new fee shows at once. The checkout
+    // itself always charges the fee the database holds.
+    void getServiceFee(supabase).then(setServiceFee);
     const timer = setTimeout(() => setCancelled(new URLSearchParams(window.location.search).get("checkout") === "cancelled"), 0);
     return () => {
       data.subscription.unsubscribe();
@@ -89,6 +94,7 @@ export function BuyNow({ productId, className }: { productId: string; className?
           {working ? t("working") : t("button")}
         </button>
       </div>
+      {serviceFee !== null && serviceFee > 0 && <p className="text-sm text-muted-foreground">{t("fee", { fee: formatMoney(serviceFee, locale) })}</p>}
       <p className="text-xs text-muted-foreground">{t("hint")}</p>
       {failure && <Notice kind="error">{tErrors(failure)}</Notice>}
     </div>

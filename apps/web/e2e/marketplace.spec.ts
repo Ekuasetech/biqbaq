@@ -2244,7 +2244,7 @@ test.describe("public marketplace", () => {
           // Against Stripe's test mode, with real keys and `stripe listen` forwarding notices to
           // the app. Stripe's seller sign-up has a CAPTCHA, so the shop (STRIPE_LIVE_SHOP) is set
           // up with Stripe by hand first. Run on purpose: STRIPE_LIVE=1 npx playwright test -g "live Stripe".
-          test("live Stripe: a buyer pays by test card, Stripe's notice marks the order paid, and Biqbaq keeps CA$1", async ({ browser, request }) => {
+          test("live Stripe: a buyer pays by test card plus Biqbaq's service fee, and Stripe's notice marks the order paid", async ({ browser, request }) => {
             test.skip(!process.env.STRIPE_LIVE, "Runs only with STRIPE_LIVE=1, Stripe test keys and stripe listen");
             test.setTimeout(180000);
             const shots = process.env.SHOTS ?? "test-results";
@@ -2261,7 +2261,11 @@ test.describe("public marketplace", () => {
             await buyer.page.waitForURL(/checkout\.stripe\.com/, { timeout: 30000 });
             const checkout = buyer.page;
             await checkout.waitForLoadState("networkidle").catch(() => {});
-            await expect(checkout.getByText(`CA$${(Number(price) * 2 / 100).toFixed(2)}`).first()).toBeVisible({ timeout: 30000 });
+            // The product, and Biqbaq's service fee as a line of its own that the buyer pays.
+            const fee = Number(sql(`select value #>> '{}' from public.platform_settings where key = 'payments.application_fee_minor'`));
+            const charged = Number(price) * 2 + fee;
+            await expect(checkout.getByText(`CA$${(charged / 100).toFixed(2)}`).first()).toBeVisible({ timeout: 30000 });
+            if (fee > 0) await expect(checkout.getByText("Biqbaq service fee")).toBeVisible();
 
             // Shipping address in Canada, and Stripe's test card.
             await checkout.getByText("Enter address manually").click().catch(() => {});
@@ -2288,15 +2292,16 @@ test.describe("public marketplace", () => {
             await checkout.waitForURL(/\/account\/orders\?placed=BQ-\d+/, { timeout: 60000 });
             const number = new URL(checkout.url()).searchParams.get("placed")!;
             await expect.poll(() => sql(`select status from public.orders where number = '${number}'`), { timeout: 60000 }).toBe("paid");
-            const order = sql(`select total_minor || '|' || application_fee_minor || '|' || provider_payment_id || '|' || quantity || '|' || (shipping_address ->> 'city') from public.orders where number = '${number}'`).split("|");
-            expect(order[0]).toBe(String(Number(price) * 2));
-            expect(order[1]).toBe("100");
+            const order = sql(`select total_minor || '|' || application_fee_minor || '|' || provider_payment_id || '|' || quantity || '|' || (shipping_address ->> 'city') || '|' || subtotal_minor from public.orders where number = '${number}'`).split("|");
+            expect(order[0]).toBe(String(charged));
+            expect(order[5]).toBe(String(Number(price) * 2));
+            expect(order[1]).toBe(String(fee));
             expect(order[3]).toBe("2");
             expect(order[4]).toBe("Toronto");
             await checkout.reload();
             await expect(checkout.getByRole("main")).toContainText(number, { timeout: 15000 });
 
-            // On Stripe's side: paid on the seller's account, with Biqbaq's CA$1.
+            // On Stripe's side: paid on the seller's account, with Biqbaq's service fee.
             const account = sql(`select provider_account_id from public.payment_accounts where seller_id = '${sellerId}'`);
             const stripe = async (method: string, path: string, body?: Record<string, string>) => {
               const response = await fetch(`https://api.stripe.com${path}`, {
@@ -2308,9 +2313,9 @@ test.describe("public marketplace", () => {
             };
             const intent = await stripe("GET", `/v1/payment_intents/${order[2]}?expand[]=latest_charge`);
             expect(intent.status).toBe("succeeded");
-            expect(intent.amount).toBe(Number(price) * 2);
+            expect(intent.amount).toBe(charged);
             expect(intent.currency).toBe("cad");
-            expect(intent.application_fee_amount).toBe(100);
+            expect(intent.application_fee_amount).toBe(fee > 0 ? fee : null);
             expect((intent.metadata as Record<string, string>).biqbaq_order).toBeTruthy();
 
             // A part refund, as the seller's refund makes it; Biqbaq keeps its fee.
@@ -2355,7 +2360,7 @@ test.describe("public marketplace", () => {
 
             await shop.reload();
             await expect(payments).toContainText("Taking payments", { timeout: 15000 });
-            await expect(payments).toContainText("Biqbaq takes $1.00 per order");
+            await expect(payments).toContainText("Buyers pay Biqbaq's $1.00 service fee on top of your price");
 
             // A buyer sees Buy now, and goes to Stripe's checkout (stood in for here).
             const buyer = await newApplicant(browser, request);
@@ -2365,6 +2370,7 @@ test.describe("public marketplace", () => {
               await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ url: "/account/orders?placed=BQ-TEST" }) });
             });
             await buyer.page.goto(`/products/${slug}`);
+            await expect(buyer.page.getByText("Plus Biqbaq's $1.00 service fee per order")).toBeVisible({ timeout: 15000 });
             await buyer.page.getByLabel("Quantity").selectOption("3");
             await buyer.page.getByRole("button", { name: "Buy now" }).click({ timeout: 15000 });
             await expect(buyer.page).toHaveURL(/\/account\/orders\?placed=BQ-TEST$/);
@@ -2378,18 +2384,22 @@ test.describe("public marketplace", () => {
 
             // A paid order, as Stripe's notice records it.
             const buyerId = sql(`select id from auth.users where email = '${buyer.email}'`);
-            sql(`insert into public.orders (buyer_id, seller_id, product_id, product_name, unit_price_minor, quantity, total_minor, application_fee_minor, status, paid_at, provider_payment_id, buyer_email, shipping_name, shipping_phone, shipping_address)
-                 values ('${buyerId}', '${sellerId}', '${productId}', '${name}', 1250, 3, 3750, 100, 'paid', now(), 'pi_e2e', '${buyer.email}', 'Bola Buyer', '416-555-0100', '{"line1": "12 King St W", "city": "Toronto", "state": "ON", "postal_code": "M5H 1A1", "country": "CA"}')`);
+            sql(`insert into public.orders (buyer_id, seller_id, product_id, product_name, unit_price_minor, quantity, subtotal_minor, total_minor, application_fee_minor, status, paid_at, provider_payment_id, buyer_email, shipping_name, shipping_phone, shipping_address)
+                 values ('${buyerId}', '${sellerId}', '${productId}', '${name}', 1250, 3, 3750, 3850, 100, 'paid', now(), 'pi_e2e', '${buyer.email}', 'Bola Buyer', '416-555-0100', '{"line1": "12 King St W", "city": "Toronto", "state": "ON", "postal_code": "M5H 1A1", "country": "CA"}')`);
             await shop.goto("/account/shop/orders");
             const order = shop.getByRole("article").filter({ hasText: name });
             await expect(order).toContainText("To deliver", { timeout: 15000 });
             await expect(order).toContainText("Bola Buyer");
             await expect(order).toContainText("12 King St W");
+            // The seller sees their sale; the buyer paid it plus the service fee.
+            await expect(order).toContainText("$37.50");
             await order.getByRole("button", { name: "Refund" }).click();
-            await order.getByLabel(/Amount to refund/).fill("40");
+            // Up to the product price: the service fee is not refunded.
+            await expect(order.getByLabel(/Amount to refund/)).toHaveValue("37.50");
+            await order.getByLabel(/Amount to refund/).fill("38");
             await order.getByRole("button", { name: "Refund" }).click();
             await expect(order).toContainText("Enter an amount up to what's left to refund.");
-            await expect(order).toContainText("Biqbaq keeps its $1.00 fee.");
+            await expect(order).toContainText("The buyer's service fee isn't refunded.");
             await order.getByRole("button", { name: "Cancel" }).click();
             await order.getByRole("button", { name: "Mark delivered" }).click();
             // It moves from "To deliver" to "Delivered".
@@ -2400,6 +2410,30 @@ test.describe("public marketplace", () => {
             await buyer.page.goto("/account/orders");
             await expect(buyer.page.getByRole("list", { name: "Your orders" })).toContainText(name, { timeout: 15000 });
             await expect(buyer.page.getByRole("list", { name: "Your orders" })).toContainText("Delivered");
+            await expect(buyer.page.getByRole("list", { name: "Your orders" })).toContainText("$38.50");
+            await expect(buyer.page.getByRole("list", { name: "Your orders" })).toContainText("incl. $1.00 service fee");
+
+            // Super Admin sets the service fee in dollars, with a reason, and product pages show it.
+            const fee = page.getByRole("region", { name: "Service fee" });
+            await expect(fee).toContainText("Now: $1.00.", { timeout: 15000 });
+            try {
+              await fee.getByLabel("Fee (CAD)").fill("2.50");
+              await fee.getByRole("button", { name: "Save fee" }).click();
+              await expect(fee).toContainText("Give a reason for the change.");
+              await fee.getByLabel("Fee (CAD)").fill("101");
+              await fee.getByLabel("Reason for the change").fill("Testing the fee");
+              await fee.getByRole("button", { name: "Save fee" }).click();
+              await expect(fee).toContainText("Enter an amount from $0.00 to $100.00.");
+              await fee.getByLabel("Fee (CAD)").fill("2.50");
+              await fee.getByRole("button", { name: "Save fee" }).click();
+              await expect(fee).toContainText("Saved. New checkouts add $2.50.");
+              expect(sql(`select value #>> '{}' from public.platform_settings where key = 'payments.application_fee_minor'`)).toBe("250");
+              await buyer.page.goto(`/products/${slug}`);
+              await expect(buyer.page.getByText("Plus Biqbaq's $2.50 service fee per order")).toBeVisible({ timeout: 15000 });
+            } finally {
+              // Other tests and the local copy expect the default CA$1.
+              sql(`update public.platform_settings set value = '100' where key = 'payments.application_fee_minor'`);
+            }
 
             // Turning payments off removes Buy now at once.
             await row.getByRole("button", { name: "Turn off" }).click();

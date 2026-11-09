@@ -22,6 +22,9 @@ export interface ShopOrder {
   number: string;
   product_name: string;
   quantity: number;
+  /** The seller's sale: the product price times the quantity. */
+  subtotal_minor: number;
+  /** What the buyer paid: the sale plus Biqbaq's service fee. */
   total_minor: number;
   application_fee_minor: number;
   status: string;
@@ -45,12 +48,14 @@ export interface MyOrder {
   product_name: string;
   product_slug: string | null;
   quantity: number;
+  subtotal_minor: number;
   total_minor: number;
   status: "paid" | "pending";
   refunded_minor: number;
   fulfilled_at: string | null;
   paid_at: string | null;
   created_at: string;
+  total: number;
 }
 
 export interface AdminPaymentAccount {
@@ -74,6 +79,7 @@ export interface AdminOrder {
   shop_name: string;
   buyer_email: string | null;
   product_name: string;
+  subtotal_minor: number;
   total_minor: number;
   application_fee_minor: number;
   status: string;
@@ -102,26 +108,36 @@ export const addressLines = (address: ShippingAddress | null) =>
     : [];
 
 /** Where an order stands, for the seller and the buyer. */
-export function orderState(order: { status: string; refunded_minor: number; total_minor: number; fulfilled_at: string | null; disputed?: boolean }) {
+export function orderState(order: { status: string; refunded_minor: number; subtotal_minor: number; fulfilled_at?: string | null; disputed?: boolean }) {
   if (order.status !== "paid") return order.status as "pending" | "failed" | "expired";
   if (order.disputed) return "disputed";
-  if (order.refunded_minor >= order.total_minor) return "refunded";
+  // Biqbaq's service fee is never refunded, so refunding the sale refunds the order.
+  if (order.refunded_minor >= order.subtotal_minor) return "refunded";
   if (order.refunded_minor > 0) return "partly_refunded";
   return order.fulfilled_at ? "delivered" : "to_deliver";
 }
 
 export const myPaymentAccount = (supabase: SupabaseClient, seller: string) => supabase.rpc("my_payment_account", { p_seller: seller });
+export const SHOP_ORDERS_PAGE_SIZE = 20;
 export const listShopOrders = (supabase: SupabaseClient, seller: string, status: string, page: number) =>
-  supabase.rpc("list_shop_orders", { p_seller: seller, p_status: status === "all" ? null : status, p_limit: 50, p_offset: (page - 1) * 50 });
+  supabase.rpc("list_shop_orders", {
+    p_seller: seller,
+    p_status: status === "all" ? null : status,
+    p_limit: SHOP_ORDERS_PAGE_SIZE,
+    p_offset: (page - 1) * SHOP_ORDERS_PAGE_SIZE,
+  });
+export const ADMIN_PAYMENTS_PAGE_SIZE = 20;
 export const setOrderFulfilled = (supabase: SupabaseClient, order: string, fulfilled: boolean) =>
   supabase.rpc("set_order_fulfilled", { p_order: order, p_fulfilled: fulfilled });
-export const listMyOrders = (supabase: SupabaseClient) => supabase.rpc("my_orders", { p_limit: 100 });
+export const MY_ORDERS_PAGE_SIZE = 20;
+export const listMyOrders = (supabase: SupabaseClient, page: number) =>
+  supabase.rpc("my_orders", { p_limit: MY_ORDERS_PAGE_SIZE, p_offset: (page - 1) * MY_ORDERS_PAGE_SIZE });
 export const adminListPaymentAccounts = (supabase: SupabaseClient, search: string, page: number) =>
-  supabase.rpc("admin_list_payment_accounts", { p_search: search || null, p_limit: 20, p_offset: (page - 1) * 20 });
+  supabase.rpc("admin_list_payment_accounts", { p_search: search || null, p_limit: ADMIN_PAYMENTS_PAGE_SIZE, p_offset: (page - 1) * ADMIN_PAYMENTS_PAGE_SIZE });
 export const adminSetSellerPayments = (supabase: SupabaseClient, seller: string, enabled: boolean) =>
   supabase.rpc("admin_set_seller_payments", { p_seller: seller, p_enabled: enabled });
 export const adminListOrders = (supabase: SupabaseClient, search: string, page: number) =>
-  supabase.rpc("admin_list_orders", { p_search: search || null, p_limit: 20, p_offset: (page - 1) * 20 });
+  supabase.rpc("admin_list_orders", { p_search: search || null, p_limit: ADMIN_PAYMENTS_PAGE_SIZE, p_offset: (page - 1) * ADMIN_PAYMENTS_PAGE_SIZE });
 
 /** Maps a refusal to a message key under payments.errors, without showing the provider's or database's wording. */
 export function paymentErrorKey(code: string | undefined): string {
@@ -141,4 +157,14 @@ export function paymentErrorKey(code: string | undefined): string {
     "PROVIDER_FAILED",
   ]);
   return code && known.has(code) ? code : "GENERIC";
+}
+
+/** Biqbaq's service fee (BD-02), paid by the buyer on top of the price: one amount for every shop. */
+export const SERVICE_FEE_KEY = "payments.application_fee_minor";
+export const SERVICE_FEE_MAX_MINOR = 10000;
+export async function getServiceFee(supabase: SupabaseClient): Promise<number | null> {
+  const { data, error } = await supabase.from("public_platform_settings").select("value").eq("key", SERVICE_FEE_KEY).maybeSingle();
+  if (error || !data) return null;
+  const value = Number((data as { value: unknown }).value);
+  return Number.isInteger(value) && value >= 0 ? value : null;
 }

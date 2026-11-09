@@ -4,11 +4,12 @@ import type { User } from "@supabase/supabase-js";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { cardClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
+import { Pager } from "@/components/ui/pager";
 import { Link } from "@/i18n/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/modules/invoicing";
-import { listMyOrders, orderState, type MyOrder } from "@/modules/payment-management";
+import { listMyOrders, MY_ORDERS_PAGE_SIZE, orderState, type MyOrder } from "@/modules/payment-management";
 
 /** A buyer's orders. A new one shows as "confirming" until Stripe's notice marks it paid. */
 export function MyOrders() {
@@ -18,6 +19,7 @@ export function MyOrders() {
   const format = useFormatter();
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [rows, setRows] = useState<MyOrder[] | null>(null);
+  const [page, setPage] = useState(1);
   const [placed, setPlaced] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,10 +37,14 @@ export function MyOrders() {
     let tries = 0;
     // Just back from paying: checks a few times while Stripe's notice arrives.
     const load = async () => {
-      const { data } = await listMyOrders(getSupabaseBrowserClient());
+      const { data } = await listMyOrders(getSupabaseBrowserClient(), page);
       if (stop) return;
       const next = (data ?? []) as MyOrder[];
       setRows(next);
+      if (next.length === 0 && page > 1) {
+        setPage(page - 1);
+        return;
+      }
       if (next.some((order) => order.status === "pending") && tries++ < 10) setTimeout(() => void load(), 3000);
     };
     const timer = setTimeout(() => void load(), 0);
@@ -46,7 +52,7 @@ export function MyOrders() {
       stop = true;
       clearTimeout(timer);
     };
-  }, [user]);
+  }, [user, page]);
 
   if (user === undefined) return <p className="text-sm text-muted-foreground">{t("loading")}</p>;
   if (!user) {
@@ -86,6 +92,9 @@ export function MyOrders() {
                   </span>
                   <span className="grid justify-items-end gap-1">
                     <span className="font-semibold tabular-nums">{formatMoney(order.total_minor, locale)}</span>
+                    {order.total_minor > order.subtotal_minor && (
+                      <span className="text-xs text-muted-foreground">{t("serviceFee", { fee: formatMoney(order.total_minor - order.subtotal_minor, locale) })}</span>
+                    )}
                     <StatusPill tone={state === "delivered" ? "good" : state === "confirming" || state === "to_deliver" ? "waiting" : "neutral"}>
                       {state === "confirming" ? t("confirming") : state === "to_deliver" ? t("paid") : tStates(state)}
                     </StatusPill>
@@ -95,6 +104,7 @@ export function MyOrders() {
             })}
           </ul>
         )}
+        {rows && rows.length > 0 && <Pager page={page} total={rows[0].total} pageSize={MY_ORDERS_PAGE_SIZE} onPage={setPage} />}
         <p className="text-xs text-muted-foreground">{t("help")}</p>
       </section>
     </div>

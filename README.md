@@ -39,7 +39,7 @@ stripe listen --print-secret     # the whsec_ value
 stripe listen --forward-to localhost:3000/api/v1/payments/stripe/webhook --events checkout.session.completed,checkout.session.async_payment_succeeded,checkout.session.async_payment_failed,checkout.session.expired,refund.created,refund.updated,charge.refund.updated,charge.dispute.created,charge.dispute.updated,charge.dispute.closed,account.updated
 ```
 
-A seller's Stripe sign-up has a CAPTCHA, so it is done by hand: Super Admin turns payments on for the shop, then its owner clicks **Set up payments with Stripe** and uses Stripe's test shortcuts. Then `STRIPE_LIVE=1 STRIPE_SECRET_KEY=... npx playwright test -g "live Stripe"` (with `STRIPE_LIVE_SHOP` set to the shop's slug, `albert` by default) pays by test card, and checks the order, Biqbaq's CA$1 on Stripe's side, and a refund. Forward to the port the test uses.
+A seller's Stripe sign-up has a CAPTCHA, so it is done by hand: Super Admin turns payments on for the shop, then its owner clicks **Set up payments with Stripe** and uses Stripe's test shortcuts. Then `STRIPE_LIVE=1 STRIPE_SECRET_KEY=... npx playwright test -g "live Stripe"` (with `STRIPE_LIVE_SHOP` set to the shop's slug, `albert` by default) pays by test card, and checks the order, Biqbaq's service fee on Stripe's side, and a refund. Forward to the port the test uses.
 
 Real project settings belong in `apps/web/.env.local`, copied from `.env.example`. On this computer the generated local files override it, so development and tests cannot touch the real project. Never commit real keys.
 

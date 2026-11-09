@@ -5,11 +5,12 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { cardClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Pager } from "@/components/ui/pager";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useScrollToHash } from "@/lib/use-scroll-to-hash";
 import { cn } from "@/lib/utils";
 import { formatMoney, parseMoney } from "@/modules/invoicing";
-import { addressLines, listShopOrders, orderState, paymentErrorKey, setOrderFulfilled, type ShopOrder } from "@/modules/payment-management";
+import { addressLines, listShopOrders, orderState, paymentErrorKey, setOrderFulfilled, SHOP_ORDERS_PAGE_SIZE, type ShopOrder } from "@/modules/payment-management";
 
 const secondaryButton =
   "inline-flex h-9 items-center justify-center rounded-lg border border-border bg-card px-3 text-sm font-semibold hover:bg-muted disabled:opacity-50";
@@ -26,7 +27,8 @@ function Refund({ order, onDone }: { order: ShopOrder; onDone: () => Promise<voi
   const t = useTranslations("payments.orders");
   const tErrors = useTranslations("payments.errors");
   const locale = useLocale();
-  const left = order.total_minor - order.refunded_minor;
+  // Up to the product price: Biqbaq's service fee, paid by the buyer, is not refunded.
+  const left = Math.max(order.subtotal_minor - order.refunded_minor, 0);
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState((left / 100).toFixed(2));
   const [key] = useState(() => crypto.randomUUID());
@@ -81,18 +83,22 @@ export function ShopOrders({ sellerId }: { sellerId: string }) {
   const locale = useLocale();
   const format = useFormatter();
   const [filter, setFilter] = useState<string>("to_deliver");
+  const [page, setPage] = useState(1);
   const [rows, setRows] = useState<ShopOrder[] | null>(null);
   const [failed, setFailed] = useState(false);
 
   const load = useCallback(async () => {
-    const { data, error } = await listShopOrders(getSupabaseBrowserClient(), sellerId, filter, 1);
+    const { data, error } = await listShopOrders(getSupabaseBrowserClient(), sellerId, filter, page);
     if (error) {
       setFailed(true);
       return;
     }
     setFailed(false);
-    setRows(data as ShopOrder[]);
-  }, [sellerId, filter]);
+    const found = data as ShopOrder[];
+    // The last order on a later page moved away (delivered or refunded): show the page before.
+    if (found.length === 0 && page > 1) setPage(page - 1);
+    else setRows(found);
+  }, [sellerId, filter, page]);
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), 0);
@@ -111,7 +117,10 @@ export function ShopOrders({ sellerId }: { sellerId: string }) {
             type="button"
             role="tab"
             aria-selected={filter === name}
-            onClick={() => setFilter(name)}
+            onClick={() => {
+              setFilter(name);
+              setPage(1);
+            }}
             className={cn(secondaryButton, filter === name && "border-primary bg-primary text-primary-foreground hover:bg-primary")}
           >
             {t(`filters.${name}`)}
@@ -133,7 +142,7 @@ export function ShopOrders({ sellerId }: { sellerId: string }) {
                         {order.number} · {order.product_name} × {order.quantity}
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        {formatMoney(order.total_minor, locale)} · {order.paid_at ? format.dateTime(new Date(order.paid_at), { dateStyle: "medium", timeStyle: "short" }) : ""}
+                        {formatMoney(order.subtotal_minor, locale)} · {order.paid_at ? format.dateTime(new Date(order.paid_at), { dateStyle: "medium", timeStyle: "short" }) : ""}
                         {order.refunded_minor > 0 && ` · ${t("refunded", { amount: formatMoney(order.refunded_minor, locale) })}`}
                       </p>
                     </div>
@@ -167,6 +176,7 @@ export function ShopOrders({ sellerId }: { sellerId: string }) {
           })}
         </ul>
       )}
+      {rows && rows.length > 0 && <Pager page={page} total={rows[0].total} pageSize={SHOP_ORDERS_PAGE_SIZE} onPage={setPage} />}
     </section>
   );
 }

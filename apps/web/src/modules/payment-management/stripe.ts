@@ -148,7 +148,8 @@ export async function dashboardLink(accountId: string) {
   return link.url;
 }
 
-// Payments: direct charges on the seller's account, with Biqbaq's fee (BD-02).
+// Payments: direct charges on the seller's account. The buyer pays the price plus Biqbaq's
+// service fee, which goes to Biqbaq as the application fee (BD-02).
 
 export async function createCheckout(input: {
   accountId: string;
@@ -157,7 +158,9 @@ export async function createCheckout(input: {
   productName: string;
   unitPriceMinor: number;
   quantity: number;
+  /** Biqbaq's service fee: a line of its own that the buyer pays, kept by Biqbaq (BD-02). */
   applicationFeeMinor: number;
+  serviceFeeLabel: string;
   buyerEmail: string | null;
   successUrl: string;
   cancelUrl: string;
@@ -169,7 +172,12 @@ export async function createCheckout(input: {
     body: {
       mode: "payment",
       locale: input.locale === "fr" ? "fr-CA" : "en",
-      line_items: [{ quantity: input.quantity, price_data: { currency: "cad", unit_amount: input.unitPriceMinor, product_data: { name: input.productName.slice(0, 250) } } }],
+      line_items: [
+        { quantity: input.quantity, price_data: { currency: "cad", unit_amount: input.unitPriceMinor, product_data: { name: input.productName.slice(0, 250) } } },
+        ...(input.applicationFeeMinor > 0
+          ? [{ quantity: 1, price_data: { currency: "cad", unit_amount: input.applicationFeeMinor, product_data: { name: input.serviceFeeLabel } } }]
+          : []),
+      ],
       payment_intent_data: { application_fee_amount: input.applicationFeeMinor, metadata: { biqbaq_order: input.orderId, biqbaq_number: input.orderNumber } },
       // BD-03: the seller arranges delivery, so Stripe collects where and how to reach the buyer.
       shipping_address_collection: { allowed_countries: ["CA"] },

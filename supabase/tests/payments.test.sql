@@ -23,7 +23,7 @@ insert into sellers (id, owner_user_id, slug, name, city) values
 insert into products (id, seller_id, created_by, slug, name, description, price_minor, currency, status, first_published_at, availability) values
   ('00000000-0000-4000-8000-000000000b71', '00000000-0000-4000-8000-000000000b61', '00000000-0000-4000-8000-000000000b51', 'p-rice', 'P Rice', 'x', 2500, 'CAD', 'published', now(), 'in_stock'),
   ('00000000-0000-4000-8000-000000000b72', '00000000-0000-4000-8000-000000000b61', '00000000-0000-4000-8000-000000000b51', 'p-gone', 'P Gone', 'x', 2500, 'CAD', 'published', now(), 'out_of_stock'),
-  ('00000000-0000-4000-8000-000000000b73', '00000000-0000-4000-8000-000000000b61', '00000000-0000-4000-8000-000000000b51', 'p-cheap', 'P Cheap', 'x', 50, 'CAD', 'published', now(), 'in_stock');
+  ('00000000-0000-4000-8000-000000000b73', '00000000-0000-4000-8000-000000000b61', '00000000-0000-4000-8000-000000000b51', 'p-cheap', 'P Cheap', 'x', 20, 'CAD', 'published', now(), 'in_stock');
 update platform_settings set value = 'true' where key = 'email.notifications_enabled';
 update platform_settings set value = 'true' where key = 'payments.enabled';
 update platform_settings set value = '100' where key = 'payments.application_fee_minor';
@@ -74,11 +74,19 @@ set local role authenticated;
 select throws_ok($$ select * from begin_order('00000000-0000-4000-8000-000000000b71', 0) $$, '23514', 'QUANTITY_INVALID', 'a quantity of zero is refused');
 select throws_ok($$ select * from begin_order('00000000-0000-4000-8000-000000000b71', 21) $$, '23514', 'QUANTITY_INVALID', 'so is more than the most allowed');
 select throws_ok($$ select * from begin_order('00000000-0000-4000-8000-000000000b72', 1) $$, '55000', 'OUT_OF_STOCK', 'out of stock cannot be bought');
-select throws_ok($$ select * from begin_order('00000000-0000-4000-8000-000000000b73', 2) $$, '23514', 'TOTAL_TOO_SMALL', 'a total not above Biqbaq''s fee cannot be paid');
+reset role;
+update platform_settings set value = '0' where key = 'payments.application_fee_minor';
+select pg_temp.act_as('00000000-0000-4000-8000-000000000b52');
+set local role authenticated;
+select throws_ok($$ select * from begin_order('00000000-0000-4000-8000-000000000b73', 2) $$, '23514', 'TOTAL_TOO_SMALL', 'a payment under Stripe''s CA$0.50 cannot be made');
+reset role;
+update platform_settings set value = '100' where key = 'payments.application_fee_minor';
+select pg_temp.act_as('00000000-0000-4000-8000-000000000b52');
+set local role authenticated;
 select results_eq($$ insert into ord select order_id from begin_order('00000000-0000-4000-8000-000000000b71', 3) returning (select 1) $$, $$ values (1) $$, 'a buyer starts an order');
 reset role;
-select results_eq($$ select status, unit_price_minor, quantity, total_minor, application_fee_minor from orders where id = (select id from ord) $$,
-  $$ values ('pending', 2500::bigint, 3, 7500::bigint, 100::bigint) $$, 'priced here, with Biqbaq''s CA$1, not from the page');
+select results_eq($$ select status, unit_price_minor, quantity, subtotal_minor, total_minor, application_fee_minor from orders where id = (select id from ord) $$,
+  $$ values ('pending', 2500::bigint, 3, 7500::bigint, 7600::bigint, 100::bigint) $$, 'priced here, with Biqbaq''s CA$1 added on top for the buyer');
 select pg_temp.act_as('00000000-0000-4000-8000-000000000b51');
 set local role authenticated;
 select is_empty($$ select 1 from list_shop_orders('00000000-0000-4000-8000-000000000b61') $$, 'an unpaid checkout is not an order for the seller');
@@ -89,9 +97,9 @@ set local role service_role;
 select lives_ok($$ select attach_checkout((select id from ord), 'cs_test_1') $$, 'the server attaches Stripe''s checkout');
 select is(claim_payment_event('stripe', 'evt_1', 'checkout.session.completed'), true, 'a notice is handled the first time');
 select is(claim_payment_event('stripe', 'evt_1', 'checkout.session.completed'), false, 'and never again');
-select is(record_checkout('cs_test_1', 'acct_wrong', 'paid', 'pi_1', 7500, 'b@example.com', 'B', '416', '{}'), 'unknown', 'a notice from another Stripe account is ignored');
+select is(record_checkout('cs_test_1', 'acct_wrong', 'paid', 'pi_1', 7600, 'b@example.com', 'B', '416', '{}'), 'unknown', 'a notice from another Stripe account is ignored');
 select throws_ok($$ select record_checkout('cs_test_1', 'acct_1', 'paid', 'pi_1', 100, 'b@example.com', 'B', '416', '{}') $$, '55000', 'AMOUNT_MISMATCH', 'a payment for the wrong amount is refused');
-select is(record_checkout('cs_test_1', 'acct_1', 'paid', 'pi_1', 7500, 'p-buyer@example.com', 'Bola Buyer', '416-555-0100', '{"city": "Toronto"}'), 'paid', 'the paid notice marks it paid');
+select is(record_checkout('cs_test_1', 'acct_1', 'paid', 'pi_1', 7600, 'p-buyer@example.com', 'Bola Buyer', '416-555-0100', '{"city": "Toronto"}'), 'paid', 'the paid notice marks it paid');
 select is(record_checkout('cs_test_1', 'acct_1', 'expired', null, null, null, null, null, null), 'paid', 'a later notice cannot undo it');
 reset role;
 select is((select count(*)::int from notifications where user_id = '00000000-0000-4000-8000-000000000b52' and type = 'order_paid'), 1, 'the buyer is told');
@@ -100,10 +108,10 @@ select is((select count(*)::int from notifications where user_id = '00000000-000
 -- The seller's orders.
 select pg_temp.act_as('00000000-0000-4000-8000-000000000b51');
 set local role authenticated;
-select results_eq($$ select quantity, shipping_name, shipping_phone from list_shop_orders('00000000-0000-4000-8000-000000000b61') $$,
-  $$ values (3, 'Bola Buyer', '416-555-0100') $$, 'the seller sees the order and where to deliver it');
+select results_eq($$ select quantity, subtotal_minor, total_minor, shipping_name, shipping_phone, total from list_shop_orders('00000000-0000-4000-8000-000000000b61') $$,
+  $$ values (3, 7500::bigint, 7600::bigint, 'Bola Buyer', '416-555-0100', 1::bigint) $$, 'the seller sees their sale and where to deliver it');
 select lives_ok($$ select set_order_fulfilled((select id from ord), true) $$, 'and marks it delivered');
-select throws_ok($$ select * from prepare_refund((select id from ord), 7501) $$, '23514', 'AMOUNT_INVALID', 'a refund cannot exceed the total');
+select throws_ok($$ select * from prepare_refund((select id from ord), 7501) $$, '23514', 'AMOUNT_INVALID', 'a refund cannot exceed the product price: Biqbaq keeps its fee');
 select results_eq($$ select provider_account_id, provider_payment_id, refundable_minor from prepare_refund((select id from ord), 2500) $$,
   $$ values ('acct_1', 'pi_1', 7500::bigint) $$, 'a partial refund is allowed');
 reset role;
@@ -134,7 +142,7 @@ select is((select count(*)::int from notifications where user_id = '00000000-000
 -- The buyer's own orders, and Super Admin's view.
 select pg_temp.act_as('00000000-0000-4000-8000-000000000b52');
 set local role authenticated;
-select results_eq($$ select shop_name, status, refunded_minor from my_orders() $$, $$ values ('P Shop', 'paid', 2500::bigint) $$, 'the buyer sees their order');
+select results_eq($$ select shop_name, status, subtotal_minor, total_minor, refunded_minor, total from my_orders() $$, $$ values ('P Shop', 'paid', 7500::bigint, 7600::bigint, 2500::bigint, 1::bigint) $$, 'the buyer sees their order, with the fee they paid');
 reset role;
 select pg_temp.act_as('00000000-0000-4000-8000-000000000b54');
 set local role authenticated;
@@ -153,6 +161,21 @@ select is((select buy_online from public_products where slug = 'p-rice'), false,
 set local role service_role;
 select is(record_payment_account('00000000-0000-4000-8000-000000000b61', 'acct_1', true, true, 0, false), 'suspended', 'Stripe''s approval cannot override Super Admin');
 reset role;
+
+-- The service fee is shown on product pages before checkout, and only Super Admin changes it.
+set local role anon;
+select is((select value from public_platform_settings where key = 'payments.application_fee_minor'), '100'::jsonb, 'anyone can see the service fee');
+reset role;
+select pg_temp.act_as('00000000-0000-4000-8000-000000000b51');
+set local role authenticated;
+select throws_ok($$ select update_platform_setting('payments.application_fee_minor', '0'::jsonb, 'free') $$, '42501', null, 'a seller cannot change it');
+reset role;
+select pg_temp.act_as('00000000-0000-4000-8000-000000000b53');
+set local role authenticated;
+select lives_ok($$ select update_platform_setting('payments.application_fee_minor', '250'::jsonb, 'new fee') $$, 'Super Admin sets it');
+select throws_ok($$ select update_platform_setting('payments.application_fee_minor', '10001'::jsonb, 'too much') $$, '23514', null, 'up to CA$100');
+reset role;
+select is((select value from platform_settings where key = 'payments.application_fee_minor'), '250'::jsonb, 'and new orders use it');
 
 select * from finish();
 rollback;

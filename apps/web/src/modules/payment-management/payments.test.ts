@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 import { addressLines, orderState, paymentErrorKey } from "./index";
 
 describe("orderState", () => {
-  const paid = { status: "paid", refunded_minor: 0, total_minor: 1000, fulfilled_at: null, disputed: false };
+  const paid = { status: "paid", refunded_minor: 0, subtotal_minor: 1000, fulfilled_at: null, disputed: false };
   it("follows an order from payment to delivery or refund", () => {
     expect(orderState(paid)).toBe("to_deliver");
     expect(orderState({ ...paid, fulfilled_at: "2026-11-08" })).toBe("delivered");
     expect(orderState({ ...paid, refunded_minor: 300 })).toBe("partly_refunded");
     expect(orderState({ ...paid, refunded_minor: 1000 })).toBe("refunded");
+    // The buyer's service fee is never refunded, so refunding the sale is a full refund.
+    expect(orderState({ ...paid, refunded_minor: 1000, total_minor: 1100 } as typeof paid)).toBe("refunded");
     expect(orderState({ ...paid, disputed: true })).toBe("disputed");
     expect(orderState({ ...paid, status: "pending" })).toBe("pending");
   });

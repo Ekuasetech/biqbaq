@@ -7,7 +7,13 @@
     "skipToContent": "Skip to content",
     "views": "{count, plural, one {# view} other {# views}}",
     "previewNotice": "Preview: this site is still being built, and includes sample data.",
-    "home": "Home"
+    "home": "Home",
+    "pager": {
+      "pagination": "Pages",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {pages}"
+    }
   },
   "nav": {
     "products": "Products",
@@ -771,7 +777,7 @@
       },
       "payments": {
         "title": "Online payments",
-        "help": "Buy now and Biqbaq's fee. Each shop is turned on separately, on the Payments screen."
+        "help": "Buy now for buyers. Biqbaq's service fee and each shop's payments are set on the Payments screen."
       }
     },
     "items": {
@@ -898,10 +904,6 @@
       "paymentsEnabled": {
         "label": "Online payments",
         "help": "Whether buyers can pay online at all. Off stops Buy now everywhere."
-      },
-      "paymentsFee": {
-        "label": "Biqbaq's fee per order (cents)",
-        "help": "100 is CA$1. Kept when an order is refunded."
       },
       "paymentsMaxQuantity": {
         "label": "Most of one product per order",
@@ -2270,7 +2272,7 @@
         "enabled": "Buyers can pay for your products on Biqbaq. Money goes to your Stripe account, and Stripe pays it out to your bank.",
         "suspended": "Biqbaq has paused online payments for this shop. Buyers can still contact you."
       },
-      "fees": "Biqbaq takes {fee} per order, and Stripe takes its own card fee. Biqbaq's fee is kept if you refund an order.",
+      "fees": "Buyers pay Biqbaq's {fee} service fee on top of your price, so you receive your full price, less Stripe's card fee. The service fee isn't refunded if you refund an order.",
       "start": "Set up payments with Stripe",
       "continue": "Continue with Stripe",
       "check": "Check status",
@@ -2284,7 +2286,9 @@
       "button": "Buy now",
       "working": "Opening checkout...",
       "hint": "You'll pay on Stripe's secure page. The seller arranges delivery or pickup with you through Biqbaq messages.",
-      "cancelled": "You left the checkout, so nothing was charged."
+      "cancelled": "You left the checkout, so nothing was charged.",
+      "fee": "Plus Biqbaq's {fee} service fee per order, shown at checkout.",
+      "feeLine": "Biqbaq service fee"
     },
     "errors": {
       "QUANTITY_INVALID": "Choose a quantity the shop allows.",
@@ -2321,7 +2325,7 @@
       "notDelivered": "Mark not delivered",
       "refund": "Refund",
       "refundAmount": "Amount to refund (up to {left})",
-      "refundHint": "The refund comes from your Stripe balance. Biqbaq keeps its {fee} fee.",
+      "refundHint": "The refund comes from your Stripe balance, up to the product price. The buyer's service fee isn't refunded.",
       "confirmRefund": "Refund",
       "working": "Please wait...",
       "cancel": "Cancel",
@@ -2345,7 +2349,8 @@
       "empty": "No orders yet.",
       "confirming": "Confirming payment",
       "paid": "Paid",
-      "help": "Delivery is arranged with each seller through Biqbaq messages. For a refund, contact the seller."
+      "help": "Delivery is arranged with each seller through Biqbaq messages. For a refund, contact the seller.",
+      "serviceFee": "incl. {fee} service fee"
     }
   },
   "paymentsAdmin": {
@@ -2370,6 +2375,22 @@
       "pending": "Awaiting payment",
       "failed": "Payment failed",
       "expired": "Not completed"
+    },
+    "shopsPages": "Shop pages",
+    "ordersPages": "Order pages",
+    "serviceFee": {
+      "title": "Service fee",
+      "intro": "Buyers pay this on top of the price, once per order, for every shop. Biqbaq keeps it, including when an order is refunded.",
+      "current": "Now: {fee}.",
+      "amount": "Fee (CAD)",
+      "reason": "Reason for the change",
+      "save": "Save fee",
+      "saving": "Saving...",
+      "help": "Applies to checkouts started after saving. Set 0 to charge no fee. The change is recorded in the audit log.",
+      "invalid": "Enter an amount from $0.00 to {max}.",
+      "reasonNeeded": "Give a reason for the change.",
+      "failed": "The fee couldn't be saved. Please try again.",
+      "saved": "Saved. New checkouts add {fee}."
     }
   }
 }
