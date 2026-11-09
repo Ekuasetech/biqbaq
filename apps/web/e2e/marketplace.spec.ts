@@ -2241,6 +2241,175 @@ test.describe("public marketplace", () => {
             await expect(page.getByText("Suspend product")).toHaveCount(0);
           });
 
+          // Against Stripe's test mode, with real keys and `stripe listen` forwarding notices to
+          // the app. Stripe's seller sign-up has a CAPTCHA, so the shop (STRIPE_LIVE_SHOP) is set
+          // up with Stripe by hand first. Run on purpose: STRIPE_LIVE=1 npx playwright test -g "live Stripe".
+          test("live Stripe: a buyer pays by test card, Stripe's notice marks the order paid, and Biqbaq keeps CA$1", async ({ browser, request }) => {
+            test.skip(!process.env.STRIPE_LIVE, "Runs only with STRIPE_LIVE=1, Stripe test keys and stripe listen");
+            test.setTimeout(180000);
+            const shots = process.env.SHOTS ?? "test-results";
+            const shopSlug = process.env.STRIPE_LIVE_SHOP ?? "albert";
+            const sellerId = sql(`select id from public.sellers where slug = '${shopSlug}'`);
+            expect(sql(`select status from public.payment_accounts where seller_id = '${sellerId}'`)).toBe("enabled");
+            const product = sql(`select slug || '|' || id || '|' || price_minor from public.products where seller_id = '${sellerId}' and status = 'published' and deleted_at is null order by created_at limit 1`);
+            const [slug, , price] = product.split("|");
+
+            const buyer = await newApplicant(browser, request);
+            await buyer.page.goto(`/products/${slug}`);
+            await buyer.page.getByLabel("Quantity").selectOption("2");
+            await buyer.page.getByRole("button", { name: "Buy now" }).click({ timeout: 15000 });
+            await buyer.page.waitForURL(/checkout\.stripe\.com/, { timeout: 30000 });
+            const checkout = buyer.page;
+            await checkout.waitForLoadState("networkidle").catch(() => {});
+            await expect(checkout.getByText(`CA$${(Number(price) * 2 / 100).toFixed(2)}`).first()).toBeVisible({ timeout: 30000 });
+
+            // Shipping address in Canada, and Stripe's test card.
+            await checkout.getByText("Enter address manually").click().catch(() => {});
+            await checkout.locator('input[name="shippingName"]').fill("Bola Buyer");
+            await checkout.locator('input[name="shippingAddressLine1"]').fill("12 King St W");
+            await checkout.locator('input[name="shippingLocality"]').fill("Toronto");
+            await checkout.locator('select[name="shippingAdministrativeArea"]').selectOption("ON");
+            await checkout.locator('input[name="shippingPostalCode"]').fill("M5H 1A1");
+            await checkout.locator('input[name="phoneNumber"]').fill("4165550100");
+            // Card is one of several ways to pay (Klarna and Affirm too); its row opens the card form.
+            // Stripe lays a clear button over the row, which Playwright counts as hidden.
+            await checkout.getByTestId("card-accordion-item-button").dispatchEvent("click");
+            await checkout.locator('input[name="cardNumber"]').fill("4242424242424242");
+            await checkout.locator('input[name="cardExpiry"]').fill("12 / 34");
+            await checkout.locator('input[name="cardCvc"]').fill("123");
+            const billingName = checkout.locator('input[name="billingName"]');
+            if (await billingName.isVisible().catch(() => false)) await billingName.fill("Bola Buyer");
+            const save = checkout.locator('input[name="enableStripePass"]');
+            if (await save.isChecked().catch(() => false)) await save.uncheck();
+            await checkout.screenshot({ path: `${shots}/checkout-1.png`, fullPage: true });
+            await checkout.getByTestId("hosted-payment-submit-button").click();
+
+            // Back on Biqbaq, and Stripe's notice marks the order paid.
+            await checkout.waitForURL(/\/account\/orders\?placed=BQ-\d+/, { timeout: 60000 });
+            const number = new URL(checkout.url()).searchParams.get("placed")!;
+            await expect.poll(() => sql(`select status from public.orders where number = '${number}'`), { timeout: 60000 }).toBe("paid");
+            const order = sql(`select total_minor || '|' || application_fee_minor || '|' || provider_payment_id || '|' || quantity || '|' || (shipping_address ->> 'city') from public.orders where number = '${number}'`).split("|");
+            expect(order[0]).toBe(String(Number(price) * 2));
+            expect(order[1]).toBe("100");
+            expect(order[3]).toBe("2");
+            expect(order[4]).toBe("Toronto");
+            await checkout.reload();
+            await expect(checkout.getByRole("main")).toContainText(number, { timeout: 15000 });
+
+            // On Stripe's side: paid on the seller's account, with Biqbaq's CA$1.
+            const account = sql(`select provider_account_id from public.payment_accounts where seller_id = '${sellerId}'`);
+            const stripe = async (method: string, path: string, body?: Record<string, string>) => {
+              const response = await fetch(`https://api.stripe.com${path}`, {
+                method,
+                headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`, "Stripe-Account": account, "Content-Type": "application/x-www-form-urlencoded" },
+                body: body ? new URLSearchParams(body).toString() : undefined,
+              });
+              return (await response.json()) as Record<string, unknown>;
+            };
+            const intent = await stripe("GET", `/v1/payment_intents/${order[2]}?expand[]=latest_charge`);
+            expect(intent.status).toBe("succeeded");
+            expect(intent.amount).toBe(Number(price) * 2);
+            expect(intent.currency).toBe("cad");
+            expect(intent.application_fee_amount).toBe(100);
+            expect((intent.metadata as Record<string, string>).biqbaq_order).toBeTruthy();
+
+            // A part refund, as the seller's refund makes it; Biqbaq keeps its fee.
+            const refund = await stripe("POST", "/v1/refunds", { payment_intent: order[2], amount: "500", refund_application_fee: "false" });
+            expect(refund.status).toBe("succeeded");
+            await expect.poll(() => sql(`select refunded_minor from public.orders where number = '${number}'`), { timeout: 60000 }).toBe("500");
+          });
+
+          test("online payments: off until Super Admin turns them on, then Buy now, orders and delivery", async ({ page, browser, request }) => {
+            test.setTimeout(150000);
+            const seller = await approvedSeller(page, browser, request);
+            const shop = seller.page;
+            const name = `Payable ${unique()}`;
+            await addProduct(shop, name);
+            await item(shop, name).getByRole("button", { name: "Publish" }).click();
+            await expect(item(shop, name)).toContainText("Published");
+            const productId = sql(`select id from public.products where name = '${name}'`);
+            const slug = sql(`select slug from public.products where id = '${productId}'`);
+            const sellerId = sql(`select seller_id from public.products where id = '${productId}'`);
+            const shopSlug = sql(`select slug from public.sellers where id = '${sellerId}'`);
+
+            // Off to begin with (§13.1).
+            await shop.goto("/account/shop/settings");
+            const payments = shop.getByRole("region", { name: "Online payments" });
+            await expect(payments).toContainText("Online payments are off for this shop.", { timeout: 15000 });
+            await expect(payments.getByRole("button", { name: "Set up payments with Stripe" })).toHaveCount(0);
+
+            // Stripe's approval stands in here; the real account is set up with Stripe in test mode.
+            sql(`insert into public.payment_accounts (seller_id, provider_account_id, status, charges_enabled, payouts_enabled) values ('${sellerId}', 'acct_e2e_${unique()}', 'verification_pending', true, true)`);
+            await page.goto("/admin/payments");
+            const shops = page.getByRole("region", { name: "Shops" });
+            await shops.getByLabel("Search shops").fill(shopSlug);
+            await shops.getByRole("button", { name: "Search", exact: true }).click();
+            const row = page.getByRole("article").filter({ has: page.getByText(`/sellers/${shopSlug}`, { exact: true }) });
+            await row.getByRole("button", { name: "Turn on" }).click({ timeout: 15000 });
+            await expect(row.getByRole("button", { name: "Turn off" })).toBeVisible();
+            // The shop takes payments only with Stripe's confirmation, recorded by the server.
+            sql(`update public.payment_accounts set status = 'enabled' where seller_id = '${sellerId}'`);
+            await row.getByRole("button", { name: "Turn off" }).click();
+            await row.getByRole("button", { name: "Turn on" }).click();
+            await expect(row).toContainText("Taking payments", { timeout: 15000 });
+
+            await shop.reload();
+            await expect(payments).toContainText("Taking payments", { timeout: 15000 });
+            await expect(payments).toContainText("Biqbaq takes $1.00 per order");
+
+            // A buyer sees Buy now, and goes to Stripe's checkout (stood in for here).
+            const buyer = await newApplicant(browser, request);
+            const asked: unknown[] = [];
+            await buyer.page.route("**/api/v1/checkout", async (route) => {
+              asked.push(route.request().postDataJSON());
+              await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ url: "/account/orders?placed=BQ-TEST" }) });
+            });
+            await buyer.page.goto(`/products/${slug}`);
+            await buyer.page.getByLabel("Quantity").selectOption("3");
+            await buyer.page.getByRole("button", { name: "Buy now" }).click({ timeout: 15000 });
+            await expect(buyer.page).toHaveURL(/\/account\/orders\?placed=BQ-TEST$/);
+            expect(asked).toEqual([{ product: productId, quantity: 3, locale: "en" }]);
+            await expect(buyer.page.getByText("Order BQ-TEST is being confirmed with Stripe")).toBeVisible();
+
+            // The seller cannot buy their own product (checked by the database).
+            await shop.goto(`/products/${slug}`);
+            await shop.getByRole("button", { name: "Buy now" }).click({ timeout: 15000 });
+            await expect(shop.getByText("You can't buy from your own shop.")).toBeVisible({ timeout: 15000 });
+
+            // A paid order, as Stripe's notice records it.
+            const buyerId = sql(`select id from auth.users where email = '${buyer.email}'`);
+            sql(`insert into public.orders (buyer_id, seller_id, product_id, product_name, unit_price_minor, quantity, total_minor, application_fee_minor, status, paid_at, provider_payment_id, buyer_email, shipping_name, shipping_phone, shipping_address)
+                 values ('${buyerId}', '${sellerId}', '${productId}', '${name}', 1250, 3, 3750, 100, 'paid', now(), 'pi_e2e', '${buyer.email}', 'Bola Buyer', '416-555-0100', '{"line1": "12 King St W", "city": "Toronto", "state": "ON", "postal_code": "M5H 1A1", "country": "CA"}')`);
+            await shop.goto("/account/shop/orders");
+            const order = shop.getByRole("article").filter({ hasText: name });
+            await expect(order).toContainText("To deliver", { timeout: 15000 });
+            await expect(order).toContainText("Bola Buyer");
+            await expect(order).toContainText("12 King St W");
+            await order.getByRole("button", { name: "Refund" }).click();
+            await order.getByLabel(/Amount to refund/).fill("40");
+            await order.getByRole("button", { name: "Refund" }).click();
+            await expect(order).toContainText("Enter an amount up to what's left to refund.");
+            await expect(order).toContainText("Biqbaq keeps its $1.00 fee.");
+            await order.getByRole("button", { name: "Cancel" }).click();
+            await order.getByRole("button", { name: "Mark delivered" }).click();
+            // It moves from "To deliver" to "Delivered".
+            await expect(order).toHaveCount(0);
+            await shop.getByRole("tab", { name: "Delivered" }).click();
+            await expect(order).toContainText("Delivered");
+
+            await buyer.page.goto("/account/orders");
+            await expect(buyer.page.getByRole("list", { name: "Your orders" })).toContainText(name, { timeout: 15000 });
+            await expect(buyer.page.getByRole("list", { name: "Your orders" })).toContainText("Delivered");
+
+            // Turning payments off removes Buy now at once.
+            await row.getByRole("button", { name: "Turn off" }).click();
+            await expect(row).toContainText("Paused by Biqbaq");
+            await buyer.page.goto(`/products/${slug}`);
+            await expect(buyer.page.getByRole("heading", { level: 1 })).toHaveText(name);
+            await expect(buyer.page.getByRole("button", { name: "Buy now" })).toHaveCount(0);
+            await buyer.context.close();
+          });
+
           test("the top-bar search finds the seller's own things and goes to them", async ({ page, browser, request }) => {
             test.setTimeout(120000);
             const { page: shop } = await approvedSeller(page, browser, request);

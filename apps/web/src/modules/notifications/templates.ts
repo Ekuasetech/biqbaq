@@ -257,6 +257,104 @@ const TEMPLATES: Record<string, Record<EmailLocale, Build>> = {
       path: "/admin/email-lists",
     }),
   },
+  payments_enabled: {
+    en: (x) => ({
+      subject: "Online payments are on for your shop",
+      body: `Biqbaq has turned on online payments for ${x}. Set them up with Stripe in Shop settings, and buyers can pay for your products once Stripe confirms your account.`,
+      action: "Set up payments",
+      path: "/account/shop/settings",
+    }),
+    fr: (x) => ({
+      subject: "Les paiements en ligne sont activés pour votre boutique",
+      body: `Biqbaq a activé les paiements en ligne pour ${x}. Configurez-les avec Stripe dans les paramètres de la boutique; les acheteurs pourront payer vos produits dès que Stripe aura confirmé votre compte.`,
+      action: "Configurer les paiements",
+      path: "/account/shop/settings",
+    }),
+  },
+  payments_disabled: {
+    en: (x) => ({
+      subject: "Online payments are off for your shop",
+      body: `Biqbaq has turned off online payments for ${x}. Buyers can still contact you. Orders already paid are not affected.`,
+      action: "Go to My shop",
+      path: "/account/shop/settings",
+    }),
+    fr: (x) => ({
+      subject: "Les paiements en ligne sont désactivés pour votre boutique",
+      body: `Biqbaq a désactivé les paiements en ligne pour ${x}. Les acheteurs peuvent toujours vous écrire. Les commandes déjà payées ne sont pas touchées.`,
+      action: "Accéder à ma boutique",
+      path: "/account/shop/settings",
+    }),
+  },
+  order_paid: {
+    en: (x) => ({
+      subject: "Your order is paid",
+      body: `Your payment for ${x} went through. The seller will contact you about delivery through Biqbaq messages.`,
+      action: "See your orders",
+      path: "/account/orders",
+    }),
+    fr: (x) => ({
+      subject: "Votre commande est payée",
+      body: `Votre paiement pour ${x} a été accepté. Le vendeur vous contactera pour la livraison par les messages Biqbaq.`,
+      action: "Voir vos commandes",
+      path: "/account/orders",
+    }),
+  },
+  order_received: {
+    en: (x) => ({
+      subject: "You have a new order",
+      body: `A buyer has paid for ${x}. Their delivery details are on your Orders page. Arrange delivery or pickup with them through Biqbaq messages.`,
+      action: "See your orders",
+      path: "/account/shop/orders",
+    }),
+    fr: (x) => ({
+      subject: "Vous avez une nouvelle commande",
+      body: `Un acheteur a payé ${x}. Ses coordonnées de livraison sont sur votre page Commandes. Organisez la livraison ou le retrait avec lui par les messages Biqbaq.`,
+      action: "Voir vos commandes",
+      path: "/account/shop/orders",
+    }),
+  },
+  order_refunded: {
+    en: (x) => ({
+      subject: "You've been refunded",
+      body: `The seller has refunded you for ${x}. It can take a few days to show on your statement.`,
+      action: "See your orders",
+      path: "/account/orders",
+    }),
+    fr: (x) => ({
+      subject: "Vous avez été remboursé",
+      body: `Le vendeur vous a remboursé pour ${x}. Le remboursement peut prendre quelques jours avant d'apparaître sur votre relevé.`,
+      action: "Voir vos commandes",
+      path: "/account/orders",
+    }),
+  },
+  order_fulfilled: {
+    en: (x) => ({
+      subject: "Your order has been delivered",
+      body: `The seller has marked your order for ${x} as delivered. If something's wrong, message them on Biqbaq.`,
+      action: "See your orders",
+      path: "/account/orders",
+    }),
+    fr: (x) => ({
+      subject: "Votre commande a été livrée",
+      body: `Le vendeur a indiqué que votre commande pour ${x} a été livrée. En cas de problème, écrivez-lui sur Biqbaq.`,
+      action: "Voir vos commandes",
+      path: "/account/orders",
+    }),
+  },
+  order_disputed: {
+    en: (x) => ({
+      subject: "A payment was disputed",
+      body: `A buyer's bank has disputed the payment for ${x}. Respond in your Stripe dashboard before Stripe's deadline, with proof of delivery if you have it.`,
+      action: "See your orders",
+      path: "/account/shop/orders",
+    }),
+    fr: (x) => ({
+      subject: "Un paiement a été contesté",
+      body: `La banque d'un acheteur a contesté le paiement pour ${x}. Répondez dans votre tableau de bord Stripe avant la date limite de Stripe, avec une preuve de livraison si vous en avez une.`,
+      action: "Voir vos commandes",
+      path: "/account/shop/orders",
+    }),
+  },
   product_restored: {
     en: (product) => ({
       subject: "Your product's suspension was lifted",

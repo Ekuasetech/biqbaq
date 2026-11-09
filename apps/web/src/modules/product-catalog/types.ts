@@ -65,6 +65,8 @@ export interface Product {
   reviews: Review[];
   views: number;
   createdAt: string;
+  /** Its shop takes online payments (PRD §13). */
+  buyOnline?: boolean;
 }
 
 export interface ProductQuery {

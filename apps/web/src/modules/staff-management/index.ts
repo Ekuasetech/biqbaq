@@ -9,6 +9,7 @@ export const STAFF_PERMISSIONS = [
   "products.delete",
   "messages.view",
   "messages.respond",
+  "orders.manage",
   "staff.manage",
 ] as const;
 

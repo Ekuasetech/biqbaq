@@ -27,6 +27,20 @@ Emails sent locally land in the test inbox at http://127.0.0.1:54324, not real i
 
 To try the admin screens, create an account, then run `./scripts/make-local-super-admin.sh you@example.com`. This only works once per local database, and only on the local copy.
 
+The local email sender starts with `npm run dev` and keeps the email types it started with: after adding a new kind of email, restart the dev server, or those emails fail with `UNKNOWN_TEMPLATE`.
+
+### Payments with Stripe (test mode)
+
+Use a Stripe account kept only for Biqbaq, in test mode or a sandbox, with Connect switched on. Put its `STRIPE_SECRET_KEY` (`sk_test_...`) in `apps/web/.env.local`, then forward Stripe's notices to the app and put the secret it prints in the same file as `STRIPE_WEBHOOK_SECRET`:
+
+```sh
+stripe login                     # choose the Biqbaq account
+stripe listen --print-secret     # the whsec_ value
+stripe listen --forward-to localhost:3000/api/v1/payments/stripe/webhook --events checkout.session.completed,checkout.session.async_payment_succeeded,checkout.session.async_payment_failed,checkout.session.expired,refund.created,refund.updated,charge.refund.updated,charge.dispute.created,charge.dispute.updated,charge.dispute.closed,account.updated
+```
+
+A seller's Stripe sign-up has a CAPTCHA, so it is done by hand: Super Admin turns payments on for the shop, then its owner clicks **Set up payments with Stripe** and uses Stripe's test shortcuts. Then `STRIPE_LIVE=1 STRIPE_SECRET_KEY=... npx playwright test -g "live Stripe"` (with `STRIPE_LIVE_SHOP` set to the shop's slug, `albert` by default) pays by test card, and checks the order, Biqbaq's CA$1 on Stripe's side, and a refund. Forward to the port the test uses.
+
 Real project settings belong in `apps/web/.env.local`, copied from `.env.example`. On this computer the generated local files override it, so development and tests cannot touch the real project. Never commit real keys.
 
 ## Where to start

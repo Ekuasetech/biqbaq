@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Bell,
   Car,
+  CreditCard,
   FileText,
   ChevronDown,
   BookOpen,
@@ -22,6 +23,7 @@ import {
   Settings,
   Share2,
   ShieldCheck,
+  ShoppingBag,
   Store,
   Users,
   X,
@@ -111,12 +113,14 @@ function useNavigation(data: DashboardData | null, pathname: string) {
     { href: "/account", label: t("overview"), icon: LayoutDashboard },
     { href: "/account/messages", label: t("messages"), icon: MessageCircle, badge: data?.counts.unread_conversations },
     { href: "/account/notifications", label: t("notifications"), icon: Bell, badge: data?.counts.unread_notifications },
+    { href: "/account/orders", label: t("orders"), icon: ShoppingBag },
   ];
   if (data?.access.shop || (data?.access.staff_shops ?? 0) > 0) main.push({ href: "/account/shop", label: t("shop"), icon: Store });
   // In their own shop, an owner sees its pages beneath it (Q-56). Staff get tabs on the page.
   if (data?.access.shop && (pathname === "/account/shop" || pathname.startsWith("/account/shop/"))) {
     for (const [section, icon] of [
       ["products", Package],
+      ["orders", ShoppingBag],
       ["cargo-cars", Car],
       ["clients", Mail],
       ["invoices", FileText],
@@ -145,7 +149,10 @@ function useNavigation(data: DashboardData | null, pathname: string) {
       { href: "/admin/messages", label: t("conversations"), icon: MessagesSquare },
       { href: "/admin/referrals", label: t("adminReferrals"), icon: Share2 },
     );
-    records.push({ href: "/admin/audit-log", label: t("auditLog"), icon: FileClock });
+    records.push(
+      { href: "/admin/payments", label: t("payments"), icon: CreditCard },
+      { href: "/admin/audit-log", label: t("auditLog"), icon: FileClock },
+    );
   }
   if (a?.moderation) content.push({ href: "/admin/moderation", label: t("moderation"), icon: Gavel });
   if (a?.blog) content.push({ href: "/admin/blog", label: t("blog"), icon: BookOpen });

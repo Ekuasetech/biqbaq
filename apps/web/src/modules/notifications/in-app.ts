@@ -50,6 +50,13 @@ export const NOTIFICATION_PATHS: Record<string, string> = {
   bulk_email_disabled: "/account/shop",
   bulk_email_paused: "/account/shop",
   bulk_email_paused_admin: "/admin/email-lists",
+  payments_enabled: "/account/shop/settings",
+  payments_disabled: "/account/shop/settings",
+  order_paid: "/account/orders",
+  order_received: "/account/shop/orders",
+  order_refunded: "/account/orders",
+  order_fulfilled: "/account/orders",
+  order_disputed: "/account/shop/orders",
 };
 
 export const notificationPath = (type: string) => NOTIFICATION_PATHS[type] ?? "/account";

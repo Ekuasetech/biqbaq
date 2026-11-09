@@ -606,6 +606,10 @@
       "settings": {
         "title": "Shop settings",
         "description": "Shop details, verification and your public API."
+      },
+      "orders": {
+        "title": "Orders",
+        "description": "Paid orders to deliver, and refunds."
       }
     }
   },
@@ -764,6 +768,10 @@
       "bulkEmail": {
         "title": "Customer emails",
         "help": "Limits on bulk email from each shop and from Biqbaq. Every email shares one Resend account, so keep these modest."
+      },
+      "payments": {
+        "title": "Online payments",
+        "help": "Buy now and Biqbaq's fee. Each shop is turned on separately, on the Payments screen."
       }
     },
     "items": {
@@ -886,6 +894,22 @@
       "bulkBounces": {
         "label": "Bounces before pausing (%)",
         "help": "Percent of a shop's emails bouncing in 30 days that pauses its bulk email. Resend's own limit is 4%."
+      },
+      "paymentsEnabled": {
+        "label": "Online payments",
+        "help": "Whether buyers can pay online at all. Off stops Buy now everywhere."
+      },
+      "paymentsFee": {
+        "label": "Biqbaq's fee per order (cents)",
+        "help": "100 is CA$1. Kept when an order is refunded."
+      },
+      "paymentsMaxQuantity": {
+        "label": "Most of one product per order",
+        "help": "How many of one product a buyer can order at once."
+      },
+      "paymentsCheckouts": {
+        "label": "Checkouts per person per hour",
+        "help": "Most checkouts one person can start in an hour."
       }
     },
     "history": {
@@ -1002,7 +1026,13 @@
       "invoice_send": "Sent an invoice",
       "receipt_send": "Sent a receipt",
       "invoice_resend": "Sent an invoice or receipt again",
-      "bulk_email_auto_pause": "Paused a shop's bulk email automatically"
+      "bulk_email_auto_pause": "Paused a shop's bulk email automatically",
+      "payments_enable": "Turned on online payments for a shop",
+      "payments_disable": "Turned off online payments for a shop",
+      "payments_status": "A shop's payment status changed",
+      "order_fulfil": "Marked an order delivered",
+      "order_unfulfil": "Marked an order not delivered",
+      "order_refund": "Refunded an order"
     }
   },
   "moderation": {
@@ -1202,7 +1232,8 @@
       "products_delete": "Delete products",
       "staff_manage": "Manage other staff",
       "messages_view": "See customer messages",
-      "messages_respond": "Reply to customers"
+      "messages_respond": "Reply to customers",
+      "orders_manage": "Manage orders and refunds"
     },
     "memberStatus": {
       "active": "Active",
@@ -1796,7 +1827,14 @@
       "bulk_email_enabled": "Customer emails are on for {shop}. You can build a list and send updates.",
       "bulk_email_disabled": "Customer emails are off for {shop}.",
       "bulk_email_paused": "Customer emails for {shop} paused themselves to protect Biqbaq's email. Biqbaq will review it.",
-      "bulk_email_paused_admin": "Bulk email for {shop} paused itself. Review it before turning it back on."
+      "bulk_email_paused_admin": "Bulk email for {shop} paused itself. Review it before turning it back on.",
+      "payments_enabled": "Online payments are on for {shop}. Set them up with Stripe in Shop settings.",
+      "payments_disabled": "Online payments are off for {shop}.",
+      "order_paid": "Your order for {product} is paid.",
+      "order_received": "New order: {product}.",
+      "order_refunded": "You've been refunded for {product}.",
+      "order_fulfilled": "Your order for {product} was delivered.",
+      "order_disputed": "A payment for {product} was disputed. Respond in your Stripe dashboard."
     }
   },
   "referrals": {
@@ -2141,7 +2179,9 @@
       "adminReferrals": "Referral programmes",
       "conversations": "Conversations",
       "settings": "Platform settings",
-      "auditLog": "Audit log"
+      "auditLog": "Audit log",
+      "orders": "Orders",
+      "payments": "Payments"
     },
     "overview": {
       "today": "Today",
@@ -2208,6 +2248,128 @@
         "archived": "Archived",
         "suspended": "Suspended by Biqbaq"
       }
+    }
+  },
+  "payments": {
+    "setup": {
+      "title": "Online payments",
+      "status": {
+        "disabled": "Off",
+        "onboarding_incomplete": "Setup not finished",
+        "verification_pending": "Stripe is checking",
+        "restricted": "Limited by Stripe",
+        "enabled": "Taking payments",
+        "suspended": "Paused by Biqbaq"
+      },
+      "help": {
+        "notAllowed": "Online payments are off for this shop. Biqbaq can turn them on: send us a message if you'd like buyers to pay on Biqbaq.",
+        "disabled": "Set up payments with Stripe to let buyers pay for your products here. Stripe checks who you are and where to send your money.",
+        "onboarding_incomplete": "Stripe needs a few more details before you can take payments. Continue where you left off.",
+        "verification_pending": "Stripe is checking your details. This usually takes minutes, sometimes a day or two.",
+        "restricted": "Stripe has limited your account. Open your Stripe dashboard to see what it needs.",
+        "enabled": "Buyers can pay for your products on Biqbaq. Money goes to your Stripe account, and Stripe pays it out to your bank.",
+        "suspended": "Biqbaq has paused online payments for this shop. Buyers can still contact you."
+      },
+      "fees": "Biqbaq takes {fee} per order, and Stripe takes its own card fee. Biqbaq's fee is kept if you refund an order.",
+      "start": "Set up payments with Stripe",
+      "continue": "Continue with Stripe",
+      "check": "Check status",
+      "dashboard": "Open Stripe dashboard",
+      "working": "Opening Stripe..."
+    },
+    "buy": {
+      "signIn": "Sign in to buy",
+      "signInWhy": "and pay securely with Stripe.",
+      "quantity": "Quantity",
+      "button": "Buy now",
+      "working": "Opening checkout...",
+      "hint": "You'll pay on Stripe's secure page. The seller arranges delivery or pickup with you through Biqbaq messages.",
+      "cancelled": "You left the checkout, so nothing was charged."
+    },
+    "errors": {
+      "QUANTITY_INVALID": "Choose a quantity the shop allows.",
+      "PRODUCT_NOT_FOUND": "This product isn't available any more.",
+      "OUT_OF_STOCK": "This product is out of stock.",
+      "PAYMENTS_UNAVAILABLE": "This shop isn't taking online payments right now. You can still contact the seller.",
+      "OWN_SHOP": "You can't buy from your own shop.",
+      "TOTAL_TOO_SMALL": "This order is too small to pay online.",
+      "RATE_LIMITED": "You've started several checkouts recently. Please try again in an hour.",
+      "AMOUNT_INVALID": "Enter an amount up to what's left to refund.",
+      "ORDER_NOT_PAID": "This order isn't paid, so it can't be refunded.",
+      "NOT_ALLOWED": "You don't have permission to do this.",
+      "SIGN_IN": "Please sign in first.",
+      "NOT_CONFIGURED": "Online payments aren't set up on Biqbaq yet.",
+      "PROVIDER_FAILED": "Stripe couldn't do that just now. Please try again.",
+      "GENERIC": "That didn't work. Please try again."
+    },
+    "orders": {
+      "title": "Orders",
+      "intro": "Orders buyers have paid for online. Arrange delivery or pickup through Biqbaq messages, then mark each one delivered.",
+      "filter": "Show",
+      "filters": {
+        "to_deliver": "To deliver",
+        "delivered": "Delivered",
+        "refunded": "Refunded",
+        "all": "All"
+      },
+      "empty": "No orders here yet.",
+      "loadFailed": "Orders couldn't be loaded. Please refresh the page.",
+      "refunded": "{amount} refunded",
+      "deliverTo": "Deliver to",
+      "disputed": "The buyer's bank has disputed this payment. Respond in your Stripe dashboard.",
+      "markDelivered": "Mark delivered",
+      "notDelivered": "Mark not delivered",
+      "refund": "Refund",
+      "refundAmount": "Amount to refund (up to {left})",
+      "refundHint": "The refund comes from your Stripe balance. Biqbaq keeps its {fee} fee.",
+      "confirmRefund": "Refund",
+      "working": "Please wait...",
+      "cancel": "Cancel",
+      "states": {
+        "to_deliver": "To deliver",
+        "delivered": "Delivered",
+        "partly_refunded": "Partly refunded",
+        "refunded": "Refunded",
+        "disputed": "Disputed",
+        "pending": "Awaiting payment",
+        "failed": "Payment failed",
+        "expired": "Not completed"
+      }
+    },
+    "myOrders": {
+      "title": "Your orders",
+      "loading": "Loading...",
+      "signedOut": "Sign in to see your orders.",
+      "signIn": "Sign in",
+      "placed": "Thank you. Order {number} is being confirmed with Stripe, and will show as paid in a moment.",
+      "empty": "No orders yet.",
+      "confirming": "Confirming payment",
+      "paid": "Paid",
+      "help": "Delivery is arranged with each seller through Biqbaq messages. For a refund, contact the seller."
+    }
+  },
+  "paymentsAdmin": {
+    "title": "Payments",
+    "shopsTitle": "Shops",
+    "shopsIntro": "Online payments are off for every shop until you turn them on. A shop takes payments only once Stripe confirms its account. Turning it off pauses Buy now at once.",
+    "searchShops": "Search shops",
+    "searchButton": "Search",
+    "loadFailed": "Couldn't load. Please refresh the page.",
+    "figures": "{orders, plural, one {# paid order} other {# paid orders}} · {total}",
+    "chargesOn": "payments on",
+    "chargesOff": "payments off",
+    "payoutsOn": "payouts on",
+    "payoutsOff": "payouts off",
+    "turnOn": "Turn on",
+    "turnOff": "Turn off",
+    "ordersTitle": "Orders",
+    "searchOrders": "Order, shop, buyer email or Stripe reference",
+    "noOrders": "No orders found.",
+    "fee": "Biqbaq {fee}",
+    "orderStatus": {
+      "pending": "Awaiting payment",
+      "failed": "Payment failed",
+      "expired": "Not completed"
     }
   }
 }

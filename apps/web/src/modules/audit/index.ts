@@ -79,6 +79,12 @@ export const AUDIT_ACTIONS = [
   "invoice.send",
   "receipt.send",
   "invoice.resend",
+  "payments.enable",
+  "payments.disable",
+  "payments.status",
+  "order.fulfil",
+  "order.unfulfil",
+  "order.refund",
   "setting.update",
 ] as const;
 

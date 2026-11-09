@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BuyNow } from "@/components/payments/buy-now";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { productPhotoName, PageTransition } from "@/components/layout/page-transition";
@@ -99,6 +100,8 @@ export default async function ProductPage({ params }: Props) {
             <p className="mt-1 text-sm font-medium">{t(`availability.${product.availability}`)}</p>
             <ViewCount count={product.views} className="mt-1" />
             <RecordView path={`/api/v1/products/${product.id}/view`} />
+            {/* Only when its shop takes online payments (PRD §13, BD-03). */}
+            {product.buyOnline && <BuyNow productId={product.id} className="mt-4" />}
           </div>
 
           <div className="rounded-2xl bg-card p-4 shadow-sm">

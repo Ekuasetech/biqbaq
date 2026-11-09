@@ -1,11 +1,13 @@
 "use client";
 
+import { OnlinePayments } from "@/components/payments/online-payments";
+import { ShopOrders } from "@/components/payments/shop-orders";
 import { useScrollToHash } from "@/lib/use-scroll-to-hash";
 import { EmailListManager } from "@/components/email-lists/email-list-manager";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { Car, FileText, Mail, Package, Settings, Users, type LucideIcon } from "lucide-react";
+import { Car, FileText, Mail, Package, Settings, ShoppingBag, Users, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
 import { ProductPhotos } from "@/components/seller/product-photos";
@@ -285,13 +287,14 @@ function ProductItem({
  * this person can do. The screen only explains the outcome.
  */
 /** My shop's pages (owner's redesign, 2026-11-08, Q-56). */
-export const SHOP_SECTIONS = ["overview", "products", "cargo-cars", "clients", "invoices", "staff", "settings"] as const;
+export const SHOP_SECTIONS = ["overview", "products", "orders", "cargo-cars", "clients", "invoices", "staff", "settings"] as const;
 export type ShopSection = (typeof SHOP_SECTIONS)[number];
 
 export const shopSectionPath = (section: ShopSection) => (section === "overview" ? "/account/shop" : `/account/shop/${section}`);
 
 const SECTION_ICONS: Record<Exclude<ShopSection, "overview">, LucideIcon> = {
   products: Package,
+  orders: ShoppingBag,
   "cargo-cars": Car,
   clients: Mail,
   invoices: FileText,
@@ -398,6 +401,8 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
   const allowed: Record<ShopSection, boolean> = {
     overview: true,
     products: isOwner || can(access, "products.create") || can(access, "products.edit") || can(access, "products.publish") || can(access, "products.delete"),
+    // Online orders (PRD §13): the owner, and staff given "Manage orders".
+    orders: active && (isOwner || can(access, "orders.manage")),
     "cargo-cars": active && isOwner,
     clients: active && isOwner,
     invoices: active && isOwner,
@@ -536,6 +541,7 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
             />
           )}
           <VerificationCard status={shop.verification_status} request={verificationRequest} shopActive={active} onChanged={reload} />
+          {active && <OnlinePayments sellerId={shop.id} />}
           {active && <ShopApi slug={shop.slug} />}
         </>
       )}
@@ -574,6 +580,8 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
           </ul>
         </section>
       )}
+
+      {section === "orders" && <ShopOrders sellerId={shop.id} />}
 
       {section === "cargo-cars" && (
         <ShopVehicles verified={shop.verification_status === "provider_verified" || shop.verification_status === "manually_verified"} photoLimit={photoLimit} />

@@ -70,6 +70,15 @@ export const SETTING_GROUPS: { id: string; settings: SettingDefinition[] }[] = [
     ],
   },
   {
+    id: "payments",
+    settings: [
+      { key: "payments.enabled", id: "paymentsEnabled", kind: "toggle" },
+      { key: "payments.application_fee_minor", id: "paymentsFee", kind: "number", min: 0, max: 10000 },
+      { key: "payments.max_quantity", id: "paymentsMaxQuantity", kind: "number", min: 1, max: 1000 },
+      { key: "payments.max_checkouts_per_hour", id: "paymentsCheckouts", kind: "number", min: 1, max: 1000 },
+    ],
+  },
+  {
     id: "ads",
     settings: [{ key: "ads.max_per_section", id: "adsPerSection", kind: "number", min: 1, max: 6 }],
   },

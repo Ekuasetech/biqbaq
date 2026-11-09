@@ -68,8 +68,8 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 | ID | Decision | How the design handles it | Blocks |
 | --- | --- | --- | --- |
 | BD-01 | Dealers also sell vehicles? | Listing has room for it; no sale fields yet | Phase 9 |
-| BD-02 | Commission model | Configurable commission rules table, empty for now | Phase 7 |
-| BD-03 | Online payment, external contact, or both | Orders are optional and per seller, so "both" works. Checkout policy still needed | Phase 7 |
+| BD-02 | Commission model | **Decided by the owner (2026-11-08):** a fixed CA$1 per order for Biqbaq, taken as a Stripe application fee and kept even when the order is refunded. A platform setting, so it can change without code | Decided |
+| BD-03 | Online payment, external contact, or both | **Decided by the owner (2026-11-08):** both. Online payment is per seller, switched on by Super Admin (§13.1); other sellers keep Contact Seller and messages. A buyer pays for one product at a time, with a quantity; Stripe's checkout collects the delivery address and phone, and the seller arranges delivery or pickup through messages, with no separate delivery fee. Listed prices include any tax, which each seller handles | Decided |
 | BD-04 | Chat attachments | **Decided by the owner (2026-11-07):** text only for now | Decided |
 | BD-05 | Separate or unified inbox | **Decided by the owner (2026-11-07):** one inbox, with each conversation labelled with its product or vehicle listing | Decided |
 | BD-06 | Job display approach | Isolated integration | Phase 10 |
@@ -78,7 +78,7 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 | BD-09 | Co-admin permissions and delegation | **Decided by the owner (2026-11-06):** a Co-admin has only the permissions given to them, from the permission catalogue, and no one can grant a permission they do not hold (no escalation) | Decided |
 | BD-10 | Product approval requirement | **Decided by the owner (2026-11-06):** none. Sellers publish without admin approval, and moderators can suspend listings afterwards | Decided |
 | BD-11 | Referral window and precedence | **Decided by the owner (2026-11-08):** the latest referral link opened gets the credit, if the person signs up within 30 days of opening it | Decided |
-| BD-12 | Payment providers and countries | Provider interface; evaluate against provider terms | Phase 7 |
+| BD-12 | Payment providers and countries | **Decided by the owner (2026-11-08):** Stripe Connect, in Canada and CAD, with direct charges: each sale is the seller's, Stripe bills its fees to the seller, and refunds and chargebacks come from the seller's balance. Sellers use the Express dashboard on Stripe's Accounts v2, with Stripe responsible for losses (Managed Risk), so Biqbaq does not cover negative balances. That combination is a Stripe public preview (API version `2026-10-28.preview`), to recheck before launch. The payment module stays provider-independent (§13.5) | Decided |
 | BD-13 | SMS provider | Interface only | Phase 10 |
 | BD-14 | Image formats, dimensions, counts | **Decided by the owner (2026-11-06):** JPG, PNG and WebP; up to 5 images per product; up to 4000 × 4000 pixels; 1 MB each, with photos shrunk automatically in the browser. All are platform settings | Decided |
 | BD-15 | Blog resubmission workflow | **Decided by the owner (2026-11-07):** not needed: only Super Admin and Co-admin post and edit the blog and ads, so sellers do not blog and nothing is resubmitted. A Co-admin needs the permission for each, given by Super Admin | Decided |

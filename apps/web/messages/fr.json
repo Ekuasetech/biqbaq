@@ -606,6 +606,10 @@
       "settings": {
         "title": "Paramètres de la boutique",
         "description": "Détails de la boutique, vérification et votre API publique."
+      },
+      "orders": {
+        "title": "Commandes",
+        "description": "Commandes payées à livrer, et remboursements."
       }
     }
   },
@@ -764,6 +768,10 @@
       "bulkEmail": {
         "title": "Courriels aux clients",
         "help": "Limites des envois groupés de chaque boutique et de Biqbaq. Tous les courriels partagent un seul compte Resend, alors restez modéré."
+      },
+      "payments": {
+        "title": "Paiements en ligne",
+        "help": "« Acheter » et les frais de Biqbaq. Chaque boutique s'active séparément, dans l'écran Paiements."
       }
     },
     "items": {
@@ -886,6 +894,22 @@
       "bulkBounces": {
         "label": "Échecs avant la suspension (%)",
         "help": "Pourcentage des courriels d'une boutique en échec en 30 jours qui suspend ses envois groupés. La limite de Resend est de 4 %."
+      },
+      "paymentsEnabled": {
+        "label": "Paiements en ligne",
+        "help": "Si les acheteurs peuvent payer en ligne. Désactivé, « Acheter » disparaît partout."
+      },
+      "paymentsFee": {
+        "label": "Frais de Biqbaq par commande (cents)",
+        "help": "100 correspond à 1 $ CA. Conservés en cas de remboursement."
+      },
+      "paymentsMaxQuantity": {
+        "label": "Quantité maximale par commande",
+        "help": "Combien d'unités d'un produit un acheteur peut commander à la fois."
+      },
+      "paymentsCheckouts": {
+        "label": "Paiements par personne par heure",
+        "help": "Nombre maximal de paiements qu'une personne peut commencer en une heure."
       }
     },
     "history": {
@@ -1002,7 +1026,13 @@
       "invoice_send": "A envoyé une facture",
       "receipt_send": "A envoyé un reçu",
       "invoice_resend": "A renvoyé une facture ou un reçu",
-      "bulk_email_auto_pause": "A suspendu automatiquement les envois groupés d'une boutique"
+      "bulk_email_auto_pause": "A suspendu automatiquement les envois groupés d'une boutique",
+      "payments_enable": "A activé les paiements en ligne d'une boutique",
+      "payments_disable": "A désactivé les paiements en ligne d'une boutique",
+      "payments_status": "L'état des paiements d'une boutique a changé",
+      "order_fulfil": "A indiqué une commande comme livrée",
+      "order_unfulfil": "A indiqué une commande comme non livrée",
+      "order_refund": "A remboursé une commande"
     }
   },
   "moderation": {
@@ -1202,7 +1232,8 @@
       "products_delete": "Supprimer des produits",
       "staff_manage": "Gérer le reste du personnel",
       "messages_view": "Voir les messages des clients",
-      "messages_respond": "Répondre aux clients"
+      "messages_respond": "Répondre aux clients",
+      "orders_manage": "Gérer les commandes et les remboursements"
     },
     "memberStatus": {
       "active": "Actif",
@@ -1796,7 +1827,14 @@
       "bulk_email_enabled": "Les courriels aux clients sont activés pour {shop}. Vous pouvez créer une liste et écrire à vos clients.",
       "bulk_email_disabled": "Les courriels aux clients sont désactivés pour {shop}.",
       "bulk_email_paused": "Les courriels aux clients de {shop} se sont suspendus pour protéger les courriels de Biqbaq. Biqbaq examinera la situation.",
-      "bulk_email_paused_admin": "Les envois groupés de {shop} se sont suspendus. Vérifiez avant de les réactiver."
+      "bulk_email_paused_admin": "Les envois groupés de {shop} se sont suspendus. Vérifiez avant de les réactiver.",
+      "payments_enabled": "Les paiements en ligne sont activés pour {shop}. Configurez-les avec Stripe dans les paramètres de la boutique.",
+      "payments_disabled": "Les paiements en ligne sont désactivés pour {shop}.",
+      "order_paid": "Votre commande pour {product} est payée.",
+      "order_received": "Nouvelle commande : {product}.",
+      "order_refunded": "Vous avez été remboursé pour {product}.",
+      "order_fulfilled": "Votre commande pour {product} a été livrée.",
+      "order_disputed": "Un paiement pour {product} a été contesté. Répondez dans votre tableau de bord Stripe."
     }
   },
   "referrals": {
@@ -2141,7 +2179,9 @@
       "adminReferrals": "Programmes de parrainage",
       "conversations": "Conversations",
       "settings": "Paramètres de la plateforme",
-      "auditLog": "Journal d'audit"
+      "auditLog": "Journal d'audit",
+      "orders": "Commandes",
+      "payments": "Paiements"
     },
     "overview": {
       "today": "Aujourd'hui",
@@ -2208,6 +2248,128 @@
         "archived": "Archivé",
         "suspended": "Suspendu par Biqbaq"
       }
+    }
+  },
+  "payments": {
+    "setup": {
+      "title": "Paiements en ligne",
+      "status": {
+        "disabled": "Désactivés",
+        "onboarding_incomplete": "Configuration inachevée",
+        "verification_pending": "Vérification par Stripe",
+        "restricted": "Limités par Stripe",
+        "enabled": "Paiements acceptés",
+        "suspended": "Suspendus par Biqbaq"
+      },
+      "help": {
+        "notAllowed": "Les paiements en ligne sont désactivés pour cette boutique. Biqbaq peut les activer : écrivez-nous si vous voulez que les acheteurs paient sur Biqbaq.",
+        "disabled": "Configurez les paiements avec Stripe pour que les acheteurs puissent payer vos produits ici. Stripe vérifie votre identité et où envoyer votre argent.",
+        "onboarding_incomplete": "Stripe a besoin de quelques détails de plus avant que vous puissiez accepter des paiements. Reprenez là où vous en étiez.",
+        "verification_pending": "Stripe vérifie vos informations. Cela prend généralement quelques minutes, parfois un jour ou deux.",
+        "restricted": "Stripe a limité votre compte. Ouvrez votre tableau de bord Stripe pour voir ce qu'il faut fournir.",
+        "enabled": "Les acheteurs peuvent payer vos produits sur Biqbaq. L'argent arrive sur votre compte Stripe, qui le verse à votre banque.",
+        "suspended": "Biqbaq a suspendu les paiements en ligne pour cette boutique. Les acheteurs peuvent toujours vous écrire."
+      },
+      "fees": "Biqbaq prend {fee} par commande, et Stripe prend ses propres frais de carte. Les frais de Biqbaq sont conservés si vous remboursez une commande.",
+      "start": "Configurer les paiements avec Stripe",
+      "continue": "Continuer avec Stripe",
+      "check": "Vérifier l'état",
+      "dashboard": "Ouvrir le tableau de bord Stripe",
+      "working": "Ouverture de Stripe..."
+    },
+    "buy": {
+      "signIn": "Connectez-vous pour acheter",
+      "signInWhy": "et payer en toute sécurité avec Stripe.",
+      "quantity": "Quantité",
+      "button": "Acheter",
+      "working": "Ouverture du paiement...",
+      "hint": "Vous paierez sur la page sécurisée de Stripe. Le vendeur organise la livraison ou le retrait avec vous par les messages Biqbaq.",
+      "cancelled": "Vous avez quitté le paiement, donc rien n'a été prélevé."
+    },
+    "errors": {
+      "QUANTITY_INVALID": "Choisissez une quantité permise par la boutique.",
+      "PRODUCT_NOT_FOUND": "Ce produit n'est plus disponible.",
+      "OUT_OF_STOCK": "Ce produit est en rupture de stock.",
+      "PAYMENTS_UNAVAILABLE": "Cette boutique n'accepte pas les paiements en ligne pour le moment. Vous pouvez toujours écrire au vendeur.",
+      "OWN_SHOP": "Vous ne pouvez pas acheter dans votre propre boutique.",
+      "TOTAL_TOO_SMALL": "Cette commande est trop petite pour être payée en ligne.",
+      "RATE_LIMITED": "Vous avez commencé plusieurs paiements récemment. Veuillez réessayer dans une heure.",
+      "AMOUNT_INVALID": "Entrez un montant jusqu'à ce qui reste à rembourser.",
+      "ORDER_NOT_PAID": "Cette commande n'est pas payée, donc elle ne peut pas être remboursée.",
+      "NOT_ALLOWED": "Vous n'avez pas la permission de faire ceci.",
+      "SIGN_IN": "Veuillez d'abord vous connecter.",
+      "NOT_CONFIGURED": "Les paiements en ligne ne sont pas encore configurés sur Biqbaq.",
+      "PROVIDER_FAILED": "Stripe n'a pas pu le faire pour le moment. Veuillez réessayer.",
+      "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
+    },
+    "orders": {
+      "title": "Commandes",
+      "intro": "Les commandes payées en ligne par les acheteurs. Organisez la livraison ou le retrait par les messages Biqbaq, puis indiquez chacune comme livrée.",
+      "filter": "Afficher",
+      "filters": {
+        "to_deliver": "À livrer",
+        "delivered": "Livrées",
+        "refunded": "Remboursées",
+        "all": "Toutes"
+      },
+      "empty": "Aucune commande ici pour le moment.",
+      "loadFailed": "Les commandes n'ont pas pu être chargées. Veuillez actualiser la page.",
+      "refunded": "{amount} remboursés",
+      "deliverTo": "Livrer à",
+      "disputed": "La banque de l'acheteur a contesté ce paiement. Répondez dans votre tableau de bord Stripe.",
+      "markDelivered": "Indiquer livrée",
+      "notDelivered": "Indiquer non livrée",
+      "refund": "Rembourser",
+      "refundAmount": "Montant à rembourser (jusqu'à {left})",
+      "refundHint": "Le remboursement vient de votre solde Stripe. Biqbaq conserve ses frais de {fee}.",
+      "confirmRefund": "Rembourser",
+      "working": "Veuillez patienter...",
+      "cancel": "Annuler",
+      "states": {
+        "to_deliver": "À livrer",
+        "delivered": "Livrée",
+        "partly_refunded": "Remboursée en partie",
+        "refunded": "Remboursée",
+        "disputed": "Contestée",
+        "pending": "En attente de paiement",
+        "failed": "Paiement refusé",
+        "expired": "Non terminée"
+      }
+    },
+    "myOrders": {
+      "title": "Vos commandes",
+      "loading": "Chargement...",
+      "signedOut": "Connectez-vous pour voir vos commandes.",
+      "signIn": "Se connecter",
+      "placed": "Merci. La commande {number} est en cours de confirmation avec Stripe, et s'affichera comme payée dans un instant.",
+      "empty": "Aucune commande pour le moment.",
+      "confirming": "Confirmation du paiement",
+      "paid": "Payée",
+      "help": "La livraison s'organise avec chaque vendeur par les messages Biqbaq. Pour un remboursement, contactez le vendeur."
+    }
+  },
+  "paymentsAdmin": {
+    "title": "Paiements",
+    "shopsTitle": "Boutiques",
+    "shopsIntro": "Les paiements en ligne sont désactivés pour chaque boutique jusqu'à ce que vous les activiez. Une boutique n'accepte des paiements qu'une fois son compte confirmé par Stripe. Les désactiver suspend « Acheter » immédiatement.",
+    "searchShops": "Rechercher des boutiques",
+    "searchButton": "Rechercher",
+    "loadFailed": "Impossible de charger. Veuillez actualiser la page.",
+    "figures": "{orders, plural, one {# commande payée} other {# commandes payées}} · {total}",
+    "chargesOn": "paiements actifs",
+    "chargesOff": "paiements inactifs",
+    "payoutsOn": "versements actifs",
+    "payoutsOff": "versements inactifs",
+    "turnOn": "Activer",
+    "turnOff": "Désactiver",
+    "ordersTitle": "Commandes",
+    "searchOrders": "Commande, boutique, courriel de l'acheteur ou référence Stripe",
+    "noOrders": "Aucune commande trouvée.",
+    "fee": "Biqbaq {fee}",
+    "orderStatus": {
+      "pending": "En attente de paiement",
+      "failed": "Paiement refusé",
+      "expired": "Non terminée"
     }
   }
 }
