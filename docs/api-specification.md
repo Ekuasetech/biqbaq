@@ -10,7 +10,7 @@ Status: **proposed, awaiting review**. Base path `/api/v1`. Later phases extend 
 - **Pagination:** `?page=1&pageSize=20` (maximum 100), returning `meta: { page, pageSize, total, totalPages }`.
 - **Compatibility:** additive changes stay in v1; breaking changes get v2.
 
-## Public seller product API (§10)
+## Public seller API (§10): products and reviews
 
 ### `GET /api/v1/sellers/{sellerSlug}/products`
 
@@ -54,6 +54,40 @@ Response `200`:
 - **Rate limit:** per IP, 600 requests an hour by default (the `api.max_requests_per_hour` setting), returning `429` with `Retry-After`. Each visitor to a seller's website counts separately, as their browser makes the call.
 - **Built (2026-11-07):** also returns `seller.city`, `seller.url` and each product's `publishedAt`. `400` for a bad query, `405` for anything but `GET` and `OPTIONS`, and `304` for a matching `If-None-Match`.
 - **Output:** built from an explicit schema, not by passing database rows through.
+
+### `GET /api/v1/sellers/{sellerSlug}/reviews`
+
+A shop's reviews, for its own website (owner's request, 2026-11-08). Same rules as the products endpoint: no key, open CORS, the same cache headers and `ETag`, the same hourly limit per IP (one allowance shared by both endpoints), `400`, `404`, `405` and `304` as above. Sellers find both addresses in Shop settings.
+
+| Query | Values | Notes |
+| --- | --- | --- |
+| `page`, `pageSize` | integers | `pageSize` up to 100 |
+| `product` | product slug | Only that product's reviews, and its summary |
+| `locale` | `en` (default), `fr` | The product `url` follows it |
+
+Response `200`:
+
+```json
+{
+  "seller": { "name": "ABC Store", "slug": "abc-store", "city": "Toronto", "verified": true, "url": "https://biqbaq.com/sellers/abc-store" },
+  "summary": { "reviewCount": 2, "averageRating": 4.5 },
+  "data": [
+    {
+      "id": "6f1c7a2e-0000-4000-8000-000000000001",
+      "rating": 5,
+      "body": "Great fit",
+      "author": { "name": "Ada Obi" },
+      "verifiedPurchase": false,
+      "createdAt": "2026-11-08T12:00:00Z",
+      "product": { "name": "Ankara Tote Bag", "slug": "ankara-tote-bag", "url": "https://biqbaq.com/products/ankara-tote-bag" }
+    }
+  ],
+  "meta": { "page": 1, "pageSize": 20, "total": 2, "totalPages": 1 }
+}
+```
+
+- **Included:** published reviews on the shop's live products, newest first, read from the `public_shop_reviews` and `public_shop_review_stats` views. The reviewer's name is shown as Biqbaq shows it (owner's choice), or `null` when they have none. `averageRating` is to one decimal place, `null` with no reviews.
+- **Excluded:** hidden reviews, reviews on drafts or removed products, suspended shops, and everything while Super Admin has reviews switched off (§7.3).
 
 ## Trusted operations
 

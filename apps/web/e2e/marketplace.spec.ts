@@ -1669,7 +1669,7 @@ test.describe("public marketplace", () => {
             await expect(person.page).toHaveURL(/\/account\/shop\?seller=/);
             await expect(person.page.getByText("You are working here as staff.")).toBeVisible();
             await expect(person.page.getByRole("region", { name: "Shop details" })).toHaveCount(0);
-            await expect(person.page.getByRole("region", { name: "Show your products on your own website" })).toHaveCount(0);
+            await expect(person.page.getByRole("region", { name: "Show your products and reviews on your own website" })).toHaveCount(0);
             await expect(person.page.getByRole("region", { name: "Staff", exact: true })).toHaveCount(0);
             // Their shop's pages show as tabs, only those they may use.
             const tabs = person.page.getByRole("navigation", { name: "Shop pages" });
@@ -1740,10 +1740,14 @@ test.describe("public marketplace", () => {
 
             // The seller finds their address in Shop settings, and it is the one that works.
             await shop.goto("/account/shop/settings");
-            const card = shop.getByRole("region", { name: "Show your products on your own website" });
+            const card = shop.getByRole("region", { name: "Show your products and reviews on your own website" });
             const shown = await card.getByLabel("Your shop's product address").inputValue();
             expect(new URL(shown).pathname).toBe(`/api/v1/sellers/${slug}/products`);
-            await card.getByText("Notes for your website developer").click();
+            // And the address for its reviews.
+            const reviews = await card.getByLabel("Your shop's reviews address").inputValue();
+            expect(new URL(reviews).pathname).toBe(`/api/v1/sellers/${slug}/reviews`);
+            expect((await (await request.get(new URL(reviews).pathname)).json()).summary).toEqual({ reviewCount: 0, averageRating: null });
+            await card.getByText("Notes for your website developer").first().click();
             await expect(card).toContainText("send them to that Biqbaq page");
             const api = async () => (await (await request.get(`/api/v1/sellers/${slug}/products`)).json()).data.map((p: { name: string }) => p.name);
             expect(await api()).toEqual([]);
@@ -3662,6 +3666,20 @@ test.describe("the public seller API", () => {
       sql(`set session_replication_role = replica; update public.products set status = '${status}', first_published_at = ${age ? `now() - interval '${age}'` : "null"} where name = '${name} ${id}'`);
     }
     sql(`set session_replication_role = replica; update public.products set deleted_at = now(), status = 'archived' where name = 'Hidden one ${id}'`);
+    // Reviews: two published on live products, one hidden by a moderator, one on a draft.
+    for (const [label, name] of [["ada", "Ada Reviewer"], ["bo", "Bo Reviewer"]]) {
+      const reviewer = `${label}-${id}-1@example.com`;
+      sql(`insert into auth.users (id, email, email_confirmed_at) values (gen_random_uuid(), '${reviewer}', now())`);
+      sql(`update public.profiles set display_name = '${name}' where id = (select id from auth.users where email = '${reviewer}')`);
+    }
+    const review = (who: string, product: string, rating: number, body: string, status: string, age: string) =>
+      sql(`set session_replication_role = replica; insert into public.reviews (product_id, author_id, rating, body, status, created_at)
+           select p.id, u.id, ${rating}, '${body}', '${status}', now() - interval '${age}' from public.products p, auth.users u
+           where p.name = '${product} ${id}' and u.email = '${who}-${id}-1@example.com'`);
+    review("ada", "Alpha", 5, "Great fit", "published", "1 hour");
+    review("bo", "Bravo", 4, "Tasty", "published", "2 hours");
+    review("ada", "Bravo", 1, "Rude words", "hidden", "3 hours");
+    review("bo", "Draft one", 3, "On a draft", "published", "4 hours");
   });
 
   test.afterAll(() => {
@@ -3733,6 +3751,42 @@ test.describe("the public seller API", () => {
     const again = await request.get(`/api/v1/sellers/${slug}/products`, { headers: { ...headers, "If-None-Match": etag } });
     expect(again.status()).toBe(304);
     expect(await again.text()).toBe("");
+  });
+
+  test("returns the shop's published reviews, with a summary, in the documented shape", async ({ request }) => {
+    const response = await request.get(`/api/v1/sellers/${slug}/reviews`, { headers: address() });
+    expect(response.status()).toBe(200);
+    expect(response.headers()["access-control-allow-origin"]).toBe("*");
+    expect(response.headers()["etag"]).toBeTruthy();
+    const body = await response.json();
+    expect(body.seller).toMatchObject({ name: "API Shop", slug, verified: true });
+    expect(body.summary).toEqual({ reviewCount: 2, averageRating: 4.5 });
+    expect(body.meta).toEqual({ page: 1, pageSize: 20, total: 2, totalPages: 1 });
+    // Newest first, with names as Biqbaq shows them.
+    expect(body.data.map((review: { body: string }) => review.body)).toEqual(["Great fit", "Tasty"]);
+    const review = body.data[0];
+    expect(Object.keys(review).sort()).toEqual(["author", "body", "createdAt", "id", "product", "rating", "verifiedPurchase"]);
+    expect(review).toMatchObject({ rating: 5, author: { name: "Ada Reviewer" }, verifiedPurchase: false, product: { name: `Alpha ${id}` } });
+    expect(new URL(review.product.url).pathname).toBe(`/products/${review.product.slug}`);
+    const text = JSON.stringify(body);
+    for (const secret of ["Rude words", "On a draft", email, `ada-${id}`, "author_id", "status"]) expect(text).not.toContain(secret);
+
+    // One product's reviews, and a page at a time.
+    const bravo = body.data[1].product.slug;
+    const one = await (await request.get(`/api/v1/sellers/${slug}/reviews?product=${bravo}`, { headers: address() })).json();
+    expect(one.summary).toEqual({ reviewCount: 1, averageRating: 4 });
+    expect(one.data.map((r: { body: string }) => r.body)).toEqual(["Tasty"]);
+    const second = await (await request.get(`/api/v1/sellers/${slug}/reviews?pageSize=1&page=2`, { headers: address() })).json();
+    expect(second.meta).toEqual({ page: 2, pageSize: 1, total: 2, totalPages: 2 });
+    expect(second.data.map((r: { body: string }) => r.body)).toEqual(["Tasty"]);
+    const none = await (await request.get(`/api/v1/sellers/${slug}/reviews?product=no-such-product`, { headers: address() })).json();
+    expect(none.summary).toEqual({ reviewCount: 0, averageRating: null });
+
+    // Bad requests and unknown shops, as for products.
+    expect((await request.get(`/api/v1/sellers/${slug}/reviews?pageSize=1000`, { headers: address() })).status()).toBe(400);
+    expect((await request.get(`/api/v1/sellers/no-such-shop-${id}/reviews`, { headers: address() })).status()).toBe(404);
+    const preflight = await request.fetch(`/api/v1/sellers/${slug}/reviews`, { method: "OPTIONS", headers: { Origin: "https://abc-store.example", "Access-Control-Request-Method": "GET" } });
+    expect(preflight.status()).toBe(204);
   });
 
   test("one internet address cannot go past the limit", async ({ request }) => {

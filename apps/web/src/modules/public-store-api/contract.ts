@@ -94,3 +94,64 @@ export function matchesEtag(header: string | null, etag: string) {
   if (!header) return false;
   return header.split(",").some((tag) => tag.trim().replace(/^W\//, "") === etag || tag.trim() === "*");
 }
+
+// A shop's reviews, for its own website (owner's request, 2026-11-08). Same rules as the
+// products: public data only, versioned, and each review links back to Biqbaq.
+
+export const reviewsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).max(MAX_PAGE).default(1),
+  pageSize: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(20),
+  product: z.string().regex(/^[a-z0-9-]{1,200}$/).optional(),
+  locale: z.enum(["en", "fr"]).default("en"),
+});
+export type ReviewsQuery = z.infer<typeof reviewsQuerySchema>;
+
+export function parseReviewsQuery(params: URLSearchParams) {
+  const raw: Record<string, string> = {};
+  for (const key of ["page", "pageSize", "product", "locale"]) {
+    const value = params.get(key);
+    if (value !== null && value !== "") raw[key] = value;
+  }
+  return reviewsQuerySchema.safeParse(raw);
+}
+
+export interface PublicReviewRow {
+  id: string;
+  rating: number;
+  body: string;
+  is_verified_purchase: boolean;
+  created_at: string;
+  author_name: string | null;
+  product_slug: string;
+  product_name: string;
+}
+
+export interface ApiReview {
+  id: string;
+  rating: number;
+  body: string;
+  author: { name: string | null };
+  verifiedPurchase: boolean;
+  createdAt: string;
+  product: { name: string; slug: string; url: string };
+}
+
+/** Built field by field, so nothing new in the database can leak out by accident. */
+export function toApiReview(row: PublicReviewRow, siteUrl: string, locale: "en" | "fr"): ApiReview {
+  return {
+    id: row.id,
+    rating: row.rating,
+    body: row.body,
+    author: { name: row.author_name },
+    verifiedPurchase: row.is_verified_purchase,
+    createdAt: row.created_at,
+    product: { name: row.product_name, slug: row.product_slug, url: canonicalProductUrl(siteUrl, row.product_slug, locale) },
+  };
+}
+
+/** The average rating to one decimal place, from per-product counts and totals; null with none. */
+export function reviewSummary(rows: { review_count: number; rating_total: number }[]) {
+  const count = rows.reduce((sum, row) => sum + Number(row.review_count), 0);
+  const total = rows.reduce((sum, row) => sum + Number(row.rating_total), 0);
+  return { reviewCount: count, averageRating: count ? Math.round((total / count) * 10) / 10 : null };
+}

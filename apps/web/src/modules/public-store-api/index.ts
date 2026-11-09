@@ -1,7 +1,17 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { getSupabasePublicClient } from "@/lib/supabase/public";
 import { CATALOG_CACHE_TAG } from "@/modules/product-catalog/types";
-import { toApiProduct, type ApiProduct, type ApiQuery, type PublicProductRow } from "./contract";
+import {
+  reviewSummary,
+  toApiProduct,
+  toApiReview,
+  type ApiProduct,
+  type ApiQuery,
+  type ApiReview,
+  type PublicProductRow,
+  type PublicReviewRow,
+  type ReviewsQuery,
+} from "./contract";
 
 export interface Storefront {
   seller: { name: string; slug: string; city: string; verified: boolean };
@@ -54,5 +64,55 @@ export async function getStorefront(sellerSlug: string, query: ApiQuery, siteUrl
     seller: { name: seller.name, slug: seller.slug, city: seller.city, verified: seller.verified },
     products: ((data ?? []) as PublicProductRow[]).map((row) => toApiProduct(row, siteUrl, query.locale)),
     total: count ?? 0,
+  };
+}
+
+export interface ShopReviews {
+  seller: { name: string; slug: string; city: string; verified: boolean };
+  summary: { reviewCount: number; averageRating: number | null };
+  reviews: ApiReview[];
+}
+
+/**
+ * A shop's published reviews, newest first, from the public views only, so it can never show
+ * more than product pages do. Empty while Super Admin has reviews switched off. Null means no
+ * public seller has this address.
+ */
+export async function getShopReviews(sellerSlug: string, query: ReviewsQuery, siteUrl: string): Promise<ShopReviews | null> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CATALOG_CACHE_TAG);
+
+  const supabase = getSupabasePublicClient();
+  const { data: seller, error: sellerError } = await supabase
+    .from("public_sellers")
+    .select("name, slug, city, verified")
+    .eq("slug", sellerSlug)
+    .maybeSingle();
+  if (sellerError) throw new Error(`Seller lookup failed: ${sellerError.code}`);
+  if (!seller) return null;
+
+  let stats = supabase.from("public_shop_review_stats").select("review_count, rating_total").eq("seller_slug", sellerSlug);
+  let reviews = supabase
+    .from("public_shop_reviews")
+    .select("id, rating, body, is_verified_purchase, created_at, author_name, product_slug, product_name")
+    .eq("seller_slug", sellerSlug);
+  if (query.product) {
+    stats = stats.eq("product_slug", query.product);
+    reviews = reviews.eq("product_slug", query.product);
+  }
+  const from = (query.page - 1) * query.pageSize;
+  const [summary, page] = await Promise.all([
+    stats,
+    reviews.order("created_at", { ascending: false }).order("id").range(from, from + query.pageSize - 1),
+  ]);
+  if (summary.error) throw new Error(`Review summary failed: ${summary.error.code}`);
+  // Asking for a page past the end is not an error; it is just empty.
+  if (page.error && page.error.code !== "PGRST103") throw new Error(`Review lookup failed: ${page.error.code}`);
+
+  return {
+    seller: { name: seller.name, slug: seller.slug, city: seller.city, verified: seller.verified },
+    summary: reviewSummary((summary.data ?? []) as { review_count: number; rating_total: number }[]),
+    reviews: ((page.data ?? []) as PublicReviewRow[]).map((row) => toApiReview(row, siteUrl, query.locale)),
   };
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canonicalProductUrl, etagFor, matchesEtag, parseApiQuery, sellerSlugSchema, toApiProduct, type PublicProductRow } from "./contract";
+import { canonicalProductUrl, etagFor, matchesEtag, parseApiQuery, parseReviewsQuery, reviewSummary, sellerSlugSchema, toApiProduct, toApiReview, type PublicProductRow } from "./contract";
 
 const row: PublicProductRow = {
   id: "6f1c7a2e-0000-4000-8000-000000000000",
@@ -79,5 +79,42 @@ describe("ETags", () => {
     expect(matchesEtag(`"other", ${tag}`, tag)).toBe(true);
     expect(matchesEtag('"other"', tag)).toBe(false);
     expect(matchesEtag(null, tag)).toBe(false);
+  });
+});
+
+describe("the reviews endpoint", () => {
+  it("reads its query, refusing what it does not know", () => {
+    expect(parseReviewsQuery(new URLSearchParams("")).data).toEqual({ page: 1, pageSize: 20, locale: "en" });
+    expect(parseReviewsQuery(new URLSearchParams("product=sr-rice&page=2&pageSize=5&locale=fr")).data).toEqual({ product: "sr-rice", page: 2, pageSize: 5, locale: "fr" });
+    expect(parseReviewsQuery(new URLSearchParams("pageSize=101")).success).toBe(false);
+    expect(parseReviewsQuery(new URLSearchParams("product=Not A Slug")).success).toBe(false);
+  });
+
+  it("builds each review field by field, with a link back to the product on Biqbaq", () => {
+    const row = {
+      id: "r1",
+      rating: 4,
+      body: "Good",
+      is_verified_purchase: true,
+      created_at: "2026-11-08T12:00:00Z",
+      author_name: "Ada Obi",
+      product_slug: "rice",
+      product_name: "Rice",
+      author_id: "must-not-leak",
+    };
+    expect(toApiReview(row, "https://biqbaq.ca/", "fr")).toEqual({
+      id: "r1",
+      rating: 4,
+      body: "Good",
+      author: { name: "Ada Obi" },
+      verifiedPurchase: true,
+      createdAt: "2026-11-08T12:00:00Z",
+      product: { name: "Rice", slug: "rice", url: "https://biqbaq.ca/fr/products/rice" },
+    });
+  });
+
+  it("averages ratings to one decimal place, and has none without reviews", () => {
+    expect(reviewSummary([{ review_count: 2, rating_total: 7 }, { review_count: 1, rating_total: 4 }])).toEqual({ reviewCount: 3, averageRating: 3.7 });
+    expect(reviewSummary([])).toEqual({ reviewCount: 0, averageRating: null });
   });
 });
