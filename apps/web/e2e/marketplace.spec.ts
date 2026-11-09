@@ -2060,6 +2060,78 @@ test.describe("public marketplace", () => {
             (reader as unknown as { problems?: string[] }).problems = [];
           });
 
+          test("Super Admin writes the About us page, which the footer links to once it is published", async ({ page, request, browser }) => {
+            test.setTimeout(150000);
+            const id = unique();
+            const owner = await confirmedAccount(page, request);
+            makeSuperAdmin(owner);
+            // The local copy may have its own About us page: it is put back afterwards.
+            const before = sql(`select coalesce((select row_to_json(a)::text from public.about_page a), '')`);
+            sql(`delete from public.about_page`);
+            const visitor = await browser.newContext();
+            const home = await visitor.newPage();
+            try {
+              // Nothing on the site until it is published.
+              await home.goto("/");
+              await expect(home.getByRole("contentinfo").getByRole("link", { name: "About us" })).toHaveCount(0);
+              expect((await home.goto("/about"))?.status()).toBe(404);
+
+              await page.goto("/admin/about");
+              await expect(page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: "About us" })).toHaveAttribute("aria-current", "page");
+              await expect(page.getByText("Not on the site yet")).toBeVisible({ timeout: 15000 });
+              // The page's own photo is here; the text editor has no photo button.
+              await expect(page.getByRole("region", { name: "About us photo" })).toContainText("Showing the site's original photo.");
+              await expect(page.getByRole("toolbar").first().getByRole("button", { name: /photo/i })).toHaveCount(0);
+              await page.getByRole("button", { name: "Publish" }).click();
+              await expect(page.getByText("Write something in English before publishing.")).toBeVisible();
+              ignoreExpectedFailures(page); // The browser logs the refusal as an error.
+
+              const english = page.getByRole("textbox", { name: "About us, in English" });
+              await english.click();
+              await page.keyboard.type(`We connect Nigerians in Canada ${id}.`);
+              await page.getByRole("button", { name: "Bold" }).first().click();
+              await page.keyboard.type(" Shop local.");
+              await page.getByRole("button", { name: "Publish" }).click();
+              await expect(page.getByText("Saved. The page is on the site, linked from the footer.")).toBeVisible();
+              await expect(page.getByText("On the site", { exact: true })).toBeVisible();
+
+              // The footer links to it; the page has the photo at the top, then the write-up.
+              await home.goto("/");
+              const footerLink = home.getByRole("contentinfo").getByRole("link", { name: "About us" });
+              await expect(footerLink).toBeVisible({ timeout: 15000 });
+              await footerLink.click();
+              await expect(home).toHaveURL(/\/about$/);
+              await expect(home.getByRole("heading", { level: 1 })).toHaveText("About us");
+              await expect(home.getByRole("article")).toContainText(`We connect Nigerians in Canada ${id}.`);
+              await expect(home.getByRole("article").locator("strong")).toHaveText("Shop local.");
+              const photoTop = (await home.getByRole("article").locator("img").first().boundingBox())!.y;
+              expect(photoTop).toBeLessThan((await home.getByRole("heading", { level: 1 }).boundingBox())!.y);
+              // French visitors read the English until a French version is written.
+              await home.goto("/fr/about");
+              await expect(home.getByRole("heading", { level: 1 })).toHaveText("À propos");
+              await expect(home.getByRole("article")).toContainText(`We connect Nigerians in Canada ${id}.`);
+
+              await page.getByRole("tab", { name: "French" }).click();
+              await page.getByRole("textbox", { name: "About us, in French" }).click();
+              await page.keyboard.type(`Nous rapprochons les Nigérians au Canada ${id}.`);
+              await page.getByRole("button", { name: "Save changes" }).click();
+              await expect(page.getByText("Saved. The page is on the site, linked from the footer.")).toBeVisible();
+              await home.reload();
+              await expect(home.getByRole("article")).toContainText(`Nous rapprochons les Nigérians au Canada ${id}.`);
+
+              // Taken off the site again.
+              await page.getByRole("button", { name: "Take it off the site" }).click();
+              await expect(page.getByText("Saved. The page isn't on the site.")).toBeVisible();
+              await home.context().clearCookies({ name: "NEXT_LOCALE" });
+              expect((await home.goto("/about"))?.status()).toBe(404);
+              expect(sql(`select count(*) from public.audit_logs where action = 'about.save' and actor_id = (select id from auth.users where email = '${owner}')`)).toBe("3");
+            } finally {
+              await visitor.close();
+              sql(`delete from public.about_page`);
+              if (before) sql(`insert into public.about_page select * from json_populate_record(null::public.about_page, '${before.replaceAll("'", "''")}'::json)`);
+            }
+          });
+
           test("Super Admin writes What customers say, and the quotes slide right to left on the front page", async ({ page, request, browser }) => {
             test.setTimeout(150000);
             const id = unique();

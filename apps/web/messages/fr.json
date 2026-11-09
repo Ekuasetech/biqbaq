@@ -1039,7 +1039,8 @@
       "testimonial_create": "A ajouté une citation de client",
       "testimonial_edit": "A modifié une citation de client",
       "testimonial_move": "A réordonné les citations de clients",
-      "testimonial_delete": "A supprimé une citation de client"
+      "testimonial_delete": "A supprimé une citation de client",
+      "about_save": "A enregistré la page À propos"
     }
   },
   "moderation": {
@@ -2210,7 +2211,8 @@
       "orders": "Commandes",
       "payments": "Paiements",
       "siteImages": "Images du site",
-      "testimonials": "Ce que disent nos clients"
+      "testimonials": "Ce que disent nos clients",
+      "about": "À propos"
     },
     "overview": {
       "today": "Aujourd'hui",
@@ -2470,7 +2472,8 @@
       "category_food": "Magasiner par catégorie : Alimentation",
       "category_beauty": "Magasiner par catégorie : Beauté",
       "category_home": "Magasiner par catégorie : Maison",
-      "category_cargo_cars": "Magasiner par catégorie : Voitures cargo"
+      "category_cargo_cars": "Magasiner par catégorie : Voitures cargo",
+      "about": "Photo de la page À propos"
     },
     "heroHint": "Affichée avec le titre « {headline} ». Plus large que haute (environ 5 sur 4).",
     "getStartedHint": "Affichée à droite des trois cartes Commencer (en dessous sur téléphone).",
@@ -2501,7 +2504,8 @@
       "MEDIA_NOT_CONFIGURED": "Le téléversement de photos n'est pas encore configuré.",
       "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
     },
-    "categoryHint": "Affichée en petit dans le coin de la carte de cette catégorie. Une photo carrée convient le mieux."
+    "categoryHint": "Affichée en petit dans le coin de la carte de cette catégorie. Une photo carrée convient le mieux.",
+    "aboutHint": "Affichée en haut de la page À propos, large et basse (environ 21 sur 9)."
   },
   "testimonialsAdmin": {
     "title": "Ce que disent nos clients",
@@ -2542,5 +2546,42 @@
       "TESTIMONIAL_NOT_FOUND": "Cette citation a été supprimée. Voici la liste à jour.",
       "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
     }
+  },
+  "aboutAdmin": {
+    "title": "À propos",
+    "loading": "Chargement...",
+    "loadFailed": "La page À propos n'a pas pu être chargée. Veuillez actualiser la page.",
+    "live": "Sur le site",
+    "notLive": "Pas encore sur le site",
+    "view": "Voir la page",
+    "writeUp": "Texte",
+    "writeUpHint": "Affiché sous la photo. La version française est facultative : les visiteurs francophones lisent l'anglais tant qu'il n'y en a pas.",
+    "languages": "Langue",
+    "language": {
+      "en": "Anglais",
+      "fr": "Français"
+    },
+    "editorLabel": {
+      "en": "À propos, en anglais",
+      "fr": "À propos, en français"
+    },
+    "frenchHint": "Laissez le français vide pour montrer l'anglais aux visiteurs francophones.",
+    "publish": "Publier",
+    "saveLive": "Enregistrer les changements",
+    "saveDraft": "Enregistrer comme brouillon",
+    "unpublish": "Retirer du site",
+    "saving": "Enregistrement...",
+    "savedPublished": "Enregistré. La page est sur le site, avec un lien dans le pied de page.",
+    "savedDraft": "Enregistré. La page n'est pas sur le site.",
+    "errors": {
+      "CONTENT_REQUIRED": "Écrivez quelque chose en anglais avant de publier.",
+      "CONTENT_INVALID": "Quelque chose dans le texte n'est pas permis. Vérifiez et réessayez.",
+      "PHOTOS_NOT_ALLOWED": "Les photos ne peuvent pas aller dans le texte; la page a sa propre photo au-dessus.",
+      "DETAILS_INVALID": "Le texte est trop long.",
+      "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
+    }
+  },
+  "about": {
+    "title": "À propos"
   }
 }

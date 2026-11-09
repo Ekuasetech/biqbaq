@@ -15,7 +15,8 @@ const secondaryButton =
   "inline-flex h-10 items-center justify-center rounded-lg border border-border bg-card px-4 text-sm font-semibold hover:bg-muted disabled:opacity-50";
 const PHOTO_ERRORS = new Set(["FORMAT", "TOO_LARGE", "UNREADABLE", "UPLOAD_FAILED", "IMAGE_REJECTED", "MEDIA_NOT_CONFIGURED"]);
 
-function Slot({ slot, row, onChanged }: { slot: SiteImageSlot; row: SiteImageRow | undefined; onChanged: () => Promise<void> }) {
+/** One photo slot: preview, upload, back to the original, and its description. */
+export function Slot({ slot, row, onChanged }: { slot: SiteImageSlot; row: SiteImageRow | undefined; onChanged: () => Promise<void> }) {
   const t = useTranslations("siteImagesAdmin");
   const tHome = useTranslations("home");
   const locale = useLocale();
@@ -85,7 +86,7 @@ function Slot({ slot, row, onChanged }: { slot: SiteImageSlot; row: SiteImageRow
       <div
         className={cn(
           "relative w-full overflow-hidden rounded-2xl bg-muted",
-          slot === "get_started" ? "aspect-[4/3]" : slot.startsWith("category_") ? "aspect-square max-w-48" : "aspect-[5/4]",
+          slot === "get_started" ? "aspect-[4/3]" : slot === "about" ? "aspect-[21/9]" : slot.startsWith("category_") ? "aspect-square max-w-48" : "aspect-[5/4]",
         )}
       >
         <Image src={image.src} alt={t("preview", { name: t(`slots.${slot}`) })} fill sizes="(min-width: 768px) 320px, 90vw" className="object-cover" />
@@ -96,6 +97,8 @@ function Slot({ slot, row, onChanged }: { slot: SiteImageSlot; row: SiteImageRow
           <p className="mt-1 text-sm text-muted-foreground">
             {slot === "get_started"
               ? t("getStartedHint")
+              : slot === "about"
+                ? t("aboutHint")
               : slot.startsWith("category_")
                 ? t("categoryHint")
                 : t("heroHint", { headline: tHome(headline[slot as keyof typeof headline]) })}
@@ -176,7 +179,8 @@ export function SiteImagesAdmin() {
       <p className="text-sm text-muted-foreground">{t("intro")}</p>
       {failed && <Notice kind="error">{t("loadFailed")}</Notice>}
       {rows &&
-        SITE_IMAGE_SLOTS.map((slot) => {
+        // The About us photo is changed on the About us page.
+        SITE_IMAGE_SLOTS.filter((slot) => slot !== "about").map((slot) => {
           const row = rows.find((candidate) => candidate.slot === slot);
           return <Slot key={slot} slot={slot} row={row} onChanged={load} />;
         })}

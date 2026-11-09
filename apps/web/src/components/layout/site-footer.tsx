@@ -3,7 +3,8 @@ import { Link } from "@/i18n/navigation";
 import { CATEGORY_SLUGS } from "@/modules/product-catalog";
 import { reveal } from "./reveal";
 
-export function SiteFooter() {
+/** `showAbout` adds the About us link, once Super Admin has published that page. */
+export function SiteFooter({ showAbout = false }: { showAbout?: boolean }) {
   const t = useTranslations();
   const linkClass = "text-sm text-white/75 transition-colors hover:text-white";
 
@@ -39,6 +40,13 @@ export function SiteFooter() {
                   {t("cargoCars.title")}
                 </Link>
               </li>
+              {showAbout && (
+                <li>
+                  <Link href="/about" className={linkClass}>
+                    {t("about.title")}
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link href="/blog" className={linkClass}>
                   {t("blog.pageTitle")}

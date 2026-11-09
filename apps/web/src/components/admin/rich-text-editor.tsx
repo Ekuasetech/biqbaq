@@ -45,7 +45,7 @@ function ToolButton({ label, active, disabled, onClick, children }: { label: str
   );
 }
 
-function Toolbar({ editor, postId, onError }: { editor: Editor; postId: string | null; onError: (code: string) => void }) {
+function Toolbar({ editor, postId, photos, onError }: { editor: Editor; postId: string | null; photos: boolean; onError: (code: string) => void }) {
   const t = useTranslations("blogAdmin.editor");
   const state = useEditorState({
     editor,
@@ -114,12 +114,12 @@ function Toolbar({ editor, postId, onError }: { editor: Editor; postId: string |
         <span className="mx-1 h-5 w-px bg-border" aria-hidden />
         <ToolButton label={t("link")} active={state.link} onClick={() => { setHref(editor.getAttributes("link").href ?? ""); setLinking(true); setPhoto(null); }}><LinkIcon className="size-4" /></ToolButton>
         <ToolButton label={t("unlink")} disabled={!state.link} onClick={() => chain().extendMarkRange("link").unsetLink().run()}><Unlink className="size-4" /></ToolButton>
-        <ToolButton label={t("photo")} disabled={!postId} onClick={() => { setPhoto({ alt: "" }); setLinking(false); }}><ImagePlus className="size-4" /></ToolButton>
+        {photos && <ToolButton label={t("photo")} disabled={!postId} onClick={() => { setPhoto({ alt: "" }); setLinking(false); }}><ImagePlus className="size-4" /></ToolButton>}
         <span className="mx-1 h-5 w-px bg-border" aria-hidden />
         <ToolButton label={t("undo")} disabled={!state.canUndo} onClick={() => chain().undo().run()}><Undo2 className="size-4" /></ToolButton>
         <ToolButton label={t("redo")} disabled={!state.canRedo} onClick={() => chain().redo().run()}><Redo2 className="size-4" /></ToolButton>
       </div>
-      {!postId && <p className="px-1 text-xs text-muted-foreground">{t("saveBeforePhotos")}</p>}
+      {photos && !postId && <p className="px-1 text-xs text-muted-foreground">{t("saveBeforePhotos")}</p>}
       {linking && (
         <div className="flex flex-wrap items-center gap-2 px-1">
           <label htmlFor="editor-link" className="text-sm font-medium">{t("linkAddress")}</label>
@@ -150,12 +150,14 @@ function Toolbar({ editor, postId, onError }: { editor: Editor; postId: string |
  * Tiptap, limited to the formatting the owner chose (2026-11-07). Code, tables and other
  * extras are off, and links to anything but web and email addresses cannot be made.
  */
-export function RichTextEditor({ id, label, initial, postId, disabled, onChange, onError }: {
+export function RichTextEditor({ id, label, initial, postId, disabled, photos = true, onChange, onError }: {
   id: string;
   label: string;
   initial: Doc;
   postId: string | null;
   disabled?: boolean;
+  /** False where the page has its own photo, such as About us: no photos inside the text. */
+  photos?: boolean;
   onChange: (doc: Doc) => void;
   onError: (code: string) => void;
 }) {
@@ -193,7 +195,7 @@ export function RichTextEditor({ id, label, initial, postId, disabled, onChange,
 
   return (
     <div className={cn("overflow-hidden rounded-lg border border-input bg-card focus-within:ring-2 focus-within:ring-ring", disabled && "opacity-60")}>
-      {editor && !disabled && <Toolbar editor={editor} postId={postId} onError={onError} />}
+      {editor && !disabled && <Toolbar editor={editor} postId={postId} photos={photos} onError={onError} />}
       <EditorContent editor={editor} />
     </div>
   );

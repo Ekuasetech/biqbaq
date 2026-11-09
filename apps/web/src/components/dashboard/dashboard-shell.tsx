@@ -13,6 +13,7 @@ import {
   FileText,
   Gavel,
   Images,
+  Info,
   Quote,
   LayoutDashboard,
   LogOut,
@@ -162,6 +163,7 @@ function useNavigation(data: DashboardData | null, pathname: string) {
   // The front page's own photos (owner's request, 2026-11-08): Super Admin only.
   if (a?.super_admin) content.push({ href: "/admin/site-images", label: t("siteImages"), icon: Images });
   if (a?.super_admin) content.push({ href: "/admin/testimonials", label: t("testimonials"), icon: Quote });
+  if (a?.super_admin) content.push({ href: "/admin/about", label: t("about"), icon: Info });
   const groups: NavGroup[] = (
     [
       { key: "people", items: people },

@@ -1,5 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { getAboutPage } from "@/modules/about/server";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SubscribePopup } from "@/components/layout/subscribe-popup";
 
@@ -14,7 +15,7 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[lo
       <main id="main" className="flex-1">
         {children}
       </main>
-      <SiteFooter />
+      <SiteFooter showAbout={Boolean(await getAboutPage())} />
       <SubscribePopup />
     </>
   );

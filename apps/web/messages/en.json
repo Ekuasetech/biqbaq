@@ -1039,7 +1039,8 @@
       "testimonial_create": "Added a customer quote",
       "testimonial_edit": "Edited a customer quote",
       "testimonial_move": "Reordered customer quotes",
-      "testimonial_delete": "Deleted a customer quote"
+      "testimonial_delete": "Deleted a customer quote",
+      "about_save": "Saved the About us page"
     }
   },
   "moderation": {
@@ -2210,7 +2211,8 @@
       "orders": "Orders",
       "payments": "Payments",
       "siteImages": "Site images",
-      "testimonials": "What customers say"
+      "testimonials": "What customers say",
+      "about": "About us"
     },
     "overview": {
       "today": "Today",
@@ -2470,7 +2472,8 @@
       "category_food": "Shop by category: Food & groceries",
       "category_beauty": "Shop by category: Beauty",
       "category_home": "Shop by category: Home",
-      "category_cargo_cars": "Shop by category: Cargo cars"
+      "category_cargo_cars": "Shop by category: Cargo cars",
+      "about": "About us photo"
     },
     "heroHint": "Shown with the headline “{headline}”. Shown wider than tall (about 5 by 4).",
     "getStartedHint": "Shown to the right of the three Get started cards (below them on phones).",
@@ -2501,7 +2504,8 @@
       "MEDIA_NOT_CONFIGURED": "Photo uploads aren't set up yet.",
       "GENERIC": "That didn't work. Please try again."
     },
-    "categoryHint": "Shown small in the corner of this category's card. A square photo works best."
+    "categoryHint": "Shown small in the corner of this category's card. A square photo works best.",
+    "aboutHint": "Shown across the top of the About us page, wide and short (about 21 by 9)."
   },
   "testimonialsAdmin": {
     "title": "What customers say",
@@ -2542,5 +2546,42 @@
       "TESTIMONIAL_NOT_FOUND": "This quote was deleted. Showing the latest.",
       "GENERIC": "That didn't work. Please try again."
     }
+  },
+  "aboutAdmin": {
+    "title": "About us",
+    "loading": "Loading...",
+    "loadFailed": "The About us page couldn't be loaded. Please refresh the page.",
+    "live": "On the site",
+    "notLive": "Not on the site yet",
+    "view": "View the page",
+    "writeUp": "Write-up",
+    "writeUpHint": "Shown under the photo. The French version is optional: French visitors read the English until you write one.",
+    "languages": "Language",
+    "language": {
+      "en": "English",
+      "fr": "French"
+    },
+    "editorLabel": {
+      "en": "About us, in English",
+      "fr": "About us, in French"
+    },
+    "frenchHint": "Leave the French empty to show the English to French visitors.",
+    "publish": "Publish",
+    "saveLive": "Save changes",
+    "saveDraft": "Save as draft",
+    "unpublish": "Take it off the site",
+    "saving": "Saving...",
+    "savedPublished": "Saved. The page is on the site, linked from the footer.",
+    "savedDraft": "Saved. The page isn't on the site.",
+    "errors": {
+      "CONTENT_REQUIRED": "Write something in English before publishing.",
+      "CONTENT_INVALID": "Something in the text isn't allowed. Check it and try again.",
+      "PHOTOS_NOT_ALLOWED": "Photos can't go inside the text; the page has its own photo above.",
+      "DETAILS_INVALID": "The text is too long.",
+      "GENERIC": "That didn't work. Please try again."
+    }
+  },
+  "about": {
+    "title": "About us"
   }
 }
