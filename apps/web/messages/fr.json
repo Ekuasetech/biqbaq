@@ -64,9 +64,6 @@
     "banner4Eyebrow": "Voitures cargo",
     "banner4Title": "Envoyez des marchandises au pays avec des voitures cargo",
     "banner4Cta": "Voir les voitures",
-    "spotlightTitle": "À l'honneur",
-    "viewProduct": "Voir le produit",
-    "viewProductNamed": "Voir le produit : {name}",
     "placeholderNote": "Contenu provisoire : le texte définitif reste à venir.",
     "testimonialsTitle": "Ce que disent les clients",
     "testimonialBody": "Témoignage d'exemple : les vrais avis de clients apparaîtront ici une fois recueillis.",
@@ -2397,6 +2394,44 @@
       "reasonNeeded": "Indiquez la raison du changement.",
       "failed": "Les frais n'ont pas pu être enregistrés. Veuillez réessayer.",
       "saved": "Enregistré. Les nouveaux paiements ajoutent {fee}."
+    }
+  },
+  "subscribePopup": {
+    "email": "Adresse courriel",
+    "working": "Inscription...",
+    "consent": "En vous inscrivant, vous acceptez de recevoir des courriels de Biqbaq sur les bonnes affaires. Nous vous écrirons d'abord pour confirmer, et vous pouvez vous désabonner à tout moment.",
+    "checkInbox": "Merci. Consultez votre boîte de réception et cliquez sur le lien pour confirmer.",
+    "done": "Fermer",
+    "close": "Fermer",
+    "errors": {
+      "EMAIL_INVALID": "Entrez une adresse courriel valide.",
+      "RATE_LIMITED": "Trop d'inscriptions depuis cette connexion. Veuillez réessayer plus tard.",
+      "POPUP_OFF": "Les inscriptions sont fermées pour le moment.",
+      "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
+    }
+  },
+  "subscribePopupAdmin": {
+    "title": "Fenêtre d'inscription",
+    "intro": "Invite les visiteurs des pages publiques à s'inscrire aux bonnes affaires, 15 secondes après leur arrivée. Les inscrits rejoignent la liste de Biqbaq ci-dessous en attente jusqu'à leur confirmation par courriel, et chaque nouvelle inscription est envoyée à l'adresse indiquée ici par FormSubmit.",
+    "enabled": "Afficher la fenêtre",
+    "language": {
+      "en": "Anglais",
+      "fr": "Français"
+    },
+    "message": "Message",
+    "button": "Bouton",
+    "notifyEmail": "Envoyer les inscriptions à",
+    "notifyHelp": "FormSubmit écrit à cette adresse à chaque nouvelle inscription. La première fois, et après un changement, FormSubmit envoie un lien d'activation à cette adresse : cliquez dessus, sinon rien n'arrive. Elle n'apparaît jamais sur le site public.",
+    "reason": "Raison du changement",
+    "save": "Enregistrer la fenêtre",
+    "saving": "Enregistrement...",
+    "saved": "Enregistré. Les visiteurs voient le nouveau texte tout de suite.",
+    "errors": {
+      "load": "Les réglages de la fenêtre n'ont pas pu être chargés. Veuillez actualiser la page.",
+      "DETAILS_INVALID": "Remplissez chaque message (jusqu'à 200 caractères) et bouton (jusqu'à 30).",
+      "EMAIL_INVALID": "Entrez une adresse courriel valide pour recevoir les inscriptions.",
+      "REASON_REQUIRED": "Indiquez la raison du changement.",
+      "GENERIC": "L'enregistrement n'a pas fonctionné. Veuillez réessayer."
     }
   }
 }

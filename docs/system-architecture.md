@@ -38,7 +38,7 @@ The PRD requires web and mobile to share one set of rules, and mobile cannot cal
 | Layer | Holds | Examples |
 | --- | --- | --- |
 | **PostgreSQL**: RLS and RPC functions | Who can see or change a row; invariants that must hold in one transaction | Publication allowance, role approval, audit writes, referral uniqueness |
-| **Server API**: `apps/web` `/api/v1/*`, calling `modules/*` | Anything needing a secret or an external provider | Cloudinary signing, Resend, payments, webhooks, public seller API |
+| **Server API**: `apps/web` `/api/v1/*`, calling `modules/*` | Anything needing a secret or an external provider | Cloudinary signing, Resend, payments, webhooks, public seller API, FormSubmit sign-up notices (Q-57) |
 | **Shared packages** | Contracts, not authority | Zod schemas, types, permission names, API client |
 | **Clients** | Presentation; UX-only checks | Hiding a button the backend would refuse anyway |
 

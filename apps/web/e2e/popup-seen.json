@@ -1,0 +1,7 @@
+{
+  "cookies": [],
+  "origins": [
+    { "origin": "http://localhost:3100", "localStorage": [{ "name": "biqbaq.subscribePopup", "value": "{\"subscribed\":true}" }] },
+    { "origin": "http://localhost:3000", "localStorage": [{ "name": "biqbaq.subscribePopup", "value": "{\"subscribed\":true}" }] }
+  ]
+}

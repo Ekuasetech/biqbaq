@@ -8,10 +8,7 @@ import { HeroHeadline, HeroSlideshow, HeroSlidesProvider } from "@/components/la
 import { PageTransition } from "@/components/layout/page-transition";
 import { reveal, RevealWords } from "@/components/layout/reveal";
 import { ProductGrid } from "@/components/product/product-card";
-import { SellerBadge } from "@/components/product/seller-badge";
-import { ViewCount } from "@/components/product/view-count";
 import { Link } from "@/i18n/navigation";
-import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CargoVehicleCard } from "@/components/vehicle/cargo-vehicle-card";
 import { CATEGORY_SLUGS, listFeaturedProducts } from "@/modules/product-catalog";
@@ -50,16 +47,17 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale });
-  const products = await listFeaturedProducts(11);
+  const products = await listFeaturedProducts(6);
   const cargoVehicles = await listCargoVehicles(4);
+  // The "In the spotlight" section was removed at the owner's request (2026-11-08).
   const grid = products.slice(0, 6);
-  const [spotlight, ...spotlightRest] = products.slice(6);
 
   const banners = [
     // The "free website after referrals" tile was removed, as no website is offered (Q-17).
-    { key: "banner1", href: "/register", image: photo("banner1", 500), className: "bg-brand-navy text-white md:col-span-12", size: "lg" },
-    { key: "banner3", href: "/products", image: photo("banner3", 500), className: "bg-card text-foreground shadow-sm md:col-span-6", size: "sm" },
-    { key: "banner4", href: "/cargo-cars", image: "/hero/sienna-cargo.jpg", className: "bg-[oklch(0.2_0.07_262)] text-white md:col-span-6", size: "sm" },
+    // Three even tiles, each with one of the site's own photos (owner asked for a tidier row).
+    { key: "banner1", href: "/register", image: "/hero/toronto-professional.jpg", className: "bg-brand-navy text-white" },
+    { key: "banner3", href: "/products", image: "/hero/nigeria-seller.jpg", className: "bg-card text-foreground shadow-sm" },
+    { key: "banner4", href: "/cargo-cars", image: "/hero/sienna-cargo.jpg", className: "bg-[oklch(0.2_0.07_262)] text-white" },
   ] as const;
 
   const faqs = ["1", "2", "3", "4", "5"] as const;
@@ -206,81 +204,33 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
       {/* Promotional tiles */}
       <section className="pt-14" aria-label={t("home.promotionsLabel")}>
-        <ul className="grid gap-4 md:grid-cols-12">
-          {banners.map(({ key, href, image, className, size }, index) => (
-            <li key={key} {...reveal("panel", index * 90)} className={cn("relative overflow-hidden rounded-3xl", className)}>
-              <Link
-                href={href}
-                className={cn(
-                  "group grid h-full grid-cols-[1.2fr_1fr] items-center gap-4 p-6 sm:p-8",
-                  size === "lg" ? "min-h-72" : "min-h-52",
-                )}
-              >
-                <span>
-                  <span {...reveal("rise", 450)} className="block text-xs font-bold tracking-widest uppercase">
-                    {t(`home.${key}Eyebrow`)}
-                  </span>
-                  <span {...reveal("rise", 550)} className="mt-2 block font-heading text-2xl leading-tight font-extrabold text-balance sm:text-3xl">
-                    {t(`home.${key}Title`)}
-                  </span>
-                  <span {...reveal("rise", 700)} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 group-hover:underline">
-                    {t(`home.${key}Cta`)}
-                    <ArrowRight className="size-4" aria-hidden />
-                  </span>
+        <ul className="grid gap-4 md:grid-cols-3">
+          {banners.map(({ key, href, image, className }, index) => (
+            <li key={key} {...reveal("panel", index * 90)} className={cn("overflow-hidden rounded-3xl", className)}>
+              <Link href={href} className="group flex h-full flex-col gap-5 p-5 sm:p-6">
+                <span className="relative block aspect-[16/10] w-full overflow-hidden rounded-2xl">
+                  <Image
+                    src={image}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1280px) 400px, (min-width: 768px) 30vw, 90vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                 </span>
-                <span {...reveal("pop", 500)} className="relative block aspect-square w-full overflow-hidden rounded-2xl">
-                  <Image src={image} alt="" fill sizes="(min-width: 768px) 25vw, 45vw" className="object-cover" />
+                <span className="flex flex-1 flex-col">
+                  <span className="block text-xs font-bold tracking-widest uppercase opacity-80">{t(`home.${key}Eyebrow`)}</span>
+                  <span className="mt-2 block font-heading text-2xl leading-tight font-extrabold text-balance">{t(`home.${key}Title`)}</span>
+                  {/* Pushed to the bottom, so the three links line up whatever the title's length. */}
+                  <span className="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold underline-offset-4 group-hover:underline">
+                    {t(`home.${key}Cta`)}
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                  </span>
                 </span>
               </Link>
             </li>
           ))}
         </ul>
       </section>
-
-      {/* Spotlight */}
-      {spotlight && (
-        <section className="pt-14" aria-labelledby="spotlight-title">
-          <SectionHeading id="spotlight-title" title={t("home.spotlightTitle")} action={<ViewAll label={t("home.viewAll")} />} />
-          <div className="grid gap-4 lg:grid-cols-2">
-            <ProductGrid products={spotlightRest} className="grid-cols-2 sm:grid-cols-2 lg:grid-cols-2" />
-            <article className="group relative flex flex-col gap-3">
-              <div {...reveal("fade", 150)} className="relative aspect-[4/3] flex-1 overflow-hidden rounded-3xl bg-muted">
-                <Image
-                  src={spotlight.images[0]?.url ?? photo("spotlight", 600)}
-                  alt={spotlight.images[0]?.alt ?? ""}
-                  fill
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none"
-                />
-              </div>
-              <div {...reveal("rise", 350)} className="rounded-3xl bg-card p-5 shadow-sm">
-                <h3 className="font-heading text-xl font-extrabold">{spotlight.name}</h3>
-                <p className="mt-1 text-xl font-bold">{formatPrice(spotlight.price, locale)}</p>
-                <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{spotlight.description}</p>
-                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                  <span className="font-medium">
-                    <Link href={`/sellers/${spotlight.seller.slug}`} className="underline-offset-4 hover:underline">
-                      {spotlight.seller.name}
-                    </Link>{" "}
-                    · {spotlight.seller.city}
-                  </span>
-                  <SellerBadge verified={spotlight.seller.verified} />
-                  <span className="text-muted-foreground">{t(`availability.${spotlight.availability}`)}</span>
-                  <ViewCount count={spotlight.views} />
-                </div>
-                <Link
-                  href={`/products/${spotlight.slug}`}
-                  aria-label={t("home.viewProductNamed", { name: spotlight.name })}
-                  className="mt-4 flex h-11 items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground transition-colors hover:bg-brand-red hover:text-brand-red-foreground"
-                >
-                  {t("home.viewProduct")}
-                  <ArrowUpRight className="size-4" aria-hidden />
-                </Link>
-              </div>
-            </article>
-          </div>
-        </section>
-      )}
 
       {/* Testimonials: placeholder content until there are real ones. */}
       <section className="pt-14" aria-labelledby="testimonials-title">

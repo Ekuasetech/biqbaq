@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { SubscribePopup } from "@/components/layout/subscribe-popup";
 
 /** The public site: header, page, footer. */
 export default async function SiteLayout({ children, params }: LayoutProps<"/[locale]">) {
@@ -14,6 +15,7 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[lo
         {children}
       </main>
       <SiteFooter />
+      <SubscribePopup />
     </>
   );
 }

@@ -3,6 +3,7 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
+import { SubscribePopupAdmin } from "@/components/admin/subscribe-popup-admin";
 import { EmailListManager } from "@/components/email-lists/email-list-manager";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -106,6 +107,7 @@ export function EmailListsAdmin() {
   const t = useTranslations("emailListsAdmin");
   return (
     <div className="grid gap-4">
+      <SubscribePopupAdmin />
       <EmailListManager seller={null} title={t("biqbaqTitle")} />
       <ShopLists />
     </div>

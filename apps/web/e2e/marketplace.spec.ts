@@ -187,6 +187,12 @@ test.describe("public marketplace", () => {
       return ads.compareDocumentPosition(tiles) & Node.DOCUMENT_POSITION_FOLLOWING;
     });
     expect(order).toBeTruthy();
+    // On a wide screen, the three tiles sit in one even row.
+    const boxes = await section.getByRole("listitem").evaluateAll((items) => items.map((item) => item.getBoundingClientRect().toJSON() as DOMRect));
+    expect(boxes).toHaveLength(3);
+    expect(new Set(boxes.map((box) => Math.round(box.top))).size).toBe(1);
+    expect(new Set(boxes.map((box) => Math.round(box.height))).size).toBe(1);
+    expect(new Set(boxes.map((box) => Math.round(box.width))).size).toBe(1);
     await page.goto("/products?q=calgary");
     await expect(page.getByText("Calgary, Canada").first()).toBeVisible();
   });
@@ -2466,6 +2472,84 @@ test.describe("public marketplace", () => {
             await search.press("Enter");
             await expect(shop).toHaveURL(/\/account\/shop\/products#product-/);
             await expect(item(shop, name)).toBeInViewport({ timeout: 15000 });
+          });
+
+          test("the sign-up pop-up: Super Admin words it, visitors see it after 15 seconds and sign up", async ({ page, browser, request }) => {
+            test.setTimeout(120000);
+            const id = unique();
+            const owner = await confirmedAccount(page, request);
+            makeSuperAdmin(owner);
+            await page.goto("/admin/email-lists");
+            const settings = page.getByRole("region", { name: "Sign-up pop-up" });
+            const before = sql(`select string_agg(key || '=' || value::text, chr(10)) from public.platform_settings where key in ('subscribe_popup.message_en', 'subscribe_popup.notify_email')`);
+            try {
+              const english = settings.getByRole("group", { name: "English" });
+              await expect(english.getByLabel("Message")).not.toHaveValue("", { timeout: 15000 });
+              await english.getByLabel("Message").fill(`Deals ${id}`);
+              await settings.getByRole("button", { name: "Save pop-up" }).click();
+              await expect(settings).toContainText("Give a reason for the change.");
+              await settings.getByLabel("Send sign-ups to").fill("not-an-email");
+              await settings.getByLabel("Reason for the change").fill("Testing");
+              await settings.getByRole("button", { name: "Save pop-up" }).click();
+              await expect(settings).toContainText("Enter a valid email address to send sign-ups to.");
+              ignoreExpectedFailures(page);
+              await settings.getByLabel("Send sign-ups to").fill("Owner-Inbox@Example.com");
+              await settings.getByRole("button", { name: "Save pop-up" }).click();
+              await expect(settings).toContainText("Saved.");
+              expect(sql(`select value #>> '{}' from public.platform_settings where key = 'subscribe_popup.notify_email'`)).toBe("owner-inbox@example.com");
+
+              // A first-time visitor, with nothing remembered: nothing at first, then the pop-up.
+              const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
+              const visitor = await context.newPage();
+              await visitor.clock.install();
+              await visitor.goto("/");
+              const popup = visitor.getByRole("dialog", { name: `Deals ${id}` });
+              await expect(popup).toHaveCount(0);
+              await visitor.clock.fastForward("00:16");
+              await expect(popup).toBeVisible({ timeout: 15000 });
+              await popup.getByLabel("Email address").fill("nope");
+              await popup.getByRole("button", { name: "Subscribe" }).click();
+              await expect(popup).toContainText("Enter a valid email address.");
+              const email = newEmail("popup");
+              await popup.getByLabel("Email address").fill(email);
+              await popup.getByRole("button", { name: "Subscribe" }).click();
+              await expect(popup).toContainText("Check your inbox and click the link to confirm.");
+              // On Biqbaq's list, waiting for them to confirm by email.
+              expect(sql(`select s.status || ' ' || s.source from public.list_subscribers s join public.email_lists l on l.id = s.list_id where l.owner_type = 'platform' and s.email = '${email}'`)).toBe("pending self");
+              await popup.getByRole("button", { name: "Close" }).first().click();
+              await expect(popup).toBeHidden();
+              // Signed up, so never again in this browser.
+              await visitor.reload();
+              await visitor.clock.fastForward("00:16");
+              await visitor.waitForTimeout(1000);
+              await expect(visitor.getByRole("dialog")).toHaveCount(0);
+              await context.close();
+
+              // Never on the sign-in pages; closing it keeps it away.
+              const other = await browser.newContext({ storageState: { cookies: [], origins: [] } });
+              const second = await other.newPage();
+              await second.clock.install();
+              await second.goto("/sign-in");
+              await second.clock.fastForward("00:16");
+              await second.waitForTimeout(1000);
+              await expect(second.getByRole("dialog")).toHaveCount(0);
+              await second.goto("/blog");
+              await second.clock.fastForward("00:16");
+              await expect(second.getByRole("dialog", { name: `Deals ${id}` })).toBeVisible({ timeout: 15000 });
+              await second.keyboard.press("Escape");
+              await expect(second.getByRole("dialog")).toBeHidden();
+              await second.reload();
+              await second.clock.fastForward("00:16");
+              await second.waitForTimeout(1000);
+              await expect(second.getByRole("dialog")).toHaveCount(0);
+              await other.close();
+            } finally {
+              // The local copy keeps the owner's own wording and address.
+              for (const line of before.split("\n")) {
+                const [key, ...value] = line.split("=");
+                sql(`update public.platform_settings set value = '${value.join("=").replaceAll("'", "''")}'::jsonb where key = '${key}'`);
+              }
+            }
           });
 
           test("long lists come a page at a time, and a search result opens the page its item is on", async ({ page, browser, request }) => {

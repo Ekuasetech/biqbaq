@@ -4,7 +4,9 @@ export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
   reporter: "line",
-  use: { baseURL: "http://localhost:3100", trace: "retain-on-failure" },
+  // Every test starts as if the sign-up pop-up was already answered, so it does not cover
+  // the page 15 seconds in; the pop-up's own test starts with nothing remembered.
+  use: { baseURL: "http://localhost:3100", trace: "retain-on-failure", storageState: "e2e/popup-seen.json" },
   webServer: [
     { command: "npx next start -p 3100", url: "http://localhost:3100", reuseExistingServer: true },
     // Local Supabase Auth sends its emails through the web app on port 3000, whichever port

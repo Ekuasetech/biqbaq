@@ -64,9 +64,6 @@
     "banner4Eyebrow": "Cargo Cars",
     "banner4Title": "Send goods home with cargo cars",
     "banner4Cta": "View cars",
-    "spotlightTitle": "In the spotlight",
-    "viewProduct": "View product",
-    "viewProductNamed": "View product: {name}",
     "placeholderNote": "Placeholder content: final wording to come.",
     "testimonialsTitle": "What customers say",
     "testimonialBody": "Sample testimonial: real customer feedback will appear here once it has been collected.",
@@ -2397,6 +2394,44 @@
       "reasonNeeded": "Give a reason for the change.",
       "failed": "The fee couldn't be saved. Please try again.",
       "saved": "Saved. New checkouts add {fee}."
+    }
+  },
+  "subscribePopup": {
+    "email": "Email address",
+    "working": "Signing up...",
+    "consent": "By signing up, you agree to receive emails about deals from Biqbaq. We'll email you to confirm first, and you can unsubscribe at any time.",
+    "checkInbox": "Thank you. Check your inbox and click the link to confirm.",
+    "done": "Close",
+    "close": "Close",
+    "errors": {
+      "EMAIL_INVALID": "Enter a valid email address.",
+      "RATE_LIMITED": "Too many sign-ups from here. Please try again later.",
+      "POPUP_OFF": "Sign-ups are closed right now.",
+      "GENERIC": "That didn't work. Please try again."
+    }
+  },
+  "subscribePopupAdmin": {
+    "title": "Sign-up pop-up",
+    "intro": "Asks visitors on public pages to sign up for deals, 15 seconds after they arrive. Sign-ups join Biqbaq's list below as pending until they confirm by email, and each new one is sent to the address here through FormSubmit.",
+    "enabled": "Show the pop-up",
+    "language": {
+      "en": "English",
+      "fr": "French"
+    },
+    "message": "Message",
+    "button": "Button",
+    "notifyEmail": "Send sign-ups to",
+    "notifyHelp": "FormSubmit emails this address about each new sign-up. The first time, and after changing it, FormSubmit sends an activation link to this address: click it, or nothing arrives. It never appears on the public site.",
+    "reason": "Reason for the change",
+    "save": "Save pop-up",
+    "saving": "Saving...",
+    "saved": "Saved. Visitors see the new wording straight away.",
+    "errors": {
+      "load": "The pop-up's settings couldn't be loaded. Please refresh the page.",
+      "DETAILS_INVALID": "Fill in each message (up to 200 characters) and button (up to 30).",
+      "EMAIL_INVALID": "Enter a valid email address to send sign-ups to.",
+      "REASON_REQUIRED": "Give a reason for the change.",
+      "GENERIC": "That didn't save. Please try again."
     }
   }
 }
