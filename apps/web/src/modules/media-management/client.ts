@@ -180,3 +180,19 @@ const MESSAGE_KEYS: Record<string, string> = {
 
 export const photoErrorKey = (error: unknown) =>
   (error instanceof Error && MESSAGE_KEYS[error.message]) || "generic";
+
+/** Uploads a front-page photo for one slot (Super Admin only; the server checks again). */
+export async function uploadSiteImage(slot: string, file: File): Promise<void> {
+  if (!ACCEPTED_TYPES.includes(file.type)) throw new MediaError("FORMAT");
+  const { uploadUrl, fields, limits } = await postJson<{
+    uploadUrl: string;
+    fields: Record<string, string | number>;
+    limits: MediaLimits;
+  }>("/api/v1/media/site-image/sign", { slot });
+  const form = new FormData();
+  for (const [key, value] of Object.entries(fields)) form.append(key, String(value));
+  form.append("file", await prepareImage(file, limits), "site.jpg");
+  const upload = await fetch(uploadUrl, { method: "POST", body: form });
+  if (!upload.ok) throw new MediaError("UPLOAD_FAILED");
+  await postJson("/api/v1/media/site-image/complete", { slot, publicId: fields.public_id });
+}

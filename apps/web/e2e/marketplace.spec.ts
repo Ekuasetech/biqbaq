@@ -6,6 +6,14 @@ import { expect, test } from "@playwright/test";
 // Its script already ran on first load, so the theme is unaffected.
 const KNOWN_DEV_WARNING = "Encountered a script tag while rendering React component";
 
+/** True while the hero shows the site's own photos, not ones Super Admin uploaded. */
+function heroPhotosAreOriginal() {
+  const count = execFileSync("docker", ["exec", "-i", "supabase_db_biqbaq", "psql", "-U", "supabase_admin", "-d", "postgres", "-q", "-tA", "-c", "select count(*) from public.site_images where slot like 'hero_%'"], {
+    env: { ...process.env, PATH: `${process.env.PATH}:/Applications/Docker.app/Contents/Resources/bin` },
+  }).toString().trim();
+  return count === "0";
+}
+
 /** Opens a group in the dashboard sidebar, if it is closed (Q-56). */
 async function openNavGroup(page: import("@playwright/test").Page, name: string) {
   const button = page.getByRole("navigation", { name: "Dashboard" }).getByRole("button", { name });
@@ -69,18 +77,21 @@ test.describe("public marketplace", () => {
   });
 
   test("hero photos change on their own, and can be paused", async ({ page }) => {
+    // The photos' own descriptions are checked only while the site's photos show: Super Admin
+    // may have uploaded others (Site images). The headlines are the same either way.
+    const original = heroPhotosAreOriginal();
     await page.goto("/");
     const active = page.locator("img[data-active]");
     const headline = page.getByRole("heading", { level: 1 });
-    await expect(active).toHaveAttribute("alt", /grocery store/);
+    if (original) await expect(active).toHaveAttribute("alt", /grocery store/);
     await expect(headline).toHaveAccessibleName("Find groceries and other products in your city");
-    await expect(active).toHaveAttribute("alt", /shipping container/, { timeout: 8000 });
-    await expect(headline).toHaveAccessibleName("Find cargo vehicles heading to Nigeria and send your goods");
-    await expect(active).toHaveAttribute("alt", /Toronto/, { timeout: 7000 });
-    await expect(headline).toHaveAccessibleName("The Platform made for Entrepreneurs to do business");
+    if (original) await expect(active).toHaveAttribute("alt", /shipping container/, { timeout: 8000 });
+    await expect(headline).toHaveAccessibleName("Find cargo vehicles heading to Nigeria and send your goods", { timeout: 8000 });
+    if (original) await expect(active).toHaveAttribute("alt", /Toronto/, { timeout: 7000 });
+    await expect(headline).toHaveAccessibleName("The Platform made for Entrepreneurs to do business", { timeout: 7000 });
     await page.getByRole("button", { name: "Pause the photo slideshow" }).click();
     await page.waitForTimeout(6000);
-    await expect(active).toHaveAttribute("alt", /Toronto/);
+    if (original) await expect(active).toHaveAttribute("alt", /Toronto/);
     await expect(headline).toHaveAccessibleName("The Platform made for Entrepreneurs to do business");
   });
 
@@ -88,7 +99,8 @@ test.describe("public marketplace", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await page.waitForTimeout(6000);
-    await expect(page.locator("img[data-active]")).toHaveAttribute("alt", /grocery store/);
+    if (heroPhotosAreOriginal()) await expect(page.locator("img[data-active]")).toHaveAttribute("alt", /grocery store/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName("Find groceries and other products in your city");
     await expect(page.getByRole("button", { name: "Play the photo slideshow" })).toBeVisible();
   });
 
@@ -2046,6 +2058,86 @@ test.describe("public marketplace", () => {
               await expect(reader.getByRole("heading", { name: title })).toHaveCount(0, { timeout: 2000 });
             }).toPass({ timeout: 90000 });
             (reader as unknown as { problems?: string[] }).problems = [];
+          });
+
+          test("Super Admin changes a front-page photo, describes it, and puts the original back", async ({ page, request }) => {
+            test.setTimeout(240000);
+            const owner = await confirmedAccount(page, request);
+            makeSuperAdmin(owner);
+            const png = (width: number, height: number) => {
+              const crc = (buffer: Buffer) => {
+                let c = ~0;
+                for (const byte of buffer) {
+                  c ^= byte;
+                  for (let k = 0; k < 8; k += 1) c = (c >>> 1) ^ (0xedb88320 & -(c & 1));
+                }
+                return ~c >>> 0;
+              };
+              const chunk = (type: string, data: Buffer) => {
+                const head = Buffer.alloc(8);
+                head.writeUInt32BE(data.length);
+                head.write(type, 4);
+                const tail = Buffer.alloc(4);
+                tail.writeUInt32BE(crc(Buffer.concat([head.subarray(4), data])));
+                return Buffer.concat([head, data, tail]);
+              };
+              const header = Buffer.alloc(13);
+              header.writeUInt32BE(width, 0);
+              header.writeUInt32BE(height, 4);
+              header.set([8, 2, 0, 0, 0], 8);
+              const row = Buffer.concat([Buffer.from([0]), Buffer.alloc(width * 3, 120)]);
+              return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", header), chunk("IDAT", deflateSync(Buffer.concat(Array.from({ length: height }, () => row)))), chunk("IEND", Buffer.alloc(0))]);
+            };
+            // The Get started photo: no other test looks at it, so tests running alongside are unaffected.
+            const before = sql(`select coalesce((select image_url from public.site_images where slot = 'get_started'), 'original')`);
+            test.skip(before !== "original", "Super Admin has uploaded a Get started photo on this copy");
+            try {
+              await page.goto("/admin/site-images");
+              await openNavGroup(page, "Content");
+              await expect(page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: "Site images" })).toHaveAttribute("aria-current", "page");
+              const slot = page.getByRole("region", { name: "Get started on Biqbaq" });
+              await expect(slot).toContainText("Showing the site's original photo.", { timeout: 15000 });
+              await expect(slot.getByRole("button", { name: "Back to the original" })).toHaveCount(0);
+              await expect(page.getByRole("region", { name: "Top section, photo 1" })).toContainText("Find groceries and other products in your city");
+              // The five Shop by category cards have their own photos too.
+              for (const name of ["Fashion", "Food & groceries", "Beauty", "Home", "Cargo cars"]) {
+                await expect(page.getByRole("region", { name: `Shop by category: ${name}` })).toContainText("A square photo works best.");
+              }
+
+              await slot.getByLabel("Upload a photo").setInputFiles({ name: "start.png", mimeType: "image/png", buffer: png(1200, 900) });
+              await expect(slot).toContainText("Photo saved. The front page shows it now.", { timeout: 60000 });
+              await expect(slot).toContainText("Showing your photo.");
+              const uploaded = sql(`select image_url from public.site_images where slot = 'get_started'`);
+              expect(uploaded).toMatch(/^https:\/\/res\.cloudinary\.com\/.+\/site\/get_started\//);
+
+              await slot.getByLabel("English").fill("A grey test picture");
+              await slot.getByLabel("French").fill("Une image de test grise");
+              await slot.getByRole("button", { name: "Save description" }).click();
+              await expect(slot).toContainText("Description saved.");
+
+              // The front page shows it straight away, with its description.
+              const home = await page.context().newPage();
+              await home.goto("/");
+              const picture = home.getByRole("region", { name: "Get started on Biqbaq" }).getByRole("img", { name: "A grey test picture" });
+              await expect(picture).toBeVisible({ timeout: 15000 });
+              expect(decodeURIComponent((await picture.getAttribute("src")) ?? "")).toContain("/site/get_started/");
+              await home.goto("/fr");
+              await expect(home.getByRole("img", { name: "Une image de test grise" })).toBeVisible({ timeout: 15000 });
+              // Opening the French page remembers French; back to English for the rest.
+              await page.context().clearCookies({ name: "NEXT_LOCALE" });
+
+              // Back to the original: the upload is gone from the database (and Cloudinary).
+              page.once("dialog", (dialog) => void dialog.accept());
+              await slot.getByRole("button", { name: "Back to the original" }).click();
+              await expect(slot).toContainText("The original photo is back.");
+              expect(sql(`select count(*) from public.site_images where slot = 'get_started'`)).toBe("0");
+              await home.goto("/");
+              await expect(home.getByRole("img", { name: "A grey test picture" })).toHaveCount(0);
+              await expect(home.getByRole("region", { name: "Get started on Biqbaq" }).locator("img").last()).toHaveAttribute("src", /toronto-professional/, { timeout: 15000 });
+              await home.close();
+            } finally {
+              sql(`delete from public.site_images where slot = 'get_started'`);
+            }
           });
 
           test("Super Admin creates, previews, turns on, edits and deletes an ad, with a real photo", async ({ page, request, browser }) => {

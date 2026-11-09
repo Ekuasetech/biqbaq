@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { adFolder, blogFolder, productFolder, vehicleFolder, type AssetFacts, type MediaLimits } from "./rules";
+import { adFolder, blogFolder, productFolder, vehicleFolder, type AssetFacts, type MediaLimits, siteImageFolder } from "./rules";
 import { signParams } from "./signature";
 
 // The only code that uses the Cloudinary secret. It never leaves the server.
@@ -38,6 +38,7 @@ export const signProductUpload = (productId: string, limits: MediaLimits) => sig
 export const signVehicleImageUpload = (listingId: string, limits: MediaLimits) => signUpload((root) => vehicleFolder(root, listingId), limits);
 export const signAdImageUpload = (adId: string, limits: MediaLimits) => signUpload((root) => adFolder(root, adId), limits);
 export const signBlogCoverUpload = (postId: string, limits: MediaLimits) => signUpload((root) => blogFolder(root, postId), limits);
+export const signSiteImageUpload = (slot: string, limits: MediaLimits) => signUpload((root) => siteImageFolder(root, slot), limits);
 
 export interface CloudinaryAsset extends AssetFacts {
   secure_url: string;

@@ -26,6 +26,13 @@ export const productFolder = (root: string, productId: string) => `${root}/produ
 export const blogFolder = (root: string, postId: string) => `${root}/blog/${postId}`;
 export const adFolder = (root: string, adId: string) => `${root}/ads/${adId}`;
 export const vehicleFolder = (root: string, listingId: string) => `${root}/vehicles/${listingId}`;
+export const siteImageFolder = (root: string, slot: string) => `${root}/site/${slot}`;
+
+/** True only for a file this server would have named for this front-page photo slot. */
+export function isOwnSiteImage(publicId: string, root: string, slot: string): boolean {
+  const prefix = `${siteImageFolder(root, slot)}/`;
+  return publicId.startsWith(prefix) && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(publicId.slice(prefix.length));
+}
 
 /** True only for a file this server would have named for this vehicle listing. */
 export function isOwnVehicleImage(publicId: string, root: string, listingId: string): boolean {

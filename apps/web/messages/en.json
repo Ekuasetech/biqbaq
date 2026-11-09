@@ -1032,7 +1032,10 @@
       "payments_status": "A shop's payment status changed",
       "order_fulfil": "Marked an order delivered",
       "order_unfulfil": "Marked an order not delivered",
-      "order_refund": "Refunded an order"
+      "order_refund": "Refunded an order",
+      "site_image_upload": "Changed a front-page photo",
+      "site_image_describe": "Described a front-page photo",
+      "site_image_reset": "Put back a front-page photo"
     }
   },
   "moderation": {
@@ -2201,7 +2204,8 @@
       "settings": "Platform settings",
       "auditLog": "Audit log",
       "orders": "Orders",
-      "payments": "Payments"
+      "payments": "Payments",
+      "siteImages": "Site images"
     },
     "overview": {
       "today": "Today",
@@ -2448,5 +2452,50 @@
       "REASON_REQUIRED": "Give a reason for the change.",
       "GENERIC": "That didn't save. Please try again."
     }
+  },
+  "siteImagesAdmin": {
+    "title": "Site images",
+    "intro": "The photos on the front page: the three that turn in the top section, the one beside Get started on Biqbaq, and the five on the Shop by category cards. Each new photo shows straight away. Photos are cropped to fit.",
+    "slots": {
+      "hero_1": "Top section, photo 1",
+      "hero_2": "Top section, photo 2",
+      "hero_3": "Top section, photo 3",
+      "get_started": "Get started on Biqbaq",
+      "category_fashion": "Shop by category: Fashion",
+      "category_food": "Shop by category: Food & groceries",
+      "category_beauty": "Shop by category: Beauty",
+      "category_home": "Shop by category: Home",
+      "category_cargo_cars": "Shop by category: Cargo cars"
+    },
+    "heroHint": "Shown with the headline “{headline}”. Shown wider than tall (about 5 by 4).",
+    "getStartedHint": "Shown to the right of the three Get started cards (below them on phones).",
+    "showingOriginal": "Showing the site's original photo.",
+    "showingUpload": "Showing your photo.",
+    "upload": "Upload a photo",
+    "replace": "Replace the photo",
+    "uploading": "Uploading...",
+    "reset": "Back to the original",
+    "resetConfirm": "Put the site's original photo back? Your photo will be deleted.",
+    "resetDone": "The original photo is back.",
+    "uploaded": "Photo saved. The front page shows it now.",
+    "working": "Please wait...",
+    "altTitle": "What a screen reader says about this photo",
+    "altEn": "English",
+    "altFr": "French",
+    "altHelp": "Describe what's in the photo, in a short sentence, for people who can't see it. Leave both empty if it's only decoration.",
+    "saveAlt": "Save description",
+    "described": "Description saved.",
+    "preview": "Photo now showing for {name}",
+    "loadFailed": "The photos couldn't be loaded. Please refresh the page.",
+    "photoErrors": {
+      "FORMAT": "Choose a JPG, PNG or WebP photo.",
+      "TOO_LARGE": "This photo couldn't be made small enough. Try another.",
+      "UNREADABLE": "This photo couldn't be opened. Try another.",
+      "UPLOAD_FAILED": "The upload didn't finish. Please try again.",
+      "IMAGE_REJECTED": "This photo isn't allowed. Try another.",
+      "MEDIA_NOT_CONFIGURED": "Photo uploads aren't set up yet.",
+      "GENERIC": "That didn't work. Please try again."
+    },
+    "categoryHint": "Shown small in the corner of this category's card. A square photo works best."
   }
 }

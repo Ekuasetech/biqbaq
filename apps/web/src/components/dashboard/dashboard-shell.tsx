@@ -4,14 +4,15 @@ import { DashboardSearch } from "@/components/dashboard/dashboard-search";
 import {
   ArrowLeft,
   Bell,
-  Car,
-  CreditCard,
-  FileText,
-  ChevronDown,
   BookOpen,
+  Car,
+  ChevronDown,
   ClipboardCheck,
+  CreditCard,
   FileClock,
+  FileText,
   Gavel,
+  Images,
   LayoutDashboard,
   LogOut,
   Mail,
@@ -157,6 +158,8 @@ function useNavigation(data: DashboardData | null, pathname: string) {
   if (a?.moderation) content.push({ href: "/admin/moderation", label: t("moderation"), icon: Gavel });
   if (a?.blog) content.push({ href: "/admin/blog", label: t("blog"), icon: BookOpen });
   if (a?.ads) content.push({ href: "/admin/ads", label: t("ads"), icon: Megaphone });
+  // The front page's own photos (owner's request, 2026-11-08): Super Admin only.
+  if (a?.super_admin) content.push({ href: "/admin/site-images", label: t("siteImages"), icon: Images });
   const groups: NavGroup[] = (
     [
       { key: "people", items: people },

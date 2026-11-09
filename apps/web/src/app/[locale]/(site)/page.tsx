@@ -13,9 +13,8 @@ import { cn } from "@/lib/utils";
 import { CargoVehicleCard } from "@/components/vehicle/cargo-vehicle-card";
 import { CATEGORY_SLUGS, listFeaturedProducts } from "@/modules/product-catalog";
 import { listCargoVehicles } from "@/modules/vehicle-marketplace";
-
-const photo = (seed: string, width: number, height = width) =>
-  `https://picsum.photos/seed/biqbaq-${seed}/${width}/${height}`;
+import { categorySlot } from "@/modules/site-images";
+import { getSiteImages } from "@/modules/site-images/server";
 
 const categoryHref = (category: string) => ({ pathname: "/products", query: { category } });
 
@@ -49,6 +48,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const t = await getTranslations({ locale });
   const products = await listFeaturedProducts(6);
   const cargoVehicles = await listCargoVehicles(4);
+  // Super Admin's photos for the hero and Get started, or the site's own (Site images page).
+  const siteImages = await getSiteImages(locale);
   // The "In the spotlight" section was removed at the owner's request (2026-11-08).
   const grid = products.slice(0, 6);
 
@@ -110,7 +111,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             </div>
           </div>
           <div {...reveal("fade", 600)} className="relative aspect-[5/4] w-full">
-            <HeroSlideshow />
+            <HeroSlideshow images={[siteImages.hero_1, siteImages.hero_2, siteImages.hero_3]} />
           </div>
         </div>
         </HeroSlidesProvider>
@@ -129,8 +130,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
                 <span className="relative z-10 text-sm font-bold">{label}</span>
                 <span className="absolute -right-3 -bottom-3 size-20 overflow-hidden rounded-2xl">
                   <Image
-                    src={photo(`category-${key}`, 200)}
-                    alt=""
+                    src={siteImages[categorySlot(key)].src}
+                    alt={siteImages[categorySlot(key)].alt ?? ""}
                     fill
                     sizes="80px"
                     className="object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transform-none"
@@ -232,8 +233,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           </ul>
           <div {...reveal("fade", 200)} className="relative min-h-72 overflow-hidden rounded-3xl bg-muted lg:min-h-96">
             <Image
-              src="/hero/toronto-professional.jpg"
-              alt=""
+              src={siteImages.get_started.src}
+              alt={siteImages.get_started.alt ?? ""}
               fill
               sizes="(min-width: 1024px) 50vw, 100vw"
               className="object-cover"

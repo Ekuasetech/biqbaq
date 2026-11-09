@@ -1032,7 +1032,10 @@
       "payments_status": "L'état des paiements d'une boutique a changé",
       "order_fulfil": "A indiqué une commande comme livrée",
       "order_unfulfil": "A indiqué une commande comme non livrée",
-      "order_refund": "A remboursé une commande"
+      "order_refund": "A remboursé une commande",
+      "site_image_upload": "A changé une photo de la page d'accueil",
+      "site_image_describe": "A décrit une photo de la page d'accueil",
+      "site_image_reset": "A remis une photo de la page d'accueil"
     }
   },
   "moderation": {
@@ -2201,7 +2204,8 @@
       "settings": "Paramètres de la plateforme",
       "auditLog": "Journal d'audit",
       "orders": "Commandes",
-      "payments": "Paiements"
+      "payments": "Paiements",
+      "siteImages": "Images du site"
     },
     "overview": {
       "today": "Aujourd'hui",
@@ -2448,5 +2452,50 @@
       "REASON_REQUIRED": "Indiquez la raison du changement.",
       "GENERIC": "L'enregistrement n'a pas fonctionné. Veuillez réessayer."
     }
+  },
+  "siteImagesAdmin": {
+    "title": "Images du site",
+    "intro": "Les photos de la page d'accueil : les trois qui défilent dans la section du haut, celle à côté de Commencer sur Biqbaq, et les cinq des cartes Magasiner par catégorie. Chaque nouvelle photo s'affiche tout de suite. Les photos sont recadrées.",
+    "slots": {
+      "hero_1": "Section du haut, photo 1",
+      "hero_2": "Section du haut, photo 2",
+      "hero_3": "Section du haut, photo 3",
+      "get_started": "Commencer sur Biqbaq",
+      "category_fashion": "Magasiner par catégorie : Mode",
+      "category_food": "Magasiner par catégorie : Alimentation",
+      "category_beauty": "Magasiner par catégorie : Beauté",
+      "category_home": "Magasiner par catégorie : Maison",
+      "category_cargo_cars": "Magasiner par catégorie : Voitures cargo"
+    },
+    "heroHint": "Affichée avec le titre « {headline} ». Plus large que haute (environ 5 sur 4).",
+    "getStartedHint": "Affichée à droite des trois cartes Commencer (en dessous sur téléphone).",
+    "showingOriginal": "La photo d'origine du site est affichée.",
+    "showingUpload": "Votre photo est affichée.",
+    "upload": "Téléverser une photo",
+    "replace": "Remplacer la photo",
+    "uploading": "Téléversement...",
+    "reset": "Revenir à l'original",
+    "resetConfirm": "Remettre la photo d'origine du site? Votre photo sera supprimée.",
+    "resetDone": "La photo d'origine est revenue.",
+    "uploaded": "Photo enregistrée. La page d'accueil l'affiche maintenant.",
+    "working": "Veuillez patienter...",
+    "altTitle": "Ce qu'un lecteur d'écran dit de cette photo",
+    "altEn": "Anglais",
+    "altFr": "Français",
+    "altHelp": "Décrivez ce que montre la photo en une courte phrase, pour les personnes qui ne la voient pas. Laissez vide si elle est seulement décorative.",
+    "saveAlt": "Enregistrer la description",
+    "described": "Description enregistrée.",
+    "preview": "Photo affichée pour {name}",
+    "loadFailed": "Les photos n'ont pas pu être chargées. Veuillez actualiser la page.",
+    "photoErrors": {
+      "FORMAT": "Choisissez une photo JPG, PNG ou WebP.",
+      "TOO_LARGE": "Cette photo n'a pas pu être assez réduite. Essayez-en une autre.",
+      "UNREADABLE": "Cette photo n'a pas pu être ouverte. Essayez-en une autre.",
+      "UPLOAD_FAILED": "Le téléversement n'a pas abouti. Veuillez réessayer.",
+      "IMAGE_REJECTED": "Cette photo n'est pas acceptée. Essayez-en une autre.",
+      "MEDIA_NOT_CONFIGURED": "Le téléversement de photos n'est pas encore configuré.",
+      "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
+    },
+    "categoryHint": "Affichée en petit dans le coin de la carte de cette catégorie. Une photo carrée convient le mieux."
   }
 }

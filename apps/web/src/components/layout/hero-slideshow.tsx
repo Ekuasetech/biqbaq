@@ -20,9 +20,24 @@ const INTRO_MS = 1300;
 
 // Each photo is paired with the headline shown alongside it.
 const SLIDES = [
-  { src: "/hero/nigeria-seller.jpg", title: "slideSellerTitle", alt: "slideSellerAlt", position: "object-[65%_center]" },
-  { src: "/hero/sienna-cargo.jpg", title: "slideCargoTitle", alt: "slideCargoAlt", position: "object-[45%_center]" },
-  { src: "/hero/toronto-professional.jpg", title: "slideTorontoTitle", alt: "slideTorontoAlt", position: "object-center" },
+  {
+    src: "/hero/nigeria-seller.jpg",
+    title: "slideSellerTitle",
+    alt: "slideSellerAlt",
+    position: "object-[65%_center]",
+  },
+  {
+    src: "/hero/sienna-cargo.jpg",
+    title: "slideCargoTitle",
+    alt: "slideCargoAlt",
+    position: "object-[45%_center]",
+  },
+  {
+    src: "/hero/toronto-professional.jpg",
+    title: "slideTorontoTitle",
+    alt: "slideTorontoAlt",
+    position: "object-center",
+  },
 ] as const;
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
@@ -43,7 +58,8 @@ const HeroSlidesContext = createContext<HeroSlidesState | null>(null);
 
 function useHeroSlides() {
   const state = useContext(HeroSlidesContext);
-  if (!state) throw new Error("Hero components must be inside HeroSlidesProvider");
+  if (!state)
+    throw new Error("Hero components must be inside HeroSlidesProvider");
   return state;
 }
 
@@ -71,7 +87,9 @@ export function HeroSlidesProvider({ children }: { children: ReactNode }) {
   }, [active, paused]);
 
   return (
-    <HeroSlidesContext.Provider value={{ active, paused, setPaused: setUserPaused }}>
+    <HeroSlidesContext.Provider
+      value={{ active, paused, setPaused: setUserPaused }}
+    >
       {children}
     </HeroSlidesContext.Provider>
   );
@@ -100,36 +118,51 @@ export function HeroHeadline() {
   );
 }
 
-export function HeroSlideshow() {
+/**
+ * The hero's photos. Super Admin can replace each one (owner's request, 2026-11-08); a
+ * replaced photo is centred, and uses Super Admin's description when one was given.
+ */
+export function HeroSlideshow({
+  images,
+}: {
+  images?: { src: string; alt: string | null; custom: boolean }[];
+}) {
   const t = useTranslations("home");
   const { active, paused, setPaused } = useHeroSlides();
 
   return (
     <>
-      {SLIDES.map((slide, index) => (
-        <Image
-          key={slide.src}
-          src={slide.src}
-          alt={index === active ? t(slide.alt) : ""}
-          aria-hidden={index !== active}
-          data-active={index === active || undefined}
-          fill
-          preload={index === 0}
-          sizes="(min-width: 1024px) 45vw, 90vw"
-          className={cn(
-            "rounded-[1.5rem] object-cover transition-opacity duration-[1200ms] ease-in-out motion-reduce:transition-none",
-            slide.position,
-            index === active ? "opacity-100" : "opacity-0",
-          )}
-        />
-      ))}
+      {SLIDES.map((slide, index) => {
+        const image = images?.[index];
+        return (
+          <Image
+            key={`${index}-${image?.src ?? slide.src}`}
+            src={image?.src ?? slide.src}
+            alt={index === active ? (image?.alt ?? t(slide.alt)) : ""}
+            aria-hidden={index !== active}
+            data-active={index === active || undefined}
+            fill
+            preload={index === 0}
+            sizes="(min-width: 1024px) 45vw, 90vw"
+            className={cn(
+              "rounded-[1.5rem] object-cover transition-opacity duration-[1200ms] ease-in-out motion-reduce:transition-none",
+              image?.custom ? "object-center" : slide.position,
+              index === active ? "opacity-100" : "opacity-0",
+            )}
+          />
+        );
+      })}
       <button
         type="button"
         aria-label={paused ? t("slidesPlay") : t("slidesPause")}
         onClick={() => setPaused(!paused)}
         className="absolute right-3 bottom-3 flex size-10 items-center justify-center rounded-full bg-black/55 text-white transition-colors outline-none hover:bg-black/75 focus-visible:ring-2 focus-visible:ring-white"
       >
-        {paused ? <Play className="size-4" aria-hidden /> : <Pause className="size-4" aria-hidden />}
+        {paused ? (
+          <Play className="size-4" aria-hidden />
+        ) : (
+          <Pause className="size-4" aria-hidden />
+        )}
       </button>
     </>
   );
