@@ -1,13 +1,14 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useScrollToHash } from "@/lib/use-scroll-to-hash";
+import { useScrollToHash, useSeekHash } from "@/lib/use-scroll-to-hash";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
 import { ProductPhotos } from "@/components/seller/product-photos";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Pager } from "@/components/ui/pager";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -16,6 +17,7 @@ import { refreshCatalog } from "@/modules/product-catalog/actions";
 import {
   deleteVehicle,
   listMyVehicles,
+  MY_VEHICLES_PAGE_SIZE,
   makeMainVehiclePhoto,
   parseRestrictions,
   publishVehicle,
@@ -204,11 +206,18 @@ export function ShopVehicles({ verified, photoLimit }: { verified: boolean; phot
   const t = useTranslations("shopVehicles");
   const [vehicles, setVehicles] = useState<MyVehicle[] | null>(null);
   const [adding, setAdding] = useState(false);
+  const [page, setPage] = useState(1);
+  const seek = useSeekHash("vehicle-");
 
   const load = useCallback(async () => {
-    const { data } = await listMyVehicles(getSupabaseBrowserClient());
-    setVehicles((data ?? []) as MyVehicle[]);
-  }, []);
+    const { data } = await listMyVehicles(getSupabaseBrowserClient(), page);
+    const found = (data ?? []) as MyVehicle[];
+    // The last car on a later page was deleted: show the page before.
+    if (found.length === 0 && page > 1) setPage(page - 1);
+    // A search result names a car on a later page: look there.
+    else if (seek(found.map((vehicle) => vehicle.id), page, MY_VEHICLES_PAGE_SIZE, found[0]?.total ?? 0)) setPage(page + 1);
+    else setVehicles(found);
+  }, [page, seek]);
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), 0);
@@ -233,6 +242,7 @@ export function ShopVehicles({ verified, photoLimit }: { verified: boolean; phot
           {vehicles.map((vehicle) => <VehicleItem key={vehicle.id} vehicle={vehicle} photoLimit={photoLimit} onChanged={load} />)}
         </ul>
       )}
+      {vehicles && vehicles.length > 0 && <Pager page={page} total={vehicles[0].total} pageSize={MY_VEHICLES_PAGE_SIZE} onPage={setPage} label={t("pages")} />}
     </section>
   );
 }

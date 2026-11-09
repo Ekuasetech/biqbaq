@@ -48,6 +48,8 @@ export interface Campaign {
   created_at: string;
   /** Set when it went to one client. */
   single_email: string | null;
+  /** How many there are in all, for pages. */
+  total: number;
 }
 
 export interface ShopEmailList {
@@ -91,7 +93,9 @@ export const sendCampaign = (supabase: SupabaseClient, seller: string | null, su
   supabase.rpc("send_email_campaign", { p_seller: seller, p_subject: subject, p_body: body, p_to: to ?? null });
 export const stopUpdates = (supabase: SupabaseClient, seller: string | null, email: string) =>
   supabase.rpc("stop_client_updates", { p_seller: seller, p_email: email });
-export const listCampaigns = (supabase: SupabaseClient, seller: string | null) => supabase.rpc("list_email_campaigns", { p_seller: seller });
+export const CAMPAIGNS_PAGE_SIZE = 20;
+export const listCampaigns = (supabase: SupabaseClient, seller: string | null, page = 1) =>
+  supabase.rpc("list_email_campaigns", { p_seller: seller, p_limit: CAMPAIGNS_PAGE_SIZE, p_offset: (Math.max(page, 1) - 1) * CAMPAIGNS_PAGE_SIZE });
 export const getSubscription = (supabase: SupabaseClient, shop: string | null) => supabase.rpc("my_list_subscription", { p_shop: shop });
 export const setSubscription = (supabase: SupabaseClient, shop: string | null, subscribed: boolean) =>
   supabase.rpc("set_list_subscription", { p_shop: shop, p_subscribed: subscribed });

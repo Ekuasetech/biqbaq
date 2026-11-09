@@ -2468,6 +2468,41 @@ test.describe("public marketplace", () => {
             await expect(item(shop, name)).toBeInViewport({ timeout: 15000 });
           });
 
+          test("long lists come a page at a time, and a search result opens the page its item is on", async ({ page, browser, request }) => {
+            test.setTimeout(120000);
+            const { page: shop } = await approvedSeller(page, browser, request);
+            const name = `Oldest ${unique()}`;
+            await addProduct(shop, name);
+            const productId = sql(`select id from public.products where name = '${name}'`);
+            // 21 newer products, so the first one is on page 2 (20 to a page).
+            sql(`insert into public.products (seller_id, slug, name, description, category_id, price_minor, currency, status, availability, created_at)
+                 select seller_id, slug || '-' || g, 'Newer product ' || g, description, category_id, price_minor, currency, 'draft', availability, now() + g * interval '1 second'
+                 from public.products, generate_series(1, 21) g where id = '${productId}'`);
+
+            await shop.goto("/account/shop/products");
+            const pages = shop.getByRole("navigation", { name: "Product pages" });
+            await expect(pages).toContainText("Page 1 of 2", { timeout: 15000 });
+            await expect(shop.locator('article[id^="product-"]')).toHaveCount(20);
+            await expect(item(shop, name)).toHaveCount(0);
+            await pages.getByRole("button", { name: "Next" }).click();
+            await expect(pages).toContainText("Page 2 of 2");
+            await expect(shop.locator('article[id^="product-"]')).toHaveCount(2);
+            await expect(item(shop, name)).toBeVisible();
+            await expect(pages.getByRole("button", { name: "Next" })).toBeDisabled();
+            // The overview counts every product, not just one page.
+            await shop.goto("/account/shop");
+            await expect(shop.getByRole("main")).toContainText("22 products", { timeout: 15000 });
+
+            // A search result for the oldest product finds it on page 2.
+            const search = shop.getByRole("combobox", { name: "Search your things" });
+            await search.fill(name);
+            await expect(shop.getByRole("listbox", { name: "Search results" }).getByRole("option", { name: new RegExp(`^${name}`) })).toBeVisible({ timeout: 15000 });
+            await shop.getByRole("listbox", { name: "Search results" }).getByRole("option", { name: new RegExp(`^${name}`) }).click();
+            await expect(shop).toHaveURL(/\/account\/shop\/products#product-/);
+            await expect(item(shop, name)).toBeInViewport({ timeout: 15000 });
+            await expect(shop.getByRole("navigation", { name: "Product pages" })).toContainText("Page 2 of 2");
+          });
+
           test("a seller edits their shop details, and only the public ones show", async ({ page, browser, request }) => {
             test.setTimeout(120000);
             const { page: shop } = await approvedSeller(page, browser, request);

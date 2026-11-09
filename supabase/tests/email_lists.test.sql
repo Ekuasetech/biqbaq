@@ -195,6 +195,10 @@ update platform_settings set value = '50' where key = 'bulk_email.max_complaints
 select private.check_list_health((select id from email_lists where seller_id = '00000000-0000-4000-8000-000000000b11'));
 select results_eq($$ select enabled, pause_reason from email_lists where seller_id = '00000000-0000-4000-8000-000000000b11' $$, $$ values (false, 'unsubscribes') $$, 'more than 5% unsubscribing pauses it too');
 update email_lists set enabled = true, paused_at = null, pause_reason = null where seller_id = '00000000-0000-4000-8000-000000000b11';
+select pg_temp.act_as('00000000-0000-4000-8000-000000000b01');
+set local role authenticated;
+select results_eq($$ select count(*)::int, bool_and(total >= 2) from list_email_campaigns('00000000-0000-4000-8000-000000000b11', 1, 0) $$, $$ values (1, true) $$, 'sent emails come a page at a time, with how many there are in all');
+reset role;
 update platform_settings set value = '4' where key = 'bulk_email.max_bounce_percent';
 update platform_settings set value = '1' where key = 'bulk_email.max_complaints_30d';
 update platform_settings set value = '50' where key = 'bulk_email.max_unsubscribe_percent';

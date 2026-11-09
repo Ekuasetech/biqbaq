@@ -21,6 +21,8 @@ export type VehicleForm = z.infer<typeof vehicleSchema>;
 export const parseRestrictions = (text: string) => text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
 
 export interface MyVehicle {
+  /** How many cars the seller has in all, for pages. */
+  total: number;
   id: string;
   slug: string;
   make: string;
@@ -40,7 +42,9 @@ export interface MyVehicle {
 
 // Every function here is also checked by the database, whatever this code or the page does.
 
-export const listMyVehicles = (supabase: SupabaseClient) => supabase.rpc("my_vehicle_listings");
+export const MY_VEHICLES_PAGE_SIZE = 20;
+export const listMyVehicles = (supabase: SupabaseClient, page = 1) =>
+  supabase.rpc("my_vehicle_listings", { p_limit: MY_VEHICLES_PAGE_SIZE, p_offset: (Math.max(page, 1) - 1) * MY_VEHICLES_PAGE_SIZE });
 export const saveVehicle = (supabase: SupabaseClient, id: string | null, form: VehicleForm) =>
   supabase.rpc("save_vehicle_listing", {
     p_id: id,

@@ -30,8 +30,18 @@ export interface CommentForModeration {
 // Every function here is also checked by the database, whatever this code or the page does.
 
 /** Read fresh rather than cached, so a new comment shows straight away. */
-export const listComments = (supabase: SupabaseClient, postId: string) =>
-  supabase.from("public_blog_comments").select("id, body, created_at, author_name").eq("post_id", postId).order("created_at").limit(500);
+export const COMMENTS_PAGE_SIZE = 20;
+/** One page of a post's comments, oldest first, with how many there are in all (`count`). */
+export const listComments = (supabase: SupabaseClient, postId: string, page = 1) => {
+  const from = (Math.max(page, 1) - 1) * COMMENTS_PAGE_SIZE;
+  return supabase
+    .from("public_blog_comments")
+    .select("id, body, created_at, author_name", { count: "exact" })
+    .eq("post_id", postId)
+    .order("created_at")
+    .order("id")
+    .range(from, from + COMMENTS_PAGE_SIZE - 1);
+};
 export const myCommentIds = (supabase: SupabaseClient, postId: string) => supabase.rpc("my_blog_comment_ids", { p_post: postId });
 export const addComment = (supabase: SupabaseClient, postId: string, body: string) => supabase.rpc("add_blog_comment", { p_post: postId, p_body: body });
 export const deleteMyComment = (supabase: SupabaseClient, id: string) => supabase.rpc("delete_my_blog_comment", { p_comment: id });

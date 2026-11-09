@@ -2,7 +2,7 @@
 
 import { OnlinePayments } from "@/components/payments/online-payments";
 import { ShopOrders } from "@/components/payments/shop-orders";
-import { useScrollToHash } from "@/lib/use-scroll-to-hash";
+import { useScrollToHash, useSeekHash } from "@/lib/use-scroll-to-hash";
 import { EmailListManager } from "@/components/email-lists/email-list-manager";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useLocale, useTranslations } from "next-intl";
@@ -18,6 +18,7 @@ import { ShopVehicles } from "@/components/seller/shop-vehicles";
 import { VerificationCard } from "@/components/seller/verification-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Pager } from "@/components/ui/pager";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
@@ -40,6 +41,7 @@ import {
   unpublishProduct,
   updateProduct,
   type Category,
+  SHOP_PRODUCTS_PAGE_SIZE,
   type SellerProduct,
 } from "@/modules/product-catalog/seller-products";
 import { AVAILABILITIES } from "@/modules/product-catalog/types";
@@ -55,6 +57,8 @@ interface ShopData {
   shop: Shop | null;
   access: ShopAccess | null;
   products: SellerProduct[];
+  /** How many products the shop has in all; `products` is one page of them. */
+  productTotal: number;
   categories: Category[];
   allowance: PublishingAllowance | null;
   photos: ShopPhoto[];
@@ -315,6 +319,8 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
   const [data, setData] = useState<ShopData | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [productPage, setProductPage] = useState(1);
+  const seekProduct = useSeekHash("product-");
 
   const load = useCallback(async (userId: string) => {
     const supabase = getSupabaseBrowserClient();
@@ -324,12 +330,22 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
       return;
     }
     if (!shop.data) {
-      setData({ shop: null, access: null, products: [], categories: [], allowance: null, photos: [], photoLimit: 0, verificationRequest: null });
+      setData({ shop: null, access: null, products: [], productTotal: 0, categories: [], allowance: null, photos: [], photoLimit: 0, verificationRequest: null });
       return;
     }
-    const products = await listShopProducts(supabase, shop.data.id);
+    const products = await listShopProducts(supabase, shop.data.id, productPage);
     if (products.error) {
       setLoadFailed(true);
+      return;
+    }
+    // The last product on a later page was deleted: show the page before.
+    if (products.data.length === 0 && productPage > 1) {
+      setProductPage(productPage - 1);
+      return;
+    }
+    // A search result names a product on a later page: look there.
+    if (seekProduct(products.data.map((product) => product.id), productPage, SHOP_PRODUCTS_PAGE_SIZE, products.count ?? 0)) {
+      setProductPage(productPage + 1);
       return;
     }
     const [shopAccess, categories, allowance, photos, photoLimit, verificationRequest] = await Promise.all([
@@ -349,13 +365,14 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
       shop: shop.data as Shop,
       access: shopAccess.access,
       products: products.data as SellerProduct[],
+      productTotal: products.count ?? products.data.length,
       categories: categories.data as Category[],
       allowance: allowance.data as PublishingAllowance,
       photos: photos.data as ShopPhoto[],
       photoLimit: photoLimit.data as number,
       verificationRequest: verificationRequest.data as MyVerificationRequest | null,
     });
-  }, [staffSellerId]);
+  }, [staffSellerId, productPage, seekProduct]);
 
   const userId = user?.id;
   useEffect(() => {
@@ -388,7 +405,7 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
     );
   }
 
-  const { shop, access, allowance, categories, products, photos, photoLimit, verificationRequest } = data;
+  const { shop, access, allowance, categories, products, productTotal, photos, photoLimit, verificationRequest } = data;
   // A person's own shop is theirs even while suspended, when the access check has no answer;
   // they see its pages and notices, and the database still refuses changes.
   const isOwner = staffSellerId ? Boolean(access?.is_owner) : true;
@@ -506,7 +523,7 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
                         <span className="min-w-0">
                           <span className="block font-semibold">{t(`sections.${name}.title`)}</span>
                           <span className="block text-sm text-muted-foreground">
-                            {name === "products" ? t("sections.products.count", { count: products.length }) : t(`sections.${name}.description`)}
+                            {name === "products" ? t("sections.products.count", { count: productTotal }) : t(`sections.${name}.description`)}
                           </span>
                         </span>
                       </Link>
@@ -578,6 +595,7 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
               <ProductItem key={product.id} supabase={supabase} sellerId={shop.id} access={access} product={product} categories={categories} photos={photos.filter((photo) => photo.entity_id === product.id)} photoLimit={photoLimit} onChanged={reload} />
             ))}
           </ul>
+          <Pager page={productPage} total={productTotal} pageSize={SHOP_PRODUCTS_PAGE_SIZE} onPage={setProductPage} label={t("productPages")} />
         </section>
       )}
 

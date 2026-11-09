@@ -45,12 +45,18 @@ const toColumns = ({ price, ...form }: ProductForm) => ({ ...form, price_minor: 
 /** Shows stored cents in the price box, as 12.50. */
 export const priceInputValue = (minor: number) => (minor / 100).toFixed(2);
 
-export async function listShopProducts(supabase: SupabaseClient, sellerId: string) {
+export const SHOP_PRODUCTS_PAGE_SIZE = 20;
+
+/** One page of a shop's products, newest first, with how many there are in all (`count`). */
+export async function listShopProducts(supabase: SupabaseClient, sellerId: string, page = 1) {
+  const from = (Math.max(page, 1) - 1) * SHOP_PRODUCTS_PAGE_SIZE;
   return supabase
     .from("products")
-    .select("id, slug, name, description, category_id, price_minor, availability, condition, status")
+    .select("id, slug, name, description, category_id, price_minor, availability, condition, status", { count: "exact" })
     .eq("seller_id", sellerId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .order("id")
+    .range(from, from + SHOP_PRODUCTS_PAGE_SIZE - 1);
 }
 
 export async function listCategories(supabase: SupabaseClient) {

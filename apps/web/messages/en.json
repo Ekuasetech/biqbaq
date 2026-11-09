@@ -617,7 +617,8 @@
         "title": "Orders",
         "description": "Paid orders to deliver, and refunds."
       }
-    }
+    },
+    "productPages": "Product pages"
   },
   "errorPage": {
     "title": "Something went wrong",
@@ -1319,7 +1320,8 @@
       "rateLimited": "You've written several reviews recently. Please try again in an hour.",
       "unavailable": "This product is no longer available.",
       "generic": "That didn't work. Please try again."
-    }
+    },
+    "favouritePages": "Favourite pages"
   },
   "blogAdmin": {
     "title": "Blog",
@@ -1504,7 +1506,8 @@
       "rateLimited": "You've posted several comments recently. Please try again in an hour.",
       "unavailable": "This post is no longer available.",
       "generic": "That didn't work. Please try again."
-    }
+    },
+    "pages": "Comment pages"
   },
   "adsAdmin": {
     "title": "Ads",
@@ -1669,7 +1672,8 @@
       "notAllowed": "You don't have permission to do this.",
       "changed": "This has already changed. Showing the latest.",
       "generic": "That didn't work. Please try again."
-    }
+    },
+    "pages": "Cargo car pages"
   },
   "messaging": {
     "title": "Messages",
@@ -1961,7 +1965,8 @@
     "history": {
       "title": "Sent emails",
       "line": "{count, plural, one {# person} other {# people}} · {date}",
-      "single": "To {email} · {date}"
+      "single": "To {email} · {date}",
+      "pages": "Sent email pages"
     },
     "getUpdates": {
       "start": "Get updates",
@@ -2024,7 +2029,8 @@
       "download": "Download PDF",
       "resend": "Send again",
       "resent": "Sent again.",
-      "sentTimes": "sent {count} times"
+      "sentTimes": "sent {count} times",
+      "pages": "Invoice pages"
     },
     "stats": {
       "clients": "Clients",

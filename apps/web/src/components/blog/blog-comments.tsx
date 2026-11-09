@@ -4,11 +4,12 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { WriterAvatar } from "@/components/blog/blog-post-card";
 import { Label } from "@/components/ui/label";
+import { Pager } from "@/components/ui/pager";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSessionUser } from "@/lib/supabase/use-session-user";
-import { addComment, COMMENT_MAX_LENGTH, commentErrorKey, commentSchema, deleteMyComment, listComments, myCommentIds, type BlogComment } from "@/modules/blog/comments";
+import { addComment, COMMENT_MAX_LENGTH, commentErrorKey, COMMENTS_PAGE_SIZE, commentSchema, deleteMyComment, listComments, myCommentIds, type BlogComment } from "@/modules/blog/comments";
 
 const primaryButton = "inline-flex h-10 items-center justify-center rounded-lg bg-brand-red px-4 text-sm font-semibold text-brand-red-foreground hover:bg-brand-red/90 disabled:opacity-60";
 
@@ -18,6 +19,8 @@ export function BlogComments({ postId }: { postId: string }) {
   const format = useFormatter();
   const user = useSessionUser();
   const [comments, setComments] = useState<BlogComment[] | null>(null);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [mine, setMine] = useState<string[]>([]);
   const [body, setBody] = useState("");
   const [working, setWorking] = useState(false);
@@ -25,9 +28,16 @@ export function BlogComments({ postId }: { postId: string }) {
 
   const load = useCallback(async () => {
     const supabase = getSupabaseBrowserClient();
-    const { data } = await listComments(supabase, postId);
-    setComments((data ?? []) as BlogComment[]);
-  }, [postId]);
+    const { data, count } = await listComments(supabase, postId, page);
+    const found = (data ?? []) as BlogComment[];
+    // The last comment on a later page was deleted or hidden: show the page before.
+    if (found.length === 0 && page > 1) {
+      setPage(page - 1);
+      return;
+    }
+    setComments(found);
+    setTotal(count ?? found.length);
+  }, [postId, page]);
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), 0);
@@ -57,7 +67,10 @@ export function BlogComments({ postId }: { postId: string }) {
     if (error) setFailure(commentErrorKey(error));
     else {
       setBody("");
-      await load();
+      // The newest comment is last, so show the last page, where it now is.
+      const last = Math.max(1, Math.ceil((total + 1) / COMMENTS_PAGE_SIZE));
+      if (last !== page) setPage(last);
+      else await load();
     }
     setWorking(false);
   }
@@ -71,7 +84,7 @@ export function BlogComments({ postId }: { postId: string }) {
   return (
     <section aria-labelledby="comments-title" className="mt-12 border-t border-border pt-8">
       <h2 id="comments-title" className="font-heading text-2xl font-bold tracking-tight">
-        {t("title")}{comments && comments.length > 0 && ` (${comments.length})`}
+        {t("title")}{total > 0 && ` (${total})`}
       </h2>
       {comments === null ? null : comments.length === 0 ? (
         <p className="mt-3 text-sm text-muted-foreground">{t("empty")}</p>
@@ -96,6 +109,11 @@ export function BlogComments({ postId }: { postId: string }) {
             );
           })}
         </ul>
+      )}
+      {comments && comments.length > 0 && (
+        <div className="mt-4">
+          <Pager page={page} total={total} pageSize={COMMENTS_PAGE_SIZE} onPage={setPage} label={t("pages")} />
+        </div>
       )}
       {user === undefined ? null : user ? (
         <form onSubmit={submit} noValidate aria-label={t("formLabel")} className="mt-5 grid gap-2">

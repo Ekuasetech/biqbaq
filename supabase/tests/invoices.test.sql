@@ -85,6 +85,8 @@ select is((select label from create_invoice('00000000-0000-4000-8000-000000000c1
 select throws_ok($$ select * from create_invoice('00000000-0000-4000-8000-000000000c11', 'invoice', 'chidi@example.com', current_date, null, null, null, pg_temp.items(), '[]', null, null) $$,
   'P0001', 'INVOICE_LIMIT', 'there is a daily limit');
 select is((select count(*)::int from list_invoices('00000000-0000-4000-8000-000000000c11')), 3, 'the seller sees what they sent');
+select results_eq($$ select count(*)::int, max(total)::int from list_invoices('00000000-0000-4000-8000-000000000c11', 2, 0) $$, $$ values (2, 3) $$, 'a page at a time, with how many there are in all');
+select is((select count(*)::int from list_invoices('00000000-0000-4000-8000-000000000c11', 2, 2)), 1, 'and the next page has the rest');
 select is((get_invoice('00000000-0000-4000-8000-000000000c11', (select id from inv)) ->> 'label'), 'INV-0001', 'and can open it again');
 reset role;
 

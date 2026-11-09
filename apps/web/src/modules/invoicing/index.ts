@@ -150,6 +150,8 @@ export interface InvoiceSummary {
   issue_date: string;
   created_at: string;
   send_count: number;
+  /** How many there are in all, for pages. */
+  total: number;
 }
 
 export const createInvoice = (supabase: SupabaseClient, input: InvoiceInput) =>
@@ -166,7 +168,9 @@ export const createInvoice = (supabase: SupabaseClient, input: InvoiceInput) =>
     p_tax_number: input.taxNumber,
     p_notes: input.notes,
   });
-export const listInvoices = (supabase: SupabaseClient, seller: string | null) => supabase.rpc("list_invoices", { p_seller: seller });
+export const INVOICES_PAGE_SIZE = 20;
+export const listInvoices = (supabase: SupabaseClient, seller: string | null, page = 1) =>
+  supabase.rpc("list_invoices", { p_seller: seller, p_limit: INVOICES_PAGE_SIZE, p_offset: (Math.max(page, 1) - 1) * INVOICES_PAGE_SIZE });
 export const resendInvoice = (supabase: SupabaseClient, seller: string | null, id: string) =>
   supabase.rpc("resend_invoice", { p_seller: seller, p_id: id });
 

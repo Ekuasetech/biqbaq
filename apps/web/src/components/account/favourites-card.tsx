@@ -4,10 +4,11 @@ import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { cardClass, headingClass } from "@/components/account/account-dashboard";
+import { Pager } from "@/components/ui/pager";
 import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { listMyFavourites, setFavourite, type Favourite } from "@/modules/reviews";
+import { FAVOURITES_PAGE_SIZE, listMyFavourites, setFavourite, type Favourite } from "@/modules/reviews";
 
 const secondaryButton =
   "inline-flex h-9 items-center justify-center rounded-lg border border-border px-3 text-sm font-semibold hover:bg-muted disabled:opacity-50";
@@ -17,11 +18,15 @@ export function FavouritesCard() {
   const t = useTranslations("reviews");
   const locale = useLocale();
   const [items, setItems] = useState<Favourite[]>([]);
+  const [page, setPage] = useState(1);
 
   const load = useCallback(async () => {
-    const { data } = await listMyFavourites(getSupabaseBrowserClient());
-    setItems((data ?? []) as Favourite[]);
-  }, []);
+    const { data } = await listMyFavourites(getSupabaseBrowserClient(), page);
+    const found = (data ?? []) as Favourite[];
+    // The last favourite on a later page was removed: show the page before.
+    if (found.length === 0 && page > 1) setPage(page - 1);
+    else setItems(found);
+  }, [page]);
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), 0);
@@ -55,6 +60,7 @@ export function FavouritesCard() {
           </li>
         ))}
       </ul>
+      <Pager page={page} total={items[0].total} pageSize={FAVOURITES_PAGE_SIZE} onPage={setPage} label={t("favouritePages")} />
     </section>
   );
 }

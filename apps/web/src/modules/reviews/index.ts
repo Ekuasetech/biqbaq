@@ -28,6 +28,8 @@ export interface Favourite {
   image_url: string | null;
   available: boolean;
   saved_at: string;
+  /** How many favourites there are in all, for pages. */
+  total: number;
 }
 
 export interface ReviewForModeration {
@@ -58,7 +60,9 @@ export const deleteMyReview = (supabase: SupabaseClient, productId: string) => s
 export const isFavourite = (supabase: SupabaseClient, productId: string) => supabase.rpc("is_favourite", { p_product: productId });
 export const setFavourite = (supabase: SupabaseClient, productId: string, saved: boolean) =>
   supabase.rpc("set_favourite", { p_product: productId, p_saved: saved });
-export const listMyFavourites = (supabase: SupabaseClient) => supabase.rpc("my_favourites");
+export const FAVOURITES_PAGE_SIZE = 20;
+export const listMyFavourites = (supabase: SupabaseClient, page = 1) =>
+  supabase.rpc("my_favourites", { p_limit: FAVOURITES_PAGE_SIZE, p_offset: (Math.max(page, 1) - 1) * FAVOURITES_PAGE_SIZE });
 export const listReviewsForModeration = (supabase: SupabaseClient, status: string, search: string, page: number, pageSize: number) =>
   supabase.rpc("admin_list_reviews", {
     p_status: status === "all" ? null : status,

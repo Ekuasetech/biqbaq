@@ -1,11 +1,12 @@
 "use client";
 
-import { useScrollToHash } from "@/lib/use-scroll-to-hash";
+import { useScrollToHash, useSeekHash } from "@/lib/use-scroll-to-hash";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Pager } from "@/components/ui/pager";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -15,6 +16,7 @@ import {
   ADDRESS_MIN,
   addClients,
   BODY_MAX,
+  CAMPAIGNS_PAGE_SIZE,
   emailListErrorKey,
   getList,
   listCampaigns,
@@ -29,7 +31,7 @@ import {
   type EmailList,
   type Subscriber,
 } from "@/modules/email-lists";
-import { formatMoney, invoiceErrorKey, listInvoices, resendInvoice, type InvoiceSummary } from "@/modules/invoicing";
+import { formatMoney, INVOICES_PAGE_SIZE, invoiceErrorKey, listInvoices, resendInvoice, type InvoiceSummary } from "@/modules/invoicing";
 
 const secondaryButton =
   "inline-flex h-9 items-center justify-center rounded-lg border border-border bg-card px-3 text-sm font-semibold hover:bg-muted disabled:opacity-50";
@@ -246,11 +248,15 @@ function Subscribers({
   const [status, setStatus] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<Subscriber[] | null>(null);
+  const seek = useSeekHash("client-");
 
   const load = useCallback(async () => {
     const { data } = await listSubscribers(getSupabaseBrowserClient(), seller, status, page);
-    setRows((data ?? []) as Subscriber[]);
-  }, [seller, status, page]);
+    const found = (data ?? []) as Subscriber[];
+    // A search result names a client on a later page: look there.
+    if (seek(found.map((row) => row.email), page, SUBSCRIBERS_PAGE_SIZE, found[0]?.total ?? 0)) setPage(page + 1);
+    else setRows(found);
+  }, [seller, status, page, seek]);
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), 0);
@@ -458,13 +464,20 @@ function Campaigns({ seller, version }: { seller: string | null; version: number
   const t = useTranslations("emailLists");
   const format = useFormatter();
   const [rows, setRows] = useState<Campaign[] | null>(null);
+  const [page, setPage] = useState(1);
   useEffect(() => {
     const timer = setTimeout(async () => {
-      const { data } = await listCampaigns(getSupabaseBrowserClient(), seller);
+      const { data } = await listCampaigns(getSupabaseBrowserClient(), seller, page);
       setRows((data ?? []) as Campaign[]);
     }, 0);
     return () => clearTimeout(timer);
-  }, [seller, version]);
+  }, [seller, version, page]);
+  // A new email goes to the top of the first page.
+  const [seenVersion, setSeenVersion] = useState(version);
+  if (seenVersion !== version) {
+    setSeenVersion(version);
+    setPage(1);
+  }
   if (!rows || rows.length === 0) return null;
   return (
     <div className="grid gap-2">
@@ -481,6 +494,7 @@ function Campaigns({ seller, version }: { seller: string | null; version: number
           </li>
         ))}
       </ul>
+      <Pager page={page} total={rows[0].total} pageSize={CAMPAIGNS_PAGE_SIZE} onPage={setPage} label={t("history.pages")} />
     </div>
   );
 }
@@ -493,11 +507,16 @@ function Documents({ seller, version }: { seller: string | null; version: number
   const errorText = useErrorText();
   const [rows, setRows] = useState<InvoiceSummary[] | null>(null);
   const [message, setMessage] = useState<{ id: string; key: string } | null>(null);
+  const [page, setPage] = useState(1);
+  const seek = useSeekHash("invoice-");
 
   const load = useCallback(async () => {
-    const { data } = await listInvoices(getSupabaseBrowserClient(), seller);
-    setRows((data ?? []) as InvoiceSummary[]);
-  }, [seller]);
+    const { data } = await listInvoices(getSupabaseBrowserClient(), seller, page);
+    const found = (data ?? []) as InvoiceSummary[];
+    // A search result names an invoice on a later page: look there.
+    if (seek(found.map((row) => row.id), page, INVOICES_PAGE_SIZE, found[0]?.total ?? 0)) setPage(page + 1);
+    else setRows(found);
+  }, [seller, page, seek]);
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), 0);
@@ -546,6 +565,7 @@ function Documents({ seller, version }: { seller: string | null; version: number
           ))}
         </ul>
       )}
+      {rows && rows.length > 0 && <Pager page={page} total={rows[0].total} pageSize={INVOICES_PAGE_SIZE} onPage={setPage} label={t("documents.pages")} />}
     </div>
   );
 }

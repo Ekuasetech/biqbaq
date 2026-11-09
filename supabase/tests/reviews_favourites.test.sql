@@ -145,6 +145,8 @@ select lives_ok($$ select set_favourite((select live from v), true) $$, 'saving 
 select ok(is_favourite((select live from v)), 'it is saved');
 select throws_ok($$ select set_favourite((select draft from v), true) $$, 'P0002', 'PRODUCT_NOT_FOUND', 'a draft cannot be saved');
 select results_eq($$ select name, available from my_favourites() $$, $$ values ('R Live', true) $$, 'it is in their list');
+select results_eq($$ select total from my_favourites(20, 0) $$, $$ values (1::bigint) $$, 'with how many there are in all, for pages');
+select is_empty($$ select 1 from my_favourites(20, 20) $$, 'and nothing on a page past the end');
 reset role;
 select pg_temp.act_as('00000000-0000-4000-8000-000000000205');
 set local role authenticated;

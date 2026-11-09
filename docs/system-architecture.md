@@ -74,6 +74,7 @@ Client access rules:
 | Localization | `next-intl` on web, using `/[locale]/` routes. Seller content is not translated. Canonical product URLs must stay stable, so they use the default locale |
 | Deletion | Business records are soft-deleted, so allowance, audit and order history survive |
 | Monorepo tooling | npm workspaces (ADR-0004) |
+| Long lists | Every list that can grow is read a page at a time (usually 20; at most 100 or 200 per call), and the database returns how many there are in all as `total` with each row, or as the PostgREST `count`. The web app shows them with the shared `Pager` (Previous, "Page 1 of 3", Next). A dashboard search result that names an item on a later page moves through the pages to find it |
 
 ## 5. Hosting
 
