@@ -202,7 +202,7 @@
     "browseProducts": "Voir les produits"
   },
   "blog": {
-    "sectionTitle": "Sur le blogue de Biqbaq",
+    "sectionTitle": "Blogue Biqbaq",
     "pageTitle": "Blogue de Biqbaq",
     "pageBody": "Des guides et des récits pour les Nigérians au Canada. Les articles affichés ici sont des exemples pour cet aperçu.",
     "mostRead": "Le plus lu",
@@ -2219,7 +2219,7 @@
     "discover": {
       "ads": "À la une",
       "sponsored": "Pub",
-      "blog": "Du blogue Biqbaq",
+      "blog": "Blogue Biqbaq",
       "allPosts": "Tous les articles",
       "minutes": "{count, plural, one {# minute de lecture} other {# minutes de lecture}}"
     },
@@ -2412,7 +2412,7 @@
   },
   "subscribePopupAdmin": {
     "title": "Fenêtre d'inscription",
-    "intro": "Invite les visiteurs des pages publiques à s'inscrire aux bonnes affaires, 15 secondes après leur arrivée. Les inscrits rejoignent la liste de Biqbaq ci-dessous en attente jusqu'à leur confirmation par courriel, et chaque nouvelle inscription est envoyée à l'adresse indiquée ici par FormSubmit.",
+    "intro": "Invite les visiteurs des pages publiques à s'inscrire aux bonnes affaires, 10 secondes après leur arrivée (en fondu). Les inscrits rejoignent la liste de Biqbaq ci-dessous en attente jusqu'à leur confirmation par courriel, et chaque nouvelle inscription est envoyée à l'adresse indiquée ici par FormSubmit.",
     "enabled": "Afficher la fenêtre",
     "language": {
       "en": "Anglais",

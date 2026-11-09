@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, ShoppingBag, UserPlus } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Search, ShoppingBag, Truck, UserPlus } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 import { Suspense, type ReactNode } from "react";
@@ -54,10 +54,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   const banners = [
     // The "free website after referrals" tile was removed, as no website is offered (Q-17).
-    // Three even tiles, each with one of the site's own photos (owner asked for a tidier row).
-    { key: "banner1", href: "/register", image: "/hero/toronto-professional.jpg", className: "bg-brand-navy text-white" },
-    { key: "banner3", href: "/products", image: "/hero/nigeria-seller.jpg", className: "bg-card text-foreground shadow-sm" },
-    { key: "banner4", href: "/cargo-cars", image: "/hero/sienna-cargo.jpg", className: "bg-[oklch(0.2_0.07_262)] text-white" },
+    { key: "banner1", href: "/register", Icon: UserPlus, tone: "bg-brand-navy text-white" },
+    { key: "banner3", href: "/products", Icon: Search, tone: "bg-brand-red text-brand-red-foreground" },
+    { key: "banner4", href: "/cargo-cars", Icon: Truck, tone: "bg-[oklch(0.2_0.07_262)] text-white" },
   ] as const;
 
   const faqs = ["1", "2", "3", "4", "5"] as const;
@@ -202,34 +201,45 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <AdsSection locale={locale} placement="homepage" />
       </Suspense>
 
-      {/* Promotional tiles */}
-      <section className="pt-14" aria-label={t("home.promotionsLabel")}>
-        <ul className="grid gap-4 md:grid-cols-3">
-          {banners.map(({ key, href, image, className }, index) => (
-            <li key={key} {...reveal("panel", index * 90)} className={cn("overflow-hidden rounded-3xl", className)}>
-              <Link href={href} className="group flex h-full flex-col gap-5 p-5 sm:p-6">
-                <span className="relative block aspect-[16/10] w-full overflow-hidden rounded-2xl">
-                  <Image
-                    src={image}
-                    alt=""
-                    fill
-                    sizes="(min-width: 1280px) 400px, (min-width: 768px) 30vw, 90vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </span>
-                <span className="flex flex-1 flex-col">
-                  <span className="block text-xs font-bold tracking-widest uppercase opacity-80">{t(`home.${key}Eyebrow`)}</span>
-                  <span className="mt-2 block font-heading text-2xl leading-tight font-extrabold text-balance">{t(`home.${key}Title`)}</span>
-                  {/* Pushed to the bottom, so the three links line up whatever the title's length. */}
-                  <span className="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold underline-offset-4 group-hover:underline">
-                    {t(`home.${key}Cta`)}
-                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+      {/* Get started: laid out like the blog section (owner's choice), with the three cards
+          stacked on the left and one large photo on the right. */}
+      <section className="pt-14" aria-labelledby="get-started-title">
+        <SectionHeading id="get-started-title" title={t("home.promotionsLabel")} />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <ul className="grid gap-3">
+            {banners.map(({ key, href, Icon, tone }, index) => (
+              <li key={key} {...reveal("rise", 100 + index * 90)}>
+                <article className="group relative flex h-full items-center gap-4 rounded-2xl bg-card p-3 shadow-sm transition-shadow focus-within:ring-2 focus-within:ring-ring hover:shadow-md">
+                  <span className={cn("flex size-24 shrink-0 items-center justify-center rounded-xl sm:size-28", tone)} aria-hidden>
+                    <Icon className="size-9 transition-transform duration-500 group-hover:scale-110 motion-reduce:transform-none" />
                   </span>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-xs font-bold tracking-wide text-brand-red uppercase dark:text-red-400">{t(`home.${key}Eyebrow`)}</span>
+                    <h3 className="mt-0.5 font-heading text-lg leading-snug font-extrabold sm:text-xl">
+                      {/* The link covers the whole card through the ::after overlay. */}
+                      <Link href={href} className="outline-none after:absolute after:inset-0">
+                        {t(`home.${key}Title`)}
+                      </Link>
+                    </h3>
+                    <span className="mt-1.5 inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 group-hover:underline">
+                      {t(`home.${key}Cta`)}
+                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                    </span>
+                  </span>
+                </article>
+              </li>
+            ))}
+          </ul>
+          <div {...reveal("fade", 200)} className="relative min-h-72 overflow-hidden rounded-3xl bg-muted lg:min-h-96">
+            <Image
+              src="/hero/toronto-professional.jpg"
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+            />
+          </div>
+        </div>
       </section>
 
       {/* Testimonials: placeholder content until there are real ones. */}

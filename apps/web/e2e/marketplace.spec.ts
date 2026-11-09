@@ -123,8 +123,8 @@ test.describe("public marketplace", () => {
     await page.goto("/");
     const headings = await page.getByRole("heading", { level: 2 }).allTextContents();
     const cargo = headings.findIndex((h) => h.includes("Cargo cars going to Nigeria"));
-    expect(headings[cargo + 1]).toContain("From the Biqbaq blog");
-    const section = page.getByRole("region", { name: "From the Biqbaq blog" });
+    expect(headings[cargo + 1]).toContain("Biqbaq Blog");
+    const section = page.getByRole("region", { name: "Biqbaq Blog" });
     await expect(section.getByRole("article")).toHaveCount(5);
     const lead = section.getByRole("article").first();
     await expect(lead).toContainText("Most read");
@@ -155,7 +155,7 @@ test.describe("public marketplace", () => {
     const section = page.getByRole("region", { name: "Sponsored" });
     await expect(section.getByRole("article")).toHaveCount(3);
     const headings = await page.getByRole("heading", { level: 2 }).allTextContents();
-    const blog = headings.findIndex((h) => h.includes("From the Biqbaq blog"));
+    const blog = headings.findIndex((h) => h.includes("Biqbaq Blog"));
     expect(headings[blog + 1]).toContain("Sponsored");
     await expect(section.getByRole("article").first()).toContainText("Send your goods home");
     await expect(section.getByText("Ad", { exact: true })).toHaveCount(3);
@@ -183,16 +183,20 @@ test.describe("public marketplace", () => {
     await expect(page.locator("#ads-title")).toBeVisible();
     const order = await page.evaluate(() => {
       const ads = document.querySelector("#ads-title")!;
-      const tiles = document.querySelector('[aria-label="Get started on Biqbaq"]')!;
+      const tiles = document.querySelector("#get-started-title")!;
       return ads.compareDocumentPosition(tiles) & Node.DOCUMENT_POSITION_FOLLOWING;
     });
     expect(order).toBeTruthy();
-    // On a wide screen, the three tiles sit in one even row.
+    // Laid out like the blog section: three even cards stacked on the left, a photo on the right.
     const boxes = await section.getByRole("listitem").evaluateAll((items) => items.map((item) => item.getBoundingClientRect().toJSON() as DOMRect));
     expect(boxes).toHaveLength(3);
-    expect(new Set(boxes.map((box) => Math.round(box.top))).size).toBe(1);
-    expect(new Set(boxes.map((box) => Math.round(box.height))).size).toBe(1);
+    expect(new Set(boxes.map((box) => Math.round(box.left))).size).toBe(1);
     expect(new Set(boxes.map((box) => Math.round(box.width))).size).toBe(1);
+    expect(new Set(boxes.map((box) => Math.round(box.height))).size).toBe(1);
+    expect(boxes[0].top).toBeLessThan(boxes[1].top);
+    expect(boxes[1].top).toBeLessThan(boxes[2].top);
+    const photo = await section.locator("img").last().boundingBox();
+    expect(photo!.x).toBeGreaterThan(boxes[0].left + boxes[0].width);
     await page.goto("/products?q=calgary");
     await expect(page.getByText("Calgary, Canada").first()).toBeVisible();
   });
@@ -574,7 +578,7 @@ test.describe("public marketplace", () => {
 
     test("an article does not list itself below, and shows the ads", async ({ page }) => {
       await page.goto("/blog/styling-ankara-for-a-canadian-winter");
-      const section = page.getByRole("region", { name: "From the Biqbaq blog" });
+      const section = page.getByRole("region", { name: "Biqbaq Blog" });
       await expect(section.getByRole("article")).toHaveCount(4);
       await expect(section).not.toContainText("Styling Ankara");
       await expect(page.getByRole("region", { name: "Sponsored" }).getByRole("article")).toHaveCount(3);
@@ -2474,7 +2478,7 @@ test.describe("public marketplace", () => {
             await expect(item(shop, name)).toBeInViewport({ timeout: 15000 });
           });
 
-          test("the sign-up pop-up: Super Admin words it, visitors see it after 15 seconds and sign up", async ({ page, browser, request }) => {
+          test("the sign-up pop-up: Super Admin words it, visitors see it fade in after 10 seconds and sign up", async ({ page, browser, request }) => {
             test.setTimeout(120000);
             const id = unique();
             const owner = await confirmedAccount(page, request);
@@ -2505,7 +2509,10 @@ test.describe("public marketplace", () => {
               await visitor.goto("/");
               const popup = visitor.getByRole("dialog", { name: `Deals ${id}` });
               await expect(popup).toHaveCount(0);
-              await visitor.clock.fastForward("00:16");
+              await visitor.clock.fastForward("00:09");
+              await visitor.waitForTimeout(500);
+              await expect(popup).toHaveCount(0);
+              await visitor.clock.fastForward("00:02");
               await expect(popup).toBeVisible({ timeout: 15000 });
               await popup.getByLabel("Email address").fill("nope");
               await popup.getByRole("button", { name: "Subscribe" }).click();
@@ -2520,7 +2527,7 @@ test.describe("public marketplace", () => {
               await expect(popup).toBeHidden();
               // Signed up, so never again in this browser.
               await visitor.reload();
-              await visitor.clock.fastForward("00:16");
+              await visitor.clock.fastForward("00:11");
               await visitor.waitForTimeout(1000);
               await expect(visitor.getByRole("dialog")).toHaveCount(0);
               await context.close();
@@ -2530,16 +2537,16 @@ test.describe("public marketplace", () => {
               const second = await other.newPage();
               await second.clock.install();
               await second.goto("/sign-in");
-              await second.clock.fastForward("00:16");
+              await second.clock.fastForward("00:11");
               await second.waitForTimeout(1000);
               await expect(second.getByRole("dialog")).toHaveCount(0);
               await second.goto("/blog");
-              await second.clock.fastForward("00:16");
+              await second.clock.fastForward("00:11");
               await expect(second.getByRole("dialog", { name: `Deals ${id}` })).toBeVisible({ timeout: 15000 });
               await second.keyboard.press("Escape");
               await expect(second.getByRole("dialog")).toBeHidden();
               await second.reload();
-              await second.clock.fastForward("00:16");
+              await second.clock.fastForward("00:11");
               await second.waitForTimeout(1000);
               await expect(second.getByRole("dialog")).toHaveCount(0);
               await other.close();
@@ -3160,7 +3167,7 @@ test.describe("public marketplace", () => {
           await expect(nav.getByRole("button", { name: "Records" })).toBeDisabled();
           // Ads and blog posts close the Overview (owner's decision, 2026-11-08).
           await page.goto("/account");
-          await expect(page.getByRole("heading", { name: "From the Biqbaq blog" })).toBeVisible({ timeout: 15000 });
+          await expect(page.getByRole("heading", { name: "Biqbaq Blog" })).toBeVisible({ timeout: 15000 });
           // Settings and logging out sit at the bottom.
           await page.getByRole("link", { name: "Platform settings" }).click();
           await expect(page).toHaveURL(/\/admin\/settings$/);
@@ -3383,7 +3390,7 @@ test.describe("public marketplace", () => {
     test(`blog and ads appear exactly once on ${path}`, async ({ page }) => {
       await page.goto(path);
       const french = path.startsWith("/fr");
-      const blog = page.getByRole("region", { name: french ? "Sur le blogue de Biqbaq" : "From the Biqbaq blog" });
+      const blog = page.getByRole("region", { name: french ? "Blogue Biqbaq" : "Biqbaq Blog" });
       const ads = page.getByRole("region", { name: french ? "Commandité" : "Sponsored" });
       await expect(blog.getByRole("article")).toHaveCount(5);
       await expect(ads.getByRole("article")).toHaveCount(3);

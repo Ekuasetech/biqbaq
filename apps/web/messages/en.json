@@ -202,7 +202,7 @@
     "browseProducts": "Browse products"
   },
   "blog": {
-    "sectionTitle": "From the Biqbaq blog",
+    "sectionTitle": "Biqbaq Blog",
     "pageTitle": "Biqbaq blog",
     "pageBody": "Guides and stories for Nigerians in Canada. The articles shown here are samples for this preview.",
     "mostRead": "Most read",
@@ -2219,7 +2219,7 @@
     "discover": {
       "ads": "Featured",
       "sponsored": "Ad",
-      "blog": "From the Biqbaq blog",
+      "blog": "Biqbaq Blog",
       "allPosts": "All posts",
       "minutes": "{count, plural, one {# minute read} other {# minute read}}"
     },
@@ -2412,7 +2412,7 @@
   },
   "subscribePopupAdmin": {
     "title": "Sign-up pop-up",
-    "intro": "Asks visitors on public pages to sign up for deals, 15 seconds after they arrive. Sign-ups join Biqbaq's list below as pending until they confirm by email, and each new one is sent to the address here through FormSubmit.",
+    "intro": "Asks visitors on public pages to sign up for deals: it fades in 10 seconds after they arrive. Sign-ups join Biqbaq's list below as pending until they confirm by email, and each new one is sent to the address here through FormSubmit.",
     "enabled": "Show the pop-up",
     "language": {
       "en": "English",

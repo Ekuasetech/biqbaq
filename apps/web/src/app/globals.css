@@ -248,3 +248,34 @@
     filter: none;
   }
 }
+/* The sign-up pop-up fades in, with its dimmed backdrop (owner's request). */
+@keyframes subscribe-popup-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes subscribe-popup-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+dialog.subscribe-popup[open] {
+  animation: subscribe-popup-in 700ms ease-out both;
+}
+dialog.subscribe-popup[open]::backdrop {
+  animation: subscribe-popup-backdrop-in 700ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  dialog.subscribe-popup[open],
+  dialog.subscribe-popup[open]::backdrop {
+    animation: none;
+  }
+}

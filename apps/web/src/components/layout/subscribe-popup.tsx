@@ -26,7 +26,7 @@ function remember(value: { subscribed?: boolean; closedAt?: number }) {
 }
 
 /**
- * Asks visitors to sign up for deals, 15 seconds after they arrive on a public page. Closing
+ * Asks visitors to sign up for deals: it fades in 10 seconds after they arrive on a public page. Closing
  * it keeps it away for 30 days; signing up keeps it away for good. Its words come from
  * Super Admin's settings.
  */
@@ -105,7 +105,7 @@ export function SubscribePopup() {
       onClick={(event) => {
         if (event.target === event.currentTarget) close();
       }}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-3xl bg-card p-0 text-foreground shadow-2xl backdrop:bg-black/50"
+      className="subscribe-popup m-auto w-[calc(100%-2rem)] max-w-md rounded-3xl bg-card p-0 text-foreground shadow-2xl backdrop:bg-black/50"
     >
       <div className="relative grid gap-4 p-6 sm:p-8">
         <button type="button" onClick={close} aria-label={t("close")} className="absolute right-3 top-3 inline-flex size-10 items-center justify-center rounded-full hover:bg-muted">

@@ -19,8 +19,8 @@ export const POPUP_DEFAULTS: PopupContent = {
 
 export const POPUP_MESSAGE_MAX = 200;
 export const POPUP_BUTTON_MAX = 30;
-/** Shown this long after a visitor arrives. */
-export const POPUP_DELAY_MS = 15_000;
+/** Shown this long after a visitor arrives (10 seconds, owner's request). */
+export const POPUP_DELAY_MS = 10_000;
 /** After closing it, a visitor does not see it again for this long. */
 export const POPUP_SNOOZE_MS = 30 * 24 * 60 * 60 * 1000;
 export const POPUP_STORAGE_KEY = "biqbaq.subscribePopup";
