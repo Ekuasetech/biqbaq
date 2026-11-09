@@ -5,13 +5,12 @@ import { popupSignupSchema } from "@/modules/email-lists/popup";
 import { clientAddress, hashForLog } from "@/modules/seller-contact/server";
 
 const fail = (status: number, code: string) => NextResponse.json({ error: code }, { status });
-// Always the same answer, whether or not the address was already on the list, so the form
-// cannot be used to find out who is.
-const done = () => NextResponse.json({ status: "check_inbox" }, { status: 202 });
+const done = () => NextResponse.json({ status: "subscribed" }, { status: 202 });
 
 /**
- * A visitor signs up from the pop-up: they join Biqbaq's list as pending and are sent a
- * confirmation email, and the owner's inbox is told through FormSubmit (once per address).
+ * A visitor signs up from the pop-up. FormSubmit tells the owner's address, and that is all
+ * (owner's decision): Biqbaq neither keeps the address nor emails it. The database checks the
+ * pop-up is on, the address looks right, and the limits allow it.
  */
 export async function POST(request: Request) {
   const raw = await request.text();
@@ -42,11 +41,11 @@ export async function POST(request: Request) {
     return fail(500, "GENERIC");
   }
 
-  const result = (data as { is_new: boolean; notify_email: string | null }[] | null)?.[0];
-  if (result?.is_new && result.notify_email) {
-    const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || new URL(request.url).origin;
-    // The sign-up is saved either way; a missed notice only shows in the server log.
-    await notifyFormSubmit({ to: result.notify_email, subscriber: body.data.email, locale: body.data.locale, siteOrigin: origin });
-  }
+  const to = (data as { notify_email: string | null }[] | null)?.[0]?.notify_email;
+  if (!to) return fail(503, "GENERIC");
+  const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || new URL(request.url).origin;
+  // FormSubmit is the only record of the sign-up, so the visitor is told if it did not go.
+  const sent = await notifyFormSubmit({ to, subscriber: body.data.email, locale: body.data.locale, siteOrigin: origin });
+  if (sent === "failed") return fail(502, "GENERIC");
   return done();
 }

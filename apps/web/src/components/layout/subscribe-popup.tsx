@@ -119,7 +119,7 @@ export function SubscribePopup() {
         </h2>
         {state === "done" ? (
           <>
-            <p role="status" className="text-sm">{t("checkInbox")}</p>
+            <p role="status" className="text-sm">{t("thanks")}</p>
             <button type="button" onClick={close} className="inline-flex h-11 items-center justify-center rounded-lg border border-border px-4 text-sm font-semibold hover:bg-muted">
               {t("done")}
             </button>

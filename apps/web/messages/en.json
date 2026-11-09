@@ -2399,8 +2399,7 @@
   "subscribePopup": {
     "email": "Email address",
     "working": "Signing up...",
-    "consent": "By signing up, you agree to receive emails about deals from Biqbaq. We'll email you to confirm first, and you can unsubscribe at any time.",
-    "checkInbox": "Thank you. Check your inbox and click the link to confirm.",
+    "consent": "By signing up, you agree to receive emails about deals from Biqbaq. You can unsubscribe at any time.",
     "done": "Close",
     "close": "Close",
     "errors": {
@@ -2408,11 +2407,12 @@
       "RATE_LIMITED": "Too many sign-ups from here. Please try again later.",
       "POPUP_OFF": "Sign-ups are closed right now.",
       "GENERIC": "That didn't work. Please try again."
-    }
+    },
+    "thanks": "Thank you for subscribing! We'll be in touch with good deals."
   },
   "subscribePopupAdmin": {
     "title": "Sign-up pop-up",
-    "intro": "Asks visitors on public pages to sign up for deals: it fades in 10 seconds after they arrive. Sign-ups join Biqbaq's list below as pending until they confirm by email, and each new one is sent to the address here through FormSubmit.",
+    "intro": "Asks visitors on public pages to sign up for deals: it fades in 10 seconds after they arrive. Each sign-up is sent to the address here through FormSubmit, and only there: Biqbaq doesn't keep it or email it.",
     "enabled": "Show the pop-up",
     "language": {
       "en": "English",

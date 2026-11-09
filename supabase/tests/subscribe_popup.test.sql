@@ -47,25 +47,17 @@ select results_eq($$ select key, value #>> '{}' from platform_settings where key
   'tidied and saved');
 select is((select count(*)::int from audit_logs where action = 'setting.update' and target_id like 'subscribe_popup.%'), 5, 'each change is in the audit log');
 
--- Signing up.
+-- Signing up: FormSubmit only (owner's decision). Biqbaq keeps no copy and sends nothing.
 set local role service_role;
-select results_eq($$ select is_new, notify_email from subscribe_from_popup(' New@Example.com ', 'ip-1', 'fr') $$, $$ values (true, 'owner@example.com') $$, 'a visitor signs up, and the inbox is to be told');
-select results_eq($$ select is_new, notify_email from subscribe_from_popup('new@example.com', 'ip-1', 'en') $$, $$ values (false, null::text) $$, 'signing up again tells nobody again');
+select results_eq($$ select notify_email from subscribe_from_popup(' New@Example.com ', 'ip-1', 'fr') $$, $$ values ('owner@example.com') $$, 'a visitor signs up, and FormSubmit is to tell the owner''s address');
 select throws_ok($$ select * from subscribe_from_popup('nope', 'ip-2', 'en') $$, '23514', 'EMAIL_INVALID', 'a bad address is refused');
 reset role;
-select results_eq($$ select status, source, consent_basis from list_subscribers where email = 'new@example.com' $$, $$ values ('pending', 'self', null::text) $$, 'they join Biqbaq''s list as pending, not confirmed');
-select results_eq($$ select payload ->> 'template', payload -> 'data' ->> 'locale', payload -> 'data' ->> 'shop' from background_jobs where payload ->> 'to' = 'new@example.com' $$,
-  $$ values ('list_confirm', 'fr', 'Biqbaq') $$, 'and are sent one confirmation email, in their language');
-
--- Someone who left stays left; a client added without consent is asked to confirm.
-insert into list_subscribers (list_id, email, status, source, unsubscribed_at) select id, 'gone@example.com', 'unsubscribed', 'self', now() from email_lists where owner_type = 'platform';
-insert into list_subscribers (list_id, email, status, source) select id, 'client@example.com', 'client', 'added' from email_lists where owner_type = 'platform';
+select is_empty($$ select 1 from list_subscribers where email = 'new@example.com' $$, 'they are not added to Biqbaq''s list');
+select is_empty($$ select 1 from background_jobs where payload ->> 'to' = 'new@example.com' $$, 'and are sent no email by Biqbaq');
 set local role service_role;
-select results_eq($$ select is_new from subscribe_from_popup('gone@example.com', 'ip-3', 'en') $$, $$ values (false) $$, 'an unsubscribed address is not signed up again');
-select results_eq($$ select is_new from subscribe_from_popup('client@example.com', 'ip-3', 'en') $$, $$ values (true) $$, 'a client asking to join is');
+select lives_ok($$ select * from subscribe_from_popup('second@example.com', 'ip-3', 'en') $$, 'one');
+select lives_ok($$ select * from subscribe_from_popup('third@example.com', 'ip-3', 'en') $$, 'two');
 reset role;
-select is((select status from list_subscribers where email = 'gone@example.com'), 'unsubscribed', 'still unsubscribed');
-select is((select status from list_subscribers where email = 'client@example.com'), 'pending', 'and the client is pending until they confirm');
 
 -- Limits.
 set local role service_role;

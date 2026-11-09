@@ -2517,12 +2517,15 @@ test.describe("public marketplace", () => {
               await popup.getByLabel("Email address").fill("nope");
               await popup.getByRole("button", { name: "Subscribe" }).click();
               await expect(popup).toContainText("Enter a valid email address.");
+              // Every test signs up from the same connection, so its hourly limit starts afresh.
+              sql(`delete from public.rate_limit_counters where bucket like 'subscribe_popup:%'`);
               const email = newEmail("popup");
               await popup.getByLabel("Email address").fill(email);
               await popup.getByRole("button", { name: "Subscribe" }).click();
-              await expect(popup).toContainText("Check your inbox and click the link to confirm.");
-              // On Biqbaq's list, waiting for them to confirm by email.
-              expect(sql(`select s.status || ' ' || s.source from public.list_subscribers s join public.email_lists l on l.id = s.list_id where l.owner_type = 'platform' and s.email = '${email}'`)).toBe("pending self");
+              await expect(popup).toContainText("Thank you for subscribing!");
+              // FormSubmit only (test addresses are not sent): Biqbaq keeps no copy and sends nothing.
+              expect(sql(`select count(*) from public.list_subscribers where email = '${email}'`)).toBe("0");
+              expect(sql(`select count(*) from public.background_jobs where payload ->> 'to' = '${email}'`)).toBe("0");
               await popup.getByRole("button", { name: "Close" }).first().click();
               await expect(popup).toBeHidden();
               // Signed up, so never again in this browser.
@@ -2545,6 +2548,8 @@ test.describe("public marketplace", () => {
               await expect(second.getByRole("dialog", { name: `Deals ${id}` })).toBeVisible({ timeout: 15000 });
               await second.keyboard.press("Escape");
               await expect(second.getByRole("dialog")).toBeHidden();
+              // The browser notes the close a moment after the box goes.
+              await expect.poll(() => second.evaluate(() => localStorage.getItem("biqbaq.subscribePopup"))).toContain("closedAt");
               await second.reload();
               await second.clock.fastForward("00:11");
               await second.waitForTimeout(1000);

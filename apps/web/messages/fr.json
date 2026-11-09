@@ -2399,8 +2399,7 @@
   "subscribePopup": {
     "email": "Adresse courriel",
     "working": "Inscription...",
-    "consent": "En vous inscrivant, vous acceptez de recevoir des courriels de Biqbaq sur les bonnes affaires. Nous vous écrirons d'abord pour confirmer, et vous pouvez vous désabonner à tout moment.",
-    "checkInbox": "Merci. Consultez votre boîte de réception et cliquez sur le lien pour confirmer.",
+    "consent": "En vous inscrivant, vous acceptez de recevoir des courriels de Biqbaq sur les bonnes affaires. Vous pouvez vous désabonner à tout moment.",
     "done": "Fermer",
     "close": "Fermer",
     "errors": {
@@ -2408,11 +2407,12 @@
       "RATE_LIMITED": "Trop d'inscriptions depuis cette connexion. Veuillez réessayer plus tard.",
       "POPUP_OFF": "Les inscriptions sont fermées pour le moment.",
       "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
-    }
+    },
+    "thanks": "Merci de votre inscription! Nous vous écrirons avec de bonnes affaires."
   },
   "subscribePopupAdmin": {
     "title": "Fenêtre d'inscription",
-    "intro": "Invite les visiteurs des pages publiques à s'inscrire aux bonnes affaires, 10 secondes après leur arrivée (en fondu). Les inscrits rejoignent la liste de Biqbaq ci-dessous en attente jusqu'à leur confirmation par courriel, et chaque nouvelle inscription est envoyée à l'adresse indiquée ici par FormSubmit.",
+    "intro": "Invite les visiteurs des pages publiques à s'inscrire aux bonnes affaires : la fenêtre apparaît en fondu 10 secondes après leur arrivée. Chaque inscription est envoyée à l'adresse indiquée ici par FormSubmit, et seulement là : Biqbaq ne la conserve pas et ne lui écrit pas.",
     "enabled": "Afficher la fenêtre",
     "language": {
       "en": "Anglais",
