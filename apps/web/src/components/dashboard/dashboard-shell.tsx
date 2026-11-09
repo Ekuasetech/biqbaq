@@ -13,6 +13,7 @@ import {
   FileText,
   Gavel,
   Images,
+  Quote,
   LayoutDashboard,
   LogOut,
   Mail,
@@ -160,6 +161,7 @@ function useNavigation(data: DashboardData | null, pathname: string) {
   if (a?.ads) content.push({ href: "/admin/ads", label: t("ads"), icon: Megaphone });
   // The front page's own photos (owner's request, 2026-11-08): Super Admin only.
   if (a?.super_admin) content.push({ href: "/admin/site-images", label: t("siteImages"), icon: Images });
+  if (a?.super_admin) content.push({ href: "/admin/testimonials", label: t("testimonials"), icon: Quote });
   const groups: NavGroup[] = (
     [
       { key: "people", items: people },

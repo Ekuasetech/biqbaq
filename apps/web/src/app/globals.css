@@ -279,3 +279,34 @@ dialog.subscribe-popup[open]::backdrop {
     animation: none;
   }
 }
+
+/* "What customers say": the quotes slide right to left without end, as two equal halves
+   (the quotes, then copies), so moving by half a row loops seamlessly. */
+@keyframes testimonials-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-50% - 0.5rem));
+  }
+}
+.testimonials-track {
+  animation: testimonials-slide var(--testimonials-duration, 40s) linear infinite;
+}
+.testimonials-marquee:hover .testimonials-track,
+.testimonials-marquee:focus-within .testimonials-track,
+.testimonials-marquee[data-paused] .testimonials-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .testimonials-track {
+    animation: none;
+  }
+  .testimonials-marquee {
+    overflow-x: auto;
+  }
+  .testimonials-copies,
+  .testimonials-toggle {
+    display: none;
+  }
+}

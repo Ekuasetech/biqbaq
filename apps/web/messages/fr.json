@@ -66,8 +66,6 @@
     "banner4Cta": "Voir les voitures",
     "placeholderNote": "Contenu provisoire : le texte définitif reste à venir.",
     "testimonialsTitle": "Ce que disent les clients",
-    "testimonialBody": "Témoignage d'exemple : les vrais avis de clients apparaîtront ici une fois recueillis.",
-    "testimonialAuthor": "Client d'exemple {n}",
     "faqTitle": "Questions fréquentes",
     "faqMoreTitle": "Une question sur un produit?",
     "faqMoreBody": "Chaque page de produit vous permet de contacter directement son vendeur.",
@@ -81,7 +79,9 @@
     "faq4A": "Biqbaq s'adresse pour l'instant aux Nigérians au Canada, et tous les prix sont en dollars canadiens. Chaque annonce indique où se trouve son vendeur.",
     "faq5Q": "Comment devenir vendeur?",
     "faq5A": "Inscrivez-vous, puis demandez le rôle de vendeur depuis votre compte. Chaque demande est examinée avant d'être approuvée.",
-    "noProductsYet": "Aucun produit pour le moment. Revenez bientôt."
+    "noProductsYet": "Aucun produit pour le moment. Revenez bientôt.",
+    "testimonialsPause": "Arrêter les citations",
+    "testimonialsPlay": "Faire défiler les citations"
   },
   "categories": {
     "fashion": "Mode",
@@ -1035,7 +1035,11 @@
       "order_refund": "A remboursé une commande",
       "site_image_upload": "A changé une photo de la page d'accueil",
       "site_image_describe": "A décrit une photo de la page d'accueil",
-      "site_image_reset": "A remis une photo de la page d'accueil"
+      "site_image_reset": "A remis une photo de la page d'accueil",
+      "testimonial_create": "A ajouté une citation de client",
+      "testimonial_edit": "A modifié une citation de client",
+      "testimonial_move": "A réordonné les citations de clients",
+      "testimonial_delete": "A supprimé une citation de client"
     }
   },
   "moderation": {
@@ -2205,7 +2209,8 @@
       "auditLog": "Journal d'audit",
       "orders": "Commandes",
       "payments": "Paiements",
-      "siteImages": "Images du site"
+      "siteImages": "Images du site",
+      "testimonials": "Ce que disent nos clients"
     },
     "overview": {
       "today": "Aujourd'hui",
@@ -2497,5 +2502,45 @@
       "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
     },
     "categoryHint": "Affichée en petit dans le coin de la carte de cette catégorie. Une photo carrée convient le mieux."
+  },
+  "testimonialsAdmin": {
+    "title": "Ce que disent nos clients",
+    "listTitle": "Citations de clients",
+    "intro": "Les citations de Ce que disent nos clients sur la page d'accueil. Elles défilent de droite à gauche dans cet ordre; les visiteurs peuvent les arrêter. Seules les citations publiées s'affichent, et la section est masquée tant qu'aucune n'est publiée.",
+    "add": "Ajouter une citation",
+    "newLabel": "Nouvelle citation",
+    "editLabel": "Modifier la citation de {name}",
+    "quote": "Ce que le client a dit",
+    "name": "Nom du client",
+    "city": "Ville (facultatif)",
+    "publishedLabel": "L'afficher sur la page d'accueil",
+    "save": "Enregistrer la citation",
+    "saving": "Enregistrement...",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "publish": "Publier",
+    "hide": "Masquer",
+    "delete": "Supprimer",
+    "moveUp": "Placer la citation de {name} plus tôt",
+    "moveDown": "Placer la citation de {name} plus tard",
+    "deleteConfirm": "Supprimer la citation de {name}? C'est définitif.",
+    "published": "Publiée",
+    "hidden": "Masquée",
+    "shown": "{count, plural, one {# citation s'affiche sur la page d'accueil.} other {# citations s'affichent sur la page d'accueil.}}",
+    "noneShown": "Aucune citation n'est publiée, donc la section est masquée sur la page d'accueil.",
+    "empty": "Aucune citation pour l'instant. Ajoutez la première.",
+    "added": "Citation ajoutée.",
+    "saved": "Citation enregistrée.",
+    "publishedDone": "Publiée. Elle s'affiche maintenant sur la page d'accueil.",
+    "hiddenDone": "Masquée de la page d'accueil.",
+    "moved": "Ordre modifié.",
+    "deleted": "Citation supprimée.",
+    "loadFailed": "Les citations n'ont pas pu être chargées. Veuillez actualiser la page.",
+    "errors": {
+      "DETAILS_INVALID": "Écrivez la citation (jusqu'à 500 caractères) et le nom du client (jusqu'à 80).",
+      "TOO_MANY": "Il peut y avoir jusqu'à 50 citations. Supprimez-en une d'abord.",
+      "TESTIMONIAL_NOT_FOUND": "Cette citation a été supprimée. Voici la liste à jour.",
+      "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
+    }
   }
 }

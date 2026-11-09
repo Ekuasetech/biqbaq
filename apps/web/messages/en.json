@@ -66,8 +66,6 @@
     "banner4Cta": "View cars",
     "placeholderNote": "Placeholder content: final wording to come.",
     "testimonialsTitle": "What customers say",
-    "testimonialBody": "Sample testimonial: real customer feedback will appear here once it has been collected.",
-    "testimonialAuthor": "Sample customer {n}",
     "faqTitle": "Frequently asked questions",
     "faqMoreTitle": "Have a question about a product?",
     "faqMoreBody": "Every product page lets you contact its seller directly.",
@@ -81,7 +79,9 @@
     "faq4A": "Biqbaq currently serves Nigerians in Canada, with all prices in Canadian dollars. Each listing shows where its seller is based.",
     "faq5Q": "How do I become a seller?",
     "faq5A": "Register, then apply for a seller role from your account. Each application is reviewed before it is approved.",
-    "noProductsYet": "No products yet. Check back soon."
+    "noProductsYet": "No products yet. Check back soon.",
+    "testimonialsPause": "Pause the quotes",
+    "testimonialsPlay": "Play the quotes"
   },
   "categories": {
     "fashion": "Fashion",
@@ -1035,7 +1035,11 @@
       "order_refund": "Refunded an order",
       "site_image_upload": "Changed a front-page photo",
       "site_image_describe": "Described a front-page photo",
-      "site_image_reset": "Put back a front-page photo"
+      "site_image_reset": "Put back a front-page photo",
+      "testimonial_create": "Added a customer quote",
+      "testimonial_edit": "Edited a customer quote",
+      "testimonial_move": "Reordered customer quotes",
+      "testimonial_delete": "Deleted a customer quote"
     }
   },
   "moderation": {
@@ -2205,7 +2209,8 @@
       "auditLog": "Audit log",
       "orders": "Orders",
       "payments": "Payments",
-      "siteImages": "Site images"
+      "siteImages": "Site images",
+      "testimonials": "What customers say"
     },
     "overview": {
       "today": "Today",
@@ -2497,5 +2502,45 @@
       "GENERIC": "That didn't work. Please try again."
     },
     "categoryHint": "Shown small in the corner of this category's card. A square photo works best."
+  },
+  "testimonialsAdmin": {
+    "title": "What customers say",
+    "listTitle": "Customer quotes",
+    "intro": "The quotes in What customers say on the front page. They slide from right to left in this order; visitors can pause them. Only published quotes show, and the section is hidden until at least one is published.",
+    "add": "Add a quote",
+    "newLabel": "New quote",
+    "editLabel": "Edit the quote from {name}",
+    "quote": "What the customer said",
+    "name": "Customer's name",
+    "city": "City (optional)",
+    "publishedLabel": "Show it on the front page",
+    "save": "Save quote",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "publish": "Publish",
+    "hide": "Hide",
+    "delete": "Delete",
+    "moveUp": "Move the quote from {name} earlier",
+    "moveDown": "Move the quote from {name} later",
+    "deleteConfirm": "Delete the quote from {name}? This can't be undone.",
+    "published": "Published",
+    "hidden": "Hidden",
+    "shown": "{count, plural, one {# quote shows on the front page.} other {# quotes show on the front page.}}",
+    "noneShown": "No quotes are published, so the section is hidden on the front page.",
+    "empty": "No quotes yet. Add the first one.",
+    "added": "Quote added.",
+    "saved": "Quote saved.",
+    "publishedDone": "Published. It shows on the front page now.",
+    "hiddenDone": "Hidden from the front page.",
+    "moved": "Order changed.",
+    "deleted": "Quote deleted.",
+    "loadFailed": "The quotes couldn't be loaded. Please refresh the page.",
+    "errors": {
+      "DETAILS_INVALID": "Write the quote (up to 500 characters) and the customer's name (up to 80).",
+      "TOO_MANY": "There can be up to 50 quotes. Delete one first.",
+      "TESTIMONIAL_NOT_FOUND": "This quote was deleted. Showing the latest.",
+      "GENERIC": "That didn't work. Please try again."
+    }
   }
 }

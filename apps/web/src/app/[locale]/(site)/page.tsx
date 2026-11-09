@@ -15,6 +15,8 @@ import { CATEGORY_SLUGS, listFeaturedProducts } from "@/modules/product-catalog"
 import { listCargoVehicles } from "@/modules/vehicle-marketplace";
 import { categorySlot } from "@/modules/site-images";
 import { getSiteImages } from "@/modules/site-images/server";
+import { getTestimonials } from "@/modules/testimonials/server";
+import { TestimonialsMarquee } from "@/components/layout/testimonials-marquee";
 
 const categoryHref = (category: string) => ({ pathname: "/products", query: { category } });
 
@@ -50,6 +52,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const cargoVehicles = await listCargoVehicles(4);
   // Super Admin's photos for the hero and Get started, or the site's own (Site images page).
   const siteImages = await getSiteImages(locale);
+  const testimonials = await getTestimonials();
   // The "In the spotlight" section was removed at the owner's request (2026-11-08).
   const grid = products.slice(0, 6);
 
@@ -243,40 +246,14 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         </div>
       </section>
 
-      {/* Testimonials: placeholder content until there are real ones. */}
-      <section className="pt-14" aria-labelledby="testimonials-title">
-        <SectionHeading id="testimonials-title" title={t("home.testimonialsTitle")} />
-        <p {...reveal("rise")} className="-mt-3 mb-5 text-sm text-muted-foreground">{t("home.placeholderNote")}</p>
-        <ul className="grid items-center gap-4 lg:grid-cols-[1fr_1.2fr_1fr]">
-          {(["1", "2", "3"] as const).map((n, index) => {
-            const featured = n === "2";
-            return (
-              <li
-                key={n}
-                {...reveal("rise", [150, 0, 300][index])}
-                className={cn(
-                  "flex flex-col gap-6 rounded-3xl p-6",
-                  featured ? "bg-brand-navy py-10 text-white shadow-xl" : "bg-card shadow-sm",
-                )}
-              >
-                <p className={cn("font-medium", featured && "text-lg")}>{t("home.testimonialBody")}</p>
-                <div className="flex items-center gap-3">
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "flex size-10 items-center justify-center rounded-full text-sm font-bold",
-                      featured ? "bg-brand-red text-brand-red-foreground" : "bg-primary text-primary-foreground",
-                    )}
-                  >
-                    {n}
-                  </span>
-                  <p className="text-sm font-semibold">{t("home.testimonialAuthor", { n })}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      {/* What customers say: Super Admin's quotes, sliding right to left (owner's choice).
+          Hidden until at least one is published. */}
+      {testimonials.length > 0 && (
+        <section className="pt-14" aria-labelledby="testimonials-title">
+          <SectionHeading id="testimonials-title" title={t("home.testimonialsTitle")} />
+          <TestimonialsMarquee testimonials={testimonials} />
+        </section>
+      )}
 
       {/* FAQ: placeholder wording, describing only behaviour the PRD confirms. */}
       <section className="grid gap-8 pt-14 lg:grid-cols-[1fr_2fr]" aria-labelledby="faq-title">

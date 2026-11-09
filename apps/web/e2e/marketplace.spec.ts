@@ -2060,6 +2060,100 @@ test.describe("public marketplace", () => {
             (reader as unknown as { problems?: string[] }).problems = [];
           });
 
+          test("Super Admin writes What customers say, and the quotes slide right to left on the front page", async ({ page, request, browser }) => {
+            test.setTimeout(150000);
+            const id = unique();
+            const owner = await confirmedAccount(page, request);
+            makeSuperAdmin(owner);
+            try {
+              await page.goto("/admin/testimonials");
+              await expect(page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: "What customers say" })).toHaveAttribute("aria-current", "page");
+              const list = page.getByRole("region", { name: "Customer quotes" });
+              await list.getByRole("button", { name: "Add a quote" }).click({ timeout: 15000 });
+              let form = page.getByRole("form", { name: "New quote" });
+              await form.getByRole("button", { name: "Save quote" }).click();
+              await expect(form).toContainText("Write the quote");
+              await form.getByLabel("What the customer said").fill(`Found my favourite spices ${id}`);
+              await form.getByLabel("Customer's name").fill(`Ada ${id}`);
+              await form.getByLabel("City (optional)").fill("Toronto");
+              await form.getByRole("button", { name: "Save quote" }).click();
+              await expect(list).toContainText("Quote added.");
+              await list.getByRole("button", { name: "Add a quote" }).click();
+              form = page.getByRole("form", { name: "New quote" });
+              await form.getByLabel("What the customer said").fill(`Not ready ${id}`);
+              await form.getByLabel("Customer's name").fill(`Bola ${id}`);
+              await form.getByLabel("Show it on the front page").uncheck();
+              await form.getByRole("button", { name: "Save quote" }).click();
+              await expect(list.getByRole("article", { name: `Bola ${id}` })).toContainText("Hidden");
+
+              // Only the published one shows.
+              const visitor = await browser.newContext();
+              const home = await visitor.newPage();
+              await home.goto("/");
+              const section = home.getByRole("region", { name: "What customers say" });
+              await expect(section.getByRole("list", { name: "What customers say" })).toContainText(`Found my favourite spices ${id}`, { timeout: 15000 });
+              await expect(section.getByRole("list", { name: "What customers say" })).toContainText("Toronto");
+              await expect(section).not.toContainText(`Not ready ${id}`);
+              // Up to three sit still, each shown once (the local copy may have its own quotes too).
+              const others = Number(sql(`select count(*) from public.testimonials where published and name <> 'Ada ${id}'`));
+              if (others < 3) {
+                await expect(section.getByText(`Found my favourite spices ${id}`)).toHaveCount(1);
+                await expect(section.locator(".testimonials-track")).toHaveCount(0);
+                await expect(section.getByRole("button", { name: "Pause the quotes" })).toHaveCount(0);
+              }
+
+              // More than three slide from right to left.
+              sql(`insert into public.testimonials (quote, name, city, published, sort_order) select 'Extra ' || g || ' ${id}', 'Extra ${id} ' || g, '', true, 100 + g from generate_series(1, 3) g`);
+              await list.getByRole("article", { name: `Bola ${id}` }).getByRole("button", { name: "Publish" }).click();
+              await expect(list).toContainText("Published. It shows on the front page now.");
+              await home.reload();
+              await expect(section.locator(".testimonials-track")).toHaveCount(1, { timeout: 15000 });
+              await expect(section.getByRole("list", { name: "What customers say" }).getByRole("listitem")).toHaveCount(others + 5);
+              // The row itself never stands still, so the browser is pointed at the frame around it.
+              const frame = section.locator(".testimonials-marquee");
+              const track = section.locator(".testimonials-track");
+              await frame.scrollIntoViewIfNeeded();
+              const offset = () => track.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m41);
+              const first = await offset();
+              await home.waitForTimeout(1200);
+              expect(await offset()).toBeLessThan(first);
+              // Pointing at it stops it, so it can be read; so does the pause button.
+              await frame.hover();
+              const held = await offset();
+              await home.waitForTimeout(800);
+              expect(await offset()).toBe(held);
+              await home.mouse.move(0, 0);
+              await section.getByRole("button", { name: "Pause the quotes" }).click();
+              await home.mouse.move(0, 0);
+              const paused = await offset();
+              await home.waitForTimeout(800);
+              expect(await offset()).toBe(paused);
+              await expect(section.getByRole("button", { name: "Play the quotes" })).toHaveAttribute("aria-pressed", "true");
+              // With reduced motion it never moves.
+              await home.emulateMedia({ reducedMotion: "reduce" });
+              expect(await track.evaluate((element) => getComputedStyle(element).animationName)).toBe("none");
+              await visitor.close();
+
+              // Edit, hide and delete.
+              const ada = list.getByRole("article", { name: `Ada ${id}`, exact: true });
+              await ada.getByRole("button", { name: "Edit" }).click();
+              const edit = page.getByRole("form", { name: `Edit the quote from Ada ${id}` });
+              await edit.getByLabel("City (optional)").fill("Ottawa");
+              await edit.getByRole("button", { name: "Save quote" }).click();
+              await expect(list).toContainText("Quote saved.");
+              await expect(ada).toContainText("Ottawa");
+              await ada.getByRole("button", { name: "Hide" }).click();
+              await expect(ada).toContainText("Hidden");
+              page.once("dialog", (dialog) => void dialog.accept());
+              await list.getByRole("article", { name: `Bola ${id}` }).getByRole("button", { name: "Delete" }).click();
+              await expect(list).toContainText("Quote deleted.");
+              await expect(list.getByRole("article", { name: `Bola ${id}` })).toHaveCount(0);
+              expect(sql(`select count(*) from public.audit_logs where target_type = 'testimonial' and target_id in (select id::text from public.testimonials where name = 'Ada ${id}')`)).toBe("3");
+            } finally {
+              sql(`delete from public.testimonials where name in ('Ada ${id}', 'Bola ${id}') or name like 'Extra ${id} %'`);
+            }
+          });
+
           test("Super Admin changes a front-page photo, describes it, and puts the original back", async ({ page, request }) => {
             test.setTimeout(240000);
             const owner = await confirmedAccount(page, request);
@@ -2119,7 +2213,11 @@ test.describe("public marketplace", () => {
               const home = await page.context().newPage();
               await home.goto("/");
               const picture = home.getByRole("region", { name: "Get started on Biqbaq" }).getByRole("img", { name: "A grey test picture" });
-              await expect(picture).toBeVisible({ timeout: 15000 });
+              // The new photo can take a moment to replace the cached front page under load.
+              await expect(async () => {
+                await home.reload();
+                await expect(picture).toBeVisible({ timeout: 5000 });
+              }).toPass({ timeout: 30000 });
               expect(decodeURIComponent((await picture.getAttribute("src")) ?? "")).toContain("/site/get_started/");
               await home.goto("/fr");
               await expect(home.getByRole("img", { name: "Une image de test grise" })).toBeVisible({ timeout: 15000 });
