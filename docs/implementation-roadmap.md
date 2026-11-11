@@ -100,7 +100,9 @@ As PRD §26. These need answers first:
 | 8 | Marketers, referrals | **Built** on the local copy (2026-11-08): codes and links for marketers and every shop, a 30-day latest-link rule (BD-11), credit once the email is confirmed (Q-07), separate marketer and shop dashboards, and a Super Admin screen to see programmes and change codes (Q-41). Marketers are approved through role applications or given the role on the People screen. No rewards or payouts are built: the PRD asks only for tracking |
 | 9 | Vehicles and cargo | **Built** on the local copy (2026-11-07): verified sellers list cargo cars with photos, weight capacity and restrictions; the public sees trips that have not left, from verified sellers; Contact Seller goes to the dealer; views count; moderators suspend with `vehicle_listings.moderate`. Sale listings (BD-01) are not built |
 | 10 | Integrations | BD-06, BD-07, BD-13; terms checks for each source |
-| 11 | Mobile app | Web features established |
+| 11 | Mobile app | Web features established. **Before it (owner's request, 2026-11-11, Q-61):** make the website an installable web app (PWA) so phone users get an app-like Biqbaq: a web app manifest (name, short name, Biqbaq icons including a maskable one and an Apple touch icon, navy theme colour, standalone display, start page), a small service worker that only shows a friendly offline page (it caches no account, payment or private data), and an install hint (Android's install prompt; on iPhone, a short note on Safari's Share, then Add to Home Screen). Push notifications through the PWA are a later step. Whether the Expo app comes before or after launch is still open (Q-61) |
 | 12 | Hardening and launch | Q-11 |
+
+Installable web app (PWA): planned before launch (Q-61); it reuses the website as it is, so it needs no separate screens.
 
 Mobile: Phase 11 builds the app's screens, but Phases 2 to 10 must stay mobile-ready by keeping rules behind RPCs and `/api/v1`, so no feature relies on server actions alone.
