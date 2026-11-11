@@ -1078,6 +1078,20 @@ test.describe("public marketplace", () => {
             await expect(shop).toHaveURL(/\/account\/referrals$/);
             await expect(shop.getByRole("region", { name: "Shop referrals: Ada's Shop" })).toBeVisible({ timeout: 15000 });
             await expect(shop.getByRole("region", { name: "Marketer referrals" })).toHaveCount(0);
+            // The link as a QR code, to download and print or share.
+            const shopCard = shop.getByRole("region", { name: "Shop referrals: Ada's Shop" });
+            const ownCode = sql(`select code from public.referral_codes where owner_user_id = '${userId}' and owner_type = 'seller'`);
+            await expect(shopCard.getByRole("img", { name: `QR code for referral code ${ownCode}` })).toBeVisible();
+            const [download] = await Promise.all([shop.waitForEvent("download"), shopCard.getByRole("button", { name: "Download QR code" }).click()]);
+            expect(download.suggestedFilename()).toBe(`biqbaq-referral-${ownCode.toLowerCase()}.png`);
+            const saved = await download.createReadStream();
+            const chunks: Buffer[] = [];
+            for await (const chunk of saved) chunks.push(chunk as Buffer);
+            const png = Buffer.concat(chunks);
+            // A real PNG, as tall as the code plus its caption.
+            expect(png.subarray(1, 4).toString()).toBe("PNG");
+            expect(png.readUInt32BE(16)).toBe(1024);
+            expect(png.readUInt32BE(20)).toBe(1284);
 
             // Super Admin makes them a marketer too; that programme is reported separately.
             sql(`insert into public.user_roles (user_id, role_key, granted_by) values ('${userId}', 'marketer', null)`);

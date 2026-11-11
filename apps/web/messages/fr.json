@@ -1894,6 +1894,17 @@
     "earlier": "Afficher les plus anciennes",
     "errors": {
       "loadFailed": "Vos parrainages n'ont pas pu être chargés. Veuillez actualiser la page."
+    },
+    "qr": {
+      "title": "Code QR",
+      "hint": "On peut le scanner avec l'appareil photo d'un téléphone pour ouvrir votre lien. Téléchargez-le pour l'imprimer sur des dépliants, des emballages ou votre vitrine, ou partagez-le.",
+      "download": "Télécharger le code QR",
+      "share": "Partager",
+      "caption": "Rejoignez Biqbaq",
+      "shareTitle": "Rejoignez Biqbaq",
+      "shareText": "Rejoignez Biqbaq avec mon lien : {url}",
+      "alt": "Code QR du code de parrainage {code}",
+      "failed": "Le code QR n'a pas pu être créé. Veuillez réessayer."
     }
   },
   "referralsAdmin": {

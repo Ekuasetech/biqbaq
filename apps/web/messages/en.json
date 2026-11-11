@@ -1894,6 +1894,17 @@
     "earlier": "Show older",
     "errors": {
       "loadFailed": "Your referrals couldn't be loaded. Please refresh the page."
+    },
+    "qr": {
+      "title": "QR code",
+      "hint": "People can scan this with their phone's camera to open your link. Download it to print on flyers, packaging or your shop window, or share it.",
+      "download": "Download QR code",
+      "share": "Share",
+      "caption": "Join Biqbaq",
+      "shareTitle": "Join Biqbaq",
+      "shareText": "Join Biqbaq with my link: {url}",
+      "alt": "QR code for referral code {code}",
+      "failed": "The QR code couldn't be made. Please try again."
     }
   },
   "referralsAdmin": {

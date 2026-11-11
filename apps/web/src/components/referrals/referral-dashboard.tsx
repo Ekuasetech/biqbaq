@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { cardClass, headingClass, Notice, primaryButton, StatusPill } from "@/components/account/account-dashboard";
+import { ReferralQr } from "@/components/referrals/referral-qr";
 import { Link } from "@/i18n/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -104,6 +105,10 @@ function Programme({ programme }: { programme: ReferralProgramme }) {
           </dd>
         </div>
       </dl>
+      <div className="grid gap-2">
+        <h3 className="font-semibold">{t("qr.title")}</h3>
+        <ReferralQr url={url} code={programme.code} />
+      </div>
       <dl aria-label={t("statsLabel")} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label={t("total")} value={programme.total} />
         <Stat label={t("today")} value={programme.today} />
