@@ -1,3 +1,6 @@
+import { fill, NO_CUSTOM, pick, type EmailCustom, type EmailField } from "./custom";
+import { emailButton, emailLayout, emailParagraph, siteBase } from "./layout";
+
 export type EmailLocale = "en" | "fr";
 
 export interface RenderedEmail {
@@ -25,13 +28,13 @@ const TEMPLATES: Record<string, Record<EmailLocale, Build>> = {
   welcome: {
     en: () => ({
       subject: "Welcome to Biqbaq",
-      body: "Your email is confirmed and your account is ready. You can browse products from sellers in your city, find cargo cars going to Nigeria, and apply to sell from your account.",
+      body: "Your email is confirmed and your account is ready. Biqbaq brings Nigerians in Canada together with sellers in their own city: shop groceries, fashion, beauty and home goods, find cargo cars heading to Nigeria when you want to send something home, or apply to sell from your account.",
       action: "Go to your account",
       path: "/account",
     }),
     fr: () => ({
       subject: "Bienvenue sur Biqbaq",
-      body: "Votre adresse courriel est confirmée et votre compte est prêt. Vous pouvez parcourir les produits des vendeurs de votre ville, trouver des véhicules de fret en partance pour le Nigeria et demander à vendre depuis votre compte.",
+      body: "Votre adresse courriel est confirmée et votre compte est prêt. Biqbaq rapproche les Nigérians au Canada des vendeurs de leur ville : achetez des produits d'épicerie, de mode, de beauté et pour la maison, trouvez des voitures cargo en partance pour le Nigeria pour envoyer quelque chose au pays, ou demandez à vendre depuis votre compte.",
       action: "Accéder à votre compte",
       path: "/account",
     }),
@@ -529,6 +532,12 @@ const TEMPLATES: Record<string, Record<EmailLocale, Build>> = {
   },
 };
 
+/** The welcome email's extras in the owner's template: its heading and two picture tiles. */
+const WELCOME: Record<EmailLocale, { heading: string; products: string; cargo: string }> = {
+  en: { heading: "Welcome to Biqbaq", products: "Shop products", cargo: "Find cargo cars" },
+  fr: { heading: "Bienvenue sur Biqbaq", products: "Voir les produits", cargo: "Trouver une voiture cargo" },
+};
+
 const GREETING: Record<EmailLocale, (name: string | null) => string> = {
   en: (name) => (name ? `Hello ${name},` : "Hello,"),
   fr: (name) => (name ? `Bonjour ${name},` : "Bonjour,"),
@@ -537,12 +546,67 @@ const GREETING: Record<EmailLocale, (name: string | null) => string> = {
 export const escapeHtml = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
+/** The value each email fills in, shown to Super Admin as a {placeholder}. */
+const PLACEHOLDER: Record<string, "role" | "shop" | "product"> = {
+  application_received: "role",
+  application_approved: "role",
+  application_rejected: "role",
+  role_assigned: "role",
+  role_suspended: "role",
+  role_restored: "role",
+  role_revoked: "role",
+  message_to_seller: "shop",
+  message_to_buyer: "shop",
+  bulk_email_paused: "shop",
+  bulk_email_paused_admin: "shop",
+  payments_enabled: "shop",
+  payments_disabled: "shop",
+  staff_invitation: "shop",
+  staff_approved: "shop",
+  staff_suspended: "shop",
+  staff_restored: "shop",
+  staff_removed: "shop",
+  product_suspended: "product",
+  product_restored: "product",
+  order_paid: "product",
+  order_received: "product",
+  order_refunded: "product",
+  order_fulfilled: "product",
+  order_disputed: "product",
+};
+
+export const NOTIFICATION_TEMPLATES = Object.keys(TEMPLATES);
+
+/** Each notification email's built-in wording, with its {placeholder}, for Super Admin's editor. */
+export function notificationDefaults(template: string): { placeholders: string[]; defaults: Record<EmailLocale, Partial<Record<EmailField, string>>> } | null {
+  const versions = Object.hasOwn(TEMPLATES, template) ? TEMPLATES[template] : undefined;
+  if (!versions) return null;
+  const placeholder = PLACEHOLDER[template];
+  const defaults = {} as Record<EmailLocale, Partial<Record<EmailField, string>>>;
+  for (const locale of ["en", "fr"] as const) {
+    const copy = versions[locale](placeholder ? `{${placeholder}}` : "");
+    defaults[locale] = { body: copy.body, action: copy.action };
+    if (template === "welcome") {
+      defaults[locale] = { ...defaults[locale], heading: WELCOME[locale].heading, tile_products: WELCOME[locale].products, tile_cargo: WELCOME[locale].cargo };
+    }
+  }
+  return { placeholders: placeholder ? [placeholder] : [], defaults };
+}
+
+/** Wording on several lines becomes several paragraphs. */
+const paragraphs = (text: string, style?: string) =>
+  text
+    .split(/\n{2,}/)
+    .map((part) => emailParagraph(escapeHtml(part.trim()).replaceAll("\n", "<br>"), style))
+    .join("");
+
 /** Null means this version of the code has no such template. */
 export function renderEmail(
   template: string,
   data: { role?: unknown; reason?: unknown; product?: unknown; shop?: unknown },
   recipient: { name: string | null; locale: string | null },
   siteUrl: string,
+  custom: EmailCustom = NO_CUSTOM,
 ): RenderedEmail | null {
   const versions = Object.hasOwn(TEMPLATES, template) ? TEMPLATES[template] : undefined;
   if (!versions) return null;
@@ -550,24 +614,62 @@ export function renderEmail(
   const locale: EmailLocale = recipient.locale === "fr" ? "fr" : "en";
   const roleKey = typeof data.role === "string" ? data.role : "";
   const named = [data.shop, data.product].find((value) => typeof value === "string") as string | undefined;
-  const subject = named ?? ROLE_NAMES[locale][roleKey] ?? roleKey;
-  const copy = versions[locale](subject);
-  const reason = copy.reason && typeof data.reason === "string" ? data.reason : null;
-  const link = `${siteUrl.replace(/\/$/, "")}${locale === "fr" ? "/fr" : ""}${copy.path}`;
+  const value = named ?? ROLE_NAMES[locale][roleKey] ?? roleKey;
+  const placeholder = PLACEHOLDER[template];
+  // The built-in wording keeps its {placeholder}, so Super Admin's wording and it are filled in alike.
+  const builtIn = versions[locale](placeholder ? `{${placeholder}}` : "");
+  const values: Record<string, string> = placeholder ? { [placeholder]: value } : {};
+  const body = fill(pick(custom, template, locale, "body", builtIn.body), values);
+  const action = fill(pick(custom, template, locale, "action", builtIn.action), values);
+  const reason = builtIn.reason && typeof data.reason === "string" ? data.reason : null;
+  const root = `${siteBase(siteUrl)}${locale === "fr" ? "/fr" : ""}`;
+  const link = `${root}${builtIn.path}`;
   const greeting = GREETING[locale](recipient.name);
 
-  const text = [greeting, copy.body, reason ? `${copy.reason}: ${reason}` : null, `${copy.action}: ${link}`, "Biqbaq"]
+  const text = [greeting, body, reason ? `${builtIn.reason}: ${reason}` : null, `${action}: ${link}`, "Biqbaq"]
     .filter(Boolean)
     .join("\n\n");
 
-  // Names and reasons were typed by people, so nothing they wrote can become markup.
-  const html = [
-    `<p>${escapeHtml(greeting)}</p>`,
-    `<p>${escapeHtml(copy.body)}</p>`,
-    reason ? `<p><strong>${escapeHtml(copy.reason!)}:</strong> ${escapeHtml(reason)}</p>` : "",
-    `<p><a href="${escapeHtml(link)}">${escapeHtml(copy.action)}</a></p>`,
-    "<p>Biqbaq</p>",
-  ].join("");
+  // Names, reasons and Super Admin's wording are all text: nothing in them can become markup.
+  if (template === "welcome") {
+    const extras = {
+      heading: pick(custom, template, locale, "heading", WELCOME[locale].heading),
+      products: pick(custom, template, locale, "tile_products", WELCOME[locale].products),
+      cargo: pick(custom, template, locale, "tile_cargo", WELCOME[locale].cargo),
+    };
+    const html = emailLayout({
+      locale,
+      siteUrl,
+      content: "",
+      preheader: escapeHtml(body),
+      welcome: {
+        heading: escapeHtml(extras.heading),
+        panel: `<p style="margin:0 0 12px">${escapeHtml(greeting)}</p>${body
+          .split(/\n{2,}/)
+          .map((part) => `<p style="margin:0 0 12px">${escapeHtml(part.trim()).replaceAll("\n", "<br>")}</p>`)
+          .join("")}`,
+        button: { href: escapeHtml(link), label: escapeHtml(action) },
+        hero: custom.images.hero,
+        tiles: [
+          { href: escapeHtml(`${root}/products`), label: escapeHtml(extras.products), image: custom.images.products ?? "/email/tile-products.jpg" },
+          { href: escapeHtml(`${root}/cargo-cars`), label: escapeHtml(extras.cargo), image: custom.images.cargo ?? "/email/tile-cargo.jpg" },
+        ],
+      },
+    });
+    const welcomeText = [greeting, body, `${action}: ${link}`, `${extras.products}: ${root}/products`, `${extras.cargo}: ${root}/cargo-cars`, "Biqbaq"].join("\n\n");
+    return { subject: builtIn.subject, text: welcomeText, html };
+  }
+  const html = emailLayout({
+    locale,
+    siteUrl,
+    preheader: escapeHtml(body),
+    content: [
+      emailParagraph(escapeHtml(greeting)),
+      paragraphs(body),
+      reason ? emailParagraph(`<strong>${escapeHtml(builtIn.reason!)}:</strong> ${escapeHtml(reason)}`) : "",
+      emailButton(escapeHtml(link), escapeHtml(action)),
+    ].join(""),
+  });
 
-  return { subject: copy.subject, text, html };
+  return { subject: builtIn.subject, text, html };
 }

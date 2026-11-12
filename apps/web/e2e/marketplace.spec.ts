@@ -2074,6 +2074,69 @@ test.describe("public marketplace", () => {
             (reader as unknown as { problems?: string[] }).problems = [];
           });
 
+          test("Super Admin rewords the sign-up email, previews it, and new accounts receive it", async ({ page, request, browser }) => {
+            test.setTimeout(180000);
+            const id = unique();
+            const owner = await confirmedAccount(page, request);
+            makeSuperAdmin(owner);
+            // The local copy may have its own wording for this email: it is put back afterwards.
+            const before = sql(`select coalesce(json_agg(e)::text, '') from public.email_texts e where template = 'auth_signup'`);
+            try {
+              await page.goto("/admin/email-templates");
+              await openNavGroup(page, "Communication");
+              await expect(page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: "Email templates" })).toHaveAttribute("aria-current", "page");
+              const editor = page.getByRole("region", { name: "Sign-up confirmation" });
+              await expect(editor).toContainText("Subject (fixed): Confirm your Biqbaq account", { timeout: 15000 });
+              // Blank fields show the original wording, faintly.
+              await expect(editor.getByLabel("Main text")).toHaveAttribute("placeholder", /Thanks for creating a Biqbaq account/);
+              const preview = editor.frameLocator("iframe");
+              await expect(preview.getByRole("paragraph").filter({ hasText: "Thanks for creating a Biqbaq account." })).toBeVisible();
+
+              // A fill-in this email does not have is refused.
+              await editor.getByLabel("Main text").fill(`Almost there {shop} ${id}.`);
+              await editor.getByRole("button", { name: "Save" }).click();
+              await expect(editor).toContainText("Only use the fill-ins shown for this email");
+              ignoreExpectedFailures(page); // The browser logs the refusal as an error.
+
+              await editor.getByLabel("Main text").fill(`Almost there, one click to join Biqbaq ${id}.`);
+              await editor.getByLabel("Button text").fill("Join now");
+              await expect(preview.getByRole("paragraph").filter({ hasText: `Almost there, one click to join Biqbaq ${id}.` })).toBeVisible({ timeout: 15000 });
+              await expect(preview.getByRole("link", { name: "Join now" })).toBeVisible();
+              await editor.getByRole("button", { name: "Save" }).click();
+              await expect(editor).toContainText("Saved. New emails use this wording.");
+              await expect(page.getByRole("navigation", { name: "Emails" }).getByRole("button", { name: /Sign-up confirmation/ })).toContainText("Edited");
+
+              // A new account's confirmation email uses it. The server that sends it keeps
+              // wording for up to 30 seconds, so the new wording may take that long to arrive.
+              await page.waitForTimeout(31000);
+              const visitor = await (await browser.newContext()).newPage();
+              const email = newEmail("signupwording");
+              await register(visitor, email);
+              await expect.poll(async () => {
+                const found = await (await request.get(`${mailpit}/search?query=${encodeURIComponent(`to:"${email}"`)}`)).json();
+                if (!found.messages.length) return "";
+                const message = await (await request.get(`${mailpit}/message/${found.messages[0].ID}`)).json();
+                return `${message.Subject} | ${message.HTML}`;
+              }, { timeout: 30000 }).toMatch(new RegExp(`Confirm your Biqbaq account \\| .*Almost there, one click to join Biqbaq ${id}\\..*Join now`));
+              await visitor.context().close();
+
+              // French keeps the original until it is reworded too.
+              await editor.getByRole("tab", { name: "French" }).click();
+              await expect(preview.getByRole("paragraph").filter({ hasText: "Merci d'avoir créé un compte Biqbaq." })).toBeVisible({ timeout: 15000 });
+              await editor.getByRole("tab", { name: "English" }).click();
+
+              // Restore the original.
+              page.once("dialog", (dialog) => void dialog.accept());
+              await editor.getByRole("button", { name: "Restore the original" }).click();
+              await expect(editor).toContainText("The original wording is back.");
+              expect(sql(`select count(*) from public.email_texts where template = 'auth_signup' and locale = 'en'`)).toBe("0");
+              expect(sql(`select count(*) from public.audit_logs where action = 'email_text.save' and actor_id = (select id from auth.users where email = '${owner}')`)).toBe("2");
+            } finally {
+              sql(`delete from public.email_texts where template = 'auth_signup'`);
+              if (before) sql(`insert into public.email_texts select * from json_populate_recordset(null::public.email_texts, '${before.replaceAll("'", "''")}'::json)`);
+            }
+          });
+
           test("Super Admin writes the About us page, which the footer links to once it is published", async ({ page, request, browser }) => {
             test.setTimeout(150000);
             const id = unique();
@@ -2785,7 +2848,9 @@ test.describe("public marketplace", () => {
               // A first-time visitor, with nothing remembered: nothing at first, then the pop-up.
               const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
               const visitor = await context.newPage();
+              // The page's clock moves only when the test moves it, however slow the machine is.
               await visitor.clock.install();
+              await visitor.clock.pauseAt(new Date(Date.now() + 1000));
               await visitor.goto("/");
               const popup = visitor.getByRole("dialog", { name: `Deals ${id}` });
               await expect(popup).toHaveCount(0);
@@ -2819,6 +2884,7 @@ test.describe("public marketplace", () => {
               const other = await browser.newContext({ storageState: { cookies: [], origins: [] } });
               const second = await other.newPage();
               await second.clock.install();
+              await second.clock.pauseAt(new Date(Date.now() + 1000));
               await second.goto("/sign-in");
               await second.clock.fastForward("00:11");
               await second.waitForTimeout(1000);

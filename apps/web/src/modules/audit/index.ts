@@ -68,6 +68,7 @@ export const AUDIT_ACTIONS = [
   "testimonial.move",
   "testimonial.delete",
   "about.save",
+  "email_text.save",
   "vehicle.create",
   "vehicle.edit",
   "vehicle.publish",

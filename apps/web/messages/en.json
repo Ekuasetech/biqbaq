@@ -1040,7 +1040,8 @@
       "testimonial_edit": "Edited a customer quote",
       "testimonial_move": "Reordered customer quotes",
       "testimonial_delete": "Deleted a customer quote",
-      "about_save": "Saved the About us page"
+      "about_save": "Saved the About us page",
+      "email_text_save": "Changed an email's wording"
     }
   },
   "moderation": {
@@ -2223,7 +2224,8 @@
       "payments": "Payments",
       "siteImages": "Site images",
       "testimonials": "What customers say",
-      "about": "About us"
+      "about": "About us",
+      "emailTemplates": "Email templates"
     },
     "overview": {
       "today": "Today",
@@ -2484,7 +2486,10 @@
       "category_beauty": "Shop by category: Beauty",
       "category_home": "Shop by category: Home",
       "category_cargo_cars": "Shop by category: Cargo cars",
-      "about": "About us photo"
+      "about": "About us photo",
+      "email_welcome_hero": "Welcome email: top photo",
+      "email_tile_products": "Welcome email: left tile photo",
+      "email_tile_cargo": "Welcome email: right tile photo"
     },
     "heroHint": "Shown with the headline “{headline}”. Shown wider than tall (about 5 by 4).",
     "getStartedHint": "Shown to the right of the three Get started cards (below them on phones).",
@@ -2516,7 +2521,8 @@
       "GENERIC": "That didn't work. Please try again."
     },
     "categoryHint": "Shown small in the corner of this category's card. A square photo works best.",
-    "aboutHint": "Shown across the top of the About us page, wide and short (about 21 by 9)."
+    "aboutHint": "Shown across the top of the About us page, wide and short (about 21 by 9).",
+    "emailHint": "Shown in the welcome email. Photos are cropped to fit."
   },
   "testimonialsAdmin": {
     "title": "What customers say",
@@ -2594,5 +2600,100 @@
   },
   "about": {
     "title": "About us"
+  },
+  "emailTemplatesAdmin": {
+    "title": "Email templates",
+    "intro": "Choose an email to change its wording. Subjects and where buttons lead stay the same. Anything left blank uses Biqbaq's original wording.",
+    "listLabel": "Emails",
+    "loading": "Loading...",
+    "loadFailed": "The emails couldn't be loaded. Please refresh the page.",
+    "groups": {
+      "account": "Account",
+      "roles": "Applications, roles and staff",
+      "shop": "Shops and products",
+      "orders": "Orders and payments",
+      "messages": "Messages"
+    },
+    "names": {
+      "auth_signup": "Sign-up confirmation",
+      "auth_recovery": "Password reset",
+      "auth_magiclink": "Sign-in link",
+      "auth_invite": "Invitation to join",
+      "auth_email_change": "Email address change",
+      "auth_reauthentication": "Confirmation code",
+      "welcome": "Welcome",
+      "application_received": "New application (to Super Admin)",
+      "application_approved": "Application approved",
+      "application_rejected": "Application not approved",
+      "verification_verified": "Shop verified",
+      "verification_rejected": "Verification not approved",
+      "verification_suspended": "Verification suspended",
+      "verification_restored": "Verification restored",
+      "verification_revoked": "Verification removed",
+      "role_assigned": "Role given",
+      "role_suspended": "Role suspended",
+      "role_restored": "Role restored",
+      "role_revoked": "Role removed",
+      "staff_invitation": "Staff invitation",
+      "staff_approved": "Staff approved",
+      "staff_suspended": "Staff access suspended",
+      "staff_restored": "Staff access restored",
+      "staff_removed": "Staff removed",
+      "product_suspended": "Product suspended",
+      "product_restored": "Product restored",
+      "shop_suspended": "Shop suspended",
+      "shop_restored": "Shop restored",
+      "publishing_suspended": "Publishing suspended",
+      "publishing_restored": "Publishing restored",
+      "bulk_email_enabled": "Customer emails turned on",
+      "bulk_email_disabled": "Customer emails turned off",
+      "bulk_email_paused": "Customer emails paused",
+      "bulk_email_paused_admin": "Customer emails paused (to Super Admin)",
+      "list_confirm": "Join a shop's email list",
+      "payments_enabled": "Online payments turned on",
+      "payments_disabled": "Online payments turned off",
+      "order_paid": "Order paid (to buyer)",
+      "order_received": "New order (to seller)",
+      "order_refunded": "Order refunded",
+      "order_fulfilled": "Order delivered",
+      "order_disputed": "Payment disputed",
+      "invoice_email": "Invoice",
+      "receipt_email": "Receipt",
+      "message_to_seller": "New message (to seller)",
+      "message_to_buyer": "New message (to buyer)",
+      "enquiry": "Product enquiry (to seller)"
+    },
+    "edited": "Edited",
+    "language": "Language",
+    "languages": {
+      "en": "English",
+      "fr": "French"
+    },
+    "subjectFixed": "Subject (fixed): {subject}",
+    "welcomePhotos": "Photos in the welcome email",
+    "placeholders": "Fill-ins",
+    "placeholdersHint": "Click one to add it where you're typing. Biqbaq puts in the real name when the email is sent.",
+    "fields": {
+      "body": "Main text",
+      "action": "Button text",
+      "note": "Small print",
+      "heading": "Heading",
+      "tile_products": "Left tile label",
+      "tile_cargo": "Right tile label"
+    },
+    "blankHint": "A blank field uses the original wording, shown faintly in it. Leave a blank line to start a new paragraph.",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Saved. New emails use this wording.",
+    "restore": "Restore the original",
+    "restoreConfirm": "Go back to Biqbaq's original wording for this email, in this language?",
+    "restored": "The original wording is back.",
+    "preview": "Preview, with sample details",
+    "previewTitle": "Preview of the {name} email",
+    "errors": {
+      "PLACEHOLDER_UNKNOWN": "Only use the fill-ins shown for this email, in the main text or small print.",
+      "TOO_LONG": "Each part can be up to 3,000 characters.",
+      "GENERIC": "That didn't save. Please try again."
+    }
   }
 }

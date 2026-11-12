@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildAuthEmails, hookPayloadSchema, isValidHookSignature } from "@/modules/notifications/auth-emails";
 import { EmailService } from "@/modules/notifications/email-service";
+import { loadEmailCustom } from "@/modules/notifications/load-custom";
 
 const fail = (status: number, code: string) =>
   NextResponse.json({ error: { http_code: status, code, message: code, details: {} } }, { status });
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
   const payload = hookPayloadSchema.safeParse(json);
   if (!payload.success) return fail(400, "INVALID_REQUEST");
 
-  const emails = buildAuthEmails(payload.data, apiUrl);
+  const emails = buildAuthEmails(payload.data, apiUrl, await loadEmailCustom());
   for (const [index, { to, email }] of emails.entries()) {
     const result = await EmailService.send(to, email, {
       idempotencyKey: `auth:${id}:${index}`,

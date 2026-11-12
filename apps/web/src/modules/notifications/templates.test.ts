@@ -107,7 +107,7 @@ describe("renderEmail", () => {
       SITE,
     );
     expect(email?.html).not.toContain("<script");
-    expect(email?.html).not.toContain("<img");
+    expect(email?.html).not.toContain("<img src=x");
     expect(email?.html).toContain("&lt;img");
   });
 

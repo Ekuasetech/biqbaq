@@ -5,6 +5,7 @@ import { renderInvoiceEmail } from "@/modules/invoicing/email";
 import type { StoredInvoice } from "@/modules/invoicing";
 import { invoiceFileName, renderInvoicePdf } from "@/modules/invoicing/pdf";
 import { isListTemplate, renderListEmail, type ListEmailData } from "@/modules/notifications/list-emails";
+import { loadEmailCustom } from "@/modules/notifications/load-custom";
 import { renderEmail } from "@/modules/notifications/templates";
 
 interface ClaimedEmail {
@@ -39,6 +40,8 @@ export async function runEmailJobs(): Promise<WorkerResult> {
   const jobs = (data ?? []) as ClaimedEmail[];
   result.claimed = jobs.length;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  // Super Admin's wording, read once for the whole run.
+  const custom = await loadEmailCustom();
 
   for (const [index, job] of jobs.entries()) {
     const fail = async (code: string, retry: boolean) => {
@@ -62,7 +65,7 @@ export async function runEmailJobs(): Promise<WorkerResult> {
       const locale = job.data?.locale === "fr" ? "fr" : "en";
       const stored = invoice as StoredInvoice;
       if (index > 0) await new Promise((resolve) => setTimeout(resolve, SEND_GAP_MS));
-      const sent = await EmailService.send(job.recipient_email, renderInvoiceEmail(stored, locale), {
+      const sent = await EmailService.send(job.recipient_email, renderInvoiceEmail(stored, locale, custom), {
         idempotencyKey: job.job_id,
         attachments: [{ filename: invoiceFileName(stored), content: await renderInvoicePdf(stored, { locale }) }],
       });
@@ -75,10 +78,10 @@ export async function runEmailJobs(): Promise<WorkerResult> {
       continue;
     }
     // Customer list emails carry their own wording and an unsubscribe header.
-    const list = isListTemplate(template) ? renderListEmail(template, job.data ?? {}, siteUrl) : null;
+    const list = isListTemplate(template) ? renderListEmail(template, job.data ?? {}, siteUrl, custom) : null;
     const email = isListTemplate(template)
       ? (list?.email ?? null)
-      : renderEmail(template, job.data ?? {}, { name: job.recipient_name, locale: job.recipient_locale }, siteUrl);
+      : renderEmail(template, job.data ?? {}, { name: job.recipient_name, locale: job.recipient_locale }, siteUrl, custom);
     if (!email) {
       // Retried, because a worker still running older code should not end a newer email.
       await fail("UNKNOWN_TEMPLATE", true);

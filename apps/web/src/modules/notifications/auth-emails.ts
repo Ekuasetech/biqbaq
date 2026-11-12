@@ -1,5 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
+import { NO_CUSTOM, pick, type EmailCustom, type EmailField } from "./custom";
+import { defaultSiteUrl, emailButton, emailLayout, emailParagraph } from "./layout";
 import { escapeHtml, type EmailLocale, type RenderedEmail } from "./templates";
 
 const TOLERANCE_SECONDS = 5 * 60;
@@ -139,17 +141,44 @@ const EXPIRY: Record<EmailLocale, string> = {
   fr: "Ceci n'est valable que pendant une durée limitée.",
 };
 
+/** Account emails as Super Admin's editor knows them: `auth_signup`, `auth_recovery` and so on. */
+export const AUTH_TEMPLATES = Object.keys(AUTH_COPY).map((type) => `auth_${type}`);
+
+export function authDefaults(template: string): Record<EmailLocale, Partial<Record<EmailField, string>>> | null {
+  const versions = AUTH_COPY[template.replace(/^auth_/, "")];
+  if (!template.startsWith("auth_") || !versions) return null;
+  const field = (copy: Copy) => ({ body: copy.intro, note: copy.ignore, ...(copy.action ? { action: copy.action } : {}) });
+  return { en: field(versions.en), fr: field(versions.fr) };
+}
+
+/** The built-in wording, with Super Admin's in its place where there is some. */
+function customised(type: string, builtIn: Copy, locale: EmailLocale, custom: EmailCustom): Copy {
+  const template = `auth_${type}`;
+  return {
+    subject: builtIn.subject,
+    intro: pick(custom, template, locale, "body", builtIn.intro),
+    action: builtIn.action ? pick(custom, template, locale, "action", builtIn.action) : undefined,
+    ignore: pick(custom, template, locale, "note", builtIn.ignore),
+  };
+}
+
 function render(copy: Copy, locale: EmailLocale, name: string | null, link: string | null, code: string): RenderedEmail {
   const greeting = locale === "fr" ? (name ? `Bonjour ${name},` : "Bonjour,") : name ? `Hello ${name},` : "Hello,";
   const text = [greeting, copy.intro, link ? `${copy.action}: ${link}` : code, EXPIRY[locale], copy.ignore, "Biqbaq"].join("\n\n");
-  const html = [
-    `<p>${escapeHtml(greeting)}</p>`,
-    `<p>${escapeHtml(copy.intro)}</p>`,
-    link ? `<p><a href="${escapeHtml(link)}">${escapeHtml(copy.action ?? "")}</a></p>` : `<p><strong>${escapeHtml(code)}</strong></p>`,
-    `<p>${escapeHtml(EXPIRY[locale])}</p>`,
-    `<p>${escapeHtml(copy.ignore)}</p>`,
-    "<p>Biqbaq</p>",
-  ].join("");
+  const html = emailLayout({
+    locale,
+    siteUrl: defaultSiteUrl(),
+    preheader: escapeHtml(copy.intro),
+    content: [
+      emailParagraph(escapeHtml(greeting)),
+      emailParagraph(escapeHtml(copy.intro)),
+      link
+        ? emailButton(escapeHtml(link), escapeHtml(copy.action ?? ""))
+        : emailParagraph(`<strong>${escapeHtml(code)}</strong>`, "font-size:28px;letter-spacing:6px;margin:20px 0"),
+      emailParagraph(escapeHtml(EXPIRY[locale]), "color:#5b6475;font-size:13px"),
+      emailParagraph(escapeHtml(copy.ignore), "color:#5b6475;font-size:13px"),
+    ].join(""),
+  });
   return { subject: copy.subject, text, html };
 }
 
@@ -163,7 +192,7 @@ function verifyLink(apiUrl: string, tokenHash: string, type: string, redirectTo:
  * Turns one request from Supabase Auth into the emails it needs. An empty list means a type
  * Biqbaq does not send, such as a security notice, which are all off by default.
  */
-export function buildAuthEmails(payload: HookPayload, apiUrl: string): { to: string; email: RenderedEmail }[] {
+export function buildAuthEmails(payload: HookPayload, apiUrl: string, custom: EmailCustom = NO_CUSTOM): { to: string; email: RenderedEmail }[] {
   const { user, email_data: data } = payload;
   const type = data.email_action_type === "email" ? "reauthentication" : data.email_action_type;
   const versions = Object.hasOwn(AUTH_COPY, type) ? AUTH_COPY[type] : undefined;
@@ -172,7 +201,7 @@ export function buildAuthEmails(payload: HookPayload, apiUrl: string): { to: str
   const locale: EmailLocale = user.user_metadata?.locale === "fr" ? "fr" : "en";
   const rawName = user.user_metadata?.full_name ?? user.user_metadata?.name;
   const name = typeof rawName === "string" && rawName.trim() ? rawName.trim() : null;
-  const copy = versions[locale];
+  const copy = customised(type, versions[locale], locale, custom);
 
   if (type === "reauthentication") return [{ to: user.email, email: render(copy, locale, name, null, data.token) }];
 

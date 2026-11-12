@@ -1,4 +1,6 @@
 import { createHmac } from "node:crypto";
+import { NO_CUSTOM, pick, type EmailCustom, type EmailField } from "@/modules/notifications/custom";
+import { emailLayout, emailParagraph } from "@/modules/notifications/layout";
 import { escapeHtml, type EmailLocale, type RenderedEmail } from "@/modules/notifications/templates";
 import type { ContactEnquiry } from "./schema";
 
@@ -36,14 +38,23 @@ const COPY: Record<EmailLocale, { intro: string; from: string; product: string; 
   },
 };
 
+export function enquiryDefaults(): Record<EmailLocale, Partial<Record<EmailField, string>>> {
+  return { en: { body: COPY.en.intro, note: COPY.en.reply }, fr: { body: COPY.fr.intro, note: COPY.fr.reply } };
+}
+
 export function renderEnquiryEmail(
   enquiry: ContactEnquiry,
   product: { name: string; slug: string; kind?: "product" | "vehicle" },
   sellerLocale: string,
   siteUrl: string,
+  custom: EmailCustom = NO_CUSTOM,
 ): RenderedEmail {
   const locale: EmailLocale = sellerLocale === "fr" ? "fr" : "en";
-  const copy = COPY[locale];
+  const copy = {
+    ...COPY[locale],
+    intro: pick(custom, "enquiry", locale, "body", COPY[locale].intro),
+    reply: pick(custom, "enquiry", locale, "note", COPY[locale].reply),
+  };
   const section = product.kind === "vehicle" ? "cargo-cars" : "products";
   const link = `${siteUrl.replace(/\/$/, "")}${locale === "fr" ? "/fr" : ""}/${section}/${encodeURIComponent(product.slug)}`;
   const text = [
@@ -55,13 +66,18 @@ export function renderEnquiryEmail(
     copy.reply,
   ].join("\n\n");
   // Everything here but our own wording was typed by a stranger, so none of it can become markup.
-  const html = [
-    `<p>${escapeHtml(copy.intro)}</p>`,
-    `<p><strong>${escapeHtml(copy.product)}:</strong> <a href="${escapeHtml(link)}">${escapeHtml(product.name)}</a></p>`,
-    `<p><strong>${escapeHtml(copy.from)}:</strong> ${escapeHtml(enquiry.name)} (${escapeHtml(enquiry.email)})</p>`,
-    `<p><strong>${escapeHtml(enquiry.subject)}</strong></p>`,
-    `<p style="white-space:pre-wrap">${escapeHtml(enquiry.message)}</p>`,
-    `<p><em>${escapeHtml(copy.reply)}</em></p>`,
-  ].join("");
+  const html = emailLayout({
+    locale,
+    siteUrl,
+    preheader: escapeHtml(copy.intro),
+    content: [
+      emailParagraph(escapeHtml(copy.intro)),
+      emailParagraph(`<strong>${escapeHtml(copy.product)}:</strong> <a href="${escapeHtml(link)}" style="color:#d01d21">${escapeHtml(product.name)}</a>`),
+      emailParagraph(`<strong>${escapeHtml(copy.from)}:</strong> ${escapeHtml(enquiry.name)} (${escapeHtml(enquiry.email)})`),
+      emailParagraph(`<strong>${escapeHtml(enquiry.subject)}</strong>`),
+      emailParagraph(escapeHtml(enquiry.message), "white-space:pre-wrap"),
+      emailParagraph(`<em>${escapeHtml(copy.reply)}</em>`, "color:#5b6475"),
+    ].join(""),
+  });
   return { subject: `${copy.subject}: ${enquiry.subject}`, text, html };
 }

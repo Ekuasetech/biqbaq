@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   LogOut,
   Mail,
+  MailOpen,
   Megaphone,
   Menu,
   MessageCircle,
@@ -149,6 +150,7 @@ function useNavigation(data: DashboardData | null, pathname: string) {
     );
     communication.push(
       { href: "/admin/email-lists", label: t("customerEmails"), icon: Mail },
+      { href: "/admin/email-templates", label: t("emailTemplates"), icon: MailOpen },
       { href: "/admin/messages", label: t("conversations"), icon: MessagesSquare },
       { href: "/admin/referrals", label: t("adminReferrals"), icon: Share2 },
     );

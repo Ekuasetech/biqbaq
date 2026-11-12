@@ -86,7 +86,7 @@ export function Slot({ slot, row, onChanged }: { slot: SiteImageSlot; row: SiteI
       <div
         className={cn(
           "relative w-full overflow-hidden rounded-2xl bg-muted",
-          slot === "get_started" ? "aspect-[4/3]" : slot === "about" ? "aspect-[21/9]" : slot.startsWith("category_") ? "aspect-square max-w-48" : "aspect-[5/4]",
+          slot === "get_started" || slot.startsWith("email_tile") ? "aspect-[4/3]" : slot === "about" || slot === "email_welcome_hero" ? "aspect-[2/1]" : slot.startsWith("category_") ? "aspect-square max-w-48" : "aspect-[5/4]",
         )}
       >
         <Image src={image.src} alt={t("preview", { name: t(`slots.${slot}`) })} fill sizes="(min-width: 768px) 320px, 90vw" className="object-cover" />
@@ -99,6 +99,8 @@ export function Slot({ slot, row, onChanged }: { slot: SiteImageSlot; row: SiteI
               ? t("getStartedHint")
               : slot === "about"
                 ? t("aboutHint")
+                : slot.startsWith("email_")
+                  ? t("emailHint")
               : slot.startsWith("category_")
                 ? t("categoryHint")
                 : t("heroHint", { headline: tHome(headline[slot as keyof typeof headline]) })}
@@ -180,7 +182,7 @@ export function SiteImagesAdmin() {
       {failed && <Notice kind="error">{t("loadFailed")}</Notice>}
       {rows &&
         // The About us photo is changed on the About us page.
-        SITE_IMAGE_SLOTS.filter((slot) => slot !== "about").map((slot) => {
+        SITE_IMAGE_SLOTS.filter((slot) => slot !== "about" && !slot.startsWith("email_")).map((slot) => {
           const row = rows.find((candidate) => candidate.slot === slot);
           return <Slot key={slot} slot={slot} row={row} onChanged={load} />;
         })}

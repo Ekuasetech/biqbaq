@@ -23,7 +23,9 @@ describe("renderEnquiryEmail", () => {
   it("cannot be used to inject markup through anything a visitor types", () => {
     const attack = `<img src=x onerror=alert(1)>`;
     const email = renderEnquiryEmail({ name: attack, email: "a@b.ca", subject: attack, message: `<script>x</script>${attack}` }, product, "en", "https://biqbaq.test");
-    expect(email.html).not.toContain("<img");
+    // The layout has images of its own (the logo); what the visitor typed must not.
+    expect(email.html).not.toContain("<img src=x");
+    expect(email.html).toContain("&lt;img src=x");
     expect(email.html).not.toContain("<script");
   });
 });

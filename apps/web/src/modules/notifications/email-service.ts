@@ -1,5 +1,6 @@
 import "server-only";
 import { isRetriableStatus, resolveDelivery, type EmailEnv } from "./delivery";
+import { withTopNote } from "./layout";
 import { escapeHtml, type RenderedEmail } from "./templates";
 
 export type SendResult =
@@ -80,7 +81,7 @@ export const EmailService = {
           to: [delivery.to],
           subject: redirected ? `[Test] ${email.subject}` : email.subject,
           text: note ? `${note}\n\n${email.text}` : email.text,
-          html: note ? `<p><em>${escapeHtml(note)}</em></p>${email.html}` : email.html,
+          html: note ? withTopNote(email.html, escapeHtml(note)) : email.html,
           ...(options.replyTo ? { reply_to: options.replyTo } : {}),
           ...(options.headers ? { headers: options.headers } : {}),
           ...(options.attachments

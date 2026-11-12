@@ -1040,7 +1040,8 @@
       "testimonial_edit": "A modifié une citation de client",
       "testimonial_move": "A réordonné les citations de clients",
       "testimonial_delete": "A supprimé une citation de client",
-      "about_save": "A enregistré la page À propos"
+      "about_save": "A enregistré la page À propos",
+      "email_text_save": "A modifié le texte d'un courriel"
     }
   },
   "moderation": {
@@ -2223,7 +2224,8 @@
       "payments": "Paiements",
       "siteImages": "Images du site",
       "testimonials": "Ce que disent nos clients",
-      "about": "À propos"
+      "about": "À propos",
+      "emailTemplates": "Modèles de courriels"
     },
     "overview": {
       "today": "Aujourd'hui",
@@ -2484,7 +2486,10 @@
       "category_beauty": "Magasiner par catégorie : Beauté",
       "category_home": "Magasiner par catégorie : Maison",
       "category_cargo_cars": "Magasiner par catégorie : Voitures cargo",
-      "about": "Photo de la page À propos"
+      "about": "Photo de la page À propos",
+      "email_welcome_hero": "Courriel de bienvenue : photo du haut",
+      "email_tile_products": "Courriel de bienvenue : photo de la tuile de gauche",
+      "email_tile_cargo": "Courriel de bienvenue : photo de la tuile de droite"
     },
     "heroHint": "Affichée avec le titre « {headline} ». Plus large que haute (environ 5 sur 4).",
     "getStartedHint": "Affichée à droite des trois cartes Commencer (en dessous sur téléphone).",
@@ -2516,7 +2521,8 @@
       "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
     },
     "categoryHint": "Affichée en petit dans le coin de la carte de cette catégorie. Une photo carrée convient le mieux.",
-    "aboutHint": "Affichée en haut de la page À propos, large et basse (environ 21 sur 9)."
+    "aboutHint": "Affichée en haut de la page À propos, large et basse (environ 21 sur 9).",
+    "emailHint": "Affichée dans le courriel de bienvenue. Les photos sont recadrées."
   },
   "testimonialsAdmin": {
     "title": "Ce que disent nos clients",
@@ -2594,5 +2600,100 @@
   },
   "about": {
     "title": "À propos"
+  },
+  "emailTemplatesAdmin": {
+    "title": "Modèles de courriels",
+    "intro": "Choisissez un courriel pour modifier son texte. Les objets et la destination des boutons ne changent pas. Tout champ laissé vide utilise le texte d'origine de Biqbaq.",
+    "listLabel": "Courriels",
+    "loading": "Chargement...",
+    "loadFailed": "Les courriels n'ont pas pu être chargés. Veuillez actualiser la page.",
+    "groups": {
+      "account": "Compte",
+      "roles": "Demandes, rôles et personnel",
+      "shop": "Boutiques et produits",
+      "orders": "Commandes et paiements",
+      "messages": "Messages"
+    },
+    "names": {
+      "auth_signup": "Confirmation d'inscription",
+      "auth_recovery": "Réinitialisation du mot de passe",
+      "auth_magiclink": "Lien de connexion",
+      "auth_invite": "Invitation à rejoindre",
+      "auth_email_change": "Changement d'adresse courriel",
+      "auth_reauthentication": "Code de confirmation",
+      "welcome": "Bienvenue",
+      "application_received": "Nouvelle demande (au super admin)",
+      "application_approved": "Demande approuvée",
+      "application_rejected": "Demande non approuvée",
+      "verification_verified": "Boutique vérifiée",
+      "verification_rejected": "Vérification non approuvée",
+      "verification_suspended": "Vérification suspendue",
+      "verification_restored": "Vérification rétablie",
+      "verification_revoked": "Vérification retirée",
+      "role_assigned": "Rôle attribué",
+      "role_suspended": "Rôle suspendu",
+      "role_restored": "Rôle rétabli",
+      "role_revoked": "Rôle retiré",
+      "staff_invitation": "Invitation du personnel",
+      "staff_approved": "Personnel approuvé",
+      "staff_suspended": "Accès du personnel suspendu",
+      "staff_restored": "Accès du personnel rétabli",
+      "staff_removed": "Personnel retiré",
+      "product_suspended": "Produit suspendu",
+      "product_restored": "Produit rétabli",
+      "shop_suspended": "Boutique suspendue",
+      "shop_restored": "Boutique rétablie",
+      "publishing_suspended": "Publication suspendue",
+      "publishing_restored": "Publication rétablie",
+      "bulk_email_enabled": "Courriels aux clients activés",
+      "bulk_email_disabled": "Courriels aux clients désactivés",
+      "bulk_email_paused": "Courriels aux clients en pause",
+      "bulk_email_paused_admin": "Courriels aux clients en pause (au super admin)",
+      "list_confirm": "Rejoindre la liste d'une boutique",
+      "payments_enabled": "Paiements en ligne activés",
+      "payments_disabled": "Paiements en ligne désactivés",
+      "order_paid": "Commande payée (à l'acheteur)",
+      "order_received": "Nouvelle commande (au vendeur)",
+      "order_refunded": "Commande remboursée",
+      "order_fulfilled": "Commande livrée",
+      "order_disputed": "Paiement contesté",
+      "invoice_email": "Facture",
+      "receipt_email": "Reçu",
+      "message_to_seller": "Nouveau message (au vendeur)",
+      "message_to_buyer": "Nouveau message (à l'acheteur)",
+      "enquiry": "Demande sur un produit (au vendeur)"
+    },
+    "edited": "Modifié",
+    "language": "Langue",
+    "languages": {
+      "en": "Anglais",
+      "fr": "Français"
+    },
+    "subjectFixed": "Objet (fixe) : {subject}",
+    "welcomePhotos": "Photos du courriel de bienvenue",
+    "placeholders": "Champs remplis",
+    "placeholdersHint": "Cliquez pour l'ajouter là où vous écrivez. Biqbaq met le vrai nom à l'envoi.",
+    "fields": {
+      "body": "Texte principal",
+      "action": "Texte du bouton",
+      "note": "Petits caractères",
+      "heading": "Titre",
+      "tile_products": "Étiquette de la tuile de gauche",
+      "tile_cargo": "Étiquette de la tuile de droite"
+    },
+    "blankHint": "Un champ vide utilise le texte d'origine, affiché en pâle. Laissez une ligne vide pour commencer un nouveau paragraphe.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "saved": "Enregistré. Les nouveaux courriels utilisent ce texte.",
+    "restore": "Remettre l'original",
+    "restoreConfirm": "Revenir au texte d'origine de Biqbaq pour ce courriel, dans cette langue?",
+    "restored": "Le texte d'origine est revenu.",
+    "preview": "Aperçu, avec des détails d'exemple",
+    "previewTitle": "Aperçu du courriel {name}",
+    "errors": {
+      "PLACEHOLDER_UNKNOWN": "Utilisez seulement les champs remplis proposés pour ce courriel, dans le texte principal ou les petits caractères.",
+      "TOO_LONG": "Chaque partie peut contenir jusqu'à 3 000 caractères.",
+      "GENERIC": "L'enregistrement n'a pas fonctionné. Veuillez réessayer."
+    }
   }
 }

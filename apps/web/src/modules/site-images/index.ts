@@ -17,6 +17,10 @@ export const SITE_IMAGE_SLOTS = [
   "category_cargo_cars",
   // The About us page's photo, changed on that page rather than on Site images.
   "about",
+  // The welcome email's photos, changed in the email editor.
+  "email_welcome_hero",
+  "email_tile_products",
+  "email_tile_cargo",
 ] as const;
 export type SiteImageSlot = (typeof SITE_IMAGE_SLOTS)[number];
 export const siteImageSlotSchema = z.enum(SITE_IMAGE_SLOTS);
@@ -35,6 +39,9 @@ export const SITE_IMAGE_DEFAULTS: Record<SiteImageSlot, { src: string }> = {
   category_home: { src: "https://picsum.photos/seed/biqbaq-category-home/200/200" },
   category_cargo_cars: { src: "https://picsum.photos/seed/biqbaq-category-cargo-cars/200/200" },
   about: { src: "/hero/toronto-professional.jpg" },
+  email_welcome_hero: { src: "/email/welcome-hero.jpg" },
+  email_tile_products: { src: "/email/tile-products.jpg" },
+  email_tile_cargo: { src: "/email/tile-cargo.jpg" },
 };
 
 /** The Shop by category card's slot: `food` → `category_food`, `cargo-cars` → `category_cargo_cars`. */

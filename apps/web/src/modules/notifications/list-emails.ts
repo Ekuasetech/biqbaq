@@ -1,3 +1,5 @@
+import { fill, NO_CUSTOM, pick, type EmailCustom, type EmailField } from "./custom";
+import { emailButton, emailLayout, emailParagraph, emailSmall } from "./layout";
 import { escapeHtml, type RenderedEmail } from "./templates";
 
 // Customer list emails (Q-42 to Q-46). Canada's anti-spam law and Resend both need each
@@ -63,8 +65,14 @@ const COPY = {
 const page = (siteUrl: string, locale: "en" | "fr", path: string, token: string) =>
   `${siteUrl.replace(/\/$/, "")}${locale === "fr" ? "/fr" : ""}${path}?t=${token}`;
 
+/** The confirmation's built-in wording, with {shop}, for Super Admin's editor. */
+export function listConfirmDefaults(): Record<"en" | "fr", Partial<Record<EmailField, string>>> {
+  const of = (locale: "en" | "fr") => ({ body: COPY[locale].confirmBody("{shop}"), action: COPY[locale].confirmAction, note: COPY[locale].confirmNote });
+  return { en: of("en"), fr: of("fr") };
+}
+
 /** Null when the job's data is not complete, so nothing half-made is ever sent. */
-export function renderListEmail(template: string, data: ListEmailData, siteUrl: string): ListEmail | null {
+export function renderListEmail(template: string, data: ListEmailData, siteUrl: string, custom: EmailCustom = NO_CUSTOM): ListEmail | null {
   const locale = data.locale === "fr" ? "fr" : "en";
   const copy = COPY[locale];
   const shop = text(data.shop);
@@ -73,16 +81,23 @@ export function renderListEmail(template: string, data: ListEmailData, siteUrl: 
 
   if (template === "list_confirm") {
     const link = page(siteUrl, locale, "/email/confirm", token);
+    const body = fill(pick(custom, "list_confirm", locale, "body", copy.confirmBody("{shop}")), { shop });
+    const action = pick(custom, "list_confirm", locale, "action", copy.confirmAction);
+    const note = pick(custom, "list_confirm", locale, "note", copy.confirmNote);
     return {
       email: {
         subject: copy.confirmSubject(shop),
-        text: [copy.confirmBody(shop), `${copy.confirmAction}: ${link}`, copy.confirmNote, "Biqbaq"].join("\n\n"),
-        html: [
-          `<p>${escapeHtml(copy.confirmBody(shop))}</p>`,
-          `<p><a href="${escapeHtml(link)}">${escapeHtml(copy.confirmAction)}</a></p>`,
-          `<p>${escapeHtml(copy.confirmNote)}</p>`,
-          "<p>Biqbaq</p>",
-        ].join(""),
+        text: [body, `${action}: ${link}`, note, "Biqbaq"].join("\n\n"),
+        html: emailLayout({
+          locale,
+          siteUrl,
+          preheader: escapeHtml(body),
+          content: [
+            emailParagraph(escapeHtml(body)),
+            emailButton(escapeHtml(link), escapeHtml(action)),
+            emailParagraph(escapeHtml(note), "color:#5b6475;font-size:13px"),
+          ].join(""),
+        }),
       },
     };
   }
@@ -96,17 +111,22 @@ export function renderListEmail(template: string, data: ListEmailData, siteUrl: 
     const oneClick = `${siteUrl.replace(/\/$/, "")}/api/v1/email/unsubscribe?t=${token}`;
     const footer = [copy.from(shop), copy.why(shop, text(data.source)), `${copy.address}: ${address}`];
     // What the shop wrote is shown exactly as typed: nothing in it can become markup.
-    const paragraphs = body.split(/\n{2,}/).map((part) => `<p>${escapeHtml(part).replaceAll("\n", "<br>")}</p>`);
+    const paragraphs = body.split(/\n{2,}/).map((part) => emailParagraph(escapeHtml(part).replaceAll("\n", "<br>")));
     return {
       email: {
         subject,
         text: [body, "—", ...footer, `${copy.unsubscribe}: ${unsubscribe}`].join("\n\n"),
-        html: [
-          ...paragraphs,
-          '<hr style="border:none;border-top:1px solid #ddd">',
-          ...footer.map((line) => `<p style="font-size:12px;color:#666">${escapeHtml(line)}</p>`),
-          `<p style="font-size:12px"><a href="${escapeHtml(unsubscribe)}">${escapeHtml(copy.unsubscribe)}</a></p>`,
-        ].join(""),
+        html: emailLayout({
+          locale,
+          siteUrl,
+          content: [
+            ...paragraphs,
+            '<hr style="border:none;border-top:1px solid #e6e1d8;margin:22px 0 16px">',
+            // Who sent it, why, their address and how to stop (CASL), as before.
+            ...footer.map((line) => emailSmall(escapeHtml(line))),
+            emailSmall(`<a href="${escapeHtml(unsubscribe)}" style="color:#5b6475">${escapeHtml(copy.unsubscribe)}</a>`),
+          ].join(""),
+        }),
       },
       headers: { "List-Unsubscribe": `<${oneClick}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
     };

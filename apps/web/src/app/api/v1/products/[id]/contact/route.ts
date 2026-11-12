@@ -4,6 +4,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { EmailService } from "@/modules/notifications/email-service";
 import { contactRequestSchema } from "@/modules/seller-contact/schema";
 import { clientAddress, hashForLog, renderEnquiryEmail } from "@/modules/seller-contact/server";
+import { loadEmailCustom } from "@/modules/notifications/load-custom";
 
 const fail = (status: number, code: string, details: object = {}) =>
   NextResponse.json({ error: { code, message: code, details } }, { status });
@@ -56,6 +57,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     { name: prepared.product_name, slug: prepared.product_slug },
     prepared.seller_locale,
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+    await loadEmailCustom(),
   );
   const sent = await EmailService.send(prepared.seller_email, email, {
     idempotencyKey: prepared.enquiry_id,
