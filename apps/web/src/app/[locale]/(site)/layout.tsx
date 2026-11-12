@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { getAboutPage } from "@/modules/about/server";
 import { SiteHeader } from "@/components/layout/site-header";
+import { InstallApp } from "@/components/layout/install-app";
 import { SubscribePopup } from "@/components/layout/subscribe-popup";
 
 /** The public site: header, page, footer. */
@@ -17,6 +18,7 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[lo
       </main>
       <SiteFooter showAbout={Boolean(await getAboutPage())} />
       <SubscribePopup />
+      <InstallApp />
     </>
   );
 }

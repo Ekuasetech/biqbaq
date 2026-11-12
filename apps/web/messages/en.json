@@ -2695,5 +2695,38 @@
       "TOO_LONG": "Each part can be up to 3,000 characters.",
       "GENERIC": "That didn't save. Please try again."
     }
+  },
+  "installApp": {
+    "label": "Install Biqbaq",
+    "title": "Get the Biqbaq app",
+    "android": "Add Biqbaq to your home screen, and open it like an app.",
+    "install": "Install",
+    "ios": "Tap <share></share> Share, then Add to Home Screen, to open Biqbaq like an app.",
+    "shareIcon": "the Share button",
+    "notNow": "Not now"
+  },
+  "getTheApp": {
+    "eyebrow": "Biqbaq app",
+    "title": "Get Biqbaq on your phone",
+    "intro": "Add Biqbaq to your home screen and open it like an app: full screen, one tap away. It's free, takes a few seconds, and needs no app store.",
+    "install": "Install the app",
+    "installed": "Biqbaq is on your home screen.",
+    "android": {
+      "name": "Android",
+      "menu": "the menu button",
+      "step1": "Open Biqbaq in Chrome and tap <menu></menu> at the top",
+      "step2": "Tap Install app, or Add to Home screen",
+      "step3": "Tap Install"
+    },
+    "ios": {
+      "name": "iPhone & iPad",
+      "shareButton": "the Share button",
+      "step1": "Open Biqbaq in Safari and tap <share></share> Share",
+      "step2": "Tap <add></add> Add to Home Screen",
+      "step3": "Tap Add"
+    },
+    "qr": "On a computer? Scan this with your phone's camera to open Biqbaq there, then follow the steps.",
+    "qrAlt": "QR code to open Biqbaq on your phone",
+    "credit": "The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License."
   }
 }

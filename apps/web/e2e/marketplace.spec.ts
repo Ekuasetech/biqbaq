@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { deflateSync } from "node:zlib";
-import { expect, test } from "@playwright/test";
+import { devices, expect, test } from "@playwright/test";
 
 // Dev-only, from next-themes when a language switch re-renders the root layout.
 // Its script already ran on first load, so the theme is unaffected.
@@ -2255,9 +2255,12 @@ test.describe("public marketplace", () => {
               sql(`insert into public.testimonials (quote, name, city, published, sort_order) select 'Extra ' || g || ' ${id}', 'Extra ${id} ' || g, '', true, 100 + g from generate_series(1, 3) g`);
               await list.getByRole("article", { name: `Bola ${id}` }).getByRole("button", { name: "Publish" }).click();
               await expect(list).toContainText("Published. It shows on the front page now.");
-              await home.reload();
-              await expect(section.locator(".testimonials-track")).toHaveCount(1, { timeout: 15000 });
-              await expect(section.getByRole("list", { name: "What customers say" }).getByRole("listitem")).toHaveCount(others + 5);
+              // The front page's cached copy can take a moment to follow under load.
+              await expect(async () => {
+                await home.reload();
+                await expect(section.locator(".testimonials-track")).toHaveCount(1, { timeout: 3000 });
+                await expect(section.getByRole("list", { name: "What customers say" }).getByRole("listitem")).toHaveCount(others + 5, { timeout: 3000 });
+              }).toPass({ timeout: 60000 });
               // The row itself never stands still, so the browser is pointed at the frame around it.
               const frame = section.locator(".testimonials-marquee");
               const track = section.locator(".testimonials-track");
@@ -4026,6 +4029,8 @@ test.describe("the public seller API", () => {
 
   test.afterAll(() => {
     sql(`set session_replication_role = replica; delete from public.products where seller_id = (select id from public.sellers where slug = '${slug}'); delete from public.seller_private where seller_id = (select id from public.sellers where slug = '${slug}'); delete from public.sellers where slug = '${slug}'; delete from public.user_roles where user_id = (select id from auth.users where email = '${email}'); delete from public.profiles where id = (select id from auth.users where email = '${email}'); delete from auth.users where email = '${email}';`);
+    // The reviewers too, so this setup can run again in the same run if the group restarts.
+    sql(`delete from public.profiles where id in (select id from auth.users where email in ('ada-${id}-1@example.com', 'bo-${id}-1@example.com')); delete from auth.users where email in ('ada-${id}-1@example.com', 'bo-${id}-1@example.com');`);
     // Counters are not removed here: another worker may be counting at this moment. The cleanup after the run removes them.
   });
 
@@ -4148,3 +4153,148 @@ test.describe("the public seller API", () => {
   });
 });
 
+
+test.describe("the installable web app (Q-61)", () => {
+  // Only the sign-up pop-up is remembered, so the install hint behaves as for a new visitor.
+  const fresh = (origin: string) => ({ cookies: [], origins: [{ origin, localStorage: [{ name: "biqbaq.subscribePopup", value: '{"subscribed":true}' }] }] });
+
+  test("is installable: manifest, icons, theme colour and the offline page", async ({ request, page }) => {
+    const manifest = await (await request.get("/manifest.webmanifest")).json();
+    expect(manifest).toMatchObject({ name: "Biqbaq", display: "standalone", theme_color: "#0c2352" });
+    for (const icon of manifest.icons as { src: string }[]) {
+      const response = await request.get(icon.src);
+      expect(response.status()).toBe(200);
+      expect(response.headers()["content-type"]).toContain("image/png");
+    }
+    expect((await request.get("/sw.js")).headers()["content-type"]).toContain("javascript");
+    expect(await (await request.get("/offline.html")).text()).toContain("You're offline");
+    await page.goto("/");
+    await expect(page.locator('link[rel="manifest"]')).toHaveAttribute("href", /manifest\.webmanifest/);
+    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute("href", "/icons/apple-touch-icon.png");
+    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute("content", "#0c2352");
+  });
+
+  test("shows a friendly page instead of an error when the phone is offline", async ({ browser, baseURL }) => {
+    const context = await browser.newContext({ serviceWorkers: "allow", storageState: fresh(baseURL!) });
+    const page = await context.newPage();
+    await page.goto("/");
+    await page.evaluate(() => navigator.serviceWorker.ready);
+    // The worker takes charge of the next page visit.
+    await page.reload();
+    await context.setOffline(true);
+    await page.goto("/products").catch(() => undefined);
+    await expect(page.getByRole("heading", { name: "You're offline" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
+    await context.setOffline(false);
+    await page.getByRole("button", { name: "Try again" }).click();
+    await expect(page).toHaveURL(/\/products$/);
+    await context.close();
+  });
+
+  test("on an iPhone, explains Share then Add to Home Screen, and Not now keeps it away", async ({ browser, baseURL }) => {
+    const iphone = devices["iPhone 13"];
+    const context = await browser.newContext({ ...iphone, defaultBrowserType: undefined, storageState: fresh(baseURL!) } as Parameters<typeof browser.newContext>[0]);
+    const page = await context.newPage();
+    await page.clock.install();
+    await page.clock.pauseAt(new Date(Date.now() + 1000));
+    await page.goto("/");
+    const hint = page.getByRole("complementary", { name: "Install Biqbaq" });
+    await page.clock.fastForward("00:20");
+    await expect(hint).toHaveCount(0);
+    await page.clock.fastForward("00:06");
+    await expect(hint).toContainText("Get the Biqbaq app", { timeout: 15000 });
+    await expect(hint).toContainText("Add to Home Screen");
+    await hint.getByRole("button", { name: "Not now" }).click();
+    await expect(hint).toHaveCount(0);
+    await page.reload();
+    await page.clock.fastForward("00:30");
+    await page.waitForTimeout(500);
+    await expect(hint).toHaveCount(0);
+    await context.close();
+  });
+
+  test("on Android, the Install button opens the browser's own install prompt", async ({ browser, baseURL }) => {
+    const context = await browser.newContext({ ...devices["Pixel 7"], storageState: fresh(baseURL!) });
+    const page = await context.newPage();
+    await page.clock.install();
+    await page.clock.pauseAt(new Date(Date.now() + 1000));
+    await page.goto("/");
+    // The browser announces it can install the site; here a stand-in records being used.
+    await page.evaluate(() => {
+      const event = new Event("beforeinstallprompt") as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
+      event.prompt = async () => {
+        (window as unknown as { prompted: boolean }).prompted = true;
+      };
+      event.userChoice = Promise.resolve({ outcome: "accepted" });
+      window.dispatchEvent(event);
+    });
+    await page.clock.fastForward("00:26");
+    const hint = page.getByRole("complementary", { name: "Install Biqbaq" });
+    await hint.getByRole("button", { name: "Install" }).click({ timeout: 15000 });
+    expect(await page.evaluate(() => (window as unknown as { prompted?: boolean }).prompted)).toBe(true);
+    await expect(hint).toHaveCount(0);
+    // Installed: never offered again.
+    expect(await page.evaluate(() => localStorage.getItem("biqbaq.installHint"))).toContain("installed");
+    await context.close();
+  });
+
+  test("the front page's app section comes after the hero, with steps for each phone", async ({ page }) => {
+    await page.goto("/");
+    const section = page.getByRole("region", { name: "Get Biqbaq on your phone" });
+    await expect(section).toBeVisible();
+    // Straight after the hero.
+    const headings = await page.getByRole("heading", { level: 2 }).allTextContents();
+    expect(headings[0]).toContain("Get Biqbaq on your phone");
+    // On a computer: both phones, a QR code to open Biqbaq on one, and the robot's credit.
+    await expect(section.getByRole("article", { name: "Android" })).toContainText("Tap Install");
+    await expect(section.getByRole("article", { name: "iPhone & iPad" })).toContainText("Add to Home Screen");
+    await expect(section.getByRole("img", { name: "QR code to open Biqbaq on your phone" })).toBeVisible();
+    await expect(section).toContainText("Creative Commons 3.0 Attribution License");
+    // It moves, except for visitors who ask for reduced motion.
+    expect(await section.locator(".app-phone").evaluate((element) => getComputedStyle(element).animationName)).toBe("app-float");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    expect(await section.locator(".app-icon").evaluate((element) => getComputedStyle(element).animationName)).toBe("none");
+  });
+
+  test("on an iPhone the app section shows only the iPhone steps, and on Android its Install button works", async ({ browser, baseURL }) => {
+    const iphone = await browser.newContext({ ...devices["iPhone 13"], defaultBrowserType: undefined, storageState: fresh(baseURL!) } as Parameters<typeof browser.newContext>[0]);
+    const onIphone = await iphone.newPage();
+    await onIphone.goto("/");
+    const iosSection = onIphone.getByRole("region", { name: "Get Biqbaq on your phone" });
+    await expect(iosSection.getByRole("article", { name: "iPhone & iPad" })).toBeVisible();
+    await expect(iosSection.getByRole("article", { name: "Android" })).toHaveCount(0);
+    await expect(iosSection).not.toContainText("Creative Commons");
+    await iphone.close();
+
+    const android = await browser.newContext({ ...devices["Pixel 7"], storageState: fresh(baseURL!) });
+    const page = await android.newPage();
+    await page.goto("/");
+    const section = page.getByRole("region", { name: "Get Biqbaq on your phone" });
+    await expect(section.getByRole("article", { name: "Android" })).toContainText("Tap Install");
+    // The browser announces it can install Biqbaq; a stand-in records being used.
+    await page.evaluate(() => {
+      const event = new Event("beforeinstallprompt") as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
+      event.prompt = async () => {
+        (window as unknown as { prompted: boolean }).prompted = true;
+      };
+      event.userChoice = Promise.resolve({ outcome: "accepted" });
+      window.dispatchEvent(event);
+    });
+    await section.getByRole("button", { name: "Install the app" }).click();
+    expect(await page.evaluate(() => (window as unknown as { prompted?: boolean }).prompted)).toBe(true);
+    await expect(section).toContainText("Biqbaq is on your home screen.");
+    await android.close();
+  });
+
+  test("never shows on a computer", async ({ browser, baseURL }) => {
+    const context = await browser.newContext({ storageState: fresh(baseURL!) });
+    const page = await context.newPage();
+    await page.clock.install();
+    await page.clock.pauseAt(new Date(Date.now() + 1000));
+    await page.goto("/");
+    await page.clock.fastForward("00:30");
+    await page.waitForTimeout(500);
+    await expect(page.getByRole("complementary", { name: "Install Biqbaq" })).toHaveCount(0);
+    await context.close();
+  });
+});

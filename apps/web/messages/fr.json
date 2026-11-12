@@ -2695,5 +2695,38 @@
       "TOO_LONG": "Chaque partie peut contenir jusqu'à 3 000 caractères.",
       "GENERIC": "L'enregistrement n'a pas fonctionné. Veuillez réessayer."
     }
+  },
+  "installApp": {
+    "label": "Installer Biqbaq",
+    "title": "Obtenez l'appli Biqbaq",
+    "android": "Ajoutez Biqbaq à votre écran d'accueil et ouvrez-le comme une appli.",
+    "install": "Installer",
+    "ios": "Touchez <share></share> Partager, puis Sur l'écran d'accueil, pour ouvrir Biqbaq comme une appli.",
+    "shareIcon": "le bouton Partager",
+    "notNow": "Pas maintenant"
+  },
+  "getTheApp": {
+    "eyebrow": "Appli Biqbaq",
+    "title": "Biqbaq sur votre téléphone",
+    "intro": "Ajoutez Biqbaq à votre écran d'accueil et ouvrez-le comme une appli : plein écran, à un geste. C'est gratuit, ça prend quelques secondes et il ne faut aucune boutique d'applis.",
+    "install": "Installer l'appli",
+    "installed": "Biqbaq est sur votre écran d'accueil.",
+    "android": {
+      "name": "Android",
+      "menu": "le bouton du menu",
+      "step1": "Ouvrez Biqbaq dans Chrome et touchez <menu></menu> en haut",
+      "step2": "Touchez Installer l'appli, ou Ajouter à l'écran d'accueil",
+      "step3": "Touchez Installer"
+    },
+    "ios": {
+      "name": "iPhone et iPad",
+      "shareButton": "le bouton Partager",
+      "step1": "Ouvrez Biqbaq dans Safari et touchez <share></share> Partager",
+      "step2": "Touchez <add></add> Sur l'écran d'accueil",
+      "step3": "Touchez Ajouter"
+    },
+    "qr": "Sur un ordinateur? Scannez ceci avec l'appareil photo de votre téléphone pour y ouvrir Biqbaq, puis suivez les étapes.",
+    "qrAlt": "Code QR pour ouvrir Biqbaq sur votre téléphone",
+    "credit": "Le robot Android est reproduit ou modifié à partir d'une création de Google partagée et utilisée selon les conditions de la licence Creative Commons 3.0 Attribution."
   }
 }

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { Plus_Jakarta_Sans } from "next/font/google";
@@ -25,8 +25,14 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
     title: { default: t("title"), template: "%s | Biqbaq" },
     description: t("description"),
+    // Installing Biqbaq on a phone (Q-61): the iPhone's home-screen icon and full-screen name.
+    icons: { apple: "/icons/apple-touch-icon.png" },
+    appleWebApp: { capable: true, title: "Biqbaq", statusBarStyle: "default" },
   };
 }
+
+/** The phone's browser bar takes Biqbaq's navy. */
+export const viewport: Viewport = { themeColor: "#0c2352" };
 
 export default async function LocaleLayout({ children, params }: LayoutProps<"/[locale]">) {
   const { locale } = await params;

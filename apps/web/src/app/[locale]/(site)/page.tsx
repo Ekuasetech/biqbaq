@@ -5,6 +5,7 @@ import { Suspense, type ReactNode } from "react";
 import { AdsSection, AdsSkeleton } from "@/components/advertising/ads-section";
 import { BlogSection } from "@/components/blog/blog-section";
 import { HeroHeadline, HeroSlideshow, HeroSlidesProvider } from "@/components/layout/hero-slideshow";
+import { GetTheApp } from "@/components/layout/get-the-app";
 import { PageTransition } from "@/components/layout/page-transition";
 import { reveal, RevealWords } from "@/components/layout/reveal";
 import { ProductGrid } from "@/components/product/product-card";
@@ -119,6 +120,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         </div>
         </HeroSlidesProvider>
       </section>
+
+      {/* Get the Biqbaq app on a phone (owner's request, 2026-11-12; Q-61). */}
+      <GetTheApp />
 
       {/* Categories */}
       <section className="pt-12" aria-labelledby="categories-title">

@@ -13,6 +13,16 @@ npm test -w web         # unit tests
 npm run test:e2e -w web # browser tests (run `npm run build -w web` first)
 ```
 
+On this computer, two scripts run everything the same way each time:
+
+```sh
+scripts/test-e2e-local.sh            # build, lint, secret check, browser tests on port 3100, then remove test data
+scripts/test-e2e-local.sh -g "about" # only the tests whose names match
+scripts/test-db-copy.sh              # every database test, on a throwaway copy of the local database
+```
+
+They never touch your own local accounts: `scripts/clean-test-data.sql` removes only test addresses (`name-<digits>-<digits>@example.com`). Logs go to a temporary folder, printed at the end.
+
 Accounts need the local Supabase copy, which needs Docker running:
 
 ```sh
