@@ -57,12 +57,13 @@ Response `200`:
 
 ### `GET /api/v1/sellers/{sellerSlug}/reviews`
 
-A shop's reviews, for its own website (owner's request, 2026-11-08). Same rules as the products endpoint: no key, open CORS, the same cache headers and `ETag`, the same hourly limit per IP (one allowance shared by both endpoints), `400`, `404`, `405` and `304` as above. Sellers find both addresses in Shop settings.
+A shop's reviews, for its own website (owner's request, 2026-11-08): reviews of its products, and reviews of the shop itself from buyers it sent a one-time review link to (Q-67, added 2026-11-13). Same rules as the products endpoint: no key, open CORS, the same cache headers and `ETag`, the same hourly limit per IP (one allowance shared by both endpoints), `400`, `404`, `405` and `304` as above. Sellers find both addresses in Shop settings.
 
 | Query | Values | Notes |
 | --- | --- | --- |
 | `page`, `pageSize` | integers | `pageSize` up to 100 |
-| `product` | product slug | Only that product's reviews, and its summary |
+| `type` | `all` (default), `product`, `shop` | Only one kind of review, and its summary |
+| `product` | product slug | Only that product's reviews, and its summary. Cannot be combined with `type=shop` (`400`) |
 | `locale` | `en` (default), `fr` | The product `url` follows it |
 
 Response `200`:
@@ -70,23 +71,36 @@ Response `200`:
 ```json
 {
   "seller": { "name": "ABC Store", "slug": "abc-store", "city": "Toronto", "verified": true, "url": "https://biqbaq.com/sellers/abc-store" },
-  "summary": { "reviewCount": 2, "averageRating": 4.5 },
+  "summary": { "reviewCount": 2, "averageRating": 4 },
   "data": [
     {
       "id": "6f1c7a2e-0000-4000-8000-000000000001",
       "rating": 5,
       "body": "Great fit",
       "author": { "name": "Ada Obi" },
+      "type": "product",
+      "invited": false,
       "verifiedPurchase": false,
       "createdAt": "2026-11-08T12:00:00Z",
       "product": { "name": "Ankara Tote Bag", "slug": "ankara-tote-bag", "url": "https://biqbaq.com/products/ankara-tote-bag" }
+    },
+    {
+      "id": "6f1c7a2e-0000-4000-8000-000000000002",
+      "rating": 3,
+      "body": "Quick delivery",
+      "author": { "name": "Chidi O." },
+      "type": "shop",
+      "invited": true,
+      "verifiedPurchase": false,
+      "createdAt": "2026-11-07T12:00:00Z",
+      "product": null
     }
   ],
   "meta": { "page": 1, "pageSize": 20, "total": 2, "totalPages": 1 }
 }
 ```
 
-- **Included:** published reviews on the shop's live products, newest first, read from the `public_shop_reviews` and `public_shop_review_stats` views. The reviewer's name is shown as Biqbaq shows it (owner's choice), or `null` when they have none. `averageRating` is to one decimal place, `null` with no reviews.
+- **Included:** published reviews on the shop's live products and published shop reviews from invited buyers, together newest first, read from the `public_api_reviews` and `public_api_review_stats` views (which combine `public_shop_reviews` and `public_seller_reviews`). A shop review has `type: "shop"`, `invited: true` and `product: null`; the name is the one the buyer typed. The reviewer's name is shown as Biqbaq shows it (owner's choice), or `null` when they have none. `averageRating` is to one decimal place, `null` with no reviews.
 - **Excluded:** hidden reviews, reviews on drafts or removed products, suspended shops, and everything while Super Admin has reviews switched off (§7.3).
 
 ## Trusted operations

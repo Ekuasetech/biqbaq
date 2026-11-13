@@ -102,13 +102,15 @@ export const reviewsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).max(MAX_PAGE).default(1),
   pageSize: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(20),
   product: z.string().regex(/^[a-z0-9-]{1,200}$/).optional(),
+  /** Product reviews, shop reviews from invited buyers (Q-67), or both. */
+  type: z.enum(["all", "product", "shop"]).default("all"),
   locale: z.enum(["en", "fr"]).default("en"),
-});
+}).refine((query) => !(query.product && query.type === "shop"), { message: "A product has no shop reviews" });
 export type ReviewsQuery = z.infer<typeof reviewsQuerySchema>;
 
 export function parseReviewsQuery(params: URLSearchParams) {
   const raw: Record<string, string> = {};
-  for (const key of ["page", "pageSize", "product", "locale"]) {
+  for (const key of ["page", "pageSize", "product", "type", "locale"]) {
     const value = params.get(key);
     if (value !== null && value !== "") raw[key] = value;
   }
@@ -117,13 +119,14 @@ export function parseReviewsQuery(params: URLSearchParams) {
 
 export interface PublicReviewRow {
   id: string;
+  kind: "product" | "shop";
   rating: number;
   body: string;
   is_verified_purchase: boolean;
   created_at: string;
   author_name: string | null;
-  product_slug: string;
-  product_name: string;
+  product_slug: string | null;
+  product_name: string | null;
 }
 
 export interface ApiReview {
@@ -131,9 +134,14 @@ export interface ApiReview {
   rating: number;
   body: string;
   author: { name: string | null };
+  /** "shop" for a review of the whole shop from a buyer the shop invited (Q-67). */
+  type: "product" | "shop";
+  /** True for shop reviews: the shop sent the buyer a one-time review link. */
+  invited: boolean;
   verifiedPurchase: boolean;
   createdAt: string;
-  product: { name: string; slug: string; url: string };
+  /** The product reviewed; null for shop reviews. */
+  product: { name: string; slug: string; url: string } | null;
 }
 
 /** Built field by field, so nothing new in the database can leak out by accident. */
@@ -143,9 +151,14 @@ export function toApiReview(row: PublicReviewRow, siteUrl: string, locale: "en" 
     rating: row.rating,
     body: row.body,
     author: { name: row.author_name },
+    type: row.kind,
+    invited: row.kind === "shop",
     verifiedPurchase: row.is_verified_purchase,
     createdAt: row.created_at,
-    product: { name: row.product_name, slug: row.product_slug, url: canonicalProductUrl(siteUrl, row.product_slug, locale) },
+    product:
+      row.kind === "product" && row.product_slug && row.product_name
+        ? { name: row.product_name, slug: row.product_slug, url: canonicalProductUrl(siteUrl, row.product_slug, locale) }
+        : null,
   };
 }
 

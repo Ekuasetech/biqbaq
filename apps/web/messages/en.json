@@ -1314,9 +1314,9 @@
       "copy": "Copy the reviews address",
       "open": "Open the reviews address",
       "developer": {
-        "what": "It returns your shop's published reviews as JSON, newest first: each review's rating (1 to 5), words, the reviewer's name as Biqbaq shows it, whether it's a verified purchase, its date, and the product it's about. A summary gives your average rating and number of reviews. Hidden reviews are never included, and there are none while Biqbaq has reviews switched off.",
-        "options": "Add ?product= with a product's slug for one product's reviews, ?page= and ?pageSize= (up to 100), or ?locale=fr for French product links.",
-        "links": "Each review's product has a url. When a visitor clicks it on your website, send them to that Biqbaq page.",
+        "what": "It returns your shop's published reviews as JSON, newest first: reviews of your products, and reviews of your shop from buyers you sent a review link to. Each has its rating (1 to 5), words, the reviewer's name as Biqbaq shows it, its type (product or shop), whether it's a verified purchase or an invited shop review, its date, and the product it's about, if any. A summary gives your average rating and number of reviews. Hidden reviews are never included, and there are none while Biqbaq has reviews switched off.",
+        "options": "Add ?type=product or ?type=shop for one kind only, ?product= with a product's slug for one product's reviews, ?page= and ?pageSize= (up to 100), or ?locale=fr for French product links.",
+        "links": "Each product review's product has a url; shop reviews have none. When a visitor clicks a product on your website, send them to that Biqbaq page.",
         "limits": "No key is needed, and it can be called from a visitor's browser. Each visitor can make up to the hourly limit Biqbaq sets, and answers are cached for a minute."
       }
     }

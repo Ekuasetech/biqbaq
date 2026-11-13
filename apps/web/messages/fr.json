@@ -1314,9 +1314,9 @@
       "copy": "Copier l'adresse des avis",
       "open": "Ouvrir l'adresse des avis",
       "developer": {
-        "what": "Elle renvoie les avis publiés de votre boutique en JSON, du plus récent au plus ancien : la note (1 à 5), le texte, le nom de la personne tel que Biqbaq l'affiche, s'il s'agit d'un achat vérifié, la date et le produit concerné. Un résumé donne votre note moyenne et le nombre d'avis. Les avis masqués ne sont jamais inclus, et il n'y en a aucun quand Biqbaq a désactivé les avis.",
-        "options": "Ajoutez ?product= avec le slug d'un produit pour ses seuls avis, ?page= et ?pageSize= (jusqu'à 100), ou ?locale=fr pour des liens de produits en français.",
-        "links": "Le produit de chaque avis a une url. Quand un visiteur clique dessus sur votre site, envoyez-le vers cette page Biqbaq.",
+        "what": "Elle renvoie les avis publiés de votre boutique en JSON, du plus récent au plus ancien : les avis sur vos produits, et les avis sur votre boutique des acheteurs à qui vous avez envoyé un lien d'avis. Chacun a sa note (1 à 5), son texte, le nom de la personne tel que Biqbaq l'affiche, son type (produit ou boutique), s'il s'agit d'un achat vérifié ou d'un avis de boutique sur invitation, sa date et le produit concerné, s'il y en a un. Un résumé donne votre note moyenne et le nombre d'avis. Les avis masqués ne sont jamais inclus, et il n'y en a aucun quand Biqbaq a désactivé les avis.",
+        "options": "Ajoutez ?type=product ou ?type=shop pour un seul type, ?product= avec le slug d'un produit pour ses seuls avis, ?page= et ?pageSize= (jusqu'à 100), ou ?locale=fr pour des liens de produits en français.",
+        "links": "Le produit de chaque avis sur un produit a une url ; les avis sur la boutique n'en ont pas. Quand un visiteur clique sur un produit de votre site, envoyez-le vers cette page Biqbaq.",
         "limits": "Aucune clé n'est nécessaire, et elle peut être appelée depuis le navigateur d'un visiteur. Chaque visiteur peut faire jusqu'à la limite horaire fixée par Biqbaq, et les réponses sont mises en cache pendant une minute."
       }
     }

@@ -4172,6 +4172,11 @@ test.describe("the public seller API", () => {
     review("bo", "Bravo", 4, "Tasty", "published", "2 hours");
     review("ada", "Bravo", 1, "Rude words", "hidden", "3 hours");
     review("bo", "Draft one", 3, "On a draft", "published", "4 hours");
+    // Shop reviews from invited buyers (Q-67): one showing, one hidden by a moderator.
+    for (const [buyer, rating, body, status, age] of [["Chidi Buyer", 3, "Lovely shop", "published", "90 minutes"], ["Dayo Buyer", 1, "Mean words", "hidden", "10 minutes"]]) {
+      sql(`with i as (insert into public.shop_review_invites (seller_id, buyer_name, used_at) select id, '${buyer}', now() from public.sellers where slug = '${slug}' returning id, seller_id)
+           insert into public.shop_reviews (seller_id, invite_id, reviewer_name, rating, body, status, created_at) select seller_id, id, '${buyer}', ${rating}, '${body}', '${status}', now() - interval '${age}' from i`);
+    }
   });
 
   test.afterAll(() => {
@@ -4254,30 +4259,39 @@ test.describe("the public seller API", () => {
     expect(response.headers()["etag"]).toBeTruthy();
     const body = await response.json();
     expect(body.seller).toMatchObject({ name: "API Shop", slug, verified: true });
-    expect(body.summary).toEqual({ reviewCount: 2, averageRating: 4.5 });
-    expect(body.meta).toEqual({ page: 1, pageSize: 20, total: 2, totalPages: 1 });
-    // Newest first, with names as Biqbaq shows them.
-    expect(body.data.map((review: { body: string }) => review.body)).toEqual(["Great fit", "Tasty"]);
+    expect(body.summary).toEqual({ reviewCount: 3, averageRating: 4 });
+    expect(body.meta).toEqual({ page: 1, pageSize: 20, total: 3, totalPages: 1 });
+    // Newest first, product and shop reviews together, with names as Biqbaq shows them.
+    expect(body.data.map((review: { body: string }) => review.body)).toEqual(["Great fit", "Lovely shop", "Tasty"]);
     const review = body.data[0];
-    expect(Object.keys(review).sort()).toEqual(["author", "body", "createdAt", "id", "product", "rating", "verifiedPurchase"]);
-    expect(review).toMatchObject({ rating: 5, author: { name: "Ada Reviewer" }, verifiedPurchase: false, product: { name: `Alpha ${id}` } });
+    expect(Object.keys(review).sort()).toEqual(["author", "body", "createdAt", "id", "invited", "product", "rating", "type", "verifiedPurchase"]);
+    expect(review).toMatchObject({ rating: 5, author: { name: "Ada Reviewer" }, type: "product", invited: false, verifiedPurchase: false, product: { name: `Alpha ${id}` } });
+    expect(body.data[1]).toMatchObject({ rating: 3, author: { name: "Chidi Buyer" }, type: "shop", invited: true, verifiedPurchase: false, product: null });
     expect(new URL(review.product.url).pathname).toBe(`/products/${review.product.slug}`);
     const text = JSON.stringify(body);
-    for (const secret of ["Rude words", "On a draft", email, `ada-${id}`, "author_id", "status"]) expect(text).not.toContain(secret);
+    for (const secret of ["Rude words", "On a draft", "Mean words", email, `ada-${id}`, "author_id", "status"]) expect(text).not.toContain(secret);
 
     // One product's reviews, and a page at a time.
-    const bravo = body.data[1].product.slug;
+    const bravo = body.data[2].product.slug;
     const one = await (await request.get(`/api/v1/sellers/${slug}/reviews?product=${bravo}`, { headers: address() })).json();
     expect(one.summary).toEqual({ reviewCount: 1, averageRating: 4 });
     expect(one.data.map((r: { body: string }) => r.body)).toEqual(["Tasty"]);
     const second = await (await request.get(`/api/v1/sellers/${slug}/reviews?pageSize=1&page=2`, { headers: address() })).json();
-    expect(second.meta).toEqual({ page: 2, pageSize: 1, total: 2, totalPages: 2 });
-    expect(second.data.map((r: { body: string }) => r.body)).toEqual(["Tasty"]);
+    expect(second.meta).toEqual({ page: 2, pageSize: 1, total: 3, totalPages: 3 });
+    expect(second.data.map((r: { body: string }) => r.body)).toEqual(["Lovely shop"]);
+    // Only one kind.
+    const shopOnly = await (await request.get(`/api/v1/sellers/${slug}/reviews?type=shop`, { headers: address() })).json();
+    expect(shopOnly.summary).toEqual({ reviewCount: 1, averageRating: 3 });
+    expect(shopOnly.data.map((r: { body: string }) => r.body)).toEqual(["Lovely shop"]);
+    const productsOnly = await (await request.get(`/api/v1/sellers/${slug}/reviews?type=product`, { headers: address() })).json();
+    expect(productsOnly.summary).toEqual({ reviewCount: 2, averageRating: 4.5 });
+    expect(productsOnly.data.map((r: { body: string }) => r.body)).toEqual(["Great fit", "Tasty"]);
     const none = await (await request.get(`/api/v1/sellers/${slug}/reviews?product=no-such-product`, { headers: address() })).json();
     expect(none.summary).toEqual({ reviewCount: 0, averageRating: null });
 
     // Bad requests and unknown shops, as for products.
     expect((await request.get(`/api/v1/sellers/${slug}/reviews?pageSize=1000`, { headers: address() })).status()).toBe(400);
+    expect((await request.get(`/api/v1/sellers/${slug}/reviews?type=shop&product=${bravo}`, { headers: address() })).status()).toBe(400);
     expect((await request.get(`/api/v1/sellers/no-such-shop-${id}/reviews`, { headers: address() })).status()).toBe(404);
     const preflight = await request.fetch(`/api/v1/sellers/${slug}/reviews`, { method: "OPTIONS", headers: { Origin: "https://abc-store.example", "Access-Control-Request-Method": "GET" } });
     expect(preflight.status()).toBe(204);

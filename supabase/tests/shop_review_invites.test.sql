@@ -72,6 +72,10 @@ reset role;
 
 set local role anon;
 select results_eq($$ select seller_slug, reviewer_name, rating, body from public_seller_reviews $$, $$ values ('ri-shop', 'Bola', 5, 'Lovely shop') $$, 'it shows on the seller''s page at once');
+select results_eq($$ select kind, author_name, rating, product_slug, is_verified_purchase from public_api_reviews where seller_slug = 'ri-shop' $$,
+  $$ values ('shop'::text, 'Bola'::text, 5, null::text, false) $$, 'and in the public reviews API, as a shop review');
+select results_eq($$ select kind, review_count::int, rating_total::int from public_api_review_stats where seller_slug = 'ri-shop' $$,
+  $$ values ('shop'::text, 1, 5) $$, 'with its counts');
 reset role;
 select is((select count(*)::int from notifications where user_id = '00000000-0000-4000-8000-000000000c71' and type = 'shop_review_received'), 1, 'the seller is told');
 
@@ -88,6 +92,7 @@ select results_eq($$ select status from admin_list_shop_reviews('hidden', 'RI') 
 reset role;
 set local role anon;
 select is_empty($$ select 1 from public_seller_reviews where seller_slug = 'ri-shop' $$, 'a hidden review leaves the page');
+select is_empty($$ select 1 from public_api_reviews where seller_slug = 'ri-shop' $$, 'and the API');
 reset role;
 
 -- Reviews switched off: nothing shows, and no link works or can be made.
@@ -95,6 +100,7 @@ update shop_reviews set status = 'published';
 update platform_settings set value = 'false' where key = 'reviews.enabled';
 set local role anon;
 select is_empty($$ select 1 from public_seller_reviews $$, 'with reviews off, nothing shows');
+select is_empty($$ select 1 from public_api_reviews $$, 'not even in the API');
 reset role;
 select pg_temp.act_as('00000000-0000-4000-8000-000000000c71');
 set local role authenticated;

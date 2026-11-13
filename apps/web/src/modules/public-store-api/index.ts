@@ -92,11 +92,17 @@ export async function getShopReviews(sellerSlug: string, query: ReviewsQuery, si
   if (sellerError) throw new Error(`Seller lookup failed: ${sellerError.code}`);
   if (!seller) return null;
 
-  let stats = supabase.from("public_shop_review_stats").select("review_count, rating_total").eq("seller_slug", sellerSlug);
+  // Product reviews and shop reviews from invited buyers (Q-67), from one public view.
+  let stats = supabase.from("public_api_review_stats").select("review_count, rating_total").eq("seller_slug", sellerSlug);
   let reviews = supabase
-    .from("public_shop_reviews")
-    .select("id, rating, body, is_verified_purchase, created_at, author_name, product_slug, product_name")
+    .from("public_api_reviews")
+    .select("id, kind, rating, body, is_verified_purchase, created_at, author_name, product_slug, product_name")
     .eq("seller_slug", sellerSlug);
+  const kind = query.product ? "product" : query.type;
+  if (kind !== "all") {
+    stats = stats.eq("kind", kind);
+    reviews = reviews.eq("kind", kind);
+  }
   if (query.product) {
     stats = stats.eq("product_slug", query.product);
     reviews = reviews.eq("product_slug", query.product);

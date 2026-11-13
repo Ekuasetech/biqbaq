@@ -84,8 +84,12 @@ describe("ETags", () => {
 
 describe("the reviews endpoint", () => {
   it("reads its query, refusing what it does not know", () => {
-    expect(parseReviewsQuery(new URLSearchParams("")).data).toEqual({ page: 1, pageSize: 20, locale: "en" });
-    expect(parseReviewsQuery(new URLSearchParams("product=sr-rice&page=2&pageSize=5&locale=fr")).data).toEqual({ product: "sr-rice", page: 2, pageSize: 5, locale: "fr" });
+    expect(parseReviewsQuery(new URLSearchParams("")).data).toEqual({ page: 1, pageSize: 20, type: "all", locale: "en" });
+    expect(parseReviewsQuery(new URLSearchParams("product=sr-rice&page=2&pageSize=5&locale=fr")).data).toEqual({ product: "sr-rice", page: 2, pageSize: 5, type: "all", locale: "fr" });
+    expect(parseReviewsQuery(new URLSearchParams("type=shop")).data?.type).toBe("shop");
+    expect(parseReviewsQuery(new URLSearchParams("type=other")).success).toBe(false);
+    // A product has no shop reviews.
+    expect(parseReviewsQuery(new URLSearchParams("type=shop&product=sr-rice")).success).toBe(false);
     expect(parseReviewsQuery(new URLSearchParams("pageSize=101")).success).toBe(false);
     expect(parseReviewsQuery(new URLSearchParams("product=Not A Slug")).success).toBe(false);
   });
@@ -93,6 +97,7 @@ describe("the reviews endpoint", () => {
   it("builds each review field by field, with a link back to the product on Biqbaq", () => {
     const row = {
       id: "r1",
+      kind: "product" as const,
       rating: 4,
       body: "Good",
       is_verified_purchase: true,
@@ -107,9 +112,26 @@ describe("the reviews endpoint", () => {
       rating: 4,
       body: "Good",
       author: { name: "Ada Obi" },
+      type: "product",
+      invited: false,
       verifiedPurchase: true,
       createdAt: "2026-11-08T12:00:00Z",
       product: { name: "Rice", slug: "rice", url: "https://biqbaq.ca/fr/products/rice" },
+    });
+  });
+
+  it("marks shop reviews from invited buyers, with no product (Q-67)", () => {
+    const row = { id: "s1", kind: "shop" as const, rating: 5, body: "Lovely shop", is_verified_purchase: false, created_at: "2026-11-13T12:00:00Z", author_name: "Bola", product_slug: null, product_name: null };
+    expect(toApiReview(row, "https://biqbaq.ca", "en")).toEqual({
+      id: "s1",
+      rating: 5,
+      body: "Lovely shop",
+      author: { name: "Bola" },
+      type: "shop",
+      invited: true,
+      verifiedPurchase: false,
+      createdAt: "2026-11-13T12:00:00Z",
+      product: null,
     });
   });
 
