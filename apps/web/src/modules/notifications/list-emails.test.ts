@@ -76,4 +76,14 @@ describe("list emails", () => {
     expect(renderListEmail("blog_post", { ...post, address: "" }, SITE)).toBeNull();
     expect(isListTemplate("blog_post")).toBe(true);
   });
+
+  it("use Super Admin's wording for the blog email's line and button, and show the site's own photo in the preview", () => {
+    const custom = { texts: { "blog_post:en:action": "Read it now", "blog_post:en:heading": "Fresh from the blog" }, images: {} };
+    const data = { shop: "Biqbaq", subject: "T", body: "", slug: "t", address: "12 King St W", token, source: "self", cover: `${SITE}/hero/sienna-cargo.jpg` };
+    const result = renderListEmail("blog_post", data, SITE, custom)!;
+    expect(result.email.text).toContain(`Read it now: ${SITE}/blog/t`);
+    expect(result.email.html).toContain("Fresh from the blog");
+    expect(result.email.html).toContain(`src="${SITE}/hero/sienna-cargo.jpg"`);
+    expect(renderListEmail("blog_post", { ...data, cover: `${SITE}/../secret.jpg` }, SITE)!.email.html).not.toContain("secret");
+  });
 });

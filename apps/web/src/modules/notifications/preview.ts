@@ -24,6 +24,26 @@ export function previewEmail(template: string, locale: EmailLocale, siteUrl: str
   if (template === "list_confirm") {
     return renderListEmail("list_confirm", { shop: "Ada's Shop", token: "0".repeat(64), locale }, siteUrl, custom)?.email ?? null;
   }
+  if (template === "blog_post") {
+    return (
+      renderListEmail(
+        "blog_post",
+        {
+          shop: "Biqbaq",
+          subject: locale === "fr" ? "Expédier une voiture à Lagos : ce qu'il faut savoir" : "Shipping a car to Lagos: what to know",
+          body: locale === "fr" ? "Les coûts, les délais et les papiers à préparer avant le départ." : "What it costs, how long it takes, and the papers to get ready before it leaves.",
+          slug: "shipping-a-car-to-lagos",
+          cover: `${siteUrl.replace(/\/$/, "")}/hero/sienna-cargo.jpg`,
+          address: "12 King St W, Toronto ON M5H 1A1",
+          token: "0".repeat(64),
+          source: "self",
+          locale,
+        },
+        siteUrl,
+        custom,
+      )?.email ?? null
+    );
+  }
   if (template === "invoice_email" || template === "receipt_email") {
     const invoice = {
       kind: template === "invoice_email" ? "invoice" : "receipt",

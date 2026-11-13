@@ -2691,7 +2691,8 @@
       "message_to_seller": "New message (to seller)",
       "message_to_buyer": "New message (to buyer)",
       "enquiry": "Product enquiry (to seller)",
-      "shop_review_received": "New shop review (to seller)"
+      "shop_review_received": "New shop review (to seller)",
+      "blog_post": "New blog post (to Biqbaq's list)"
     },
     "edited": "Edited",
     "language": "Language",

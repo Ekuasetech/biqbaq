@@ -2691,7 +2691,8 @@
       "message_to_seller": "Nouveau message (au vendeur)",
       "message_to_buyer": "Nouveau message (à l'acheteur)",
       "enquiry": "Demande sur un produit (au vendeur)",
-      "shop_review_received": "Nouvel avis sur la boutique (au vendeur)"
+      "shop_review_received": "Nouvel avis sur la boutique (au vendeur)",
+      "blog_post": "Nouvel article du blog (à la liste de Biqbaq)"
     },
     "edited": "Modifié",
     "language": "Langue",

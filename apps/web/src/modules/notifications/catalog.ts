@@ -1,6 +1,6 @@
 import "server-only";
 import { authDefaults, AUTH_TEMPLATES } from "./auth-emails";
-import { listConfirmDefaults } from "./list-emails";
+import { blogPostDefaults, listConfirmDefaults } from "./list-emails";
 import { notificationDefaults, NOTIFICATION_TEMPLATES, type EmailLocale } from "./templates";
 import { placeholdersIn, type EmailField } from "./custom";
 import { INVOICE_PLACEHOLDERS, INVOICE_TEMPLATES, invoiceDefaults } from "@/modules/invoicing/email";
@@ -47,6 +47,8 @@ export function emailCatalog(): EmailEntry[] {
     entries.push(entry(template, found.defaults, found.placeholders));
   }
   entries.push(entry("list_confirm", listConfirmDefaults(), ["shop"]));
+  // New blog posts to Biqbaq's list (Q-68): the subject, title and summary come from the post.
+  entries.push(entry("blog_post", blogPostDefaults(), []));
   for (const template of INVOICE_TEMPLATES) entries.push(entry(template, invoiceDefaults(template)!, INVOICE_PLACEHOLDERS));
   entries.push(entry("enquiry", enquiryDefaults(), []));
   const order = (template: string) => (template === "auth_signup" ? 0 : template === "welcome" ? 1 : 2);

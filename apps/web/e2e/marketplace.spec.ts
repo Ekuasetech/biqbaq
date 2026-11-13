@@ -2287,6 +2287,16 @@ test.describe("public marketplace", () => {
               await expect(editor).toContainText("The original wording is back.");
               expect(sql(`select count(*) from public.email_texts where template = 'auth_signup' and locale = 'en'`)).toBe("0");
               expect(sql(`select count(*) from public.audit_logs where action = 'email_text.save' and actor_id = (select id from auth.users where email = '${owner}')`)).toBe("2");
+
+              // The new blog post email (Q-68) can be previewed: its subject is the post's title.
+              await page.getByRole("navigation", { name: "Emails" }).getByRole("button", { name: "New blog post (to Biqbaq's list)" }).click();
+              const blog = page.getByRole("region", { name: "New blog post (to Biqbaq's list)" });
+              await expect(blog).toContainText("Shipping a car to Lagos: what to know", { timeout: 15000 });
+              const blogPreview = blog.frameLocator("iframe");
+              await expect(blogPreview.getByRole("heading", { name: "Shipping a car to Lagos: what to know" })).toBeVisible();
+              await expect(blogPreview.getByRole("link", { name: "Read the post" })).toBeVisible();
+              await expect(blogPreview.locator('img[src$="/hero/sienna-cargo.jpg"]')).toHaveCount(1);
+              await expect(blogPreview.getByRole("link", { name: "Unsubscribe" })).toBeVisible();
             } finally {
               sql(`delete from public.email_texts where template = 'auth_signup'`);
               if (before) sql(`insert into public.email_texts select * from json_populate_recordset(null::public.email_texts, '${before.replaceAll("'", "''")}'::json)`);

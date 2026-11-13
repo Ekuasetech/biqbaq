@@ -70,8 +70,16 @@ const COPY = {
 };
 
 const SLUG = /^[a-z0-9-]{1,200}$/;
-// Only photos stored with Biqbaq's photo service are shown.
+// Only photos stored with Biqbaq's photo service, or the site's own (the editor's preview), are shown.
 const COVER = /^https:\/\/res\.cloudinary\.com\/[^\s"'<>]+$/;
+const isCover = (url: string, siteUrl: string) =>
+  COVER.test(url) || (/^\/(hero|email)\/[a-z0-9-]+\.jpg$/.test(url.slice(siteUrl.replace(/\/$/, "").length)) && url.startsWith(siteUrl.replace(/\/$/, "")));
+
+/** The blog email's built-in wording, for Super Admin's editor: the line above the title, and the button. */
+export function blogPostDefaults(): Record<"en" | "fr", Partial<Record<EmailField, string>>> {
+  const of = (locale: "en" | "fr") => ({ heading: COPY[locale].eyebrow, action: COPY[locale].read });
+  return { en: of("en"), fr: of("fr") };
+}
 
 const page = (siteUrl: string, locale: "en" | "fr", path: string, token: string) =>
   `${siteUrl.replace(/\/$/, "")}${locale === "fr" ? "/fr" : ""}${path}?t=${token}`;
@@ -120,7 +128,9 @@ export function renderListEmail(template: string, data: ListEmailData, siteUrl: 
     const slug = text(data.slug);
     const address = text(data.address);
     if (!title || !SLUG.test(slug) || !address) return null;
-    const cover = COVER.test(text(data.cover)) ? text(data.cover) : null;
+    const cover = isCover(text(data.cover), siteUrl) ? text(data.cover) : null;
+    const eyebrow = pick(custom, "blog_post", locale, "heading", copy.eyebrow);
+    const read = pick(custom, "blog_post", locale, "action", copy.read);
     const link = `${siteUrl.replace(/\/$/, "")}${locale === "fr" ? "/fr" : ""}/blog/${slug}`;
     const unsubscribe = page(siteUrl, locale, "/email/unsubscribe", token);
     const oneClick = `${siteUrl.replace(/\/$/, "")}/api/v1/email/unsubscribe?t=${token}`;
@@ -128,7 +138,7 @@ export function renderListEmail(template: string, data: ListEmailData, siteUrl: 
     return {
       email: {
         subject: title,
-        text: [copy.eyebrow, title, excerpt, `${copy.read}: ${link}`, "—", ...footer, `${copy.unsubscribe}: ${unsubscribe}`].filter(Boolean).join("\n\n"),
+        text: [eyebrow, title, excerpt, `${read}: ${link}`, "—", ...footer, `${copy.unsubscribe}: ${unsubscribe}`].filter(Boolean).join("\n\n"),
         html: emailLayout({
           locale,
           siteUrl,
@@ -137,10 +147,10 @@ export function renderListEmail(template: string, data: ListEmailData, siteUrl: 
             cover
               ? `<a href="${escapeHtml(link)}"><img src="${escapeHtml(cover)}" alt="" width="520" style="display:block;width:100%;max-width:520px;height:auto;border-radius:14px;margin:0 0 18px"></a>`
               : "",
-            emailSmall(`<strong style="color:#d01d21;letter-spacing:0.06em;text-transform:uppercase">${escapeHtml(copy.eyebrow)}</strong>`),
+            emailSmall(`<strong style="color:#d01d21;letter-spacing:0.06em;text-transform:uppercase">${escapeHtml(eyebrow)}</strong>`),
             `<h1 style="margin:4px 0 12px;font-family:Helvetica,Arial,sans-serif;font-size:24px;line-height:1.25;color:#0c2352">${escapeHtml(title)}</h1>`,
             excerpt ? emailParagraph(escapeHtml(excerpt)) : "",
-            emailButton(escapeHtml(link), escapeHtml(copy.read)),
+            emailButton(escapeHtml(link), escapeHtml(read)),
             '<hr style="border:none;border-top:1px solid #e6e1d8;margin:22px 0 16px">',
             ...footer.map((line) => emailSmall(escapeHtml(line))),
             emailSmall(`<a href="${escapeHtml(unsubscribe)}" style="color:#5b6475">${escapeHtml(copy.unsubscribe)}</a>`),
