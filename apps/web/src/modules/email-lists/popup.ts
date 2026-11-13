@@ -87,8 +87,8 @@ export function popupIsDue(stored: string | null, now: number): boolean {
   return true;
 }
 
-/** Pages where the pop-up would get in the way: signing in, and links from emails. */
-const QUIET_PATHS = ["/sign-in", "/register", "/forgot-password", "/reset-password", "/email"];
+/** Pages where the pop-up would get in the way: signing in, links from emails, and review links. */
+const QUIET_PATHS = ["/sign-in", "/register", "/forgot-password", "/reset-password", "/email", "/review"];
 export const popupAllowedOn = (pathname: string) => !QUIET_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
 const ERRORS = new Set(["EMAIL_INVALID", "RATE_LIMITED", "POPUP_OFF"]);

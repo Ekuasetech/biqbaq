@@ -3,6 +3,8 @@
 import { Download, Share, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { usePathname } from "@/i18n/navigation";
+import { popupAllowedOn } from "@/modules/email-lists/popup";
 import { INSTALL_HINT_DELAY_MS, INSTALL_HINT_KEY, installHintDue, installWay, type InstallWay } from "@/modules/pwa";
 import { canPromptInstall, listenForInstall, promptInstall, subscribeToInstall, wasInstalled } from "@/modules/pwa/install-events";
 
@@ -22,6 +24,8 @@ function remember(value: { installed?: boolean; dismissedAt?: number }) {
 export function InstallApp() {
   const t = useTranslations("installApp");
   const [way, setWay] = useState<InstallWay>(null);
+  // Not on sign-in pages, email links or review links, like the sign-up pop-up.
+  const quiet = !popupAllowedOn(usePathname());
 
   useEffect(() => {
     // The offline page; only on the built site, so development is never served old pages.
@@ -65,7 +69,7 @@ export function InstallApp() {
     setWay(null);
   }
 
-  if (!way) return null;
+  if (!way || quiet) return null;
   return (
     <aside
       aria-label={t("label")}

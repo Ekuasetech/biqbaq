@@ -46,6 +46,7 @@ export const NOTIFICATION_PATHS: Record<string, string> = {
   staff_suspended: "/account",
   staff_restored: "/account",
   staff_removed: "/account",
+  shop_review_received: "/account/shop/reviews",
   bulk_email_enabled: "/account/shop",
   bulk_email_disabled: "/account/shop",
   bulk_email_paused: "/account/shop",

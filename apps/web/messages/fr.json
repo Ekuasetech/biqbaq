@@ -613,6 +613,10 @@
       "orders": {
         "title": "Commandes",
         "description": "Commandes payées à livrer, et remboursements."
+      },
+      "reviews": {
+        "title": "Avis",
+        "description": "Demandez des avis aux acheteurs et voyez ce qu'ils ont dit."
       }
     },
     "productPages": "Pages des produits"
@@ -1041,7 +1045,9 @@
       "testimonial_move": "A réordonné les citations de clients",
       "testimonial_delete": "A supprimé une citation de client",
       "about_save": "A enregistré la page À propos",
-      "email_text_save": "A modifié le texte d'un courriel"
+      "email_text_save": "A modifié le texte d'un courriel",
+      "shop_review_hide": "A masqué un avis de boutique",
+      "shop_review_restore": "A réaffiché un avis de boutique"
     }
   },
   "moderation": {
@@ -1142,6 +1148,12 @@
         "unpublished": "Non publique",
         "suspended": "Suspendue"
       }
+    },
+    "shopReviews": {
+      "title": "Avis sur les boutiques",
+      "about": "Avis sur {shop}",
+      "invited": "Invité par la boutique",
+      "hideHint": "Il reste enregistré, mais disparaît de la page de la boutique."
     }
   },
   "people": {
@@ -1861,7 +1873,8 @@
       "order_received": "Nouvelle commande : {product}.",
       "order_refunded": "Vous avez été remboursé pour {product}.",
       "order_fulfilled": "Votre commande pour {product} a été livrée.",
-      "order_disputed": "Un paiement pour {product} a été contesté. Répondez dans votre tableau de bord Stripe."
+      "order_disputed": "Un paiement pour {product} a été contesté. Répondez dans votre tableau de bord Stripe.",
+      "shop_review_received": "{shop} a un nouvel avis d'un acheteur que vous avez invité."
     }
   },
   "referrals": {
@@ -2661,7 +2674,8 @@
       "receipt_email": "Reçu",
       "message_to_seller": "Nouveau message (au vendeur)",
       "message_to_buyer": "Nouveau message (à l'acheteur)",
-      "enquiry": "Demande sur un produit (au vendeur)"
+      "enquiry": "Demande sur un produit (au vendeur)",
+      "shop_review_received": "Nouvel avis sur la boutique (au vendeur)"
     },
     "edited": "Modifié",
     "language": "Langue",
@@ -2772,5 +2786,92 @@
       }
     },
     "failed": "Cela n'a pas fonctionné. Veuillez réessayer."
+  },
+  "shopReviews": {
+    "askTitle": "Demander un avis à un acheteur",
+    "askIntro": "Créez un lien pour un acheteur et envoyez-le-lui. Il n'a pas besoin de compte Biqbaq. Chaque lien sert une fois et dure 30 jours.",
+    "buyerName": "Nom de l'acheteur",
+    "make": "Créer le lien",
+    "making": "Création…",
+    "errors": {
+      "NAME_REQUIRED": "Saisissez le nom de l'acheteur.",
+      "DETAILS_INVALID": "Vérifiez le nom de l'acheteur et réessayez.",
+      "TOO_MANY_INVITES": "Vous avez créé beaucoup de liens aujourd'hui. Réessayez demain.",
+      "REVIEWS_OFF": "Les avis sont désactivés sur Biqbaq pour le moment.",
+      "GENERIC": "Un problème est survenu. Réessayez."
+    },
+    "linkFor": "Lien pour {name}",
+    "linkLabel": "Lien d'avis",
+    "copy": "Copier le lien",
+    "copied": "Copié",
+    "whatsapp": "Envoyer sur WhatsApp",
+    "share": "Partager",
+    "shareTitle": "Donnez votre avis sur ma boutique Biqbaq",
+    "shareText": "Bonjour {name}, merci pour votre achat. Laissez un court avis sur ma boutique : {url}",
+    "qrAlt": "Code QR du lien d'avis pour {name}",
+    "linkHint": "N'envoyez ce lien qu'à {name} : il ne sert qu'une fois.",
+    "linksTitle": "Vos liens d'avis",
+    "noLinks": "Aucun lien pour l'instant.",
+    "made": "Créé le {date}",
+    "expires": "Prend fin le {date}",
+    "states": {
+      "waiting": "En attente",
+      "reviewed": "Avis reçu",
+      "expired": "Terminé",
+      "cancelled": "Retiré"
+    },
+    "showLink": "Voir le lien",
+    "withdraw": "Retirer",
+    "linksPages": "Pages des liens d'avis",
+    "reviewsTitle": "Avis sur votre boutique",
+    "average": "{average} sur 5 selon {count, plural, one {# avis} other {# avis}}",
+    "reviewsIntro": "Ils s'affichent sur la page de votre boutique. Vous ne pouvez pas les retirer ; si l'un enfreint les règles, signalez-le à Biqbaq.",
+    "noReviews": "Aucun avis pour l'instant."
+  },
+  "invitedReview": {
+    "title": "Donner un avis sur une boutique",
+    "eyebrow": "Avis sur la boutique",
+    "heading": "Comment s'est passé votre achat chez {shop} ?",
+    "intro": "Bonjour {name}, {shop} vous demande votre avis sur sa boutique. Aucun compte n'est nécessaire.",
+    "formLabel": "Votre avis",
+    "rating": "Votre note",
+    "stars": "{count, plural, one {# étoile} other {# étoiles}}",
+    "name": "Votre nom",
+    "nameHint": "Il s'affiche avec votre avis.",
+    "body": "Parlez de votre achat chez {shop}",
+    "send": "Envoyer l'avis",
+    "sending": "Envoi…",
+    "public": "Votre nom, votre note et vos mots s'afficheront sur la page de la boutique.",
+    "thanksTitle": "Merci !",
+    "thanks": "Votre avis sur {shop} est maintenant sur sa page.",
+    "seeShop": "Voir {shop}",
+    "states": {
+      "missing": "Ce lien d'avis ne fonctionne pas. Demandez-en un nouveau à la boutique.",
+      "usedTitle": "Avis déjà donné",
+      "used": "Ce lien a déjà servi à donner un avis sur {shop}.",
+      "expiredTitle": "Ce lien a pris fin",
+      "expired": "Ce lien a pris fin. Demandez-en un nouveau à {shop}.",
+      "unavailableTitle": "Non disponible",
+      "unavailable": "Ce lien d'avis ne peut pas être utilisé pour le moment."
+    },
+    "errors": {
+      "NAME_REQUIRED": "Saisissez votre nom.",
+      "RATING_REQUIRED": "Choisissez une note.",
+      "DETAILS_INVALID": "Vérifiez votre avis et réessayez.",
+      "INVITE_USED": "Ce lien a déjà servi.",
+      "INVITE_EXPIRED": "Ce lien a pris fin.",
+      "INVITE_NOT_FOUND": "Ce lien d'avis ne fonctionne pas.",
+      "REVIEWS_OFF": "Les avis sont désactivés sur Biqbaq pour le moment.",
+      "RATE_LIMITED": "Trop d'avis envoyés d'ici. Réessayez plus tard.",
+      "GENERIC": "Un problème est survenu. Réessayez."
+    }
+  },
+  "sellerReviews": {
+    "title": "Avis sur la boutique",
+    "summary": "{average} sur 5 selon {count, plural, one {# avis} other {# avis}}",
+    "none": "Aucun avis pour l'instant.",
+    "by": "Par {name}",
+    "stars": "{count, plural, one {# étoile} other {# étoiles}} sur 5",
+    "invited": "Invité par la boutique"
   }
 }

@@ -613,6 +613,10 @@
       "orders": {
         "title": "Orders",
         "description": "Paid orders to deliver, and refunds."
+      },
+      "reviews": {
+        "title": "Reviews",
+        "description": "Ask buyers for reviews, and see what they said."
       }
     },
     "productPages": "Product pages"
@@ -1041,7 +1045,9 @@
       "testimonial_move": "Reordered customer quotes",
       "testimonial_delete": "Deleted a customer quote",
       "about_save": "Saved the About us page",
-      "email_text_save": "Changed an email's wording"
+      "email_text_save": "Changed an email's wording",
+      "shop_review_hide": "Hid a shop review",
+      "shop_review_restore": "Showed a shop review again"
     }
   },
   "moderation": {
@@ -1142,6 +1148,12 @@
         "unpublished": "Not public",
         "suspended": "Suspended"
       }
+    },
+    "shopReviews": {
+      "title": "Shop reviews",
+      "about": "Review of {shop}",
+      "invited": "Invited by the shop",
+      "hideHint": "It stays saved, but disappears from the shop's page."
     }
   },
   "people": {
@@ -1861,7 +1873,8 @@
       "order_received": "New order: {product}.",
       "order_refunded": "You've been refunded for {product}.",
       "order_fulfilled": "Your order for {product} was delivered.",
-      "order_disputed": "A payment for {product} was disputed. Respond in your Stripe dashboard."
+      "order_disputed": "A payment for {product} was disputed. Respond in your Stripe dashboard.",
+      "shop_review_received": "{shop} has a new review from a buyer you invited."
     }
   },
   "referrals": {
@@ -2661,7 +2674,8 @@
       "receipt_email": "Receipt",
       "message_to_seller": "New message (to seller)",
       "message_to_buyer": "New message (to buyer)",
-      "enquiry": "Product enquiry (to seller)"
+      "enquiry": "Product enquiry (to seller)",
+      "shop_review_received": "New shop review (to seller)"
     },
     "edited": "Edited",
     "language": "Language",
@@ -2772,5 +2786,92 @@
       }
     },
     "failed": "That didn't work. Please try again."
+  },
+  "shopReviews": {
+    "askTitle": "Ask a buyer for a review",
+    "askIntro": "Make a link for one buyer and send it to them. They don't need a Biqbaq account. Each link works once and lasts 30 days.",
+    "buyerName": "Buyer's name",
+    "make": "Make the link",
+    "making": "Making…",
+    "errors": {
+      "NAME_REQUIRED": "Type the buyer's name.",
+      "DETAILS_INVALID": "Check the buyer's name and try again.",
+      "TOO_MANY_INVITES": "You've made a lot of links today. Try again tomorrow.",
+      "REVIEWS_OFF": "Reviews are turned off on Biqbaq for now.",
+      "GENERIC": "Something went wrong. Try again."
+    },
+    "linkFor": "Link for {name}",
+    "linkLabel": "Review link",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "whatsapp": "Send on WhatsApp",
+    "share": "Share",
+    "shareTitle": "Review my shop on Biqbaq",
+    "shareText": "Hi {name}, thank you for buying from me. Please leave a short review of my shop: {url}",
+    "qrAlt": "QR code of the review link for {name}",
+    "linkHint": "Only send this link to {name}: it works once.",
+    "linksTitle": "Your review links",
+    "noLinks": "No links yet.",
+    "made": "Made {date}",
+    "expires": "Ends {date}",
+    "states": {
+      "waiting": "Waiting",
+      "reviewed": "Reviewed",
+      "expired": "Ended",
+      "cancelled": "Withdrawn"
+    },
+    "showLink": "Show link",
+    "withdraw": "Withdraw",
+    "linksPages": "Review links pages",
+    "reviewsTitle": "Reviews of your shop",
+    "average": "{average} out of 5 from {count, plural, one {# review} other {# reviews}}",
+    "reviewsIntro": "These show on your shop's page. You can't remove them; if one breaks the rules, report it to Biqbaq.",
+    "noReviews": "No reviews yet."
+  },
+  "invitedReview": {
+    "title": "Review a shop",
+    "eyebrow": "Shop review",
+    "heading": "How was buying from {shop}?",
+    "intro": "Hi {name}, {shop} asked you to review their shop. You don't need an account.",
+    "formLabel": "Your review",
+    "rating": "Your rating",
+    "stars": "{count, plural, one {# star} other {# stars}}",
+    "name": "Your name",
+    "nameHint": "This shows with your review.",
+    "body": "Tell others about buying from {shop}",
+    "send": "Send review",
+    "sending": "Sending…",
+    "public": "Your name, rating and words will show on the shop's page.",
+    "thanksTitle": "Thank you!",
+    "thanks": "Your review of {shop} is now on their page.",
+    "seeShop": "See {shop}",
+    "states": {
+      "missing": "This review link doesn't work. Ask the shop for a new one.",
+      "usedTitle": "Already reviewed",
+      "used": "This link has already been used to review {shop}.",
+      "expiredTitle": "This link has ended",
+      "expired": "This link has ended. Ask {shop} for a new one.",
+      "unavailableTitle": "Not available",
+      "unavailable": "This review link can't be used right now."
+    },
+    "errors": {
+      "NAME_REQUIRED": "Type your name.",
+      "RATING_REQUIRED": "Choose a rating.",
+      "DETAILS_INVALID": "Check your review and try again.",
+      "INVITE_USED": "This link has already been used.",
+      "INVITE_EXPIRED": "This link has ended.",
+      "INVITE_NOT_FOUND": "This review link doesn't work.",
+      "REVIEWS_OFF": "Reviews are turned off on Biqbaq for now.",
+      "RATE_LIMITED": "Too many reviews from here. Try again later.",
+      "GENERIC": "Something went wrong. Try again."
+    }
+  },
+  "sellerReviews": {
+    "title": "Shop reviews",
+    "summary": "{average} out of 5 from {count, plural, one {# review} other {# reviews}}",
+    "none": "No reviews yet.",
+    "by": "By {name}",
+    "stars": "{count, plural, one {# star} other {# stars}} out of 5",
+    "invited": "Invited by the shop"
   }
 }

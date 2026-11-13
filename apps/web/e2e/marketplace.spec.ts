@@ -1841,7 +1841,7 @@ test.describe("public marketplace", () => {
 
             // A moderator hides it, with a reason.
             await page.goto("/admin/moderation");
-            const panel = page.getByRole("region", { name: "Reviews" });
+            const panel = page.getByRole("region", { name: "Reviews", exact: true });
             await panel.getByLabel("Search by name").fill(name);
             await panel.getByRole("button", { name: "Search" }).click();
             const card = panel.getByRole("article", { name: `Review of ${name}` });
@@ -1855,6 +1855,81 @@ test.describe("public marketplace", () => {
             }).toPass({ timeout: 90000 });
             await buyer.page.goto(`/products/${slug}`);
             await expect(buyer.page.getByText("Biqbaq has hidden your review of this product.")).toBeVisible();
+          });
+
+          test("a seller sends a buyer a one-time review link; the review shows on the shop's page (Q-67)", async ({ page, browser, request }) => {
+            test.setTimeout(150000);
+            const seller = await approvedSeller(page, browser, request);
+            const shop = seller.page;
+            const slug = sql(`select s.slug from public.sellers s join auth.users u on u.id = s.owner_user_id where u.email = '${seller.email}'`);
+            const words = `Fast delivery ${unique()}`;
+
+            // The seller makes a link for one buyer.
+            await shop.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: "Reviews", exact: true }).click();
+            await expect(shop).toHaveURL(/\/account\/shop\/reviews$/);
+            await shop.getByRole("button", { name: "Make the link" }).click();
+            await expect(shop.getByText("Type the buyer's name.")).toBeVisible();
+            await shop.getByLabel("Buyer's name").fill("Chidi Buyer");
+            await shop.getByRole("button", { name: "Make the link" }).click();
+            await expect(shop.getByText("Link for Chidi Buyer")).toBeVisible();
+            await expect(shop.getByRole("img", { name: "QR code of the review link for Chidi Buyer" })).toBeVisible();
+            await expect(shop.getByRole("link", { name: "Send on WhatsApp" })).toHaveAttribute("href", /^https:\/\/wa\.me\/\?text=.*review%2F[0-9a-f]{64}/);
+            const url = await shop.getByRole("textbox", { name: "Review link", exact: true }).inputValue();
+            expect(url).toMatch(/\/review\/[0-9a-f]{64}$/);
+            const links = shop.getByRole("list", { name: "Your review links" });
+            await expect(links).toContainText("Chidi Buyer");
+            await expect(links).toContainText("Waiting");
+
+            // The buyer has no account: they open the link in a fresh browser.
+            const buyer = await (await browser.newContext()).newPage();
+            await buyer.goto(new URL(url).pathname);
+            await expect(buyer.getByRole("heading", { name: "How was buying from Ada's Shop?" })).toBeVisible();
+            await expect(buyer.getByLabel("Your name")).toHaveValue("Chidi Buyer");
+            const form = buyer.getByRole("form", { name: "Your review" });
+            await form.getByRole("button", { name: "Send review" }).click();
+            await expect(form.getByText("Choose a rating.")).toBeVisible();
+            await form.getByRole("radio", { name: "4 stars" }).locator("xpath=..").click();
+            await form.getByLabel("Your name").fill("Chidi O.");
+            await form.getByLabel("Tell others about buying from Ada's Shop").fill(`${words} <b>bold</b>`);
+            await form.getByRole("button", { name: "Send review" }).click();
+            await expect(buyer.getByText("Your review of Ada's Shop is now on their page.")).toBeVisible({ timeout: 15000 });
+
+            // The link works only once.
+            await buyer.reload();
+            await expect(buyer.getByRole("heading", { name: "Already reviewed" })).toBeVisible();
+            const again = await request.post(`/api/v1/review-invites/${url.split("/").pop()}`, { data: { name: "Again", rating: 1, body: "" } });
+            expect(again.status()).toBe(409);
+            expect((await request.get("/api/v1/review-invites/not-a-token")).status()).toBe(404);
+
+            // It shows on the shop's page at once, marked as invited.
+            const visitor = await (await browser.newContext()).newPage();
+            const section = visitor.getByRole("region", { name: "Shop reviews" });
+            await expect(async () => {
+              await visitor.goto(`/sellers/${slug}`);
+              await expect(section).toContainText(`${words} <b>bold</b>`, { timeout: 2000 });
+            }).toPass({ timeout: 90000 });
+            await expect(section.getByRole("article", { name: "By Chidi O." })).toContainText("Invited by the shop");
+            await expect(section).toContainText("4 out of 5 from 1 review");
+
+            // The seller sees it, and the link as reviewed, with nothing to delete it.
+            await shop.reload();
+            await expect(links).toContainText("Reviewed");
+            await expect(shop.getByRole("region", { name: "Reviews of your shop" })).toContainText(words);
+            await expect(shop.getByRole("region", { name: "Reviews of your shop" }).getByRole("button")).toHaveCount(0);
+            await expect(shop.getByRole("button", { name: "Withdraw" })).toHaveCount(0);
+
+            // A moderator can hide it, with a reason.
+            await page.goto("/admin/moderation");
+            const panel = page.getByRole("region", { name: "Shop reviews" });
+            const card = panel.getByRole("article", { name: "Review of Ada's Shop" }).filter({ hasText: words });
+            await card.getByRole("button", { name: "Hide review" }).click();
+            await card.getByLabel("Reason").fill("Test of hiding");
+            await card.getByRole("button", { name: "Confirm: Hide review" }).click();
+            await expect(card).toHaveCount(0);
+            await expect(async () => {
+              await visitor.reload();
+              await expect(section).toContainText("No reviews yet.", { timeout: 2000 });
+            }).toPass({ timeout: 90000 });
           });
 
           test("views count once per visitor per day, and never the seller or bots", async ({ page, browser, request }) => {

@@ -8,6 +8,8 @@ import { PageTransition } from "@/components/layout/page-transition";
 import { SiteExtras } from "@/components/layout/site-extras";
 import { ProductGrid } from "@/components/product/product-card";
 import { SellerBadge } from "@/components/product/seller-badge";
+import { SellerReviews } from "@/components/reviews/seller-reviews";
+import { getSellerReviews } from "@/modules/shop-reviews/server";
 import { routing } from "@/i18n/routing";
 import { getSellerBySlug, listProductsBySeller, listSellers } from "@/modules/product-catalog";
 
@@ -38,6 +40,7 @@ export default async function SellerPage({ params }: Props) {
 
   const t = await getTranslations({ locale });
   const products = await listProductsBySeller(slug);
+  const shopReviews = await getSellerReviews(slug);
   const views = products.reduce((total, product) => total + product.views, 0);
 
   return (
@@ -79,6 +82,9 @@ export default async function SellerPage({ params }: Props) {
           </h2>
           <ProductGrid products={products} />
         </section>
+
+        {/* What buyers the shop invited said about it (Q-67). */}
+        <SellerReviews locale={locale} {...shopReviews} />
 
         <SiteExtras locale={locale} />
       </div>

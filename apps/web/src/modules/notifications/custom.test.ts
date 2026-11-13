@@ -14,8 +14,8 @@ const SITE = "https://biqbaq.test";
 describe("the email catalogue", () => {
   const catalog = emailCatalog();
   it("lists every email once, each with its original wording in both languages", () => {
-    expect(catalog.length).toBe(47);
-    expect(new Set(catalog.map((item) => item.template)).size).toBe(47);
+    expect(catalog.length).toBe(48);
+    expect(new Set(catalog.map((item) => item.template)).size).toBe(48);
     for (const item of catalog) {
       expect(item.fields.length).toBeGreaterThan(0);
       for (const field of item.fields) {

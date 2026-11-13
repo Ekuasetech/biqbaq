@@ -26,6 +26,7 @@ import {
   Package,
   Settings,
   Share2,
+  Star,
   ShieldCheck,
   ShoppingBag,
   Store,
@@ -125,6 +126,7 @@ function useNavigation(data: DashboardData | null, pathname: string) {
     for (const [section, icon] of [
       ["products", Package],
       ["orders", ShoppingBag],
+      ["reviews", Star],
       ["cargo-cars", Car],
       ["clients", Mail],
       ["invoices", FileText],

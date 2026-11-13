@@ -35,6 +35,7 @@ import {
 } from "@/modules/moderation";
 import { refreshCatalog } from "@/modules/product-catalog/actions";
 import { listReviewsForModeration, setReviewHidden, type ReviewForModeration } from "@/modules/reviews";
+import { listShopReviewsForModeration, setShopReviewHidden, type ShopReviewForModeration } from "@/modules/shop-reviews";
 
 // Links on these lists do not prefetch: what they point to may be suspended a moment later.
 const secondaryButton =
@@ -523,6 +524,92 @@ function ReviewsPanel() {
   );
 }
 
+/** Shop reviews from invited buyers (Q-67): hidden only by moderators, with a reason. */
+function ShopReviewsPanel() {
+  const t = useTranslations("moderation");
+  const [filter, setFilter] = useState<string>("published");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [rows, setRows] = useState<ShopReviewForModeration[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  const load = useCallback(async () => {
+    const { data, error } = await listShopReviewsForModeration(getSupabaseBrowserClient(), filter, search, page, MODERATION_PAGE_SIZE);
+    if (error) {
+      setFailed(true);
+      return;
+    }
+    setFailed(false);
+    setRows(data as ShopReviewForModeration[]);
+  }, [filter, search, page]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => void load(), 0);
+    return () => clearTimeout(timer);
+  }, [load]);
+
+  const supabase = getSupabaseBrowserClient();
+  return (
+    <section aria-labelledby="moderation-shop-reviews" className="grid gap-3">
+      <h2 id="moderation-shop-reviews" className={headingClass}>{t("shopReviews.title")}</h2>
+      <div className={cardClass}>
+        <SearchBar
+          id="shop-reviews"
+          filters={REVIEW_FILTERS}
+          filter={filter}
+          label={(name) => t(`reviews.filters.${name}`)}
+          onFilter={(next) => { setFilter(next); setPage(1); }}
+          onSearch={(next) => { setSearch(next); setPage(1); }}
+        />
+      </div>
+      {failed && <Notice kind="error">{t("errors.loadFailed")}</Notice>}
+      {!rows && !failed && <Skeleton className="h-40 rounded-3xl" />}
+      {rows?.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
+      {rows && rows.length > 0 && (
+        <ul className="grid gap-3">
+          {rows.map((review) => (
+            <li key={review.id}>
+              <article aria-label={t("shopReviews.about", { shop: review.shop_name })} className={cardClass}>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="break-words font-semibold">{review.shop_name}</h3>
+                    <p className="break-words text-sm text-muted-foreground">
+                      {t("reviews.by", { name: review.reviewer_name })} · {t("shopReviews.invited")} · {t("reviews.rating", { rating: review.rating })}
+                    </p>
+                  </div>
+                  <StatusPill tone={review.status === "published" ? "good" : "bad"}>{t(`reviews.status.${review.status}`)}</StatusPill>
+                </div>
+                {review.body && <p className="mt-2 whitespace-pre-line break-words text-sm">{review.body}</p>}
+                {review.hidden_reason && <p className="mt-2 break-words text-sm text-muted-foreground">{t("reviews.hiddenBecause", { reason: review.hidden_reason })}</p>}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {review.status === "published" ? (
+                    <ReasonAction
+                      id={`hide-shop-${review.id}`}
+                      label={t("reviews.hide")}
+                      destructive
+                      hint={t("shopReviews.hideHint")}
+                      onConfirm={(reason) => setShopReviewHidden(supabase, review.id, true, reason)}
+                      onDone={load}
+                    />
+                  ) : (
+                    <ReasonAction
+                      id={`show-shop-${review.id}`}
+                      label={t("reviews.show")}
+                      onConfirm={(reason) => setShopReviewHidden(supabase, review.id, false, reason)}
+                      onDone={load}
+                    />
+                  )}
+                </div>
+              </article>
+            </li>
+          ))}
+        </ul>
+      )}
+      {rows && rows.length > 0 && <Pager page={page} total={rows[0].total} onPage={setPage} />}
+    </section>
+  );
+}
+
 function useModerationAccess(userId: string | undefined) {
   const [access, setAccess] = useState<ModerationAccess | null>(null);
   useEffect(() => {
@@ -566,6 +653,7 @@ export function ModerationScreen() {
     <div className="grid gap-8">
       {access.products && <ProductsPanel />}
       {access.products && <ReviewsPanel />}
+      {access.products && <ShopReviewsPanel />}
       {access.vehicles && <VehiclesPanel />}
       {(access.shops || access.publishing) && <ShopsPanel access={access} />}
     </div>

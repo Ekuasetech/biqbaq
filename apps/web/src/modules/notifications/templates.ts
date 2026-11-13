@@ -526,6 +526,10 @@ const TEMPLATES: Record<string, Record<EmailLocale, Build>> = {
     en: (shop) => ({ subject: "Your staff access was restored", body: `${shop} has restored your staff access to their shop on Biqbaq.`, action: "Go to your account", path: "/account" }),
     fr: (shop) => ({ subject: "Votre accès de personnel a été rétabli", body: `${shop} a rétabli votre accès de personnel à sa boutique sur Biqbaq.`, action: "Accéder à votre compte", path: "/account" }),
   },
+  shop_review_received: {
+    en: (shop) => ({ subject: "You have a new review", body: `A buyer you invited has reviewed ${shop} on Biqbaq. It now shows on your shop's page.`, action: "See your reviews", path: "/account/shop/reviews" }),
+    fr: (shop) => ({ subject: "Vous avez un nouvel avis", body: `Un acheteur que vous avez invité a laissé un avis sur ${shop} sur Biqbaq. Il s'affiche maintenant sur la page de votre boutique.`, action: "Voir vos avis", path: "/account/shop/reviews" }),
+  },
   staff_removed: {
     en: (shop) => ({ subject: "Your staff access was removed", body: `${shop} has removed you from their staff on Biqbaq. Your account is not affected.`, action: "Go to your account", path: "/account" }),
     fr: (shop) => ({ subject: "Votre accès de personnel a été retiré", body: `${shop} vous a retiré de son personnel sur Biqbaq. Votre compte n'est pas touché.`, action: "Accéder à votre compte", path: "/account" }),
@@ -566,6 +570,7 @@ const PLACEHOLDER: Record<string, "role" | "shop" | "product"> = {
   staff_suspended: "shop",
   staff_restored: "shop",
   staff_removed: "shop",
+  shop_review_received: "shop",
   product_suspended: "product",
   product_restored: "product",
   order_paid: "product",
