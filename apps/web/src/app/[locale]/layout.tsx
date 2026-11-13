@@ -25,8 +25,16 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
     title: { default: t("title"), template: "%s | Biqbaq" },
     description: t("description"),
-    // Installing Biqbaq on a phone (Q-61): the iPhone's home-screen icon and full-screen name.
-    icons: { apple: "/icons/apple-touch-icon.png" },
+    // The logo in the browser tab, and the iPhone's home-screen icon (Q-61). Set here in full,
+    // since setting icons here replaces the app folder's own icon file.
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "48x48" },
+        { url: "/icons/icon-32.png", sizes: "32x32", type: "image/png" },
+        { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      ],
+      apple: "/icons/apple-touch-icon.png",
+    },
     appleWebApp: { capable: true, title: "Biqbaq", statusBarStyle: "default" },
   };
 }

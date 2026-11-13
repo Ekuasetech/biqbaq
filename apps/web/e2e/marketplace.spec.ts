@@ -4352,6 +4352,11 @@ test.describe("the installable web app (Q-61)", () => {
     await expect(page.locator('link[rel="manifest"]')).toHaveAttribute("href", /manifest\.webmanifest/);
     await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute("href", "/icons/apple-touch-icon.png");
     await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute("content", "#0c2352");
+    // The logo in the browser tab: linked from every page, and at the address browsers try by themselves.
+    await expect(page.locator('link[rel="icon"][href="/favicon.ico"]')).toHaveCount(1);
+    const favicon = await request.get("/favicon.ico");
+    expect(favicon.status()).toBe(200);
+    expect(favicon.headers()["content-type"]).toContain("image/x-icon");
   });
 
   test("shows a friendly page instead of an error when the phone is offline", async ({ browser, baseURL }) => {
