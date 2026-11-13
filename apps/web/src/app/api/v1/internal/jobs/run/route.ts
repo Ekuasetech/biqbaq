@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { runEmailJobs } from "@/modules/background-jobs/email-worker";
+import { runPushJobs } from "@/modules/push/server";
 
 const fail = (status: number, code: string) => NextResponse.json({ error: { code, message: code, details: {} } }, { status });
 const digest = (value: string) => createHash("sha256").update(value).digest();
@@ -15,7 +16,8 @@ export async function POST(request: Request) {
   if (!timingSafeEqual(digest(given), digest(`Bearer ${secret}`))) return fail(401, "NOT_AUTHORIZED");
 
   try {
-    return NextResponse.json({ data: await runEmailJobs() });
+    // Emails, then phone notifications (Q-66).
+    return NextResponse.json({ data: { ...(await runEmailJobs()), push: await runPushJobs() } });
   } catch {
     console.error("Email jobs failed to run");
     return fail(500, "GENERIC");

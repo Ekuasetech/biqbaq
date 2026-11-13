@@ -2074,6 +2074,78 @@ test.describe("public marketplace", () => {
             (reader as unknown as { problems?: string[] }).problems = [];
           });
 
+          test("phone notifications: turned on per device, chosen per kind, and off again", async ({ browser, request }) => {
+            test.setTimeout(120000);
+            // A browser that can show notifications. Test browsers cannot reach a real push
+            // service, so the browser's own subscribe step is stood in for here.
+            const context = await browser.newContext({ serviceWorkers: "allow", permissions: ["notifications"] });
+            await context.addInitScript(() => {
+              // Headless browsers answer "blocked" whatever the test allows; this one says yes.
+              Object.defineProperty(Notification, "permission", { get: () => "granted" });
+              Notification.requestPermission = async () => "granted";
+              // Like a real browser, it remembers the subscription across reloads.
+              const make = (endpoint: string) =>
+                ({
+                  endpoint,
+                  toJSON: () => ({ endpoint, keys: { p256dh: "k".repeat(87), auth: "s".repeat(22) } }),
+                  unsubscribe: async () => {
+                    sessionStorage.removeItem("test-push-endpoint");
+                    return true;
+                  },
+                }) as unknown as PushSubscription;
+              PushManager.prototype.subscribe = async function () {
+                const endpoint = `https://push.example.com/send/${Math.random().toString(36).slice(2)}${"a".repeat(30)}`;
+                sessionStorage.setItem("test-push-endpoint", endpoint);
+                return make(endpoint);
+              };
+              PushManager.prototype.getSubscription = async function () {
+                const endpoint = sessionStorage.getItem("test-push-endpoint");
+                return endpoint ? make(endpoint) : null;
+              };
+            });
+            const page = await context.newPage();
+            const email = await confirmedAccount(page, request);
+            const userId = sql(`select id from auth.users where email = '${email}'`);
+            await page.goto("/account/notifications");
+            const settings = page.getByRole("region", { name: "Phone notifications" });
+            // Messages and orders on by default; the rest off.
+            await expect(settings.getByLabel(/New messages/)).toBeChecked({ timeout: 15000 });
+            await expect(settings.getByLabel(/Orders and payments/)).toBeChecked();
+            await expect(settings.getByLabel(/Applications and roles/)).not.toBeChecked();
+
+            await settings.getByRole("button", { name: "Turn on notifications" }).click();
+            await expect(settings).toContainText("On for this device", { timeout: 15000 });
+            expect(sql(`select count(*) from public.push_subscriptions where user_id = '${userId}'`)).toBe("1");
+
+            // Choices are kept, for all their devices.
+            await settings.getByLabel(/Applications and roles/).check();
+            await settings.getByLabel(/New messages/).uncheck();
+            await expect.poll(() => sql(`select string_agg(category || '=' || enabled, ',' order by category) from public.push_preferences where user_id = '${userId}'`)).toBe("applications=true,messages=false");
+            await page.reload();
+            await expect(settings.getByLabel(/Applications and roles/)).toBeChecked({ timeout: 15000 });
+            await expect(settings).toContainText("On for this device");
+
+            // An event they chose queues a push for them.
+            sql(`select private.enqueue_email('${userId}', 'application_approved', '{"role": "seller"}', 'e2e:push:${userId}')`);
+            expect(sql(`select count(*) from public.background_jobs where type = 'push' and user_id = '${userId}'`)).toBe("1");
+
+            await settings.getByRole("button", { name: "Turn off on this device" }).click();
+            await expect(settings.getByRole("button", { name: "Turn on notifications" })).toBeVisible();
+            expect(sql(`select count(*) from public.push_subscriptions where user_id = '${userId}'`)).toBe("0");
+            sql(`delete from public.background_jobs where type = 'push' and user_id = '${userId}'`);
+            await context.close();
+
+            // A browser where notifications were blocked is told how to allow them.
+            const blocked = await browser.newContext({ serviceWorkers: "allow" });
+            await blocked.addInitScript(() => Object.defineProperty(Notification, "permission", { get: () => "denied" }));
+            const second = await blocked.newPage();
+            await signIn(second, email, password);
+            await expect(signedIn(second)).toBeVisible({ timeout: 15000 });
+            await second.goto("/account/notifications");
+            await expect(second.getByRole("region", { name: "Phone notifications" })).toContainText("Notifications are blocked for Biqbaq in this browser", { timeout: 15000 });
+            await blocked.close();
+          });
+
           test("Super Admin rewords the sign-up email, previews it, and new accounts receive it", async ({ page, request, browser }) => {
             test.setTimeout(180000);
             const id = unique();

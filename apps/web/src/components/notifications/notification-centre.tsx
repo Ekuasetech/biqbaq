@@ -1,5 +1,7 @@
 "use client";
 
+import { PushSettings } from "@/components/notifications/push-settings";
+
 import { useClientNow } from "@/lib/use-client-now";
 import { getSubscription, setSubscription } from "@/modules/email-lists";
 import type { User } from "@supabase/supabase-js";
@@ -256,6 +258,7 @@ export function NotificationCentre() {
         {more && <button type="button" onClick={() => void loadEarlier()} className={cn(secondaryButton, "justify-self-center")}>{t("earlier")}</button>}
         <p className="text-xs text-muted-foreground">{t("keptFor")}</p>
       </section>
+      <PushSettings />
       <Preferences />
     </div>
   );

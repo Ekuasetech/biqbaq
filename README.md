@@ -39,6 +39,10 @@ To try the admin screens, create an account, then run `./scripts/make-local-supe
 
 The local email sender starts with `npm run dev` and keeps the email types it started with: after adding a new kind of email, restart the dev server, or those emails fail with `UNKNOWN_TEMPLATE`.
 
+### Phone notifications
+
+Pushes need a key pair, generated once per environment with `npx web-push generate-vapid-keys`: put `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (secret, server only) and `VAPID_SUBJECT` (`https://biqbaq.com` or a `mailto:` address) in `apps/web/.env.local`. The dev server's background worker sends them with the emails; restart it after adding the keys. Real pushes need a real phone or desktop browser: on iPhone, only with Biqbaq added to the Home Screen over https.
+
 ### Payments with Stripe (test mode)
 
 Use a Stripe account kept only for Biqbaq, in test mode or a sandbox, with Connect switched on. Put its `STRIPE_SECRET_KEY` (`sk_test_...`) in `apps/web/.env.local`, then forward Stripe's notices to the app and put the secret it prints in the same file as `STRIPE_WEBHOOK_SECRET`:

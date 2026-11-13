@@ -2728,5 +2728,49 @@
     "qr": "Sur un ordinateur? Scannez ceci avec l'appareil photo de votre téléphone pour y ouvrir Biqbaq, puis suivez les étapes.",
     "qrAlt": "Code QR pour ouvrir Biqbaq sur votre téléphone",
     "credit": "Le robot Android est reproduit ou modifié à partir d'une création de Google partagée et utilisée selon les conditions de la licence Creative Commons 3.0 Attribution."
+  },
+  "push": {
+    "message_to_buyer": "Nouveau message de {shop}",
+    "message_to_seller": "Nouveau message pour {shop}"
+  },
+  "pushSettings": {
+    "title": "Notifications sur le téléphone",
+    "intro": "Recevez une notification sur ce téléphone ou cet ordinateur quand quelque chose se passe, même quand Biqbaq est fermé. Activez-la séparément sur chaque appareil.",
+    "turnOn": "Activer les notifications",
+    "turnOff": "Désactiver sur cet appareil",
+    "working": "Veuillez patienter...",
+    "onHere": "Activées sur cet appareil",
+    "iosTitle": "Sur iPhone et iPad, ajoutez d'abord Biqbaq à votre écran d'accueil :",
+    "shareButton": "le bouton Partager",
+    "iosStep1": "Dans Safari, touchez <share></share> Partager",
+    "iosStep2": "Touchez <add></add> Sur l'écran d'accueil, puis Ajouter",
+    "iosStep3": "Ouvrez Biqbaq depuis votre écran d'accueil et revenez ici pour activer les notifications",
+    "blocked": "Les notifications de Biqbaq sont bloquées dans ce navigateur. Pour les permettre, ouvrez les réglages du navigateur ou du téléphone pour Biqbaq, autorisez les notifications, puis revenez ici.",
+    "unsupported": "Ce navigateur ne peut pas afficher les notifications de Biqbaq. Essayez Chrome, Edge, Firefox ou Safari.",
+    "which": "Me prévenir pour",
+    "whichHint": "Ces choix valent pour tous vos appareils. La cloche de votre tableau de bord montre toujours tout.",
+    "categories": {
+      "messages": {
+        "label": "Nouveaux messages",
+        "help": "Chaque nouveau message, regroupé par conversation."
+      },
+      "orders": {
+        "label": "Commandes et paiements",
+        "help": "Commandes payées, reçues, livrées ou remboursées, et changements de paiement pour votre boutique."
+      },
+      "applications": {
+        "label": "Demandes et rôles",
+        "help": "Décisions sur vos demandes, vos rôles et la vérification de votre boutique."
+      },
+      "staff": {
+        "label": "Personnel",
+        "help": "Invitations, approbations et changements d'accès du personnel."
+      },
+      "shop": {
+        "label": "Boutique et produits",
+        "help": "Avis sur votre boutique, vos produits, la publication et les courriels aux clients."
+      }
+    },
+    "failed": "Cela n'a pas fonctionné. Veuillez réessayer."
   }
 }

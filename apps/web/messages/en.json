@@ -2728,5 +2728,49 @@
     "qr": "On a computer? Scan this with your phone's camera to open Biqbaq there, then follow the steps.",
     "qrAlt": "QR code to open Biqbaq on your phone",
     "credit": "The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License."
+  },
+  "push": {
+    "message_to_buyer": "New message from {shop}",
+    "message_to_seller": "New message for {shop}"
+  },
+  "pushSettings": {
+    "title": "Phone notifications",
+    "intro": "Get a notification on this phone or computer when something happens, even with Biqbaq closed. Turn it on separately on each device.",
+    "turnOn": "Turn on notifications",
+    "turnOff": "Turn off on this device",
+    "working": "Please wait...",
+    "onHere": "On for this device",
+    "iosTitle": "On iPhone and iPad, add Biqbaq to your Home Screen first:",
+    "shareButton": "the Share button",
+    "iosStep1": "In Safari, tap <share></share> Share",
+    "iosStep2": "Tap <add></add> Add to Home Screen, then Add",
+    "iosStep3": "Open Biqbaq from your Home Screen and come back here to turn notifications on",
+    "blocked": "Notifications are blocked for Biqbaq in this browser. To allow them, open your browser's or phone's settings for Biqbaq, allow notifications, then come back here.",
+    "unsupported": "This browser can't show notifications from Biqbaq. Try Chrome, Edge, Firefox or Safari.",
+    "which": "Notify me about",
+    "whichHint": "These apply to all your devices. The bell in your dashboard still shows everything.",
+    "categories": {
+      "messages": {
+        "label": "New messages",
+        "help": "Each new message, grouped by conversation."
+      },
+      "orders": {
+        "label": "Orders and payments",
+        "help": "Orders paid, received, delivered or refunded, and payment changes for your shop."
+      },
+      "applications": {
+        "label": "Applications and roles",
+        "help": "Decisions on your applications, roles and shop verification."
+      },
+      "staff": {
+        "label": "Staff",
+        "help": "Invitations, approvals and changes to staff access."
+      },
+      "shop": {
+        "label": "Shop and products",
+        "help": "Notices about your shop, products, publishing and customer emails."
+      }
+    },
+    "failed": "That didn't work. Please try again."
   }
 }

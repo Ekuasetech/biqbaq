@@ -11,12 +11,16 @@ export async function register() {
   if (state.biqbaqEmailWorker) return;
 
   const { runEmailJobs } = await import("@/modules/background-jobs/email-worker");
+  const { runPushJobs } = await import("@/modules/push/server");
   let running = false;
   state.biqbaqEmailWorker = setInterval(() => {
     if (running) return;
     running = true;
     runEmailJobs()
       .catch(() => console.error("Email jobs failed to run"))
+      // Phone notifications too (Q-66).
+      .then(() => runPushJobs())
+      .catch(() => console.error("Push jobs failed to run"))
       .finally(() => {
         running = false;
       });

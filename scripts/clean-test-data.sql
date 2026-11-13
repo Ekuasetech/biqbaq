@@ -60,6 +60,10 @@ delete from public.profiles where id in (select id from t);
 delete from auth.users where id in (select id from t);
 delete from public.rate_limit_counters;
 delete from public.advertisements where created_by in (select id from t);
+-- Phone notification devices and choices (cascades are off here, so they are removed by hand).
+delete from public.push_subscriptions where user_id in (select id from t);
+delete from public.push_preferences where user_id in (select id from t);
+delete from public.background_jobs where type = 'push' and user_id in (select id from t);
 -- popup cleanup
 delete from public.background_jobs where payload ->> 'to' ~ '^popup-[0-9]+-[0-9]+@example\.com$';
 delete from public.list_subscribers where email ~ '^popup-[0-9]+-[0-9]+@example\.com$';
