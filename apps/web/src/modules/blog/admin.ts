@@ -65,6 +65,13 @@ export interface EditablePost {
   status: string;
   publish_at: string | null;
   cover_url: string | null;
+  /** Super Admin's choice to email the post to Biqbaq's list when it goes live (Q-68). */
+  email_list: boolean;
+  emailed_at: string | null;
+  email_recipients: number | null;
+  email_skipped: "no_address" | "no_subscribers" | "email_off" | null;
+  /** Only for Super Admin: who the email would reach. */
+  list_email: { subscribers: number; has_address: boolean; per_day: number } | null;
 }
 
 export interface BlogCategory {
@@ -96,8 +103,8 @@ export async function savePost(id: string | null, form: PostForm, content: unkno
   if (!response?.ok) return { data: null, error: { message: json?.error?.code ?? "GENERIC" } };
   return { data: json.data.id as string, error: null };
 }
-export const setPostStatus = (supabase: SupabaseClient, id: string, status: "draft" | "published" | "archived", publishAt?: string) =>
-  supabase.rpc("set_blog_post_status", { p_id: id, p_status: status, p_publish_at: publishAt ?? null });
+export const setPostStatus = (supabase: SupabaseClient, id: string, status: "draft" | "published" | "archived", publishAt?: string, emailList = false) =>
+  supabase.rpc("set_blog_post_status", { p_id: id, p_status: status, p_publish_at: publishAt ?? null, p_email_list: emailList });
 
 /** Maps a refusal to a message, without showing the database's wording. */
 export function blogErrorKey(error: { code?: string; message?: string }): string {

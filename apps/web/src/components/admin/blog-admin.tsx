@@ -66,6 +66,8 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
   const [failure, setFailure] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [scheduleAt, setScheduleAt] = useState("");
+  // Ticked by default (owner's choice, 2026-11-13).
+  const [emailList, setEmailList] = useState(true);
   const [newCategory, setNewCategory] = useState<{ en: string; fr: string } | null>(null);
   const [content, setContent] = useState<Doc>({ type: "doc", content: [] });
   const [editorKey, setEditorKey] = useState(0);
@@ -201,6 +203,8 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
   if (!loaded) return <Skeleton className="h-96 rounded-3xl" />;
   const state = post ? postState(post.status, post.publish_at) : "draft";
   const archived = state === "archived";
+  const canEmail = Boolean(post?.list_email) && !post?.emailed_at && state !== "published";
+  const sendEmail = canEmail && emailList;
 
   return (
     <section aria-labelledby="blog-editor" className={cn(cardClass, "grid gap-4")}>
@@ -309,9 +313,10 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
           <div className="grid gap-2">
             <h3 className="text-sm font-semibold">{t("publishing")}</h3>
             <p className="text-xs text-muted-foreground">{t("hints.publish")}</p>
+            <ListEmailChoice post={post} state={state} checked={emailList} onChange={setEmailList} disabled={working} />
             <div className="flex flex-wrap items-end gap-2">
               {state !== "published" && (
-                <button type="button" disabled={working} onClick={() => void run(() => setPostStatus(getSupabaseBrowserClient(), id, "published"), t("published"))} className={primaryButton}>{t("publishNow")}</button>
+                <button type="button" disabled={working} onClick={() => void run(() => setPostStatus(getSupabaseBrowserClient(), id, "published", undefined, sendEmail), t(sendEmail ? "publishedEmailed" : "published"))} className={primaryButton}>{t("publishNow")}</button>
               )}
               <div className="grid gap-1.5">
                 <Label htmlFor="post-schedule">{t("scheduleFor")}</Label>
@@ -320,7 +325,7 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
               <button
                 type="button"
                 disabled={working || !scheduleAt}
-                onClick={() => void run(() => setPostStatus(getSupabaseBrowserClient(), id, "published", new Date(scheduleAt).toISOString()), t("scheduled"))}
+                onClick={() => void run(() => setPostStatus(getSupabaseBrowserClient(), id, "published", new Date(scheduleAt).toISOString(), sendEmail), t(sendEmail ? "scheduledEmailed" : "scheduled"))}
                 className={secondaryButton}
               >
                 {t("schedule")}
@@ -338,6 +343,46 @@ function Editor({ postId, onClose }: { postId: string | null; onClose: () => voi
         <button type="button" disabled={working} onClick={() => void run(() => setPostStatus(getSupabaseBrowserClient(), id, "draft"), t("unarchived"))} className={cn(secondaryButton, "w-fit")}>{t("unarchive")}</button>
       )}
     </section>
+  );
+}
+
+/**
+ * Emailing a new post to Biqbaq's list (owner's request, 2026-11-13, Q-68): a tick box for
+ * Super Admin, ticked by default, until the post has been emailed; then what happened.
+ */
+function ListEmailChoice({ post, state, checked, onChange, disabled }: { post: EditablePost; state: string; checked: boolean; onChange: (value: boolean) => void; disabled: boolean }) {
+  const t = useTranslations("blogAdmin.listEmail");
+  const format = useFormatter();
+  const list = post.list_email;
+  if (post.emailed_at) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        {post.email_skipped
+          ? t(`skipped.${post.email_skipped}`)
+          : t("sent", { count: post.email_recipients ?? 0, date: format.dateTime(new Date(post.emailed_at), { dateStyle: "medium", timeStyle: "short" }) })}
+      </p>
+    );
+  }
+  // Live and not emailed: it was published without the box ticked.
+  if (!list || state === "published") return null;
+  const waiting = post.email_list && state === "scheduled";
+  return (
+    <div className="grid gap-1.5 rounded-xl bg-muted/50 p-3">
+      <label className="flex items-start gap-2 text-sm font-medium">
+        <input type="checkbox" checked={checked} disabled={disabled} onChange={(event) => onChange(event.target.checked)} className="mt-0.5 size-4 accent-primary" />
+        <span>{t("label")}</span>
+      </label>
+      <p className="text-xs text-muted-foreground">
+        {t("reach", { count: list.subscribers })}
+        {list.subscribers > list.per_day && ` ${t("spread", { perDay: list.per_day })}`}
+      </p>
+      {!list.has_address && (
+        <p className="text-xs font-semibold text-destructive">
+          {t.rich("noAddress", { link: (chunks) => <Link href="/admin/email-lists" className="underline underline-offset-2">{chunks}</Link> })}
+        </p>
+      )}
+      {waiting && <p className="text-xs text-muted-foreground">{t("waiting")}</p>}
+    </div>
   );
 }
 

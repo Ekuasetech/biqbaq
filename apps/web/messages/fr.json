@@ -1047,7 +1047,8 @@
       "about_save": "A enregistré la page À propos",
       "email_text_save": "A modifié le texte d'un courriel",
       "shop_review_hide": "A masqué un avis de boutique",
-      "shop_review_restore": "A réaffiché un avis de boutique"
+      "shop_review_restore": "A réaffiché un avis de boutique",
+      "blog_email": "A envoyé un article du blog à la liste de Biqbaq"
     }
   },
   "moderation": {
@@ -1518,6 +1519,21 @@
     "sectionNames": {
       "posts": "Articles",
       "comments": "Commentaires"
+    },
+    "publishedEmailed": "Publié. Il apparaît sur le site d'ici une minute, et le courriel à la liste de Biqbaq est en route.",
+    "scheduledEmailed": "Programmé. Il sera en ligne à cette heure-là, et envoyé à la liste de Biqbaq à ce moment.",
+    "listEmail": {
+      "label": "Envoyer cet article à la liste de Biqbaq",
+      "reach": "{count, plural, =0 {Personne n'a encore confirmé vouloir les courriels de Biqbaq.} one {Envoyé à # personne confirmée.} other {Envoyé à # personnes confirmées.}} L'objet est le titre de l'article.",
+      "spread": "Jusqu'à {perDay} partent aujourd'hui ; les autres partent les jours suivants à 9 h (heure de Toronto).",
+      "noAddress": "L'adresse postale de Biqbaq manque. La loi l'exige dans chaque courriel : personne ne recevra l'article tant que vous ne l'aurez pas ajoutée sur la page <link>Listes de courriels</link>.",
+      "waiting": "Il sera envoyé quand il sera en ligne.",
+      "sent": "{count, plural, one {Envoyé à # personne} other {Envoyé à # personnes}} le {date}.",
+      "skipped": {
+        "no_address": "Non envoyé : l'adresse postale de Biqbaq manquait à la mise en ligne.",
+        "no_subscribers": "Non envoyé : personne sur la liste de Biqbaq n'avait encore confirmé.",
+        "email_off": "Non envoyé : les courriels étaient désactivés à la mise en ligne."
+      }
     }
   },
   "comments": {

@@ -51,6 +51,7 @@ export const AUDIT_ACTIONS = [
   "blog.schedule",
   "blog.unpublish",
   "blog.archive",
+  "blog.email",
   "blog.category_create",
   "comment.hide",
   "comment.restore",

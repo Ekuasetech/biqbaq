@@ -2056,6 +2056,13 @@ test.describe("public marketplace", () => {
             await expect(post.getByText("Cover photo saved.")).toBeVisible({ timeout: 30000 });
             const slug = sql(`select slug from public.blog_posts where title = '${title}'`);
 
+            // Emailing it to Biqbaq's list is offered, ticked (Q-68). Unticked here, so this test
+            // never emails the people on the local copy's list.
+            const emailBox = post.getByRole("checkbox", { name: "Email this post to Biqbaq's list" });
+            await expect(emailBox).toBeChecked();
+            await expect(post.getByText("The subject is the post's title.", { exact: false })).toBeVisible();
+            await emailBox.uncheck();
+
             // A photo inside the article, with its description, through the same checks.
             await post.getByRole("textbox", { name: "Article" }).click();
             await page.keyboard.press("Control+End");
@@ -2082,6 +2089,8 @@ test.describe("public marketplace", () => {
             // Published now, it shows, with its text kept as text.
             await post.getByRole("button", { name: "Publish now" }).click();
             await expect(post.getByText("Published. It shows on the site within a minute.")).toBeVisible();
+            await expect(emailBox).toHaveCount(0);
+            expect(sql(`select count(*) from public.background_jobs where payload ->> 'template' = 'blog_post' and payload -> 'data' ->> 'slug' = '${slug}'`)).toBe("0");
             await expect(async () => {
               await reader.goto(`/blog/${slug}`);
               await expect(reader.getByRole("heading", { name: title })).toBeVisible({ timeout: 2000 });

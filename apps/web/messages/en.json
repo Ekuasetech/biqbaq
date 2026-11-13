@@ -1047,7 +1047,8 @@
       "about_save": "Saved the About us page",
       "email_text_save": "Changed an email's wording",
       "shop_review_hide": "Hid a shop review",
-      "shop_review_restore": "Showed a shop review again"
+      "shop_review_restore": "Showed a shop review again",
+      "blog_email": "Emailed a blog post to Biqbaq's list"
     }
   },
   "moderation": {
@@ -1518,6 +1519,21 @@
     "sectionNames": {
       "posts": "Posts",
       "comments": "Comments"
+    },
+    "publishedEmailed": "Published. It shows on the site within a minute, and the email to Biqbaq's list is on its way.",
+    "scheduledEmailed": "Scheduled. It goes live at that time, and is emailed to Biqbaq's list then.",
+    "listEmail": {
+      "label": "Email this post to Biqbaq's list",
+      "reach": "{count, plural, =0 {Nobody has confirmed they want Biqbaq's emails yet.} one {Goes to # confirmed person.} other {Goes to # confirmed people.}} The subject is the post's title.",
+      "spread": "Up to {perDay} go today; the rest go on the following days at 9:00 (Toronto time).",
+      "noAddress": "Biqbaq's mailing address is missing. The law needs it in every email, so nobody will be emailed until you add it on the <link>Email lists</link> page.",
+      "waiting": "It will be emailed when it goes live.",
+      "sent": "{count, plural, one {Emailed to # person} other {Emailed to # people}} on {date}.",
+      "skipped": {
+        "no_address": "Not emailed: Biqbaq's mailing address was missing when it went live.",
+        "no_subscribers": "Not emailed: nobody on Biqbaq's list had confirmed yet.",
+        "email_off": "Not emailed: emails were switched off when it went live."
+      }
     }
   },
   "comments": {

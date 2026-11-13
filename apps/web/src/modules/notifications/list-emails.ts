@@ -13,6 +13,9 @@ export interface ListEmailData {
   token?: unknown;
   source?: unknown;
   locale?: unknown;
+  /** A blog post's address and cover photo (Q-68). */
+  slug?: unknown;
+  cover?: unknown;
 }
 
 export interface ListEmail {
@@ -21,7 +24,7 @@ export interface ListEmail {
   headers?: Record<string, string>;
 }
 
-export const LIST_TEMPLATES = ["list_confirm", "bulk_email"] as const;
+export const LIST_TEMPLATES = ["list_confirm", "bulk_email", "blog_post"] as const;
 export const isListTemplate = (template: string) => (LIST_TEMPLATES as readonly string[]).includes(template);
 
 const TOKEN = /^[0-9a-f]{64}$/;
@@ -43,6 +46,8 @@ const COPY = {
     from: (shop: string) => `Sent by ${shop} through Biqbaq.`,
     address: "Mailing address",
     unsubscribe: "Unsubscribe",
+    eyebrow: "New on the Biqbaq Blog",
+    read: "Read the post",
   },
   fr: {
     confirmSubject: (shop: string) => `Confirmez que vous voulez des courriels de ${shop}`,
@@ -59,8 +64,14 @@ const COPY = {
     from: (shop: string) => `Envoyé par ${shop} par Biqbaq.`,
     address: "Adresse postale",
     unsubscribe: "Se désabonner",
+    eyebrow: "Nouveau sur le blog Biqbaq",
+    read: "Lire l'article",
   },
 };
+
+const SLUG = /^[a-z0-9-]{1,200}$/;
+// Only photos stored with Biqbaq's photo service are shown.
+const COVER = /^https:\/\/res\.cloudinary\.com\/[^\s"'<>]+$/;
 
 const page = (siteUrl: string, locale: "en" | "fr", path: string, token: string) =>
   `${siteUrl.replace(/\/$/, "")}${locale === "fr" ? "/fr" : ""}${path}?t=${token}`;
@@ -99,6 +110,44 @@ export function renderListEmail(template: string, data: ListEmailData, siteUrl: 
           ].join(""),
         }),
       },
+    };
+  }
+
+  if (template === "blog_post") {
+    // The subject is the post's title (owner's request, 2026-11-13).
+    const title = text(data.subject);
+    const excerpt = text(data.body);
+    const slug = text(data.slug);
+    const address = text(data.address);
+    if (!title || !SLUG.test(slug) || !address) return null;
+    const cover = COVER.test(text(data.cover)) ? text(data.cover) : null;
+    const link = `${siteUrl.replace(/\/$/, "")}${locale === "fr" ? "/fr" : ""}/blog/${slug}`;
+    const unsubscribe = page(siteUrl, locale, "/email/unsubscribe", token);
+    const oneClick = `${siteUrl.replace(/\/$/, "")}/api/v1/email/unsubscribe?t=${token}`;
+    const footer = [copy.from(shop), copy.why(shop, text(data.source)), `${copy.address}: ${address}`];
+    return {
+      email: {
+        subject: title,
+        text: [copy.eyebrow, title, excerpt, `${copy.read}: ${link}`, "—", ...footer, `${copy.unsubscribe}: ${unsubscribe}`].filter(Boolean).join("\n\n"),
+        html: emailLayout({
+          locale,
+          siteUrl,
+          preheader: escapeHtml(excerpt || title),
+          content: [
+            cover
+              ? `<a href="${escapeHtml(link)}"><img src="${escapeHtml(cover)}" alt="" width="520" style="display:block;width:100%;max-width:520px;height:auto;border-radius:14px;margin:0 0 18px"></a>`
+              : "",
+            emailSmall(`<strong style="color:#d01d21;letter-spacing:0.06em;text-transform:uppercase">${escapeHtml(copy.eyebrow)}</strong>`),
+            `<h1 style="margin:4px 0 12px;font-family:Helvetica,Arial,sans-serif;font-size:24px;line-height:1.25;color:#0c2352">${escapeHtml(title)}</h1>`,
+            excerpt ? emailParagraph(escapeHtml(excerpt)) : "",
+            emailButton(escapeHtml(link), escapeHtml(copy.read)),
+            '<hr style="border:none;border-top:1px solid #e6e1d8;margin:22px 0 16px">',
+            ...footer.map((line) => emailSmall(escapeHtml(line))),
+            emailSmall(`<a href="${escapeHtml(unsubscribe)}" style="color:#5b6475">${escapeHtml(copy.unsubscribe)}</a>`),
+          ].join(""),
+        }),
+      },
+      headers: { "List-Unsubscribe": `<${oneClick}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
     };
   }
 
