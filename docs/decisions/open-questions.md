@@ -102,5 +102,5 @@ Nothing here has been decided. "Working assumption" is what the design does unti
 
 - Accounts and keys: Supabase, Cloudinary, Resend, and a verified sending domain.
 - Before launch, email needs its own settings: a Biqbaq sending domain (ideally a separate Resend account from the mobile app), a new `RESEND_API_KEY` and `EMAIL_FROM`, `EMAIL_LIVE_SENDING=true`, a blank `EMAIL_TEST_RECIPIENT`, a long random `JOBS_WORKER_SECRET`, and a scheduler calling the worker every minute or so. Set a long random `CONTACT_HASH_SECRET`. In the Supabase dashboard's Auth Hooks, turn on Send Email, pointing at the live `/api/v1/auth/email-hook`, and put its secret in `SEND_EMAIL_HOOK_SECRET`. The real project's setting for confirming email must also be on.
-- Confirmation that `biqbaq.com` (used in the PRD's examples) is the production domain.
+- ~~Confirmation that `biqbaq.com` (used in the PRD's examples) is the production domain.~~ Confirmed 2026-11-14: the owner bought `biqbaq.com`; the site runs on Render (first at `biqbaq.onrender.com`).
 - Docker, or an equivalent, on the development machine for local Supabase and RLS tests.

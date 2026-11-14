@@ -43,7 +43,10 @@ code or in this file: they are typed into Supabase's, Render's and each provider
   and `CONTACT_HASH_SECRET` (long random values), `NEXT_PUBLIC_VAPID_PUBLIC_KEY`,
   `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (a new pair for production).
   `EMAIL_LOCAL_INBOX_URL` is for the local copy only and is not set.
-- The domain: add it to the service in Render and point the DNS records Render shows at it.
+- The domain is `biqbaq.com` (confirmed 2026-11-14): add `biqbaq.com` and `www.biqbaq.com` to the
+  service in Render (Settings > Custom Domains) and create the DNS records Render shows at the
+  registrar. Once it is verified, `<domain>` in this file means `biqbaq.com`, and
+  `NEXT_PUBLIC_SITE_URL` becomes `https://biqbaq.com`.
 
 ## 3. The email and notification sender
 

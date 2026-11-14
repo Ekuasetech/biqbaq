@@ -32,12 +32,13 @@ export const SITE_IMAGE_DEFAULTS: Record<SiteImageSlot, { src: string }> = {
   hero_2: { src: "/hero/sienna-cargo.jpg" },
   hero_3: { src: "/hero/toronto-professional.jpg" },
   get_started: { src: "/hero/toronto-professional.jpg" },
-  // Sample photos until Super Admin uploads real ones.
-  category_fashion: { src: "https://picsum.photos/seed/biqbaq-category-fashion/200/200" },
-  category_food: { src: "https://picsum.photos/seed/biqbaq-category-food/200/200" },
-  category_beauty: { src: "https://picsum.photos/seed/biqbaq-category-beauty/200/200" },
-  category_home: { src: "https://picsum.photos/seed/biqbaq-category-home/200/200" },
-  category_cargo_cars: { src: "https://picsum.photos/seed/biqbaq-category-cargo-cars/200/200" },
+  // Drawn pictures shipped with the site until Super Admin uploads real photos. They used to be
+  // picsum.photos samples, which failed to load on the live site (2026-11-14).
+  category_fashion: { src: "/categories/fashion.svg" },
+  category_food: { src: "/categories/food.svg" },
+  category_beauty: { src: "/categories/beauty.svg" },
+  category_home: { src: "/categories/home.svg" },
+  category_cargo_cars: { src: "/categories/cargo-cars.svg" },
   about: { src: "/hero/toronto-professional.jpg" },
   email_welcome_hero: { src: "/email/welcome-hero.jpg" },
   email_tile_products: { src: "/email/tile-products.jpg" },

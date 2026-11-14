@@ -6,7 +6,6 @@
   "common": {
     "skipToContent": "Skip to content",
     "views": "{count, plural, one {# view} other {# views}}",
-    "previewNotice": "Preview: this site is still being built, and includes sample data.",
     "home": "Home",
     "pager": {
       "pagination": "Pages",

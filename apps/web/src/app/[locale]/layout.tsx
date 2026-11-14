@@ -66,9 +66,6 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             >
               {t("skipToContent")}
             </a>
-            <p className="bg-brand-navy px-4 py-2 text-center text-xs font-medium text-white">
-              {t("previewNotice")}
-            </p>
             {/* The public site adds its header and footer; dashboards add their sidebar. */}
             {children}
           </ThemeProvider>
