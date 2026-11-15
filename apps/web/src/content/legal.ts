@@ -1,6 +1,6 @@
-// DRAFT legal text for lawyer review, written from what the PRD says the platform
-// does. Bracketed text marks details the owner must supply. Do not remove the
-// draft banner or the noindex setting until the text is approved.
+// Biqbaq's Conditions of Use and Privacy Notice, approved by the owner on 2026-11-14 (Q-19).
+// Biqbaq is operated by an individual in Ontario. Change the `updated` date whenever the text
+// changes, and keep the French version matching.
 
 export interface LegalSection {
   heading: string;
@@ -9,6 +9,8 @@ export interface LegalSection {
 
 export interface LegalDocument {
   title: string;
+  /** "Last updated: …", shown under the title. */
+  updated: string;
   intro: string;
   sections: LegalSection[];
 }
@@ -18,8 +20,9 @@ type LegalContent = Record<"conditions" | "privacy", LegalDocument>;
 const en: LegalContent = {
   conditions: {
     title: "Conditions of Use",
+    updated: "Last updated: November 14, 2026",
     intro:
-      "These Conditions of Use apply when you use Biqbaq, a marketplace operated by [legal company name]. By using Biqbaq, you agree to them.",
+      "These Conditions of Use apply when you use Biqbaq (biqbaq.com), a marketplace operated by an individual based in Ontario, Canada. By using Biqbaq, you agree to them.",
     sections: [
       {
         heading: "1. What Biqbaq is",
@@ -31,7 +34,7 @@ const en: LegalContent = {
       {
         heading: "2. Your account",
         paragraphs: [
-          "You must be at least [minimum age] to create an account. Give accurate information, keep your password secure, and tell us if you think someone else has used your account.",
+          "You must be at least 18 years old to create an account. Give accurate information, keep your password secure, and tell us if you think someone else has used your account.",
           "You are responsible for activity on your account. One person should use one account, and additional roles are requested from that account.",
         ],
       },
@@ -52,7 +55,7 @@ const en: LegalContent = {
       {
         heading: "5. Payments",
         paragraphs: [
-          "Where online payment is available for a seller, it is processed by a third-party payment provider and paid to the seller's connected account. The provider's own terms also apply. [Refund, chargeback and commission terms to be added once decided.]",
+          "Where online payment is available for a seller, it is processed by Stripe, a third-party payment provider, and paid to the seller's connected account. Any Biqbaq service fee is shown before you pay. Stripe's own terms also apply.",
         ],
       },
       {
@@ -89,92 +92,110 @@ const en: LegalContent = {
       {
         heading: "11. Disclaimers and liability",
         paragraphs: [
-          "Biqbaq is provided as is. To the extent the law allows, we do not guarantee sellers, dealers, listings or uninterrupted service, and we are not liable for indirect losses or for dealings between users. Nothing here limits rights you have under consumer protection law. [Liability wording to be confirmed by a lawyer.]",
+          "Biqbaq is provided as is. To the extent the law allows, we do not guarantee sellers, dealers, listings or uninterrupted service, and we are not liable for indirect losses or for dealings between users. Nothing here limits rights you have under consumer protection law.",
         ],
       },
       {
         heading: "12. Changes and governing law",
         paragraphs: [
-          "We may update these Conditions, and will post the new version with its date. These Conditions are governed by the laws of [province] and the federal laws of Canada that apply there.",
+          "We may update these Conditions, and will post the new version with its date. These Conditions are governed by the laws of Ontario and the federal laws of Canada that apply there.",
         ],
       },
       {
         heading: "13. Contact",
-        paragraphs: ["Questions about these Conditions can be sent to [contact email], or [mailing address]."],
+        paragraphs: ["Questions about these Conditions can be sent to support@biqbaq.com."],
       },
     ],
   },
   privacy: {
     title: "Privacy Notice",
+    updated: "Last updated: November 14, 2026",
     intro:
-      "This Privacy Notice explains how [legal company name] collects, uses and shares personal information when you use Biqbaq. We aim to handle it in line with Canadian privacy law.",
+      "This Privacy Notice explains how Biqbaq (\"we\", \"us\") collects, uses and shares personal information when you use biqbaq.com. Biqbaq is operated by an individual based in Ontario, Canada, and handles personal information in line with Canadian privacy law, including the Personal Information Protection and Electronic Documents Act (PIPEDA).",
     sections: [
       {
         heading: "1. Information we collect",
         paragraphs: [
-          "Account: your name, email address and sign-in details, including basic profile details from Google if you sign in with Google.",
-          "Sellers and dealers: business details, contact information and, for verification, identity documents or supporting evidence.",
-          "Activity: listings, messages, reviews, favourites, blog posts, role applications and referrals. If you contact a seller without an account, we process your name, email address and message.",
-          "Orders: order details and payment references. Card details are handled by the payment provider. [Confirm once the provider is chosen.]",
-          "Technical: device and usage information such as IP address, pages viewed and listing view counts, and browser storage or cookies that remember choices like language and theme.",
+          "Account: your name, email address and password (stored only in scrambled form), or, if you sign in with Google, the details described in section 2.",
+          "Sellers and dealers: shop or business details, contact information, payout details held by our payment provider and, for verification, identity documents or supporting evidence.",
+          "Activity: listings, photos, messages, reviews, favourites, comments, blog posts, role applications and referrals. If you contact a seller without an account, we process your name, email address and message.",
+          "Orders: what you ordered, from whom, amounts, delivery details you provide, and payment references. Card details are entered directly with Stripe, our payment provider; we never see or store your full card number.",
+          "Email and notifications: if you join an email list, your email address, language and when you agreed; if you turn on phone notifications, the browser's notification address for your device.",
+          "Technical: device and usage information such as IP address, browser type, pages viewed and listing view counts, used to run, secure and improve the site.",
         ],
       },
       {
-        heading: "2. How we use it",
+        heading: "2. Google sign-in",
         paragraphs: [
-          "We use personal information to run your account, show listings, connect buyers with sellers and dealers, review applications and verify sellers, send service messages, process payments, prevent fraud and abuse, keep records, improve the platform, and meet legal obligations.",
-          "We ask for your consent where the law requires it, including for promotional messages.",
+          "If you choose to sign in with Google, Google shares your name, email address and profile picture with us, with your permission. We do not receive your Google password, and we do not ask for access to your Gmail, contacts, calendar, Drive or any other Google data.",
+          "We use this information only to create your Biqbaq account and sign you in. We do not sell it, use it for advertising, or share it with anyone other than the provider that stores our accounts (Supabase). Our use of information received from Google follows the Google API Services User Data Policy, including its Limited Use requirements.",
+          "You can remove Biqbaq's access at any time in your Google Account's security settings, and you can ask us to delete your Biqbaq account by writing to support@biqbaq.com.",
         ],
       },
       {
-        heading: "3. What others can see",
+        heading: "3. How we use it",
         paragraphs: [
-          "Your public listings, seller name, city, verification status and reviews can be seen by anyone. Private seller email addresses are not shown on the site or in the public API, but if a seller replies to an enquiry by email, the person receiving it will see that address.",
+          "We use personal information to run your account, show listings, connect buyers with sellers and dealers, process orders and payments, review applications and verify sellers, send service messages (such as sign-in, order and message emails), prevent fraud and abuse, keep records, improve the platform, and meet legal obligations.",
+          "We send promotional emails only with your consent, as Canada's Anti-Spam Legislation requires, and every one has an unsubscribe link. A seller you have bought from or contacted may email you about their shop through Biqbaq; those emails also have an unsubscribe link.",
         ],
       },
       {
-        heading: "4. Who we share it with",
+        heading: "4. What others can see",
         paragraphs: [
-          "We share information with the other party to a conversation or order, and with service providers who help run Biqbaq: hosting, database and sign-in (Supabase), images (Cloudinary), email (Resend), and payment, identity verification and SMS providers. [Confirm the final list, and whether personal information is ever sold; the intended answer is no.]",
-          "We may also share information to comply with the law or protect rights and safety. Some providers may store or process information outside Canada, where it can be subject to local laws. [Confirm locations.]",
+          "Your public listings, shop name, city, verification status and reviews can be seen by anyone. Private seller email addresses are not shown on the site or in the public API, but if a seller replies to an enquiry by email, the person receiving it will see that address.",
         ],
       },
       {
-        heading: "5. Verification documents",
+        heading: "5. Who we share it with",
+        paragraphs: [
+          "We share information with the other party to a conversation or order, and with service providers who help run Biqbaq, only for that purpose: Render (website hosting), Supabase (database, accounts and sign-in), Cloudinary (photos), Resend (sending email), Stripe (payments), FormSubmit (telling us about new email list sign-ups), Google (sign-in, if you choose it) and your browser's push service (phone notifications you turn on). We do not sell personal information.",
+          "We may also share information when the law requires it or to protect the rights and safety of users and the public. These providers may store or process information outside Canada, mainly in the United States, where it may be accessed under the laws of that country.",
+        ],
+      },
+      {
+        heading: "6. Verification documents",
         paragraphs: [
           "Identity documents and evidence are kept in restricted storage, are available only to authorised reviewers, and each access is logged.",
         ],
       },
       {
-        heading: "6. How long we keep it",
+        heading: "7. Cookies and browser storage",
         paragraphs: [
-          "We keep personal information only as long as needed for the purposes above or as the law requires. [Retention periods to be added, including for verification documents and messages.]",
+          "We use cookies that are needed to keep you signed in and secure, and browser storage to remember choices such as language and theme and a referral code you arrive with. We do not use advertising or cross-site tracking cookies.",
         ],
       },
       {
-        heading: "7. Security",
+        heading: "8. How long we keep it",
         paragraphs: [
-          "We use safeguards suited to the sensitivity of the information, including access controls. No system is completely secure, so please use a strong password and tell us about any suspected misuse.",
+          "We keep account information while your account is open, and other information only as long as needed for the purposes above. When it is no longer needed, we delete or anonymise it. Order, payment and invoice records are kept for as long as Canadian tax and accounting law requires (generally six years), and records of verification decisions and security logs may be kept longer to protect users and the platform.",
         ],
       },
       {
-        heading: "8. Your choices and rights",
+        heading: "9. Security",
         paragraphs: [
-          "You can ask to access or correct your personal information, withdraw consent subject to legal limits, and ask questions about how it is handled. You can also change notification preferences in your account once available.",
-          "If you are not satisfied with our response, you may complain to the Office of the Privacy Commissioner of Canada or your provincial privacy regulator.",
+          "We use safeguards suited to the sensitivity of the information, including encrypted connections, access controls and logging of sensitive actions. No system is completely secure, so please use a strong password and tell us about any suspected misuse.",
         ],
       },
       {
-        heading: "9. Children",
-        paragraphs: ["Biqbaq is not intended for anyone under [minimum age]."],
+        heading: "10. Your choices and rights",
+        paragraphs: [
+          "You can ask to access, correct or delete your personal information, or withdraw your consent, subject to legal limits, by writing to support@biqbaq.com. We reply within 30 days. You can unsubscribe from any email list through the link in its emails, and change your notification settings in your account.",
+          "If you are not satisfied with our response, you may complain to the Office of the Privacy Commissioner of Canada.",
+        ],
       },
       {
-        heading: "10. Changes",
-        paragraphs: ["We may update this Notice, and will post the new version with its date."],
+        heading: "11. Age",
+        paragraphs: [
+          "Biqbaq is for people aged 18 and over. We do not knowingly collect personal information from anyone under 18, and we delete it if we learn that we have.",
+        ],
       },
       {
-        heading: "11. Contact",
-        paragraphs: ["Our privacy contact is [privacy officer name], at [privacy email], or [mailing address]."],
+        heading: "12. Changes",
+        paragraphs: ["We may update this Notice, and will post the new version on this page with its date."],
+      },
+      {
+        heading: "13. Contact",
+        paragraphs: ["Questions, requests and complaints about privacy can be sent to Biqbaq's privacy contact at support@biqbaq.com."],
       },
     ],
   },
@@ -183,8 +204,9 @@ const en: LegalContent = {
 const fr: LegalContent = {
   conditions: {
     title: "Conditions d'utilisation",
+    updated: "Dernière mise à jour : 14 novembre 2026",
     intro:
-      "Les présentes conditions d'utilisation s'appliquent lorsque vous utilisez Biqbaq, un marché exploité par [dénomination légale de l'entreprise]. En utilisant Biqbaq, vous les acceptez.",
+      "Les présentes conditions d'utilisation s'appliquent lorsque vous utilisez Biqbaq (biqbaq.com), un marché exploité par un particulier établi en Ontario, au Canada. En utilisant Biqbaq, vous les acceptez.",
     sections: [
       {
         heading: "1. Qu'est-ce que Biqbaq",
@@ -196,7 +218,7 @@ const fr: LegalContent = {
       {
         heading: "2. Votre compte",
         paragraphs: [
-          "Vous devez avoir au moins [âge minimum] pour créer un compte. Fournissez des renseignements exacts, protégez votre mot de passe et avisez-nous si vous croyez qu'une autre personne a utilisé votre compte.",
+          "Vous devez avoir au moins 18 ans pour créer un compte. Fournissez des renseignements exacts, protégez votre mot de passe et avisez-nous si vous croyez qu'une autre personne a utilisé votre compte.",
           "Vous êtes responsable de l'activité de votre compte. Chaque personne devrait utiliser un seul compte, à partir duquel elle demande des rôles supplémentaires.",
         ],
       },
@@ -217,7 +239,7 @@ const fr: LegalContent = {
       {
         heading: "5. Paiements",
         paragraphs: [
-          "Lorsque le paiement en ligne est offert pour un vendeur, il est traité par un fournisseur de paiement tiers et versé au compte connecté du vendeur. Les conditions du fournisseur s'appliquent également. [Conditions de remboursement, de rétrofacturation et de commission à ajouter une fois décidées.]",
+          "Lorsque le paiement en ligne est offert pour un vendeur, il est traité par Stripe, un fournisseur de paiement tiers, et versé au compte connecté du vendeur. Tous frais de service de Biqbaq sont affichés avant le paiement. Les conditions de Stripe s'appliquent également.",
         ],
       },
       {
@@ -254,92 +276,110 @@ const fr: LegalContent = {
       {
         heading: "11. Exclusions et responsabilité",
         paragraphs: [
-          "Biqbaq est fourni tel quel. Dans la mesure permise par la loi, nous ne garantissons ni les vendeurs, ni les concessionnaires, ni les annonces, ni un service ininterrompu, et nous ne sommes pas responsables des pertes indirectes ni des rapports entre utilisateurs. Rien ici ne limite les droits que vous confère la loi sur la protection du consommateur. [Formulation de la responsabilité à confirmer par un avocat.]",
+          "Biqbaq est fourni tel quel. Dans la mesure permise par la loi, nous ne garantissons ni les vendeurs, ni les concessionnaires, ni les annonces, ni un service ininterrompu, et nous ne sommes pas responsables des pertes indirectes ni des rapports entre utilisateurs. Rien ici ne limite les droits que vous confère la loi sur la protection du consommateur.",
         ],
       },
       {
         heading: "12. Modifications et droit applicable",
         paragraphs: [
-          "Nous pouvons mettre à jour les présentes conditions et publierons la nouvelle version avec sa date. Elles sont régies par les lois de [province] et les lois fédérales du Canada qui s'y appliquent.",
+          "Nous pouvons mettre à jour les présentes conditions et publierons la nouvelle version avec sa date. Elles sont régies par les lois de l'Ontario et les lois fédérales du Canada qui s'y appliquent.",
         ],
       },
       {
         heading: "13. Coordonnées",
-        paragraphs: ["Vous pouvez envoyer vos questions à [courriel de contact] ou à [adresse postale]."],
+        paragraphs: ["Vous pouvez envoyer vos questions à support@biqbaq.com."],
       },
     ],
   },
   privacy: {
     title: "Avis de confidentialité",
+    updated: "Dernière mise à jour : 14 novembre 2026",
     intro:
-      "Le présent avis explique comment [dénomination légale de l'entreprise] recueille, utilise et communique les renseignements personnels lorsque vous utilisez Biqbaq. Nous visons à les traiter conformément aux lois canadiennes sur la protection de la vie privée.",
+      "Le présent avis explique comment Biqbaq (« nous ») recueille, utilise et communique les renseignements personnels lorsque vous utilisez biqbaq.com. Biqbaq est exploité par un particulier établi en Ontario, au Canada, et traite les renseignements personnels conformément aux lois canadiennes sur la protection de la vie privée, notamment la Loi sur la protection des renseignements personnels et les documents électroniques (LPRPDE).",
     sections: [
       {
         heading: "1. Renseignements recueillis",
         paragraphs: [
-          "Compte : votre nom, votre adresse courriel et vos renseignements de connexion, y compris les renseignements de profil de base de Google si vous vous connectez avec Google.",
-          "Vendeurs et concessionnaires : renseignements sur l'entreprise, coordonnées et, pour la vérification, pièces d'identité ou preuves à l'appui.",
-          "Activité : annonces, messages, avis, favoris, billets de blogue, demandes de rôle et parrainages. Si vous contactez un vendeur sans compte, nous traitons votre nom, votre adresse courriel et votre message.",
-          "Commandes : détails des commandes et références de paiement. Les données de carte sont traitées par le fournisseur de paiement. [À confirmer une fois le fournisseur choisi.]",
-          "Données techniques : renseignements sur l'appareil et l'utilisation, comme l'adresse IP, les pages consultées et le nombre de vues des annonces, ainsi que le stockage du navigateur ou les témoins qui mémorisent vos choix, comme la langue et le thème.",
+          "Compte : votre nom, votre adresse courriel et votre mot de passe (conservé uniquement sous forme brouillée) ou, si vous vous connectez avec Google, les renseignements décrits à la section 2.",
+          "Vendeurs et concessionnaires : renseignements sur la boutique ou l'entreprise, coordonnées, renseignements de versement détenus par notre fournisseur de paiement et, pour la vérification, pièces d'identité ou preuves à l'appui.",
+          "Activité : annonces, photos, messages, avis, favoris, commentaires, billets de blogue, demandes de rôle et parrainages. Si vous contactez un vendeur sans compte, nous traitons votre nom, votre adresse courriel et votre message.",
+          "Commandes : ce que vous avez commandé, auprès de qui, les montants, les renseignements de livraison que vous fournissez et les références de paiement. Les données de carte sont saisies directement auprès de Stripe, notre fournisseur de paiement; nous ne voyons ni ne conservons jamais votre numéro de carte complet.",
+          "Courriels et notifications : si vous vous inscrivez à une liste d'envoi, votre adresse courriel, votre langue et la date de votre accord; si vous activez les notifications sur téléphone, l'adresse de notification du navigateur de votre appareil.",
+          "Données techniques : renseignements sur l'appareil et l'utilisation, comme l'adresse IP, le type de navigateur, les pages consultées et le nombre de vues des annonces, utilisés pour exploiter, protéger et améliorer le site.",
         ],
       },
       {
-        heading: "2. Utilisation",
+        heading: "2. Connexion avec Google",
         paragraphs: [
-          "Nous utilisons les renseignements personnels pour gérer votre compte, afficher les annonces, mettre en relation les acheteurs avec les vendeurs et les concessionnaires, examiner les demandes et vérifier les vendeurs, envoyer des messages de service, traiter les paiements, prévenir la fraude et les abus, tenir des dossiers, améliorer la plateforme et respecter nos obligations légales.",
-          "Nous demandons votre consentement lorsque la loi l'exige, notamment pour les messages promotionnels.",
+          "Si vous choisissez de vous connecter avec Google, Google nous communique votre nom, votre adresse courriel et votre photo de profil, avec votre autorisation. Nous ne recevons pas votre mot de passe Google et nous ne demandons pas l'accès à Gmail, à vos contacts, à votre agenda, à Drive ni à aucune autre donnée Google.",
+          "Nous utilisons ces renseignements uniquement pour créer votre compte Biqbaq et vous connecter. Nous ne les vendons pas, ne les utilisons pas à des fins publicitaires et ne les communiquons à personne d'autre que le fournisseur qui héberge nos comptes (Supabase). Notre utilisation des renseignements reçus de Google respecte la Politique relative aux données des utilisateurs des services d'API Google, y compris ses exigences d'utilisation limitée.",
+          "Vous pouvez retirer l'accès de Biqbaq à tout moment dans les paramètres de sécurité de votre compte Google, et demander la suppression de votre compte Biqbaq en écrivant à support@biqbaq.com.",
         ],
       },
       {
-        heading: "3. Ce que les autres peuvent voir",
+        heading: "3. Utilisation",
         paragraphs: [
-          "Vos annonces publiques, le nom du vendeur, sa ville, son statut de vérification et les avis sont visibles par tous. Les adresses courriel privées des vendeurs ne sont pas affichées sur le site ni dans l'API publique, mais si un vendeur répond à une demande par courriel, le destinataire verra cette adresse.",
+          "Nous utilisons les renseignements personnels pour gérer votre compte, afficher les annonces, mettre en relation les acheteurs avec les vendeurs et les concessionnaires, traiter les commandes et les paiements, examiner les demandes et vérifier les vendeurs, envoyer des messages de service (comme les courriels de connexion, de commande et de message), prévenir la fraude et les abus, tenir des dossiers, améliorer la plateforme et respecter nos obligations légales.",
+          "Nous envoyons des courriels promotionnels uniquement avec votre consentement, comme l'exige la Loi canadienne anti-pourriel, et chacun contient un lien de désabonnement. Un vendeur auprès de qui vous avez acheté ou que vous avez contacté peut vous écrire au sujet de sa boutique par l'entremise de Biqbaq; ces courriels contiennent aussi un lien de désabonnement.",
         ],
       },
       {
-        heading: "4. Communication à des tiers",
+        heading: "4. Ce que les autres peuvent voir",
         paragraphs: [
-          "Nous communiquons des renseignements à l'autre partie à une conversation ou à une commande, ainsi qu'aux fournisseurs qui aident à exploiter Biqbaq : hébergement, base de données et connexion (Supabase), images (Cloudinary), courriel (Resend) et fournisseurs de paiement, de vérification d'identité et de SMS. [Confirmer la liste finale, et si des renseignements personnels sont vendus; la réponse visée est non.]",
-          "Nous pouvons aussi communiquer des renseignements pour respecter la loi ou protéger des droits et la sécurité. Certains fournisseurs peuvent stocker ou traiter des renseignements à l'extérieur du Canada, où ils peuvent être assujettis aux lois locales. [Confirmer les emplacements.]",
+          "Vos annonces publiques, le nom de la boutique, sa ville, son statut de vérification et les avis sont visibles par tous. Les adresses courriel privées des vendeurs ne sont pas affichées sur le site ni dans l'API publique, mais si un vendeur répond à une demande par courriel, le destinataire verra cette adresse.",
         ],
       },
       {
-        heading: "5. Documents de vérification",
+        heading: "5. Communication à des tiers",
+        paragraphs: [
+          "Nous communiquons des renseignements à l'autre partie à une conversation ou à une commande, ainsi qu'aux fournisseurs qui aident à exploiter Biqbaq, uniquement à cette fin : Render (hébergement du site), Supabase (base de données, comptes et connexion), Cloudinary (photos), Resend (envoi de courriels), Stripe (paiements), FormSubmit (avis des nouvelles inscriptions à la liste d'envoi), Google (connexion, si vous la choisissez) et le service de notifications de votre navigateur (notifications sur téléphone que vous activez). Nous ne vendons pas de renseignements personnels.",
+          "Nous pouvons aussi communiquer des renseignements lorsque la loi l'exige ou pour protéger les droits et la sécurité des utilisateurs et du public. Ces fournisseurs peuvent stocker ou traiter des renseignements à l'extérieur du Canada, principalement aux États-Unis, où ils peuvent être consultés en vertu des lois de ce pays.",
+        ],
+      },
+      {
+        heading: "6. Documents de vérification",
         paragraphs: [
           "Les pièces d'identité et les preuves sont conservées dans un stockage à accès restreint, sont accessibles uniquement aux examinateurs autorisés, et chaque accès est consigné.",
         ],
       },
       {
-        heading: "6. Durée de conservation",
+        heading: "7. Témoins et stockage du navigateur",
         paragraphs: [
-          "Nous conservons les renseignements personnels seulement le temps nécessaire aux fins ci-dessus ou exigé par la loi. [Durées à ajouter, notamment pour les documents de vérification et les messages.]",
+          "Nous utilisons les témoins nécessaires pour vous garder connecté et protéger votre session, ainsi que le stockage du navigateur pour mémoriser vos choix, comme la langue et le thème, et un code de parrainage avec lequel vous arrivez. Nous n'utilisons pas de témoins publicitaires ni de suivi entre sites.",
         ],
       },
       {
-        heading: "7. Sécurité",
+        heading: "8. Durée de conservation",
         paragraphs: [
-          "Nous utilisons des mesures de protection adaptées à la sensibilité des renseignements, y compris des contrôles d'accès. Aucun système n'est totalement sûr : utilisez un mot de passe robuste et signalez-nous tout abus soupçonné.",
+          "Nous conservons les renseignements du compte tant que celui-ci est ouvert, et les autres renseignements seulement le temps nécessaire aux fins ci-dessus. Lorsqu'ils ne sont plus nécessaires, nous les supprimons ou les anonymisons. Les dossiers de commande, de paiement et de facturation sont conservés aussi longtemps que l'exigent les lois canadiennes en matière fiscale et comptable (généralement six ans), et les dossiers des décisions de vérification et les journaux de sécurité peuvent être conservés plus longtemps pour protéger les utilisateurs et la plateforme.",
         ],
       },
       {
-        heading: "8. Vos choix et vos droits",
+        heading: "9. Sécurité",
         paragraphs: [
-          "Vous pouvez demander à consulter ou à corriger vos renseignements personnels, retirer votre consentement sous réserve des limites légales et poser des questions sur leur traitement. Vous pourrez aussi modifier vos préférences de notification dans votre compte lorsque cette option sera offerte.",
-          "Si notre réponse ne vous satisfait pas, vous pouvez porter plainte auprès du Commissariat à la protection de la vie privée du Canada ou de l'organisme provincial compétent.",
+          "Nous utilisons des mesures de protection adaptées à la sensibilité des renseignements, notamment des connexions chiffrées, des contrôles d'accès et la consignation des actions sensibles. Aucun système n'est totalement sûr : utilisez un mot de passe robuste et signalez-nous tout abus soupçonné.",
         ],
       },
       {
-        heading: "9. Enfants",
-        paragraphs: ["Biqbaq n'est pas destiné aux personnes de moins de [âge minimum]."],
+        heading: "10. Vos choix et vos droits",
+        paragraphs: [
+          "Vous pouvez demander à consulter, à corriger ou à supprimer vos renseignements personnels, ou retirer votre consentement, sous réserve des limites légales, en écrivant à support@biqbaq.com. Nous répondons dans un délai de 30 jours. Vous pouvez vous désabonner de toute liste d'envoi au moyen du lien figurant dans ses courriels, et modifier vos paramètres de notification dans votre compte.",
+          "Si notre réponse ne vous satisfait pas, vous pouvez porter plainte auprès du Commissariat à la protection de la vie privée du Canada.",
+        ],
       },
       {
-        heading: "10. Modifications",
-        paragraphs: ["Nous pouvons mettre à jour le présent avis et publierons la nouvelle version avec sa date."],
+        heading: "11. Âge",
+        paragraphs: [
+          "Biqbaq s'adresse aux personnes de 18 ans et plus. Nous ne recueillons pas sciemment de renseignements personnels auprès de personnes de moins de 18 ans, et nous les supprimons si nous apprenons que nous l'avons fait.",
+        ],
       },
       {
-        heading: "11. Coordonnées",
-        paragraphs: ["Notre responsable de la protection de la vie privée est [nom du responsable], joignable à [courriel] ou à [adresse postale]."],
+        heading: "12. Modifications",
+        paragraphs: ["Nous pouvons mettre à jour le présent avis et publierons la nouvelle version sur cette page avec sa date."],
+      },
+      {
+        heading: "13. Coordonnées",
+        paragraphs: ["Les questions, demandes et plaintes concernant la vie privée peuvent être envoyées au responsable de la protection de la vie privée de Biqbaq, à support@biqbaq.com."],
       },
     ],
   },

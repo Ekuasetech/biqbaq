@@ -376,15 +376,17 @@ test.describe("public marketplace", () => {
     ["/conditions-of-use", "Conditions of Use", "Conditions of Use"],
     ["/privacy-notice", "Privacy Notice", "Privacy Notice"],
   ] as const) {
-    test(`${path} is reachable from the footer, marked as a draft and hidden from search`, async ({ page }) => {
+    test(`${path} is reachable from the footer, final and open to search engines (Q-19)`, async ({ page }) => {
       await page.goto("/products");
       await page.getByRole("contentinfo").getByRole("link", { name: link }).click();
       await expect(page).toHaveURL(new RegExp(`${path}$`));
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
       const main = page.getByRole("main");
-      await expect(main).toContainText("Draft for legal review");
-      await expect(main.locator("mark").first()).toBeVisible();
-      await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
+      await expect(main).toContainText("Last updated:");
+      await expect(main).toContainText("support@biqbaq.com");
+      await expect(main).not.toContainText("Draft for legal review");
+      await expect(main.locator("mark")).toHaveCount(0);
+      await expect(page.locator('meta[name="robots"][content*="noindex"]')).toHaveCount(0);
     });
   }
 

@@ -12,11 +12,13 @@ describe("legal documents", () => {
       });
     });
 
-    it(`marks the same number of blanks in ${document} in both languages`, () => {
-      const blanks = (locale: string) =>
-        JSON.stringify(getLegalDocument(locale, document)).match(/\[[^\]]+\]/g)?.length ?? 0;
-      expect(blanks("en")).toBeGreaterThan(0);
-      expect(blanks("fr")).toBe(blanks("en"));
+    it(`has no [bracketed] blanks left in ${document}, in either language`, () => {
+      for (const locale of ["en", "fr"]) {
+        const document_ = getLegalDocument(locale, document);
+        const text = [document_.intro, ...document_.sections.flatMap((section) => section.paragraphs)].join("\n");
+        expect(text).not.toMatch(/\[[^\]]+\]/);
+        expect(document_.updated).toMatch(/2026/);
+      }
     });
   }
 });

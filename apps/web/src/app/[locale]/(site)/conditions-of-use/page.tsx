@@ -7,8 +7,7 @@ type Props = PageProps<"/[locale]/conditions-of-use">;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  // Kept out of search results while the text is a draft.
-  return { title: getLegalDocument(locale, "conditions").title, robots: { index: false } };
+  return { title: getLegalDocument(locale, "conditions").title };
 }
 
 export default async function ConditionsOfUsePage({ params }: Props) {

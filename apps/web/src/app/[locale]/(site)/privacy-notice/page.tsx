@@ -7,8 +7,7 @@ type Props = PageProps<"/[locale]/privacy-notice">;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  // Kept out of search results while the text is a draft.
-  return { title: getLegalDocument(locale, "privacy").title, robots: { index: false } };
+  return { title: getLegalDocument(locale, "privacy").title };
 }
 
 export default async function PrivacyNoticePage({ params }: Props) {
