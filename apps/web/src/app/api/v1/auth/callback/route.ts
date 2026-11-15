@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { safeInternalPath } from "@/lib/safe-path";
+import { siteOrigin } from "@/lib/site-origin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { parseReferral, REFERRAL_COOKIE } from "@/modules/referrals";
 
@@ -7,7 +8,9 @@ import { parseReferral, REFERRAL_COOKIE } from "@/modules/referrals";
 // (Q-18). Exchanges the one-time code for a signed-in session, then continues to the page
 // it was for.
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
+  // Not request.nextUrl.origin: behind Render's proxy that is https://localhost:10000.
+  const origin = siteOrigin(request);
   const code = searchParams.get("code");
   const next = safeInternalPath(searchParams.get("next"));
   const viaGoogle = searchParams.get("via") === "google";

@@ -8,7 +8,7 @@ import { getSellerAccount, readiness, StripeError } from "./stripe";
 
 export const fail = (code: string, status: number) => NextResponse.json({ error: code }, { status });
 
-export const siteOrigin = (request: Request) => process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || new URL(request.url).origin;
+export { siteOrigin } from "@/lib/site-origin";
 
 /** Turns a Stripe failure into a reply that shows nothing of Stripe's wording. */
 export function stripeFailure(error: unknown) {

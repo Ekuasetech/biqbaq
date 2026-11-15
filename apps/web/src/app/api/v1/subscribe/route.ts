@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { siteOrigin } from "@/lib/site-origin";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { notifyFormSubmit } from "@/modules/email-lists/formsubmit";
 import { popupSignupSchema } from "@/modules/email-lists/popup";
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
 
   const to = (data as { notify_email: string | null }[] | null)?.[0]?.notify_email;
   if (!to) return fail(503, "GENERIC");
-  const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || new URL(request.url).origin;
+  const origin = siteOrigin(request);
   // FormSubmit is the only record of the sign-up, so the visitor is told if it did not go.
   const sent = await notifyFormSubmit({ to, subscriber: body.data.email, locale: body.data.locale, siteOrigin: origin });
   if (sent === "failed") return fail(502, "GENERIC");

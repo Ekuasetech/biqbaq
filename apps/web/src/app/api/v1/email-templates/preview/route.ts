@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { siteOrigin } from "@/lib/site-origin";
 import { z } from "zod";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { currentUser, fail, failFromDatabase } from "@/modules/media-management/server";
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
     custom.texts[textKey(item.template, body.data.locale, field as EmailField)] = value;
   }
   const { previewEmail } = await import("@/modules/notifications/preview");
-  const email = previewEmail(item.template, body.data.locale, new URL(request.url).origin, custom);
+  const email = previewEmail(item.template, body.data.locale, siteOrigin(request), custom);
   if (!email) return fail(404, "EMAIL_NOT_FOUND");
   return NextResponse.json({ data: { subject: email.subject, html: email.html } });
 }
