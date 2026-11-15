@@ -52,8 +52,19 @@ code or in this file: they are typed into Supabase's, Render's and each provider
 
 Emails, blog emails and phone notifications wait in a queue until the worker sends them. Call
 `POST https://<domain>/api/v1/internal/jobs/run` with the header
-`Authorization: Bearer <JOBS_WORKER_SECRET>` every minute, from a Render Cron Job or a
-scheduled job in Supabase. Without it, nothing is emailed.
+`Authorization: Bearer <JOBS_WORKER_SECRET>` every minute. Without it, nothing is emailed
+(sign-up and password emails are the exception: the auth hook sends them straight away).
+
+The owner chose Supabase Cron over a paid Render Cron Job (2026-11-15). Set up in the
+dashboard, not in migrations, because the job holds the secret:
+- Integrations > Cron: enable (with `pg_net`).
+- Job `biqbaq-email-sender`: schedule `* * * * *`, type HTTP Request, `POST` to the URL
+  above, header `Authorization: Bearer <JOBS_WORKER_SECRET>`, empty body.
+- Optional job `clean-cron-history`: `0 4 * * *`, SQL
+  `delete from cron.job_run_details where end_time < now() - interval '7 days';`
+- To check it, run `select created, status_code, content from net._http_response order by created desc limit 5;`
+  in the SQL editor. Each row should show 200.
+If `JOBS_WORKER_SECRET` changes in Render, change the job's header too.
 
 ## 4. Providers' webhooks
 
