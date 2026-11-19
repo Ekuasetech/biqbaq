@@ -24,6 +24,8 @@ export const SETTING_GROUPS: { id: string; settings: SettingDefinition[] }[] = [
       { key: "publishing.global_enabled", id: "publishingGlobal", kind: "toggle" },
       { key: "publishing.verified_enabled", id: "publishingVerified", kind: "toggle" },
       { key: "publishing.unverified_enabled", id: "publishingUnverified", kind: "toggle" },
+      // PRD §6.3: Admins and Co-admins publishing for sellers (roadmap item 8).
+      { key: "publishing.on_behalf_enabled", id: "publishingOnBehalf", kind: "toggle" },
       { key: "publishing.unverified_allowance", id: "unverifiedAllowance", kind: "number", min: 0, max: 1000 },
     ],
   },

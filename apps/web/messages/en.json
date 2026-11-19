@@ -529,6 +529,7 @@
       "invalidPrice": "Enter a price such as 12.50.",
       "allowanceUsed": "You've used all your publishing places. Your existing products stay up, and you can still edit or republish them.",
       "publishingOff": "Publishing is switched off right now. Please try again later.",
+      "onBehalfOff": "Publishing on behalf of sellers is switched off in Platform settings.",
       "shopSuspended": "Publishing is suspended for your shop.",
       "incomplete": "Add a description and a category before publishing.",
       "notPublishable": "This product can't be changed that way. Refresh the page to see its status.",
@@ -617,7 +618,8 @@
         "description": "Ask buyers for reviews, and see what they said."
       }
     },
-    "productPages": "Product pages"
+    "productPages": "Product pages",
+    "onBehalfBanner": "You are working on behalf of {shop}. The products stay the seller's, and everything you do here is recorded in the audit log."
   },
   "errorPage": {
     "title": "Something went wrong",
@@ -792,6 +794,10 @@
       "publishingUnverified": {
         "label": "Publishing by unverified sellers",
         "help": "Off stops unverified sellers from publishing."
+      },
+      "publishingOnBehalf": {
+        "label": "Publishing on behalf of sellers",
+        "help": "Off stops Admins and Co-admins from publishing products for sellers. They can still create and edit drafts."
       },
       "unverifiedAllowance": {
         "label": "Unverified seller allowance",
@@ -1652,6 +1658,23 @@
       "GENERIC": "That didn't work. Please try again."
     }
   },
+  "shopsAdmin": {
+    "title": "Shops",
+    "intro": "Open a shop to work on its products for the seller. You can do only what your permissions allow, and every action is recorded.",
+    "searchLabel": "Search shops",
+    "searchPlaceholder": "Shop name or city",
+    "searchButton": "Search",
+    "empty": "No shops found.",
+    "count": "{count, plural, one {# shop} other {# shops}}",
+    "open": "Manage products",
+    "suspended": "Suspended",
+    "publishingSuspended": "Publishing suspended",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "pagination": "Shop pages",
+    "noAccess": "This area is for Super Admin, and Admins or Co-admins allowed to edit products on behalf of sellers.",
+    "loadFailed": "The shops couldn't be loaded. Please refresh the page."
+  },
   "shopVehicles": {
     "title": "Cargo cars",
     "add": "Add a cargo car",
@@ -1863,6 +1886,7 @@
       "verification_revoked": "Your shop's verification was removed.",
       "product_suspended": "Biqbaq suspended your listing “{product}”.",
       "product_restored": "Biqbaq lifted the suspension on “{product}”. You can publish it again.",
+      "product_published_for_you": "Biqbaq published “{product}” for you. It's now on the site.",
       "shop_suspended": "Your shop was suspended.",
       "shop_restored": "Your shop is active again.",
       "publishing_suspended": "Publishing was suspended for your shop.",
@@ -2235,6 +2259,7 @@
       "messages": "Messages",
       "notifications": "Notifications",
       "shop": "My shop",
+      "workShops": "Shops you work for",
       "referrals": "Referrals",
       "applications": "Role applications",
       "verification": "Seller verification",
@@ -2242,6 +2267,7 @@
       "moderation": "Moderation",
       "blog": "Blog",
       "ads": "Ads",
+      "shops": "Shops",
       "customerEmails": "Customer emails",
       "adminReferrals": "Referral programmes",
       "conversations": "Conversations",
@@ -2282,6 +2308,7 @@
       }
     },
     "newCount": ", {count} new",
+    "shopCount": "{count, plural, one {# shop} other {# shops}}",
     "discover": {
       "ads": "Featured",
       "sponsored": "Ad",
@@ -2668,6 +2695,7 @@
       "staff_removed": "Staff removed",
       "product_suspended": "Product suspended",
       "product_restored": "Product restored",
+      "product_published_for_you": "Product published for you",
       "shop_suspended": "Shop suspended",
       "shop_restored": "Shop restored",
       "publishing_suspended": "Publishing suspended",

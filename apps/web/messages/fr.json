@@ -529,6 +529,7 @@
       "invalidPrice": "Entrez un prix comme 12.50.",
       "allowanceUsed": "Vous avez utilisé toutes vos places de publication. Vos produits existants restent en ligne, et vous pouvez toujours les modifier ou les republier.",
       "publishingOff": "La publication est désactivée pour le moment. Veuillez réessayer plus tard.",
+      "onBehalfOff": "La publication au nom des vendeurs est désactivée dans les paramètres de la plateforme.",
       "shopSuspended": "La publication est suspendue pour votre boutique.",
       "incomplete": "Ajoutez une description et une catégorie avant de publier.",
       "notPublishable": "Ce produit ne peut pas être modifié ainsi. Actualisez la page pour voir son statut.",
@@ -617,7 +618,8 @@
         "description": "Demandez des avis aux acheteurs et voyez ce qu'ils ont dit."
       }
     },
-    "productPages": "Pages des produits"
+    "productPages": "Pages des produits",
+    "onBehalfBanner": "Vous travaillez au nom de {shop}. Les produits restent ceux du vendeur, et tout ce que vous faites ici est consigné dans le journal d'audit."
   },
   "errorPage": {
     "title": "Une erreur s’est produite",
@@ -792,6 +794,10 @@
       "publishingUnverified": {
         "label": "Publication par les vendeurs non vérifiés",
         "help": "Désactivé empêche les vendeurs non vérifiés de publier."
+      },
+      "publishingOnBehalf": {
+        "label": "Publication au nom des vendeurs",
+        "help": "Désactivé empêche les administrateurs et co-administrateurs de publier des produits pour les vendeurs. Ils peuvent toujours créer et modifier des brouillons."
       },
       "unverifiedAllowance": {
         "label": "Limite des vendeurs non vérifiés",
@@ -1652,6 +1658,23 @@
       "GENERIC": "Cela n'a pas fonctionné. Veuillez réessayer."
     }
   },
+  "shopsAdmin": {
+    "title": "Boutiques",
+    "intro": "Ouvrez une boutique pour gérer ses produits au nom du vendeur. Vous ne pouvez faire que ce que vos autorisations permettent, et chaque action est consignée.",
+    "searchLabel": "Rechercher des boutiques",
+    "searchPlaceholder": "Nom de la boutique ou ville",
+    "searchButton": "Rechercher",
+    "empty": "Aucune boutique trouvée.",
+    "count": "{count, plural, one {# boutique} other {# boutiques}}",
+    "open": "Gérer les produits",
+    "suspended": "Suspendue",
+    "publishingSuspended": "Publication suspendue",
+    "verified": "Vérifiée",
+    "unverified": "Non vérifiée",
+    "pagination": "Pages de boutiques",
+    "noAccess": "Cet espace est réservé au super administrateur et aux administrateurs ou co-administrateurs autorisés à modifier des produits au nom des vendeurs.",
+    "loadFailed": "Les boutiques n'ont pas pu être chargées. Veuillez actualiser la page."
+  },
   "shopVehicles": {
     "title": "Voitures cargo",
     "add": "Ajouter une voiture cargo",
@@ -1863,6 +1886,7 @@
       "verification_revoked": "La vérification de votre boutique a été retirée.",
       "product_suspended": "Biqbaq a suspendu votre annonce « {product} ».",
       "product_restored": "Biqbaq a levé la suspension de « {product} ». Vous pouvez la republier.",
+      "product_published_for_you": "Biqbaq a publié « {product} » pour vous. Il est maintenant sur le site.",
       "shop_suspended": "Votre boutique a été suspendue.",
       "shop_restored": "Votre boutique est de nouveau active.",
       "publishing_suspended": "La publication a été suspendue pour votre boutique.",
@@ -2235,6 +2259,7 @@
       "messages": "Messages",
       "notifications": "Notifications",
       "shop": "Ma boutique",
+      "workShops": "Boutiques où vous travaillez",
       "referrals": "Parrainages",
       "applications": "Demandes de rôle",
       "verification": "Vérification des vendeurs",
@@ -2242,6 +2267,7 @@
       "moderation": "Modération",
       "blog": "Blogue",
       "ads": "Publicités",
+      "shops": "Boutiques",
       "customerEmails": "Courriels aux clients",
       "adminReferrals": "Programmes de parrainage",
       "conversations": "Conversations",
@@ -2282,6 +2308,7 @@
       }
     },
     "newCount": ", {count} nouveau(x)",
+    "shopCount": "{count, plural, one {# boutique} other {# boutiques}}",
     "discover": {
       "ads": "À la une",
       "sponsored": "Pub",
@@ -2668,6 +2695,7 @@
       "staff_removed": "Personnel retiré",
       "product_suspended": "Produit suspendu",
       "product_restored": "Produit rétabli",
+      "product_published_for_you": "Produit publié pour vous",
       "shop_suspended": "Boutique suspendue",
       "shop_restored": "Boutique rétablie",
       "publishing_suspended": "Publication suspendue",

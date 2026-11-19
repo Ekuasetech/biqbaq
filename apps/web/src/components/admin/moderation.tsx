@@ -12,6 +12,7 @@ import { formatPrice } from "@/lib/format";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSessionUser } from "@/lib/supabase/use-session-user";
 import { cn } from "@/lib/utils";
+import { useLiveSearch } from "@/lib/use-live-search";
 import {
   getModerationAccess,
   listVehicles,
@@ -129,12 +130,14 @@ function SearchBar({
 }) {
   const t = useTranslations("moderation");
   const [typed, setTyped] = useState("");
+  // Filters as people type, and the button still searches at once.
+  const searchNow = useLiveSearch(typed, onSearch);
   return (
     <form
       role="search"
       onSubmit={(event) => {
         event.preventDefault();
-        onSearch(typed.trim());
+        searchNow(typed);
       }}
       className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
     >

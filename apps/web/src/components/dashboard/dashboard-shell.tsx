@@ -56,8 +56,12 @@ export interface DashboardData {
     moderation: boolean;
     blog: boolean;
     ads: boolean;
+    /** Can work on sellers' products as an Admin or Co-admin (roadmap item 8). */
+    on_behalf: boolean;
     shop: boolean;
     staff_shops: number;
+    /** The shops this person works for as staff, by name. */
+    staff_shop_list?: { id: string; name: string }[];
     referrals: boolean;
   };
   counts: { unread_conversations: number; unread_notifications: number; favourites: number };
@@ -98,6 +102,8 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   badge?: number;
+  /** A plain number beside the label, such as how many shops; unlike a badge, nothing new. */
+  count?: number;
   /** Shown indented, under the item before it. */
   sub?: boolean;
 }
@@ -120,7 +126,8 @@ function useNavigation(data: DashboardData | null, pathname: string) {
     { href: "/account/notifications", label: t("notifications"), icon: Bell, badge: data?.counts.unread_notifications },
     { href: "/account/orders", label: t("orders"), icon: ShoppingBag },
   ];
-  if (data?.access.shop || (data?.access.staff_shops ?? 0) > 0) main.push({ href: "/account/shop", label: t("shop"), icon: Store });
+  // My shop is always the person's own shop (owner's request, 2026-11-18).
+  if (data?.access.shop) main.push({ href: "/account/shop", label: t("shop"), icon: Store });
   // In their own shop, an owner sees its pages beneath it (Q-56). Staff get tabs on the page.
   if (data?.access.shop && (pathname === "/account/shop" || pathname.startsWith("/account/shop/"))) {
     for (const [section, icon] of [
@@ -135,6 +142,12 @@ function useNavigation(data: DashboardData | null, pathname: string) {
     ] as const) {
       main.push({ href: `/account/shop/${section}`, label: tShop(`${section}.title`), icon, sub: true });
     }
+  }
+  // The shops a Co-seller works for: how many, and each by name, one click away (2026-11-18).
+  const workShops = data?.access.staff_shop_list ?? [];
+  if (workShops.length > 0) {
+    main.push({ href: "/account#my-staff", label: t("workShops"), icon: Users, count: workShops.length });
+    for (const shop of workShops) main.push({ href: `/account/shop?seller=${shop.id}`, label: shop.name, icon: Store, sub: true });
   }
   if (data?.access.referrals) main.push({ href: "/account/referrals", label: t("referrals"), icon: Share2 });
 
@@ -164,6 +177,7 @@ function useNavigation(data: DashboardData | null, pathname: string) {
   if (a?.moderation) content.push({ href: "/admin/moderation", label: t("moderation"), icon: Gavel });
   if (a?.blog) content.push({ href: "/admin/blog", label: t("blog"), icon: BookOpen });
   if (a?.ads) content.push({ href: "/admin/ads", label: t("ads"), icon: Megaphone });
+  if (a?.on_behalf) content.push({ href: "/admin/shops", label: t("shops"), icon: Store });
   // The front page's own photos (owner's request, 2026-11-08): Super Admin only.
   if (a?.super_admin) content.push({ href: "/admin/site-images", label: t("siteImages"), icon: Images });
   if (a?.super_admin) content.push({ href: "/admin/testimonials", label: t("testimonials"), icon: Quote });
@@ -210,6 +224,12 @@ function NavLinks({ items, pathname, onNavigate }: { items: NavItem[]; pathname:
             >
               <Icon className={cn("shrink-0", item.sub ? "size-4" : "size-5")} aria-hidden />
               <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              {item.count ? (
+                <>
+                  <span aria-hidden className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">{item.count}</span>
+                  <span className="sr-only">{t("shopCount", { count: item.count })}</span>
+                </>
+              ) : null}
               {item.badge ? (
                 <>
                   <span aria-hidden className="rounded-full bg-brand-red px-2 py-0.5 text-xs font-bold text-brand-red-foreground">

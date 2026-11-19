@@ -14,6 +14,7 @@ const TEMPLATES = [
   "role_revoked",
   "product_suspended",
   "product_restored",
+  "product_published_for_you",
   "message_to_seller",
   "message_to_buyer",
   "bulk_email_enabled",

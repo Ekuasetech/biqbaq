@@ -374,6 +374,22 @@ const TEMPLATES: Record<string, Record<EmailLocale, Build>> = {
       path: "/account/shop",
     }),
   },
+  // An Admin or Co-admin published one of the seller's products for them (roadmap item 8,
+  // owner's choice 2026-11-18). It names Biqbaq, never the person who did it.
+  product_published_for_you: {
+    en: (product) => ({
+      subject: "Biqbaq published a product for you",
+      body: `Biqbaq's team published your product "${product}" on your behalf, so it is now on the site. It uses one of your publishing places if your shop is not verified. You can edit or unpublish it from My shop at any time.`,
+      action: "See your products",
+      path: "/account/shop/products",
+    }),
+    fr: (product) => ({
+      subject: "Biqbaq a publié un produit pour vous",
+      body: `L'équipe de Biqbaq a publié votre produit « ${product} » en votre nom : il est maintenant sur le site. Il utilise l'une de vos places de publication si votre boutique n'est pas vérifiée. Vous pouvez le modifier ou le retirer depuis votre boutique à tout moment.`,
+      action: "Voir vos produits",
+      path: "/account/shop/products",
+    }),
+  },
   shop_suspended: {
     en: () => ({
       subject: "Your shop was suspended",
@@ -573,6 +589,7 @@ const PLACEHOLDER: Record<string, "role" | "shop" | "product"> = {
   shop_review_received: "shop",
   product_suspended: "product",
   product_restored: "product",
+  product_published_for_you: "product",
   order_paid: "product",
   order_received: "product",
   order_refunded: "product",

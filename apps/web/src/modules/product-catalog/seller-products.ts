@@ -78,6 +78,7 @@ export const deleteProduct = (supabase: SupabaseClient, id: string) => supabase.
 const ERROR_KEYS: Record<string, string> = {
   PUBLISH_ALLOWANCE_EXHAUSTED: "allowanceUsed",
   PUBLISHING_DISABLED: "publishingOff",
+  ON_BEHALF_DISABLED: "onBehalfOff",
   SELLER_PUBLISHING_SUSPENDED: "shopSuspended",
   PRODUCT_INCOMPLETE: "incomplete",
   PRODUCT_NOT_PUBLISHABLE: "notPublishable",

@@ -1693,6 +1693,16 @@ test.describe("public marketplace", () => {
 
             // Now they can work in the shop, with no step for Super Admin.
             await person.page.goto("/account");
+            // The sidebar counts the shops they work for and names each; My shop is only for their own.
+            const sidebar = person.page.getByRole("navigation", { name: "Dashboard" });
+            await expect(sidebar.getByRole("link", { name: "Shops you work for 1 shop" })).toBeVisible();
+            await expect(sidebar.getByRole("link", { name: "Ada's Shop", exact: true })).toHaveAttribute("href", /\/account\/shop\?seller=/);
+            await expect(sidebar.getByRole("link", { name: "My shop", exact: true })).toHaveCount(0);
+            // My shop's own address shows the shops they work for, not "no shop yet".
+            await person.page.goto("/account/shop");
+            await expect(person.page.getByRole("region", { name: "Shops you work for" })).toBeVisible();
+            await expect(person.page.getByText("You don't have a shop yet")).toHaveCount(0);
+            await person.page.goto("/account");
             await person.page.getByRole("region", { name: "Shops you work for" }).getByRole("link", { name: "Open shop" }).click();
             await expect(person.page).toHaveURL(/\/account\/shop\?seller=/);
             await expect(person.page.getByText("You are working here as staff.")).toBeVisible();
@@ -2674,6 +2684,70 @@ test.describe("public marketplace", () => {
             await expect(page.getByRole("button", { name: "Give a role" })).toHaveCount(0);
           });
 
+          test("a Co-admin creates and publishes products for a seller, who is told, with the audit keeping them apart (roadmap item 8)", async ({ page, browser, request }) => {
+            test.setTimeout(150000);
+            const { page: shop, email } = await approvedSeller(page, browser, request);
+            const id = unique();
+            const shopName = `On Behalf Shop ${id}`;
+            sql(`update public.sellers set name = '${shopName}' where owner_user_id = (select id from auth.users where email = '${email}')`);
+            const sellerDraft = `Seller draft ${id}`;
+            await addProduct(shop, sellerDraft);
+
+            // A Co-admin with no on-behalf permission has no Shops page.
+            const coAdmin = await (await browser.newContext()).newPage();
+            const coAdminEmail = await confirmedAccount(coAdmin, request);
+            sql(`insert into public.user_roles (user_id, role_key) select id, 'co_admin' from auth.users where email = '${coAdminEmail}'`);
+            await coAdmin.goto("/admin/shops");
+            await expect(coAdmin.getByText("You don't have access")).toBeVisible();
+
+            // Given the three permissions, they find the shop and open its products.
+            sql(`insert into public.user_role_permissions (user_role_id, permission_key) select r.id, p from public.user_roles r join auth.users u on u.id = r.user_id,
+                 unnest(array['products.create_on_behalf', 'products.edit_on_behalf', 'products.publish_on_behalf']) p where u.email = '${coAdminEmail}' and r.role_key = 'co_admin'`);
+            await coAdmin.goto("/account");
+            await openNavGroup(coAdmin, "Content");
+            await coAdmin.getByRole("link", { name: "Shops", exact: true }).click();
+            await expect(coAdmin).toHaveURL(/\/admin\/shops$/);
+            // The list filters as they type, without pressing Search.
+            await coAdmin.getByLabel("Search shops").fill(shopName);
+            await expect(coAdmin.getByText("1 shop", { exact: true })).toBeVisible();
+            await coAdmin.getByRole("link", { name: `Manage products: ${shopName}` }).click();
+            await expect(coAdmin.getByText(`You are working on behalf of ${shopName}.`)).toBeVisible();
+            await expect(item(coAdmin, sellerDraft)).toContainText("Draft");
+            // Only products: none of the owner's other pages.
+            const tabs = coAdmin.getByRole("navigation", { name: "Shop pages" });
+            await expect(tabs.getByRole("link", { name: "Products", exact: true })).toBeVisible();
+            await expect(tabs.getByRole("link")).toHaveCount(2);
+            await expect(coAdmin.getByRole("button", { name: "Delete" })).toHaveCount(0);
+
+            // They publish the seller's draft, and add and publish one of their own for the shop.
+            await item(coAdmin, sellerDraft).getByRole("button", { name: "Publish" }).click();
+            await expect(item(coAdmin, sellerDraft)).toContainText("Published");
+            const madeForSeller = `Made for seller ${id}`;
+            await addProduct(coAdmin, madeForSeller);
+            await item(coAdmin, madeForSeller).getByRole("button", { name: "Publish" }).click();
+            await expect(item(coAdmin, madeForSeller)).toContainText("Published");
+
+            // The products stay the seller's, the actor is recorded apart, and the seller is told.
+            const sellerId = sql(`select s.id from public.sellers s join auth.users u on u.id = s.owner_user_id where u.email = '${email}'`);
+            const coAdminId = sql(`select id from auth.users where email = '${coAdminEmail}'`);
+            expect(sql(`select count(*) from public.products where seller_id = '${sellerId}' and name in ('${sellerDraft}', '${madeForSeller}') and status = 'published'`)).toBe("2");
+            expect(sql(`select count(*) from public.audit_logs where action = 'product.publish' and actor_id = '${coAdminId}' and on_behalf_of_seller_id = '${sellerId}'`)).toBe("2");
+            expect(sql(`select count(*) from public.notifications n join auth.users u on u.id = n.user_id where u.email = '${email}' and n.type = 'product_published_for_you'`)).toBe("2");
+            await shop.reload();
+            await expect(item(shop, madeForSeller)).toContainText("Published");
+
+            // Super Admin switches it off: the Co-admin can no longer publish for sellers.
+            sql(`update public.platform_settings set value = 'false' where key = 'publishing.on_behalf_enabled'`);
+            try {
+              const third = `Waiting ${id}`;
+              await addProduct(coAdmin, third);
+              await item(coAdmin, third).getByRole("button", { name: "Publish" }).click();
+              await expect(item(coAdmin, third)).toContainText("Publishing on behalf of sellers is switched off");
+            } finally {
+              sql(`update public.platform_settings set value = 'true' where key = 'publishing.on_behalf_enabled'`);
+            }
+          });
+
           test("a moderator suspends and restores a product and a shop, and the seller is told", async ({ page, browser, request }) => {
             test.setTimeout(150000);
             const { page: shop, email } = await approvedSeller(page, browser, request);
@@ -2691,8 +2765,8 @@ test.describe("public marketplace", () => {
             await page.getByRole("link", { name: "Moderation", exact: true }).click();
             await expect(page).toHaveURL(/\/admin\/moderation$/);
             const products = page.getByRole("region", { name: "Products" });
+            // Moderation searches filter as people type, without pressing Search.
             await products.getByLabel("Search by name").fill(name);
-            await products.getByRole("button", { name: "Search" }).click();
             const card = page.getByRole("article", { name });
             await card.getByRole("button", { name: "Suspend product" }).click();
             await card.getByRole("button", { name: "Confirm: Suspend product" }).click();
@@ -2725,7 +2799,6 @@ test.describe("public marketplace", () => {
             // A shop, found by its owner's email.
             const shops = page.getByRole("region", { name: "Shops" });
             await shops.getByLabel("Search by name").fill(email);
-            await shops.getByRole("button", { name: "Search" }).click();
             const shopCard = shops.getByRole("article", { name: "Ada's Shop" }).filter({ hasText: email });
             await expect(shopCard).toBeVisible();
             await shopCard.getByRole("button", { name: "Suspend publishing" }).click();

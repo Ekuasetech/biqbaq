@@ -16,8 +16,8 @@ describe("STAFF_PERMISSIONS", () => {
 describe("can", () => {
   it("is false without access or the permission", () => {
     expect(can(null, "products.edit")).toBe(false);
-    expect(can({ is_owner: false, permissions: ["products.create"] }, "products.edit")).toBe(false);
-    expect(can({ is_owner: false, permissions: ["products.edit"] }, "products.edit")).toBe(true);
+    expect(can({ is_owner: false, permissions: ["products.create"], on_behalf: false }, "products.edit")).toBe(false);
+    expect(can({ is_owner: false, permissions: ["products.edit"], on_behalf: false }, "products.edit")).toBe(true);
   });
 });
 

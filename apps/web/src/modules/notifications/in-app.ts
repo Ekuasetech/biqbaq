@@ -33,6 +33,7 @@ export const NOTIFICATION_PATHS: Record<string, string> = {
   verification_revoked: "/account/shop",
   product_suspended: "/account/shop",
   product_restored: "/account/shop",
+  product_published_for_you: "/account/shop/products",
   shop_suspended: "/account/shop",
   shop_restored: "/account/shop",
   publishing_suspended: "/account/shop",

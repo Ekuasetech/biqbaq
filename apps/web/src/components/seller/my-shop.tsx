@@ -14,6 +14,8 @@ import { ProductPhotos } from "@/components/seller/product-photos";
 import { ShopApi } from "@/components/seller/shop-api";
 import { ShopProfile } from "@/components/seller/shop-profile";
 import { ShopReviews } from "@/components/seller/shop-reviews";
+import { StaffCard } from "@/components/account/staff-card";
+import { useDashboard } from "@/components/dashboard/dashboard-shell";
 import { ShopStaff } from "@/components/seller/shop-staff";
 import { ShopVehicles } from "@/components/seller/shop-vehicles";
 import { VerificationCard } from "@/components/seller/verification-card";
@@ -318,6 +320,7 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
   const user = useSessionUser();
   // Staff open a shop they work for by its id. Without one, this is the person's own shop.
   const staffSellerId = useSearchParams().get("seller");
+  const dashboard = useDashboard();
   const [data, setData] = useState<ShopData | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -398,6 +401,8 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
   }
   if (loadFailed || !data) return <Notice kind="error">{t("errors.loadFailed")}</Notice>;
   if (!data.shop || !data.allowance) {
+    // No shop of their own, but they work for others: show those rather than "no shop yet".
+    if (!staffSellerId && (dashboard.data?.access.staff_shops ?? 0) > 0) return <StaffCard />;
     return (
       <div className={cn(cardClass, "mx-auto max-w-lg text-center")}>
         <h2 className={headingClass}>{t("noShopTitle")}</h2>
@@ -482,7 +487,7 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
           <div>
             <h2 id="shop-summary" className={headingClass}>{shop.name}</h2>
             <p className="text-sm text-muted-foreground">{shop.city}</p>
-            {!isOwner && <p className="mt-1 text-sm font-medium">{tStaff("workingAsStaff")}</p>}
+            {!isOwner && !access?.on_behalf && <p className="mt-1 text-sm font-medium">{tStaff("workingAsStaff")}</p>}
           </div>
           <div className="flex flex-wrap gap-2">
             {active && isOwner && (
@@ -503,6 +508,8 @@ export function MyShop({ section = "overview" }: { section?: ShopSection }) {
 
   return (
     <div className="grid gap-4">
+      {/* An Admin or Co-admin working for the seller always sees whose shop this is (PRD §3.4). */}
+      {access?.on_behalf && <Notice kind="info">{t("onBehalfBanner", { shop: shop.name })}</Notice>}
       {staffTabs}
 
       {section === "overview" && (

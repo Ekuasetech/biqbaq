@@ -21,6 +21,8 @@ export const inviteSchema = z.object({ email: z.email("emailInvalid").max(254, "
 export interface ShopAccess {
   is_owner: boolean;
   permissions: string[];
+  /** An Admin or Co-admin working on the seller's products, not the owner or staff. */
+  on_behalf: boolean;
 }
 
 export interface StaffMember {
