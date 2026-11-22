@@ -2054,7 +2054,7 @@ test.describe("public marketplace", () => {
             await expect(editor.getByText("Enter a web address starting with https://, or an email address.")).toBeVisible();
             await editor.getByLabel("Link address").fill("https://biqbaq.com/about");
             await editor.getByRole("button", { name: "Add link" }).click();
-            await editor.getByLabel("Category").selectOption("cargo");
+            await editor.getByLabel("Category").selectOption("marketing");
             await editor.getByLabel("Tags").fill("Cargo, Lagos, cargo");
             await editor.getByRole("button", { name: "Save draft" }).click();
             const post = page.getByRole("region", { name: "Edit post" });

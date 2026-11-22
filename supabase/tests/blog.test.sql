@@ -57,7 +57,7 @@ select throws_ok($$ select save_blog_post(null, 'T', repeat('x', 301), '', null,
 select throws_ok($$ select save_blog_post(null, 'T', '', '', null, '{}', '', repeat('x', 71), '') $$, '23514', 'TOO_LONG', 'an overlong search engine title is refused');
 select throws_ok($$ select save_blog_post(null, 'T', '', '', 'no-such', '{}', '', '', '') $$, '23514', 'CATEGORY_NOT_FOUND', 'an unknown category is refused');
 select throws_ok($$ select save_blog_post(null, 'T', '', '', null, array['1','2','3','4','5','6','7','8','9','10','11'], '', '', '') $$, '23514', 'TOO_LONG', 'too many tags are refused');
-select lives_ok($$ insert into p select save_blog_post(null, ' Sending cargo home ', 'Summary', 'Words here', 'cargo', array['Cargo', 'cargo ', 'Lagos'], '', '', '') $$, 'a Co-admin writes a draft');
+select lives_ok($$ insert into p select save_blog_post(null, ' Sending cargo home ', 'Summary', 'Words here', 'marketing', array['Cargo', 'cargo ', 'Lagos'], '', '', '') $$, 'a Co-admin writes a draft');
 reset role;
 select results_eq($$ select slug, title, author_name, status, author_id from blog_posts where id = (select id from p) $$,
   $$ values ('sending-cargo-home', 'Sending cargo home', 'Biqbaq', 'draft', '00000000-0000-4000-8000-000000000402'::uuid) $$, 'it is saved as a draft, tidied, with a byline');
@@ -86,7 +86,7 @@ select throws_ok($$ select clear_blog_cover((select id from p)) $$, '55000', 'CO
 reset role;
 select is_empty($$ select 1 from public_blog_posts where id = (select id from p) $$, 'a scheduled post is not public before its time');
 update blog_posts set publish_at = now() - interval '1 minute' where id = (select id from p);
-select is((select category_slug from public_blog_posts where id = (select id from p)), 'cargo', 'once its time comes, it is public');
+select is((select category_slug from public_blog_posts where id = (select id from p)), 'marketing', 'once its time comes, it is public');
 select is((select jsonb_array_length(tags) from public_blog_posts where id = (select id from p)), 2, 'with its tags');
 select hasnt_column('public', 'public_blog_posts', 'author_id', 'the public view does not reveal the account');
 select hasnt_column('public', 'public_blog_posts', 'cover_public_id', 'or the file''s name');
@@ -94,7 +94,7 @@ select hasnt_column('public', 'public_blog_posts', 'cover_public_id', 'or the fi
 -- Editing keeps the address.
 select pg_temp.act_as('00000000-0000-4000-8000-000000000401');
 set local role authenticated;
-select lives_ok($$ select save_blog_post((select id from p), 'A new title', 'Summary', 'Words here', 'cargo', '{}', 'Ada', '', '') $$, 'Super Admin edits it');
+select lives_ok($$ select save_blog_post((select id from p), 'A new title', 'Summary', 'Words here', 'marketing', '{}', 'Ada', '', '') $$, 'Super Admin edits it');
 reset role;
 select results_eq($$ select slug, title, author_name from blog_posts where id = (select id from p) $$, $$ values ('sending-cargo-home', 'A new title', 'Ada') $$, 'the address never changes, so links keep working');
 select is((select count(*)::int from blog_post_tags where post_id = (select id from p)), 0, 'tags can be cleared');
